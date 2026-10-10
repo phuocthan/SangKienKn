@@ -4,29 +4,29 @@ Cập nhật: 10/10/2026. Đối chiếu tài liệu “ĐỀ ÁN HOÀN THIỆN 
 
 ## Dự án đang ở đâu?
 
-Đã hoàn thành MVP lõi: giáo viên tạo lớp/câu hỏi/học sinh → học sinh luyện tập → lưu câu sai → sửa sai → ghi nhận thời gian và cây → giáo viên xem tiến độ. Đã bổ sung vườn lớp và xếp hạng chăm chỉ. Đợt tiếp theo đã hoàn thiện sửa/ẩn câu hỏi, lịch sử phiên bản và nhập CSV có xem trước/xác nhận. Chưa hoàn thành toàn bộ đề án, chưa triển khai một website công khai và chưa nghiệm thu với lớp học thật.
+Đã hoàn thành MVP lõi: giáo viên tạo lớp/câu hỏi/học sinh → học sinh luyện tập → lưu câu sai → sửa sai → ghi nhận thời gian và cây → giáo viên xem tiến độ. Đã bổ sung vườn lớp và xếp hạng chăm chỉ. Đã hoàn thiện sửa/ẩn câu hỏi, lịch sử phiên bản, nhập CSV và Word `.docx` theo mẫu có tải mẫu/xem trước/xác nhận. Chưa hoàn thành toàn bộ đề án, chưa triển khai một website công khai và chưa nghiệm thu với lớp học thật.
 
 Theo yêu cầu hiện tại, đã dừng bản demo. Khi phát triển, kiểm thử có thể dùng server và database tạm riêng; không chạy lại demo hay triển khai hosting.
 
-| Phân hệ trong đề án          | Trạng thái                                                                        | Phần còn thiếu                                                                                       |
-| ---------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Tài khoản giáo viên/học sinh | Đã có đăng nhập, phân quyền, đổi mật khẩu tạm và giáo viên cấp lại mật khẩu       | Hoàn thiện vận hành tài khoản và quản lý học sinh tham gia nhiều lớp                                 |
-| Ngân hàng câu hỏi            | Đã có tạo/sửa bằng phiên bản, ẩn/hiện lại, lịch sử và nhập CSV xem trước/xác nhận | Học kỳ, ma trận/trộn đề, tự tách câu từ Word/PDF và nhập `.xlsx`                                     |
-| Luyện tập và cây             | Đã có luyện tập theo bài/chương, cây 5 cấp và thời gian theo hoạt động            | Ôn kỳ, trộn theo ma trận; đánh giá bằng lớp học thật                                                 |
-| Sổ tay sửa sai               | Đã có lưu câu sai từ luyện tập, làm lại và đánh dấu khắc phục                     | Nhận câu sai từ các chế độ kiểm tra sau khi xây dựng phòng thi                                       |
-| Dashboard và xuất dữ liệu    | Đã có báo cáo thời gian, luyện tập, cây, câu còn sai và CSV                       | Excel `.xlsx`, điểm thi và điểm thưởng/nhóm                                                          |
-| Khu vườn của lớp             | Đã bổ sung cây cấp 5 của thành viên trong lớp                                     | Màn hình so sánh nhiều lớp nếu cần; hiện giáo viên đổi lớp để xem                                    |
-| Xếp hạng chăm chỉ            | Đã bổ sung xếp hạng thời gian/cây và bảng sửa sai                                 | Đánh giá trải nghiệm vinh danh với giáo viên/học sinh thật                                           |
-| Vé và kiểm tra 20 phút       | Chưa triển khai                                                                   | Điều kiện mở khóa, vé cấp theo mốc cây, đề thi, thời hạn server, lưu đáp án, chấm điểm và chuyển tab |
-| Săn điểm và thi chính thức   | Chưa triển khai                                                                   | Giới hạn lượt thi, lịch thi, mở đề theo lớp, thu bài, báo cáo điểm và giáo viên duyệt điểm cộng      |
-| Green Points/đổi thưởng      | Chưa triển khai                                                                   | Sổ giao dịch điểm, cấp điểm một lần theo điều kiện, danh mục quà, yêu cầu và phê duyệt               |
-| Hoạt động nhóm               | Chưa triển khai                                                                   | Chia nhóm, đại diện, bài nộp/link/file, deadline, gia hạn, phản biện và chấm điểm                    |
-| Trợ lý AI                    | Chưa triển khai                                                                   | Kích hoạt sau nhiều lần sai, gợi ý từng bước, bài tương tự, nhà cung cấp và cấu hình sử dụng         |
-| Vận hành chính thức          | Chưa triển khai                                                                   | Hosting/HTTPS, lưu trữ, sao lưu/khôi phục, giám sát và kiểm thử tải                                  |
+| Phân hệ trong đề án          | Trạng thái                                                                      | Phần còn thiếu                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Tài khoản giáo viên/học sinh | Đã có đăng nhập, phân quyền, đổi mật khẩu tạm và giáo viên cấp lại mật khẩu     | Hoàn thiện vận hành tài khoản và quản lý học sinh tham gia nhiều lớp                                 |
+| Ngân hàng câu hỏi            | Đã có phiên bản, ẩn/hiện, lịch sử và nhập Word/CSV theo mẫu, xem trước/xác nhận | Học kỳ, ma trận/trộn đề, tự tách Word bố cục bất kỳ/PDF và nhập `.xlsx`                              |
+| Luyện tập và cây             | Đã có luyện tập theo bài/chương, cây 5 cấp và thời gian theo hoạt động          | Ôn kỳ, trộn theo ma trận; đánh giá bằng lớp học thật                                                 |
+| Sổ tay sửa sai               | Đã có lưu câu sai từ luyện tập, làm lại và đánh dấu khắc phục                   | Nhận câu sai từ các chế độ kiểm tra sau khi xây dựng phòng thi                                       |
+| Dashboard và xuất dữ liệu    | Đã có báo cáo thời gian, luyện tập, cây, câu còn sai và CSV                     | Excel `.xlsx`, điểm thi và điểm thưởng/nhóm                                                          |
+| Khu vườn của lớp             | Đã bổ sung cây cấp 5 của thành viên trong lớp                                   | Màn hình so sánh nhiều lớp nếu cần; hiện giáo viên đổi lớp để xem                                    |
+| Xếp hạng chăm chỉ            | Đã bổ sung xếp hạng thời gian/cây và bảng sửa sai                               | Đánh giá trải nghiệm vinh danh với giáo viên/học sinh thật                                           |
+| Vé và kiểm tra 20 phút       | Chưa triển khai                                                                 | Điều kiện mở khóa, vé cấp theo mốc cây, đề thi, thời hạn server, lưu đáp án, chấm điểm và chuyển tab |
+| Săn điểm và thi chính thức   | Chưa triển khai                                                                 | Giới hạn lượt thi, lịch thi, mở đề theo lớp, thu bài, báo cáo điểm và giáo viên duyệt điểm cộng      |
+| Green Points/đổi thưởng      | Chưa triển khai                                                                 | Sổ giao dịch điểm, cấp điểm một lần theo điều kiện, danh mục quà, yêu cầu và phê duyệt               |
+| Hoạt động nhóm               | Chưa triển khai                                                                 | Chia nhóm, đại diện, bài nộp/link/file, deadline, gia hạn, phản biện và chấm điểm                    |
+| Trợ lý AI                    | Chưa triển khai                                                                 | Kích hoạt sau nhiều lần sai, gợi ý từng bước, bài tương tự, nhà cung cấp và cấu hình sử dụng         |
+| Vận hành chính thức          | Chưa triển khai                                                                 | Hosting/HTTPS, lưu trữ, sao lưu/khôi phục, giám sát và kiểm thử tải                                  |
 
 ## Các bước còn lại theo thứ tự đề xuất
 
-1. **Hoàn thiện bộ đề và nội dung:** phần phiên bản, ẩn/hiện và nhập CSV đã hoàn thành; tiếp theo bổ sung cấu trúc học kỳ, ma trận và cách chọn/trộn câu. Nhập Word/PDF hoặc `.xlsx` là phần riêng. Mục tiêu: giáo viên chuẩn bị được nội dung đủ cho lớp học thật.
+1. **Hoàn thiện bộ đề và nội dung:** phiên bản, ẩn/hiện và nhập Word/CSV theo mẫu đã hoàn thành; tiếp theo bổ sung cấu trúc học kỳ, ma trận và cách chọn/trộn câu. Tự tách Word có bố cục bất kỳ, nhập PDF hoặc `.xlsx` là phần riêng. Mục tiêu: giáo viên chuẩn bị được nội dung đủ cho lớp học thật.
 2. **Xây dựng kiểm tra 20 phút:** chốt quy tắc mở khóa/vé và chuyển tab, lưu đề cố định cho từng lượt, đáp án tự lưu, thời hạn tính từ server, thu/chấm bài và xử lý mất mạng. Mục tiêu: làm và nộp bài đúng một lần, không mất đáp án khi tải lại trang.
 3. **Bổ sung Săn điểm, thi chính thức và thưởng:** lịch thi theo lớp, giới hạn lượt, lưu điểm từng lần, sổ điểm thưởng và giáo viên phê duyệt. Mục tiêu: mọi cấp/đổi điểm có lịch sử và không ghi trùng; app không tự ghi điểm vào sổ học bạ.
 4. **Hoạt động nhóm:** chia ngẫu nhiên, nộp bài, giới hạn deadline và gia hạn, phản biện chéo, chấm điểm. Mục tiêu: phân quyền đúng nhóm và bài nộp có lịch sử.
@@ -58,10 +58,10 @@ Quy tắc ngân hàng câu hỏi được ghi trong [question-bank.md](question-
 
 Mã nguồn được quản lý tại [phuocthan/SangKienKn](https://github.com/phuocthan/SangKienKn), nhánh `main`. Để chạy phiên bản hiện tại trên Windows, pull mã nguồn và làm theo [hướng dẫn local trong README](../README.md#chạy-local-trên-windows). Các kiểm thử sử dụng database riêng; database demo và thư viện cài đặt không được đưa lên Git. Gói demo Windows đã gửi trước đó chứa phiên bản trước đợt bổ sung cộng đồng này; dùng mã nguồn trên Git để nhận các tính năng mới.
 
-Kết quả kiểm thử sau đợt cộng đồng và ngân hàng câu hỏi:
+Kết quả kiểm thử sau đợt cộng đồng, ngân hàng câu hỏi và nhập Word:
 
-- `npm test`: 19/19 kiểm thử đạt, bao gồm API, phân quyền, ngưỡng cây, đồng hạng, bảo toàn đáp án/lượt làm sau sửa/ẩn câu, nhập CSV, gửi lại mã nhập và migration database cũ.
-- `npm run test:e2e`: 8/8 kiểm thử trình duyệt đạt trên desktop và mobile. Luồng mới kiểm tra xem trước file lỗi/file hợp lệ, tải mẫu, mất phản hồi sau khi server đã lưu và xác nhận lại, sửa/ẩn/hiện, xem lịch sử, sửa sai theo đáp án cũ và luyện tập theo đáp án mới. Các luồng nghiệp vụ chạy với API thật; màn hình nhiều cây và đồng hạng có fixture trình bày riêng, không tạo tiến độ giả trong dữ liệu demo.
+- `npm test`: 23/23 kiểm thử đạt, bao gồm API, phân quyền, ngưỡng cây, đồng hạng, bảo toàn đáp án/lượt làm sau sửa/ẩn câu, nhập CSV, gửi lại mã nhập và migration database cũ. Bổ sung kiểm tra khối câu Word, tiếng Việt/nội dung nhiều dòng, thiếu/nhãn trùng/đáp án lỗi/câu trùng, giải nén nội dung có giới hạn và file mẫu Word thực.
+- `npm run test:e2e`: 10/10 kiểm thử trình duyệt đạt trên desktop và mobile. Luồng Word tải đúng file `.docx` từ ứng dụng, xem trước, chặn `.doc`/file hỏng/thiếu nội dung, đổi định dạng xóa bản xem trước, xác nhận nhập, bảo toàn đáp án/lời giải nhiều dòng và từ chối nhập câu đã có. Các luồng CSV, mất phản hồi sau khi server đã lưu và xác nhận lại, sửa/ẩn/hiện, xem lịch sử, sửa sai theo đáp án cũ và luyện tập theo đáp án mới vẫn đạt. Các luồng nghiệp vụ chạy với API thật; màn hình nhiều cây và đồng hạng có fixture trình bày riêng, không tạo tiến độ giả trong dữ liệu demo.
 - `npm run build`: kiểm tra TypeScript và build Vite đạt.
 
 Chưa kiểm thử tải hoặc nghiệm thu với lớp học thật. Các server kiểm thử đã tự dừng sau khi hoàn tất; demo vẫn được giữ ở trạng thái dừng theo yêu cầu.

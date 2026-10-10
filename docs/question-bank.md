@@ -1,10 +1,10 @@
-# Ngân hàng câu hỏi: phiên bản, ẩn và nhập CSV
+# Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
 ## Quy trình giáo viên
 
 Vào Ngân hàng câu hỏi, chọn lớp/chương/bài. Giáo viên có thể thêm một câu, sửa nội dung, ẩn hoặc hiện lại và xem lịch sử phiên bản.
 
-Chọn Nhập file CSV → Tải file mẫu → điền dữ liệu → chọn file → kiểm tra xem trước → xác nhận nhập. Chỉ lần xác nhận thành công mới lưu dữ liệu; chọn file hoặc xem trước không tạo câu hỏi.
+Chọn Nhập file Word hoặc Nhập file CSV → tải mẫu tương ứng → điền dữ liệu → chọn file → kiểm tra xem trước → xác nhận nhập. Có thể đổi định dạng trong hộp nhập; đổi định dạng sẽ xóa bản xem trước cũ. Chỉ lần xác nhận thành công mới lưu dữ liệu; chọn file hoặc xem trước không tạo câu hỏi.
 
 ## Bảo toàn lịch sử học tập
 
@@ -17,7 +17,29 @@ Chọn Nhập file CSV → Tải file mẫu → điền dữ liệu → chọn f
 - Số câu và các bài luyện tập chỉ tính phiên bản hiện tại đang sử dụng. Báo cáo lượt làm vẫn bao gồm lịch sử. Một câu sai ở hai phiên bản là hai mục sửa sai riêng, vì nội dung và đáp án có thể khác nhau.
 - Lịch sử phiên bản, đáp án và quyền sửa/ẩn/nhập chỉ dành cho giáo viên sở hữu lớp. API học sinh không gửi đáp án/lời giải trước khi trả lời.
 
-## Định dạng file nhập
+## File Word (.docx)
+
+Tải mẫu bằng nút **Tải mẫu Word (.docx)** trong ứng dụng hoặc mở [file mẫu trong repository](../public/templates/greenedu-cau-hoi-mau.docx). Mẫu có hướng dẫn và hai câu minh họa, mở và chỉnh sửa trực tiếp bằng Microsoft Word. Thay câu mẫu hoặc sao chép thêm khối câu:
+
+```text
+Câu 1: Đơn vị cơ bản của độ dài trong hệ SI là gì?
+Bài học: Bài 1 · Đơn vị đo
+A. Mét
+B. Centimét
+C. Kilômét
+D. Milimét
+Đáp án: A
+Lời giải: Mét (m) là đơn vị cơ bản của độ dài trong hệ SI.
+```
+
+- Mỗi câu bắt đầu bằng `Câu 1:`, `Câu 2:`… hoặc `Câu hỏi:`; giữ đủ nhãn `Bài học:`, `A.`, `B.`, `C.`, `D.`, `Đáp án:`, `Lời giải:`. Số thứ tự dùng để phân khối, không bắt buộc liên tục.
+- Đáp án là một chữ A/B/C/D. Chấp nhận chữ thường, nhãn `Đáp án đúng:` và lựa chọn dạng `A)` hoặc `A:`. Bốn phương án phải khác nhau.
+- Chữ đậm, nghiêng và các đoạn chữ trong cùng dòng vẫn được đọc. Dòng tiếp theo không có nhãn tiếp tục câu hỏi, phương án hoặc lời giải trước đó; giữ các nhãn ở đầu dòng riêng.
+- Chỉ nhận `.docx`, không nhận `.doc` cũ. Với `.doc`, chọn Save As → Word Document (.docx) trong Word. Không nhận file Word có hình ảnh, Equation, hộp văn bản hay nội dung nhúng trong phần nội dung; dùng văn bản và công thức gõ bằng chữ. Chấp nhận/từ chối Track Changes trước khi nhập.
+- Mỗi file 1–100 câu, tối đa 5 MB; nội dung XML tối đa 2 MB. Giới hạn nội dung từng câu giống CSV. File được đọc trong trình duyệt; khi xác nhận, app gửi dữ liệu câu hỏi đã chuẩn hóa để server kiểm tra/lưu, không gửi file Word gốc.
+- Lỗi thiếu nhãn, thiếu nội dung, đáp án sai định dạng, phương án giống nhau, câu trùng hoặc file hỏng đều chặn lưu. Có câu hợp lệ và câu lỗi thì vẫn xem được câu hợp lệ, nhưng phải sửa toàn bộ lỗi trước khi xác nhận.
+
+## File CSV
 
 CSV UTF-8, có thể có BOM. Các cột theo đúng thứ tự:
 
@@ -32,7 +54,7 @@ CSV UTF-8, có thể có BOM. Các cột theo đúng thứ tự:
 - Bộ nhập API kiểm tra lại tất cả câu trước khi lưu và ghi trong một transaction. Câu trùng toàn bộ nội dung trong file hoặc trùng phiên bản hiện tại của ngân hàng (kể cả câu đã ẩn) bị từ chối; cần bỏ dòng trùng rồi nhập lại.
 - Mã của lần xác nhận được giữ khi mạng lỗi. Nếu server đã lưu mà trình duyệt chưa nhận kết quả, xác nhận lại không tạo câu trùng.
 
-Đợt này chỉ hỗ trợ CSV theo mẫu, chưa tự đọc/tách câu từ Word/PDF hoặc nhập `.xlsx`. Học kỳ, ma trận và trộn đề chưa thuộc phần đã hoàn thành.
+Cả Word và CSV dùng cùng bộ nhập API: giữ phân quyền giáo viên, kiểm tra trùng, lưu toàn bộ hoặc không lưu và chống ghi trùng khi gửi lại. Chưa tự tách đề Word có bố cục bất kỳ, đọc PDF hoặc nhập `.xlsx`. Học kỳ, ma trận và trộn đề chưa thuộc phần đã hoàn thành.
 
 ## Lưu trữ
 

@@ -4,6 +4,8 @@ import { randomUUID } from "node:crypto";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { readFileSync } from "node:fs";
+import { zipSync, strToU8 } from "fflate";
 import { DatabaseSync } from "node:sqlite";
 import {
   csvHeaders,
@@ -12,6 +14,128 @@ import {
 } from "../shared/questions.js";
 import { createApp, treeLevel } from "./app.js";
 import { hashPassword, openDatabase, seedDemo } from "./db.js";
+import {
+  parseQuestionWordText,
+  readWordDocument,
+  wordXmlLimit,
+} from "../shared/word-questions.js";
+
+const wordQuestion = `Câu 1: Một vật đi được 20 m trong 5 s. Tốc độ là bao nhiêu?
+Bài học: Bài 2 · Tốc độ
+A. 2 m/s
+B. 4 m/s
+C. 8 m/s
+D. 20 m/s
+Đáp án: B
+Lời giải: v = s/t = 20/5 = 4 m/s.`;
+
+test("Word question blocks preserve Vietnamese and multiline text, with explicit answer keys", () => {
+  const source = `Hướng dẫn nhập Word\n${wordQuestion.replace("B. 4 m/s", "b) 4 m/s").replace("Đáp án: B", "Đáp án đúng: b")}\nĐơn vị tốc độ là mét trên giây.`;
+  const parsed = parseQuestionWordText(source.normalize("NFD"));
+  assert.deepEqual(parsed.errors, []);
+  assert.equal(parsed.questions.length, 1);
+  assert.equal(parsed.questions[0].lesson, "Bài 2 · Tốc độ");
+  assert.equal(parsed.questions[0].correctIndex, 1);
+  assert.equal(parsed.questions[0].choices[1], "4 m/s");
+  assert.equal(
+    parsed.questions[0].explanation,
+    "v = s/t = 20/5 = 4 m/s.\nĐơn vị tốc độ là mét trên giây.",
+  );
+  const multiline = parseQuestionWordText(
+    wordQuestion
+      .replace("Câu 1: ", "Câu 1:\n")
+      .replace("A. 2 m/s", "A.\n2 m/s"),
+  );
+  assert.deepEqual(multiline, parseQuestionWordText(wordQuestion));
+});
+
+test("Word preview reports incomplete, invalid, repeated and duplicate blocks without silently accepting them", () => {
+  const missing = parseQuestionWordText(
+    `${wordQuestion}\n${wordQuestion.replace("D. 20 m/s\n", "")}`,
+  );
+  assert.equal(missing.questions.length, 1);
+  assert.match(missing.errors[0], /Câu 2:.*D/);
+  assert.match(
+    parseQuestionWordText(wordQuestion.replace("Đáp án: B", "Đáp án: A và B"))
+      .errors[0],
+    /Đáp án phải/,
+  );
+  assert.match(
+    parseQuestionWordText(wordQuestion.replace("B. 4 m/s", "B. 2 m/s"))
+      .errors[0],
+    /phương án phải khác/,
+  );
+  assert.match(
+    parseQuestionWordText(wordQuestion.replace("B. 4 m/s", "A. 4 m/s"))
+      .errors[0],
+    /Nhãn A xuất hiện/,
+  );
+  assert.match(
+    parseQuestionWordText(`${wordQuestion}\n${wordQuestion}`).errors[0],
+    /trùng/,
+  );
+  assert.match(
+    parseQuestionWordText("Một file Word không theo mẫu").errors[0],
+    /Không tìm thấy/,
+  );
+  assert.match(
+    parseQuestionWordText(Array(101).fill(wordQuestion).join("\n")).errors[0],
+    /100 câu/,
+  );
+  assert.match(
+    parseQuestionWordText(
+      wordQuestion.replace("Bài 2 · Tốc độ", "x".repeat(121)),
+    ).errors[0],
+    /120 ký tự/,
+  );
+});
+
+test("DOCX reader extracts only document XML and rejects invalid, missing, incomplete or oversized content", () => {
+  const xml = "<document>Tiếng Việt &amp; câu hỏi</document>";
+  assert.equal(
+    readWordDocument(
+      zipSync({
+        "word/document.xml": strToU8(xml),
+        "word/media/image1.bin": new Uint8Array(wordXmlLimit + 1),
+      }),
+    ),
+    xml,
+  );
+  assert.throws(
+    () => readWordDocument(strToU8("Not a Word document")),
+    /không phải Word/,
+  );
+  assert.throws(
+    () => readWordDocument(zipSync({ "something.xml": strToU8(xml) })),
+    /thiếu nội dung/,
+  );
+  const archive = zipSync({ "word/document.xml": strToU8(xml) });
+  assert.throws(
+    () => readWordDocument(archive.subarray(0, 20)),
+    /thiếu nội dung|Không đọc được/,
+  );
+  assert.throws(
+    () =>
+      readWordDocument(
+        zipSync({ "word/document.xml": strToU8("x".repeat(wordXmlLimit + 1)) }),
+      ),
+    /Nội dung Word quá lớn/,
+  );
+  assert.throws(
+    () => readWordDocument(new Uint8Array(5 * 1024 * 1024 + 1)),
+    /5 MB/,
+  );
+});
+
+test("downloadable Word template is a real DOCX with two editable sample question blocks", () => {
+  const file = readFileSync(
+    new URL("../public/templates/greenedu-cau-hoi-mau.docx", import.meta.url),
+  );
+  const xml = readWordDocument(file);
+  assert.ok(xml.includes("Câu 1: ") && xml.includes("Câu 2: "));
+  assert.ok(xml.includes("Đáp án: A") && xml.includes("Đáp án: B"));
+  assert.ok(xml.includes("Bài học:") && xml.includes("Lời giải:"));
+});
 
 async function fixture(t: TestContext) {
   const db = openDatabase(":memory:");

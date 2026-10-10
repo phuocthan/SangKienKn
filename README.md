@@ -137,9 +137,9 @@ Biến cấu hình:
 
 Đã bổ sung: Khu vườn của lớp hiển thị cây cấp 5 của các thành viên; Xếp hạng chăm chỉ dựa trên thời gian/cây và bảng Bác sĩ cây trồng theo số câu hiện đã khắc phục. Hai phần tính trong lớp đang chọn, không dùng điểm số, không tạo thành tích giả và không trả email qua API cộng đồng.
 
-Ngân hàng câu hỏi đã có sửa bằng phiên bản mới, ẩn/hiện lại và lịch sử nội dung. Có nhập CSV UTF-8 theo mẫu, xem trước/kiểm tra lỗi và xác nhận trước khi lưu; gửi lại khi mạng lỗi không tạo câu trùng. Sổ tay và lượt làm cũ giữ nguyên đáp án cũ. Xem [hướng dẫn ngân hàng câu hỏi](docs/question-bank.md).
+Ngân hàng câu hỏi đã có sửa bằng phiên bản mới, ẩn/hiện lại và lịch sử nội dung. Có nhập **Word `.docx` và CSV UTF-8 theo mẫu**, tải mẫu, xem trước/kiểm tra lỗi và xác nhận trước khi lưu; gửi lại khi mạng lỗi không tạo câu trùng. Word nhận các khối câu hỏi văn bản, tối đa 100 câu/5 MB; [file Word mẫu](public/templates/greenedu-cau-hoi-mau.docx) có hai câu minh họa để chỉnh sửa. Sổ tay và lượt làm cũ giữ nguyên đáp án cũ. Xem [hướng dẫn ngân hàng câu hỏi](docs/question-bank.md).
 
-Chưa có: học kỳ, ma trận/trộn đề, vé kiểm tra, thi 20 phút/thi chính thức, Green Points, đổi thưởng, hoạt động nhóm, AI, tách đề từ Word/PDF, nhập `.xlsx`, quản lý nhiều lớp cho cùng một học sinh và xuất Excel `.xlsx`. Không xóa câu hỏi đã có lịch sử; dùng chức năng ẩn.
+Chưa có: học kỳ, ma trận/trộn đề, vé kiểm tra, thi 20 phút/thi chính thức, Green Points, đổi thưởng, hoạt động nhóm, AI, tự tách đề Word có bố cục bất kỳ/PDF, nhập `.xlsx`, quản lý nhiều lớp cho cùng một học sinh và xuất Excel `.xlsx`. Không xóa câu hỏi đã có lịch sử; dùng chức năng ẩn.
 
 Trước khi dùng dữ liệu học sinh thật: triển khai HTTPS cùng nguồn, tắt và tách dữ liệu demo, sao lưu database, thiết lập quyền truy cập và chính sách dữ liệu, vận hành tài khoản giáo viên, và đánh giá tải. Thi chính thức cần đặc tả riêng về đề, lưu đáp án, mất mạng, điểm và quy trình xử lý sự cố.
 

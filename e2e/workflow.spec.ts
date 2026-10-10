@@ -1,5 +1,129 @@
 import { test, expect, type Page } from "@playwright/test";
 import { csvHeaders } from "../shared/questions";
+import { readFile } from "node:fs/promises";
+import { strToU8, zipSync } from "fflate";
+
+test("teacher downloads and imports a real Word template with preview, format switching and validation", async ({
+  page,
+}, info) => {
+  await demoLogin(page, "Giáo viên");
+  const stamp = `${info.project.name}-${Date.now()}`;
+  const classroomResponse = await page.request.post("/api/classrooms", {
+    data: { name: `Lớp Word ${stamp}`, subject: "Vật lý", grade: "10" },
+  });
+  expect(classroomResponse.ok()).toBeTruthy();
+  const classroom = await classroomResponse.json();
+  const chapterResponse = await page.request.post(
+    `/api/classrooms/${classroom.id}/chapters`,
+    { data: { title: `Chương Word ${stamp}` } },
+  );
+  expect(chapterResponse.ok()).toBeTruthy();
+  const chapter = await chapterResponse.json();
+  async function storedQuestions() {
+    const response = await page.request.get(
+      `/api/chapters/${chapter.id}/questions`,
+    );
+    expect(response.ok()).toBeTruthy();
+    return response.json();
+  }
+  await page.reload();
+  await page.getByLabel("Chọn lớp học").selectOption(classroom.id);
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Ngân hàng câu hỏi" })
+    .click();
+  await page.getByRole("button", { name: "Nhập file Word" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByLabel("Định dạng file")).toHaveValue("word");
+  const downloadEvent = page.waitForEvent("download");
+  await dialog.getByRole("link", { name: "Tải mẫu Word (.docx)" }).click();
+  const sample = await downloadEvent;
+  expect(sample.suggestedFilename()).toBe("greenedu-cau-hoi-mau.docx");
+  const buffer = await readFile((await sample.path())!);
+  expect(buffer.subarray(0, 2).toString()).toBe("PK");
+  const file = dialog.getByLabel("File câu hỏi Word (.docx)");
+  await file.setInputFiles({
+    name: "ngan-hang-cu.doc",
+    mimeType: "application/msword",
+    buffer: Buffer.from("Old Word file"),
+  });
+  await expect(dialog.getByRole("alert")).toContainText("Save As");
+  await file.setInputFiles({
+    name: "hong.docx",
+    mimeType: "application/octet-stream",
+    buffer: Buffer.from("Not a Word file"),
+  });
+  await expect(dialog.getByRole("alert")).toContainText("không phải Word");
+  await expect(
+    dialog.getByRole("button", { name: "Xác nhận nhập 0 câu" }),
+  ).toBeDisabled();
+  const invalidXml = `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Câu 1: Câu hỏi thiếu phương án và lời giải?</w:t></w:r></w:p><w:p><w:r><w:t>Đáp án: A</w:t></w:r></w:p></w:body></w:document>`;
+  await file.setInputFiles({
+    name: "thieu-noi-dung.docx",
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    buffer: Buffer.from(zipSync({ "word/document.xml": strToU8(invalidXml) })),
+  });
+  await expect(dialog.getByRole("alert")).toContainText("Thiếu nội dung");
+  expect(await storedQuestions()).toHaveLength(0);
+  const validFile = {
+    name: sample.suggestedFilename(),
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    buffer,
+  };
+  await file.setInputFiles(validFile);
+  await expect(
+    dialog.getByRole("heading", { name: "Xem trước · 2 câu hợp lệ" }),
+  ).toBeVisible();
+  expect(await storedQuestions()).toHaveLength(0);
+  await dialog.locator(".import-preview summary").first().click();
+  await expect(dialog.locator(".import-preview details").first()).toContainText(
+    "Mét ✓",
+  );
+  await expect(dialog.locator(".import-preview details").first()).toContainText(
+    "Centimét, kilômét",
+  );
+  await dialog.getByLabel("Định dạng file").selectOption("csv");
+  await expect(
+    dialog.getByRole("button", { name: "Xác nhận nhập 0 câu" }),
+  ).toBeDisabled();
+  await expect(dialog.getByLabel("File câu hỏi CSV")).toHaveValue("");
+  await dialog.getByLabel("Định dạng file").selectOption("word");
+  await expect(file).toHaveValue("");
+  await file.setInputFiles(validFile);
+  await expect(
+    dialog.getByRole("heading", { name: "Xem trước · 2 câu hợp lệ" }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBeTruthy();
+  await page.screenshot({
+    path: info.outputPath("word-import-preview.png"),
+    fullPage: true,
+  });
+  await dialog.getByRole("button", { name: "Xác nhận nhập 2 câu" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator(".bank-question")).toHaveCount(2);
+  const questions = await storedQuestions();
+  expect(
+    questions.map((q: { correctIndex: number }) => q.correctIndex).sort(),
+  ).toEqual([0, 1]);
+  expect(
+    questions.some((q: { explanation: string }) =>
+      q.explanation.includes("\nCentimét, kilômét"),
+    ),
+  ).toBeTruthy();
+  await page.getByRole("button", { name: "Nhập file Word" }).click();
+  await file.setInputFiles(validFile);
+  await dialog.getByRole("button", { name: "Xác nhận nhập 2 câu" }).click();
+  await expect(dialog.getByRole("alert")).toContainText(
+    "đã có trong ngân hàng",
+  );
+  expect(await storedQuestions()).toHaveLength(2);
+});
 
 async function demoLogin(page: Page, role: "Học sinh" | "Giáo viên") {
   await page.goto("/");

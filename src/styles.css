@@ -1260,6 +1260,11 @@ tr:last-child td {
   gap: 10px;
   margin: 22px 0;
 }
+.import-format-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 .import-errors {
   display: block;
 }

@@ -29,7 +29,7 @@ Kiểm chứng luồng giáo viên tạo lớp và câu hỏi → học sinh luy
 9. Khu vườn của lớp hiển thị một cây cho mỗi học sinh/chương đạt 4 giờ có hoạt động, trong phạm vi thành viên và chương của lớp. Không tạo dữ liệu cây trùng khi tải lại.
 10. Xếp hạng chăm chỉ xét thời gian học rồi số cây ra hoa; thành tích bằng nhau đồng hạng. Bảng sửa sai xét số câu hiện đã khắc phục, không đếm trùng số lượt làm lại. Chưa có hoạt động thì chưa xếp hạng. Các API cộng đồng không trả email hoặc đáp án.
 11. Sửa câu hỏi tạo phiên bản mới; ẩn không xóa câu cũ, lượt làm hoặc sổ tay. Lượt sửa sai dùng đáp án phiên bản cũ; lượt luyện tập mới chỉ dùng phiên bản hiện tại đang sử dụng.
-12. Nhập CSV có xem trước và xác nhận, kiểm tra lại trên server, ghi toàn bộ hoặc không ghi; gửi lại cùng mã nhập không tạo câu trùng. Xem [ngân hàng câu hỏi](question-bank.md).
+12. Nhập Word `.docx` và CSV theo mẫu có xem trước và xác nhận, kiểm tra lại trên server, ghi toàn bộ hoặc không ghi; gửi lại cùng mã nhập không tạo câu trùng. Word hỗ trợ câu hỏi văn bản, có mẫu tải về. Xem [ngân hàng câu hỏi](question-bank.md).
 
 ## Tiêu chí nghiệm thu
 

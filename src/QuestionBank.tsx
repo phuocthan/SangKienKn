@@ -18,9 +18,11 @@ import {
 } from "../shared/questions";
 import type { Question } from "./types";
 
+type ImportFormat = "csv" | "word";
+
 type Dialog =
   | { type: "edit" | "visibility" | "history"; question: Question }
-  | { type: "import" }
+  | { type: "import"; format: ImportFormat }
   | null;
 
 export function QuestionBank({
@@ -100,13 +102,22 @@ export function QuestionBank({
           />
           Hiện cả câu đã ẩn
         </label>
-        <button
-          className="button outline small"
-          onClick={() => open({ type: "import" })}
-        >
-          <Upload size={16} />
-          Nhập file CSV
-        </button>
+        <div className="import-format-actions">
+          <button
+            className="button outline small"
+            onClick={() => open({ type: "import", format: "csv" })}
+          >
+            <Upload size={16} />
+            Nhập file CSV
+          </button>
+          <button
+            className="button outline small"
+            onClick={() => open({ type: "import", format: "word" })}
+          >
+            <Upload size={16} />
+            Nhập file Word
+          </button>
+        </div>
       </div>
       {error ? (
         <div className="error-banner" role="alert">
@@ -118,7 +129,7 @@ export function QuestionBank({
       ) : !rows.length ? (
         <Empty
           title="Chưa có câu hỏi trong bộ lọc này"
-          text="Thêm câu hỏi hoặc nhập file CSV. Bật Hiện cả câu đã ẩn để xem các câu đã ngừng dùng."
+          text="Thêm câu hỏi hoặc nhập file Word/CSV theo mẫu. Bật Hiện cả câu đã ẩn để xem các câu đã ngừng dùng."
         />
       ) : (
         <div className="bank-list">
@@ -170,7 +181,11 @@ export function QuestionBank({
             <EditForm question={dialog.question} onSaved={saved} />
           )}
           {dialog.type === "import" && (
-            <ImportForm chapterId={chapterId} onSaved={saved} />
+            <ImportForm
+              chapterId={chapterId}
+              initialFormat={dialog.format}
+              onSaved={saved}
+            />
           )}
           {dialog.type === "history" && (
             <QuestionHistory id={dialog.question.id} />
@@ -324,11 +339,14 @@ function QuestionHistory({ id }: { id: string }) {
 
 function ImportForm({
   chapterId,
+  initialFormat,
   onSaved,
 }: {
   chapterId: string;
+  initialFormat: ImportFormat;
   onSaved: () => void;
 }) {
+  const [format, setFormat] = useState<ImportFormat>(initialFormat);
   const [questions, setQuestions] = useState<QuestionInput[]>([]),
     [errors, setErrors] = useState<string[]>([]);
   const [saveError, setSaveError] = useState("");
@@ -348,24 +366,51 @@ function ImportForm({
       setReading(false);
       return;
     }
-    if (file.size > 512 * 1024) {
-      setErrors(["File quá lớn. Mỗi file tối đa 512 KB và 100 câu hỏi."]);
+    if (format === "word" && /\.doc$/i.test(file.name)) {
+      setErrors([
+        "File .doc cũ chưa được hỗ trợ. Mở bằng Word và chọn Save As → Word Document (.docx).",
+      ]);
+      setReading(false);
+      return;
+    }
+    if (!(format === "word" ? /\.docx$/i : /\.csv$/i).test(file.name)) {
+      setErrors([
+        format === "word"
+          ? "Chọn file Word .docx theo mẫu."
+          : "Chọn file CSV UTF-8 theo mẫu.",
+      ]);
+      setReading(false);
+      return;
+    }
+    if (file.size > (format === "word" ? 5 * 1024 * 1024 : 512 * 1024)) {
+      setErrors([
+        format === "word"
+          ? "File Word quá lớn. Mỗi file tối đa 5 MB và 100 câu hỏi."
+          : "File quá lớn. Mỗi file tối đa 512 KB và 100 câu hỏi.",
+      ]);
       setReading(false);
       return;
     }
     setReading(true);
     try {
-      const content = new TextDecoder("utf-8", { fatal: true }).decode(
-        await file.arrayBuffer(),
-      );
-      const parsed = parseQuestionCsv(content);
+      const data = await file.arrayBuffer();
+      const parsed =
+        format === "word"
+          ? (await import("./importWord")).parseWordFile(new Uint8Array(data))
+          : parseQuestionCsv(
+              new TextDecoder("utf-8", { fatal: true }).decode(data),
+            );
       if (current === sequence.current) {
         setQuestions(parsed.questions);
         setErrors(parsed.errors);
       }
-    } catch {
+    } catch (e) {
       if (current === sequence.current)
-        setErrors(["Không đọc được file. Hãy lưu file ở định dạng CSV UTF-8."]);
+        setErrors([
+          format === "word"
+            ? errorMessage(e)
+            : "Không đọc được file. Hãy lưu file ở định dạng CSV UTF-8.",
+        ]);
     } finally {
       if (current === sequence.current) setReading(false);
     }
@@ -399,18 +444,54 @@ function ImportForm({
   return (
     <div className="question-import">
       <p>
-        Nhập câu hỏi vào chương đang chọn. Tải mẫu, điền nội dung rồi lưu thành
-        CSV UTF-8. Chọn đáp án A, B, C hoặc D. Mỗi file tối đa 100 câu.
+        Nhập câu hỏi vào chương đang chọn. Tải mẫu, điền nội dung rồi chọn file
+        để xem trước. Chọn đáp án A, B, C hoặc D. Mỗi file tối đa 100 câu.
       </p>
-      <button className="button outline small" onClick={template}>
-        <Download size={16} />
-        Tải file mẫu
-      </button>
       <label>
-        File câu hỏi CSV
+        Định dạng file
+        <select
+          value={format}
+          disabled={busy}
+          onChange={(e) => {
+            setFormat(e.target.value as ImportFormat);
+            void read();
+          }}
+        >
+          <option value="csv">CSV UTF-8 (.csv)</option>
+          <option value="word">Word (.docx)</option>
+        </select>
+      </label>
+      {format === "word" ? (
+        <>
+          <a
+            className="button outline small"
+            href="/templates/greenedu-cau-hoi-mau.docx"
+            download
+          >
+            <Download size={16} />
+            Tải mẫu Word (.docx)
+          </a>
+          <p className="subtle-note">
+            Mỗi câu bắt đầu bằng “Câu 1: …”, kèm nhãn Bài học, A–D, Đáp án và
+            Lời giải như mẫu. File tối đa 5 MB; hỗ trợ câu hỏi văn bản.
+          </p>
+        </>
+      ) : (
+        <button className="button outline small" onClick={template}>
+          <Download size={16} />
+          Tải file mẫu
+        </button>
+      )}
+      <label>
+        {format === "word" ? "File câu hỏi Word (.docx)" : "File câu hỏi CSV"}
         <input
+          key={format}
           type="file"
-          accept=".csv,text/csv"
+          accept={
+            format === "word"
+              ? ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              : ".csv,text/csv"
+          }
           disabled={busy}
           onChange={(e) => void read(e.target.files?.[0])}
         />
