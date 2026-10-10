@@ -15,6 +15,7 @@ Kiểm chứng luồng giáo viên tạo lớp và câu hỏi → học sinh luy
 - `progress`: thời gian tích lũy theo học sinh/chương.
 - `study_sessions`: một phiên học cho mỗi học sinh, tín hiệu hoạt động và đồng hồ backend.
 - `questions` có trạng thái sử dụng, phiên bản, mã nhóm phiên bản và thời điểm thay đổi; `question_imports` chống nhập trùng khi gửi lại cùng một lần xác nhận.
+- `group_activities`, `activity_groups`, `activity_group_members`: yêu cầu, hạn nộp, nhóm cố định và đại diện; `activity_files` lưu file gốc/sản phẩm trong database; `group_submissions` lưu từng phiên bản; `activity_deadline_history` lưu các lần gia hạn.
 
 ## Quy tắc nghiệp vụ
 
@@ -30,6 +31,7 @@ Kiểm chứng luồng giáo viên tạo lớp và câu hỏi → học sinh luy
 10. Xếp hạng chăm chỉ xét thời gian học rồi số cây ra hoa; thành tích bằng nhau đồng hạng. Bảng sửa sai xét số câu hiện đã khắc phục, không đếm trùng số lượt làm lại. Chưa có hoạt động thì chưa xếp hạng. Các API cộng đồng không trả email hoặc đáp án.
 11. Sửa câu hỏi tạo phiên bản mới; ẩn không xóa câu cũ, lượt làm hoặc sổ tay. Lượt sửa sai dùng đáp án phiên bản cũ; lượt luyện tập mới chỉ dùng phiên bản hiện tại đang sử dụng.
 12. Nhập Word `.docx` và CSV theo mẫu có xem trước và xác nhận, kiểm tra lại trên server, ghi toàn bộ hoặc không ghi; gửi lại cùng mã nhập không tạo câu trùng. Word hỗ trợ câu hỏi văn bản, có mẫu tải về. Xem [ngân hàng câu hỏi](question-bank.md).
+13. Hoạt động nhóm chia ngẫu nhiên cân bằng một lần, chỉ đại diện được nộp trước hạn máy chủ, giáo viên được gia hạn/đổi đại diện. Các lần nộp và file cũ được bảo toàn; học sinh chỉ xem sản phẩm nhóm mình. Xem [hoạt động nhóm](group-activities.md).
 
 ## Tiêu chí nghiệm thu
 
@@ -41,6 +43,7 @@ Kiểm chứng luồng giáo viên tạo lớp và câu hỏi → học sinh luy
 - Trang ẩn, phiên cũ, mất kết nối dài và không có tương tác quá thời gian quy định không tiếp tục tăng tiến độ.
 - Giao diện dùng được trên điện thoại và máy tính; modal có quản lý focus và các form có nhãn.
 - Học sinh/giáo viên xem được vườn lớp và xếp hạng đúng quyền; dữ liệu chương/lớp khác không ảnh hưởng thành tích lớp đang xem.
+- Nhóm, nội dung Word, sản phẩm và gia hạn còn sau khởi động lại; nộp đúng thời điểm hết hạn bị từ chối, gia hạn mở lại; gửi lại cùng bài không tạo phiên bản/file trùng.
 
 ## Các quyết định dành cho giai đoạn thi
 

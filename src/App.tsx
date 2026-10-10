@@ -38,6 +38,7 @@ import {
 } from "./components";
 import { Practice } from "./Practice";
 import { ClassCommunity } from "./ClassCommunity";
+import { GroupActivities } from "./GroupActivities";
 import { QuestionBank } from "./QuestionBank";
 import { QuestionFields } from "./QuestionFields";
 import type { Chapter, Classroom, Question, Student, User } from "./types";
@@ -47,6 +48,7 @@ type Page =
   | "practice"
   | "corrections"
   | "classes"
+  | "groups"
   | "questions"
   | "progress"
   | "garden"
@@ -239,6 +241,7 @@ export default function App() {
     ? [
         { id: "home", label: "Tổng quan", icon: LayoutDashboard },
         { id: "classes", label: "Lớp học của tôi", icon: Users },
+        { id: "groups", label: "Hoạt động nhóm", icon: Users },
         { id: "questions", label: "Ngân hàng câu hỏi", icon: BookOpen },
         { id: "progress", label: "Tiến độ học tập", icon: TrendingUp },
         { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
@@ -247,6 +250,7 @@ export default function App() {
     : [
         { id: "home", label: "Khu vườn của tôi", icon: Sprout },
         { id: "practice", label: "Luyện tập", icon: BookOpen },
+        { id: "groups", label: "Hoạt động nhóm", icon: Users },
         { id: "corrections", label: "Sổ tay sửa sai", icon: CheckCircle2 },
         { id: "progress", label: "Hành trình của tôi", icon: TrendingUp },
         { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
@@ -257,6 +261,7 @@ export default function App() {
     practice: "Luyện tập",
     corrections: "Sổ tay sửa sai",
     classes: "Lớp học của tôi",
+    groups: "Hoạt động nhóm",
     questions: "Ngân hàng câu hỏi",
     progress: isTeacher ? "Tiến độ học tập" : "Hành trình của tôi",
     settings: "Tài khoản",
@@ -731,6 +736,13 @@ export default function App() {
                     />
                   )}
                 </>
+              )}
+              {page === "groups" && (
+                <GroupActivities
+                  key={current.id}
+                  classroom={current}
+                  user={user}
+                />
               )}
               {(page === "garden" || page === "leaderboard") && (
                 <ClassCommunity

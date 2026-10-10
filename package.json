@@ -17,7 +17,7 @@
     "predemo": "npm run check:node",
     "demo": "node --env-file=.env.example --import tsx server/index.ts",
     "pretest": "npm run check:node",
-    "test": "node --import tsx --test server/app.test.ts",
+    "test": "node --import tsx --test server/*.test.ts",
     "precreate:teacher": "npm run check:node",
     "create:teacher": "node --import tsx server/create-teacher.ts",
     "pretest:e2e": "npm run check:node",
@@ -26,15 +26,18 @@
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.3.0",
+    "@xmldom/xmldom": "^0.9.12",
     "express": "^5.1.0",
     "fflate": "^0.8.3",
     "lucide-react": "^0.468.0",
+    "multer": "^2.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",
     "@types/express": "^5.0.0",
+    "@types/multer": "^2.3.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

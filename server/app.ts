@@ -7,9 +7,10 @@ import type { DatabaseSync } from "node:sqlite";
 import { createHash, randomUUID, randomBytes } from "node:crypto";
 import { hashPassword, verifyPassword } from "./db.js";
 import { questionInput, type QuestionInput } from "../shared/questions.js";
+import { isGroupUploadPath, registerGroupRoutes } from "./group-activities.js";
 
-type Row = Record<string, any>;
-type AppRequest = Request & { user?: Row; tokenHash?: string };
+export type Row = Record<string, any>;
+export type AppRequest = Request & { user?: Row; tokenHash?: string };
 const tokenHash = (token: string) =>
   createHash("sha256").update(token).digest("hex");
 const publicUser = (u: Row) => ({
@@ -65,8 +66,20 @@ export function createApp(
   app.use(express.json({ limit: "100kb" }));
   app.use("/api", (req, _res, next) => {
     if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {
-      if (!req.is("application/json"))
-        return next(new ApiError(415, "Yêu cầu phải dùng JSON."));
+      if (
+        !req.is("application/json") &&
+        !(
+          req.method === "POST" &&
+          isGroupUploadPath(req.path) &&
+          req.is("multipart/form-data")
+        )
+      )
+        return next(
+          new ApiError(
+            415,
+            "Yêu cầu phải dùng JSON hoặc file tại chức năng hỗ trợ.",
+          ),
+        );
       if (req.headers["sec-fetch-site"] === "cross-site")
         return next(new ApiError(403, "Yêu cầu khác nguồn bị từ chối."));
       if (req.headers.origin) {
@@ -922,6 +935,14 @@ export function createApp(
       ).run(id, req.user!.id);
     }
     res.json({ ok: true });
+  });
+  registerGroupRoutes(app, db, {
+    now,
+    text,
+    fail,
+    teacher,
+    student,
+    classroom,
   });
   app.use("/api", (_req, _res, next) =>
     next(new ApiError(404, "Không tìm thấy chức năng.")),

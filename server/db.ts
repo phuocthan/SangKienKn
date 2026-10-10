@@ -66,6 +66,44 @@ export function openDatabase(path: string) {
     CREATE INDEX IF NOT EXISTS attempts_student ON attempts(student_id, question_id);
     CREATE INDEX IF NOT EXISTS questions_chapter ON questions(chapter_id);
     CREATE INDEX IF NOT EXISTS sessions_expiry ON sessions(expires_at);
+    CREATE TABLE IF NOT EXISTS group_activities (
+      id TEXT PRIMARY KEY, classroom_id TEXT NOT NULL REFERENCES classrooms(id), title TEXT NOT NULL,
+      instructions TEXT NOT NULL, requirement_text TEXT NOT NULL DEFAULT '',
+      deadline_at INTEGER NOT NULL, created_at INTEGER NOT NULL, group_count INTEGER NOT NULL,
+      request_id TEXT NOT NULL UNIQUE, fingerprint TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS activity_groups (
+      id TEXT PRIMARY KEY, activity_id TEXT NOT NULL REFERENCES group_activities(id), number INTEGER NOT NULL,
+      representative_id TEXT NOT NULL REFERENCES users(id), UNIQUE(activity_id,number), UNIQUE(id,activity_id)
+    );
+    CREATE TABLE IF NOT EXISTS activity_group_members (
+      activity_id TEXT NOT NULL REFERENCES group_activities(id), group_id TEXT NOT NULL,
+      student_id TEXT NOT NULL REFERENCES users(id), PRIMARY KEY(activity_id,student_id),
+      FOREIGN KEY(group_id,activity_id) REFERENCES activity_groups(id,activity_id)
+    );
+    CREATE TABLE IF NOT EXISTS activity_files (
+      id TEXT PRIMARY KEY, activity_id TEXT NOT NULL REFERENCES group_activities(id), group_id TEXT,
+      kind TEXT NOT NULL CHECK(kind IN ('requirement','submission')), filename TEXT NOT NULL,
+      mime TEXT NOT NULL, size INTEGER NOT NULL, data BLOB NOT NULL,
+      uploaded_by TEXT NOT NULL REFERENCES users(id), created_at INTEGER NOT NULL,
+      FOREIGN KEY(group_id,activity_id) REFERENCES activity_groups(id,activity_id),
+      CHECK((kind = 'requirement' AND group_id IS NULL) OR (kind = 'submission' AND group_id IS NOT NULL))
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS activity_requirement ON activity_files(activity_id) WHERE kind = 'requirement';
+    CREATE TABLE IF NOT EXISTS group_submissions (
+      id TEXT PRIMARY KEY, group_id TEXT NOT NULL REFERENCES activity_groups(id),
+      submitted_by TEXT NOT NULL REFERENCES users(id), version INTEGER NOT NULL,
+      link TEXT, file_id TEXT REFERENCES activity_files(id), note TEXT NOT NULL,
+      created_at INTEGER NOT NULL, request_id TEXT NOT NULL UNIQUE, fingerprint TEXT NOT NULL,
+      UNIQUE(group_id,version), CHECK((link IS NOT NULL AND file_id IS NULL) OR (link IS NULL AND file_id IS NOT NULL))
+    );
+    CREATE TABLE IF NOT EXISTS activity_deadline_history (
+      id TEXT PRIMARY KEY, activity_id TEXT NOT NULL REFERENCES group_activities(id),
+      old_deadline_at INTEGER NOT NULL, deadline_at INTEGER NOT NULL,
+      changed_by TEXT NOT NULL REFERENCES users(id), changed_at INTEGER NOT NULL, reason TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS activities_classroom ON group_activities(classroom_id,created_at);
+    CREATE INDEX IF NOT EXISTS activity_files_lookup ON activity_files(activity_id,group_id);
   `);
   // Additive migration for the initial MVP database; keep answers and progress.
   if (

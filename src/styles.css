@@ -95,6 +95,143 @@ hr {
   border-top: 1px solid var(--border);
   margin: 28px 0;
 }
+.group-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.group-toolbar,
+.group-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.group-toolbar {
+  justify-content: flex-end;
+}
+.group-toolbar .text-button {
+  margin-right: auto;
+}
+.group-activity-grid,
+.group-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+  gap: 20px;
+}
+.group-activity-card {
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  min-width: 0;
+}
+.group-activity-card:hover {
+  border-color: #74a581;
+}
+.group-activity-card h2 {
+  margin-top: 18px;
+  overflow-wrap: anywhere;
+}
+.group-activity-card p,
+.group-file,
+.group-deadline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.group-activity-card svg,
+.group-file svg,
+.group-deadline svg {
+  flex-shrink: 0;
+}
+.group-status {
+  display: inline-block;
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.group-requirements,
+.group-roster {
+  min-width: 0;
+}
+.group-requirements {
+  margin-bottom: 28px;
+}
+.group-requirements h3 {
+  margin-top: 24px;
+}
+.group-instructions,
+.group-word-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.9;
+  margin-bottom: 18px;
+}
+.group-word-text {
+  background: #f7f8f4;
+  padding: 20px;
+  border-radius: 12px;
+  max-height: 440px;
+  overflow-y: auto;
+}
+.group-file,
+.group-product-link {
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+.group-extensions {
+  margin-top: 16px;
+}
+.group-extensions summary {
+  cursor: pointer;
+}
+.group-extensions p {
+  margin: 16px 0 0;
+}
+.group-members {
+  padding: 0;
+  list-style: none;
+  margin-bottom: 24px;
+}
+.group-members li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.group-members small {
+  color: var(--green);
+  flex-shrink: 0;
+}
+.group-representative,
+.group-submit-form {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  margin-bottom: 24px;
+}
+.group-representative label {
+  margin-bottom: 12px;
+}
+.group-submission {
+  background: #f7f8f4;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 12px;
+}
+.group-submission p {
+  margin: 8px 0;
+}
+@media (max-width: 600px) {
+  .group-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
 form label {
   display: flex;
   flex-direction: column;
