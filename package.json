@@ -7,11 +7,20 @@
     "node": ">=24.0.0"
   },
   "scripts": {
+    "check:node": "node scripts/check-node.mjs",
+    "predev": "npm run check:node",
     "dev": "concurrently -k -n api,web \"tsx watch server/index.ts\" \"vite --host 0.0.0.0\"",
+    "prebuild": "npm run check:node",
     "build": "tsc --noEmit && vite build",
+    "prestart": "npm run check:node",
     "start": "node --import tsx server/index.ts",
+    "predemo": "npm run check:node",
+    "demo": "node --env-file=.env.example --import tsx server/index.ts",
+    "pretest": "npm run check:node",
     "test": "node --import tsx --test server/app.test.ts",
+    "precreate:teacher": "npm run check:node",
     "create:teacher": "node --import tsx server/create-teacher.ts",
+    "pretest:e2e": "npm run check:node",
     "test:e2e": "playwright test",
     "format": "prettier --write src server e2e docs *.ts *.json *.md index.html"
   },

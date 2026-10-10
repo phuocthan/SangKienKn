@@ -22,12 +22,25 @@ Trong thư mục repository, cài thư viện, build và chạy bản demo:
 ```powershell
 npm ci
 npm run build
-node --env-file=.env.example --import tsx server/index.ts
+npm run demo
 ```
 
-Giữ cửa sổ PowerShell đang chạy và mở **http://localhost:3001** trên trình duyệt của cùng máy. Dừng bằng `Ctrl+C`. Lệnh chạy đọc cấu hình demo từ `.env.example`; không cần tạo `.env` hay tài khoản hosting. Sau mỗi lần pull bản mới, chạy lại `npm ci` và `npm run build` trước khi khởi động.
+Giữ cửa sổ PowerShell đang chạy và mở **http://localhost:3001** trên trình duyệt của cùng máy. Dừng bằng `Ctrl+C`. `npm run demo` đọc cấu hình demo từ `.env.example`; không cần tạo `.env` hay tài khoản hosting. Sau mỗi lần pull bản mới, chạy lại `npm ci` và `npm run build` trước khi khởi động.
 
 Dữ liệu lưu tại `.local/greenedu.sqlite`, không bị mất khi tải lại trang hoặc khởi động lại server. Database này không được đưa lên Git.
+
+### Lỗi `ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite`
+
+Node đang chạy chưa cung cấp module SQLite tích hợp mà app cần. Cài **Node.js 24** từ [trang tải chính thức](https://nodejs.org/en/download), đóng rồi mở lại PowerShell và kiểm tra:
+
+```powershell
+node -v
+where.exe node
+```
+
+`node -v` phải hiện `v24.x.x` hoặc mới hơn. Nếu vẫn hiện bản cũ, `where.exe node` giúp tìm các bản Node trong PATH; cập nhật PATH hoặc chọn Node 24 trong trình quản lý phiên bản đang dùng. Nếu dùng nvm-windows, chạy `nvm install 24` rồi `nvm use 24`.
+
+Sau khi đổi Node, chạy lại `npm ci`, `npm run build`, `npm run demo`. Không cần cài gói npm tên `sqlite` hay xóa database. Các lệnh phát triển, build, khởi động và kiểm thử sẽ kiểm tra Node trước khi chạy và báo phiên bản/đường dẫn Node nếu chưa phù hợp.
 
 ## Chạy để phát triển
 
