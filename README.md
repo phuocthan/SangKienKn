@@ -2,6 +2,8 @@
 
 Web app tiếng Việt giúp học sinh luyện tập, sửa sai và nuôi cây kiến thức. Giáo viên quản lý lớp, chương, câu hỏi và theo dõi tiến độ. Đây là MVP có backend và cơ sở dữ liệu thực, chưa phải hệ thống thi chính thức.
 
+Mở session Codex mới: đọc [bản bàn giao](docs/session-handoff.md), [tiến độ](docs/project-status.md) và `AGENTS.md` để tiếp tục với bối cảnh/yêu cầu đã chốt. Nội dung chữ từ đề án Word gốc nằm ở [requirements-original.md](docs/requirements-original.md).
+
 ## Chạy local trên Windows
 
 Cài Git và Node.js **24 trở lên** (app sử dụng `node:sqlite`, không cần cài SQLite riêng). Nếu đã có repository trên máy, mở PowerShell trong thư mục `SangKienKn` và cập nhật:
