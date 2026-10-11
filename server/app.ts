@@ -929,7 +929,10 @@ export function createApp(
     content: QuestionInput,
     metadata?: { familyId: string; version: number; active: boolean },
   ) {
-    content = { ...content, lesson: resolveQuestionLesson(db, chapterId, content.lesson) };
+    content = {
+      ...content,
+      lesson: resolveQuestionLesson(db, chapterId, content.lesson),
+    };
     if (lessonIsArchived(db, chapterId, content.lesson))
       fail(409, "Bài đã bị xóa. Thêm lại bài trước khi thêm hoặc sửa câu hỏi.");
     const id = randomUUID();
@@ -1043,7 +1046,10 @@ export function createApp(
       ...req.body,
       ...(req.body?.topic === undefined && q.topic ? { topic: q.topic } : {}),
     });
-    const content = { ...input, lesson: resolveQuestionLesson(db, String(q.chapter_id), input.lesson) };
+    const content = {
+      ...input,
+      lesson: resolveQuestionLesson(db, String(q.chapter_id), input.lesson),
+    };
     if (JSON.stringify(content) === JSON.stringify(questionContent(q)))
       return res.json({ id: q.id, version: q.version });
     let id: string;
@@ -1111,11 +1117,6 @@ export function createApp(
         );
       }
     }) as QuestionInput[];
-    const content: QuestionInput[] = [];
-    for (const row of input) content.push({ ...row, lesson: matchingLessonTitle(resolveQuestionLesson(db, chapterId, row.lesson), content.map(q => q.lesson)) });
-    const fingerprints = content.map(questionContentKey);
-    if (new Set(fingerprints).size !== content.length)
-      fail(400, "File có câu hỏi trùng nhau.");
     const fingerprint = createHash("sha256")
       .update(JSON.stringify(input))
       .digest("hex");
@@ -1131,6 +1132,18 @@ export function createApp(
         fail(409, "Mã nhập đã được dùng cho bộ câu hỏi khác.");
       return res.json({ ids: JSON.parse(existing.question_ids) });
     }
+    const content: QuestionInput[] = [];
+    for (const row of input)
+      content.push({
+        ...row,
+        lesson: matchingLessonTitle(
+          resolveQuestionLesson(db, chapterId, row.lesson),
+          content.map((q) => q.lesson),
+        ),
+      });
+    const fingerprints = content.map(questionContentKey);
+    if (new Set(fingerprints).size !== content.length)
+      fail(400, "File có câu hỏi trùng nhau.");
     const stored = db
       .prepare(
         "SELECT * FROM questions WHERE chapter_id = ? AND is_current = 1",
@@ -1357,7 +1370,7 @@ export function createApp(
   );
   app.use(
     (error: unknown, _req: Request, res: Response, _next: NextFunction) => {
-      if (error instanceof ApiError)
+      if (error instanceof ApiError || error instanceof LessonError)
         return res.status(error.status).json({ error: error.message });
       if (error instanceof SyntaxError && "body" in error)
         return res.status(400).json({ error: "Dữ liệu JSON không hợp lệ." });

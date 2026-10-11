@@ -126,6 +126,48 @@ test("API imports topics into existing lesson and preserves retry, duplicate, ed
     (await request(`/questions/${first.data.ids[0]}/edit`, question)).data.id,
     first.data.ids[0],
   );
+  const before = db.prepare("SELECT COUNT(*) n FROM questions").get()!.n;
+  assert.equal(
+    (
+      await request("/chapters/chapter-1/questions/import", {
+        requestId: randomUUID(),
+        questions: [
+          { ...question, text: "Câu trùng trong file" },
+          {
+            ...question,
+            text: "Câu trùng trong file",
+            lesson: title,
+            topic: "Nhãn khác",
+          },
+        ],
+      })
+    ).status,
+    400,
+  );
+  assert.equal(db.prepare("SELECT COUNT(*) n FROM questions").get()!.n, before);
+  const newLessonPayload = {
+    requestId: randomUUID(),
+    questions: [
+      { ...question, lesson: "Bài 5: Bài mới", text: "Câu mới thứ nhất" },
+      { ...question, lesson: "Bài 5 - Bài mới", text: "Câu mới thứ hai" },
+    ],
+  };
+  const newLesson = await request(
+    "/chapters/chapter-1/questions/import",
+    newLessonPayload,
+  );
+  assert.equal(newLesson.status, 201);
+  assert.deepEqual(
+    (await request("/chapters/chapter-1/questions/import", newLessonPayload))
+      .data,
+    newLesson.data,
+  );
+  assert.equal(
+    chapterLessons(db, "chapter-1").filter((row) =>
+      String(row.title).startsWith("Bài 5"),
+    ).length,
+    1,
+  );
   const created = await request("/chapters/chapter-1/questions", {
     ...question,
     text: "Một câu mới",
@@ -143,6 +185,19 @@ test("API imports topics into existing lesson and preserves retry, duplicate, ed
       await request("/chapters/chapter-1/questions/import", {
         requestId: randomUUID(),
         questions: [{ ...question, text: "Không được tự khôi phục bài" }],
+      })
+    ).status,
+    409,
+  );
+  db.prepare(
+    "INSERT INTO lessons(id,chapter_id,title,sort_order) VALUES(?,?,?,?)",
+  ).run("ambiguous-target", "chapter-1", "Bài 1: Dao động điều hoà", 1);
+  assert.equal(
+    (
+      await request("/chapters/chapter-1/questions", {
+        ...question,
+        lesson: "Bài 1 · Dao động điều hoà",
+        text: "Không được chọn tùy ý bài trùng",
       })
     ).status,
     409,

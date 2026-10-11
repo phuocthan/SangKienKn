@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Nhập câu vào bài có sẵn, chủ đề không tạo bài — 11/10/2026
+
+Hộp nhập Word/CSV có **Bài nhận câu hỏi**, mặc định bài đang lọc; chọn bài có sẵn để gộp toàn bộ câu vào bài đó và giữ nhãn chủ đề riêng. Theo tên trong file thì ghép tên bài có số tương đương về tên đã có trong cùng chương; khác số/nội dung tên không tự gộp, nhiều tên tương đương cần chọn chính xác. API áp dụng cho thêm/sửa/nhập, giữ chống trùng/retry/lịch sử. Word 50 câu vẫn giữ một Bài 1 và 10 nhãn. **37 backend, 4 E2E desktop/mobile, TypeScript/build riêng đạt**; E2E xác nhận 50 câu vào một bài có sẵn. Chưa deploy Railway hoặc đổi bài trùng đã lưu; cần backend mới để áp dụng quy tắc API. Chi tiết ở [question-bank.md](question-bank.md) và [session-handoff.md](session-handoff.md).
+
 ## Cấu hình thời gian tăng cấp cho giáo viên — 11/10/2026
 
 Đã thêm khối **Thời gian tăng cấp** tại Ôn tập & kiểm tra, theo lớp/môn, default **60 phút/cấp**, số nguyên1–1440. Xem trước năm mốc; lưu/reload và các cấp chương, tiến độ, roster/xếp hạng, vườn, vé/thưởng cùng dùng cấu hình. Migration additive classroom_level_settings, API chỉ chủ lớp; giữ progress và vé/điểm lịch sử, không cấp trùng. Nghiệp vụ student-levels.md/learning.md, thiết kế app-design.md.

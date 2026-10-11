@@ -6,6 +6,10 @@ Vào Ngân hàng câu hỏi, chọn lớp/chương/bài. Giáo viên có thể t
 
 Chọn Nhập file Word hoặc Nhập file CSV → tải mẫu tương ứng → điền dữ liệu → chọn file → kiểm tra xem trước → xác nhận nhập. Có thể đổi định dạng trong hộp nhập; đổi định dạng sẽ xóa bản xem trước cũ. Chỉ lần xác nhận thành công mới lưu dữ liệu; chọn file hoặc xem trước không tạo câu hỏi.
 
+Trong hộp nhập, **Bài nhận câu hỏi** mặc định theo bài đang lọc. Chọn bài có sẵn để toàn bộ câu trong file vào đúng bài đó, giữ chủ đề riêng của từng câu. Chọn **Theo tên bài trong file** khi nhập nhiều bài; tên tương đương của bài có số (khác `:`, `-`, `·`, khoảng trắng, hoa/thường, dấu tiếng Việt như `hoà/hòa`) được ghép về tên đang có trong cùng chương. Nếu có nhiều tên tương đương, cần chọn chính xác bài nhận; bài khác số hoặc khác nội dung tên không tự gộp. Tên chưa có được liệt kê trong bản xem trước để giáo viên kiểm tra. Nhãn `Chủ đề` không tham gia tên bài hoặc tạo bài con.
+
+API cũng ghép tên tương đương khi thêm/sửa/nhập câu; kiểm tra trùng sau khi ghép, giữ retry và lịch sử. Không tự thay đổi tên bài/câu hỏi đã lưu hoặc sửa snapshot cũ. Với bài trùng đã tạo từ đợt nhập trước, cần xử lý dữ liệu riêng; bản sửa này áp dụng cho các lần nhập tiếp theo. Backend Railway cần được triển khai để quy tắc API mới có hiệu lực.
+
 ## Bảo toàn lịch sử học tập
 
 - Câu hỏi đã xuất bản là một phiên bản có mã riêng. Khi thay đổi nội dung, bài học, lựa chọn, đáp án hoặc lời giải, app tạo mã mới và tăng số phiên bản. Không sửa câu hỏi tại chỗ.

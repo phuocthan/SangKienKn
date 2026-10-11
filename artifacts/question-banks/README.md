@@ -15,7 +15,7 @@ File `vat-li-11-chuong-1-bai-1-50-cau.docx` chứa 50 câu tự biên soạn cho
 | DD11-B1-09 | Đọc dữ liệu và đồ thị li độ | 41–45 |
 | DD11-B1-10 | Hình chiếu chuyển động tròn đều | 46–50 |
 
-Giữ chung `Bài học: Bài 1: Dao động điều hoà`. Vào Ngân hàng câu hỏi của đúng lớp/chương → Nhập file Word → xem trước đủ 50 câu/nhãn → Xác nhận nhập. Tên chủ đề gồm cả mã và tên; dùng nguyên cùng tên để phân loại câu bổ sung. Bài 1 chưa dùng vận tốc, gia tốc, năng lượng hoặc công thức con lắc.
+Giữ chung `Bài học: Bài 1: Dao động điều hoà`. Vào Ngân hàng câu hỏi của đúng lớp/chương → Nhập file Word → chọn **Bài nhận câu hỏi** là Bài 1 Dao động điều hòa đã có → xem trước đủ 50 câu/nhãn → Xác nhận nhập. Tất cả câu vào một bài; 10 chủ đề chỉ là nhãn riêng để tham khảo và cân bằng trộn câu. Tên chủ đề gồm cả mã và tên; dùng nguyên cùng tên để phân loại câu bổ sung. Bài 1 chưa dùng vận tốc, gia tốc, năng lượng hoặc công thức con lắc.
 
 Nhận biết/thông hiểu/vận dụng là phân loại biên soạn tham khảo (18/23/9 câu), không phải ma trận đánh giá chính thức và không được nhập như trường dữ liệu riêng. Bộ có đáp án nên dùng để quản lý ngân hàng, không gửi nguyên file làm đề cho học sinh.
 

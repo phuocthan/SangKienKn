@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Nhập câu có chủ đề vào bài đã có — 11/10/2026
+
+Yêu cầu mới: chủ đề chỉ là nhãn tham khảo/phục vụ trộn câu, không ghép vào tên bài hoặc sinh một bài cho mỗi chủ đề. Kiểm tra file Word 50 câu đã tạo: parser giữ `lesson` và `topic` riêng. Cách phân bài trước đây dùng nguyên chuỗi tên; khác `:`, `-`, `·` hoặc `hoà/hòa` có thể làm xuất hiện bài riêng.
+
+Đã thêm **Bài nhận câu hỏi** vào hộp nhập Word/CSV, mặc định bài đang lọc; chọn bài có sẵn sẽ gán toàn bộ câu vào tên bài đó trong bản xem trước và dữ liệu gửi. Chế độ theo file vẫn hỗ trợ nhiều bài, tự ghép tên bài có số tương đương trong cùng chương và liệt kê tên chưa có. Nếu nhiều bài tương đương, chặn để chọn chính xác, không tùy ý gộp. API thêm/sửa/nhập cũng dùng tên có sẵn, kiểm tra trùng sau ghép; retry dùng nội dung đầu vào để không đổi dấu vân tay sau khi tạo bài mới. Chủ đề vẫn lưu riêng, không tham gia danh sách bài. Không đổi câu đã lưu, lịch sử hoặc snapshot, không migration dữ liệu thật.
+
+Xác minh mới: **37/37 backend** (app, catalog, topic, question-lesson-import) đạt trên database riêng; **4/4 E2E desktop/mobile** đạt, nhập Word thật 50 câu/10 chủ đề vào `Bài 1 - Dao động điều hòa` có sẵn, xác nhận danh sách chỉ 1 bài và số câu 50. Đã xem ảnh, kiểm tra không tràn ngang; TypeScript/build riêng đạt. **Chưa push/deploy Railway hoặc xử lý bài trùng đã nhập trước đây.** Frontend local cập nhật bằng HMR; API mới cần triển khai. Hướng dẫn ở `docs/question-bank.md` và `artifacts/question-banks/README.md`.
+
 ## Giáo viên cài đặt thời gian tăng cấp — 11/10/2026
 
 Yêu cầu mới nhất: trong trang giáo viên cho cài đặt thời gian tăng cấp, default 60 phút. Đã thêm **Ôn tập & kiểm tra → Thời gian tăng cấp**, cấu hình từng lớp/môn áp dụng mọi chương. Input số nguyên 1–1440 phút, default60, xem trước năm icon/mốc thay ngay khi nhập, nút lưu có busy/validation/thông báo; desktop năm ô, mobile hai cột và cấp5 cả hàng. Không reset draft học kỳ/ma trận khi lưu; reload metadata lớp sau lưu. API cũ thiếu canConfigureLevels thì khóa input/nút, báo chờ server Railway.
