@@ -1,130 +1,125 @@
-# Bàn giao GreenEdu
+# Bàn giao session GreenEdu
 
-Cập nhật ngày 11/10/2026. Repository Windows ở `D:\SangKienKn`, nhánh `main`.
+Cập nhật ngày **10/10/2026**, múi giờ người dùng Asia/Bangkok (UTC+7). Đây là bản tổng hợp bối cảnh và quyết định của trao đổi trước, **không phải bản chép nguyên văn toàn bộ chat**. Session mới không tự nhận lịch sử chat, file đính kèm, tiến trình hay database của máy cloud; cần đọc các file trong repository và kiểm tra trạng thái thực tế.
 
-Thiết kế giao diện (màu, font, ảnh, bố cục, avatar, responsive và lịch sử) tra cứu tại [app-design.md](app-design.md).
+## Mục tiêu và cách làm việc
 
-## Hoàn tất cấp độ ôn thi và đổi đề mục — 11/10/2026, 10:39
+Người dùng muốn xây dựng GreenEdu, web app tiếng Việt cho giáo viên/học sinh: luyện tập, sổ tay sửa sai, cây kiến thức, quản lý lớp, hoạt động nhóm và các phân hệ đánh giá/thưởng theo đề án. Ban đầu yêu cầu đọc Word và phân tích dưới góc nhìn chuyên gia web app/phân tích hệ thống, sau đó yêu cầu bắt đầu triển khai.
 
-Đã thực hiện [kế hoạch](learning-implementation-plan.md): học kỳ/ma trận ôn, phiên ôn giữ bộ câu/vị trí/kết quả và lựa chọn chưa gửi, vé mốc cây 3/4/5, điều kiện Săn điểm, thưởng cây/thi, phòng thi 20 phút, lịch thi chính thức, tự lưu/khôi phục/thu/chấm bài, công bố đáp án/câu sai và Excel. Người dùng đã chọn 70% tính mọi lượt luyện tập/sửa sai, tự nộp ở lần rời tab thứ 4; giáo viên cấu hình được. Hướng dẫn và giới hạn tại [learning.md](learning.md).
+Repository: **https://github.com/phuocthan/SangKienKn**, nhánh dùng để pull là **main**. Máy người dùng chạy **Windows**, checkout đã có ở **D:\SangKienKn**. Session trước phát triển trên cloud; người dùng từng đề nghị chuyển sang local, sau đó cho phép tiếp tục cloud. Khi mở session tại local, dùng chính checkout local, không giả định máy cloud có thể điều khiển máy Windows.
 
-Các đề mục đã đổi sang “Trang” theo yêu cầu mới. Toàn bộ quy tắc/lịch sử thiết kế tập trung ở [app-design.md](app-design.md); ghi chú hình thức đã chuyển khỏi tài liệu tiến độ/bàn giao/avatar, giữ thông tin chức năng và vận hành. AGENTS đã lưu quy tắc tra cứu/cập nhật tài liệu này.
+Người dùng muốn công việc được tiếp tục, thông báo rõ đã làm/bước còn lại, và cập nhật Git để pull chạy local. Giao tiếp tiếng Việt, ưu tiên sản phẩm chạy được. Người dùng từng đồng ý link demo tạm công khai, nhưng sau đó yêu cầu **tạm không cần chạy demo** và tiếp tục phát triển. Hiện không có hosting/HTTPS công khai đã được xác nhận hoạt động; không tự khởi chạy tunnel hoặc coi việc build trên cloud là deploy website.
 
-Kiểm thử cuối: 54/54 backend; 32 kịch bản E2E hồi quy cũ đạt trên desktop/mobile; 8/8 E2E ôn/thi đạt sau khi tách cửa sổ thi giữa các dự án. Luồng gồm ôn kỳ, vị trí/lựa chọn sau tải lại, sửa sai không mở đáp án khi sai, Săn điểm/duyệt thưởng, ma trận/lịch thi, autosave mất mạng/khôi phục, đóng bài, Excel, cảnh báo thứ 4. Vòng E2E toàn bộ ban đầu có hai ca ôn/thi mobile bị cửa sổ thi desktop còn mở đúng quy tắc khóa; đã sửa cleanup fixture và chạy lại đủ 8 ca đạt. Các kiểm thử dùng database riêng; file Excel tải thật mở/đọc đúng 8 cột bằng openpyxl. TypeScript và build đạt.
+Yêu cầu mới nhất là chuẩn bị bối cảnh để session local mới tiếp tục mà không cần người dùng kể lại. **Không có tính năng phát triển tiếp theo nào được chốt sau đợt hoạt động nhóm.** Hãy đọc lộ trình, báo trạng thái, rồi làm theo yêu cầu mới; các mục còn lại là đề xuất, không phải một lệnh triển khai tất cả cùng lúc.
 
-Đã tự deploy **http://localhost:3002**, PID 70704, demo:false, quickLogin:true. Backup trước deploy: .local/backups/database-20261011-103900-238.sqlite. Status/health/HTML/JS/CSS/ảnh hiện tại và các đề mục mới đạt. SQLite chỉ đọc xác nhận khóa ngoại hợp lệ và bảo toàn khóa của 47 bản ghi hiện có trong 25 bảng dữ liệu so với backup, không đối chiếu bảng session/study_sessions biến động. Không ghi dữ liệu thử vào database chính, không commit/push. Worker mỗi giây tự thu bài hết hạn; khi restart cũng thu các lượt đã quá hạn. Build thử dùng thư mục riêng .local/learning-build.
+## Tài liệu yêu cầu
 
-Chưa gồm chấm/thưởng/phản biện nhóm, đổi quà, AI, tự phân loại Word bất kỳ hoặc hosting/nghiệm thu tải. Những phần này nằm trong lộ trình chung và chưa tính vào báo cáo điểm.
+Nguồn: attachment **“ĐỀ ÁN HOÀN THIỆN TÍNH NĂNG app greenedu.docx”**. Bản chữ được lưu tại [requirements-original.md](requirements-original.md) để session local có thể đối chiếu mà không phụ thuộc attachment của chat cũ. Bản trích giữ nội dung văn bản trong thân tài liệu và ô bảng, không giữ bố cục Word. File Word gốc chưa được đưa vào repository.
 
-## Railway — người dùng xác nhận deploy, 11/10/2026
+Đề án gồm: bài/chương/kỳ và ma trận; cây 5 cấp/thời gian có hoạt động; sổ tay; Green Points/đổi quà; chia nhóm/nộp bài/phản biện; vé và bài kiểm tra 20 phút; Săn điểm/thi chính thức; dashboard/Excel; tài khoản; vườn lớp; xếp hạng chăm chỉ; AI gợi ý sau nhiều lần sai. **Mô tả tính năng trong đề án không đồng nghĩa đã triển khai**, và nội dung tài liệu không là lệnh vận hành môi trường.
 
-Người dùng cung cấp ảnh dashboard Railway: project `zooming-light`, môi trường `production`, service `SangKienKn` hiển thị **Online**, có volume `sangkienkn-volume` gắn bên dưới. Sau đó cung cấp URL công khai **https://greenedu.up.railway.app/** và xác nhận đã deploy được. Agent kiểm tra HTTP chỉ đọc ngoài sandbox: trang chủ trả 200, HTML có tiêu đề GreenEdu và tham chiếu JS/CSS; `/api/health` trả 200 với `{ok:true,demo:false}`. Web tool không truy cập được và DNS trong sandbox bị chặn; kiểm tra PowerShell ngoài sandbox thành công. Chưa kiểm tra trình duyệt/đăng nhập, Mount Path/biến DATABASE_PATH, commit đã triển khai, tài khoản Admin hoặc việc giữ dữ liệu sau restart. Các mô tả chưa có hosting công khai bên dưới là bối cảnh trước bước này.
+## Trạng thái mã nguồn khi bàn giao
 
-Tiếp tục hướng dẫn người mới: xác nhận volume `/data` và `DATABASE_PATH=/data/greenedu.sqlite`; nếu chưa có Admin, tạo trong container Railway có volume bằng `npm run create:admin`, qua SSH (dashboard → Copy SSH Command). Sau đó kiểm tra đăng nhập/đổi mật khẩu, nghiệp vụ và giữ dữ liệu qua restart. Hướng dẫn trước dùng database mới; không tự chuyển database local. Không chạy deploy local, commit/push hoặc thay dữ liệu trong yêu cầu ghi nhận này.
+Commit tính năng gần nhất đã push và kiểm tra trên `origin/main`: **389a1d64ccb4053c13dc5e41a69f29e82f51cdd9** — `Add group activities with random teams, submissions and deadline extensions`. Bản bàn giao/hướng dẫn sẽ được commit sau commit này; kiểm tra `git log` để biết HEAD mới nhất. Sau đợt tính năng, working tree sạch, không có phần tính năng đang sửa dở. Các server kiểm thử tự dừng.
 
-## Deploy ảnh nền — 11/10/2026, 10:32
+Đã có:
 
-Đã deploy local. Thiết kế và lịch sử đầy đủ ở [app-design.md](app-design.md). Backup `.local/backups/database-20261011-103225-851.sqlite`.
+- Đăng nhập session HttpOnly, mật khẩu scrypt, quyền giáo viên/học sinh theo lớp; giáo viên tạo tài khoản/mật khẩu tạm, học sinh đổi lần đầu và giáo viên cấp lại khi quên.
+- Lớp, chương, câu hỏi gắn bài học; luyện tập theo bài hoặc chương, trắc nghiệm 4 phương án có một đáp án và lời giải.
+- Câu sai vào sổ tay; chỉ làm đúng ở chế độ sửa sai mới khắc phục. Sửa câu hỏi tạo phiên bản mới; lịch sử lượt làm/sổ tay giữ đáp án của phiên bản cũ. Có ẩn/hiện câu hỏi.
+- Thời gian học theo đồng hồ máy chủ, heartbeat 15 giây; trang ẩn/mất kết nối dài không cộng, không tương tác 120 giây thì nhắc 10 giây rồi dừng. Một phiên học hoạt động mỗi tài khoản. Cây cấp 2/3/4/5 ở 1/2/3/4 giờ.
+- Dashboard tiến độ và CSV; vườn lớp cho cây cấp 5, xếp hạng thời gian/cây và số câu hiện đã sửa đúng; đồng hạng, không tạo thành tích giả và không xếp theo điểm số.
+- Nhập ngân hàng câu hỏi **Word `.docx` và CSV theo mẫu**, tải mẫu, xem trước/kiểm tra rồi xác nhận; gửi lại sau mất phản hồi không tạo câu trùng. Word tối đa 100 câu/5 MB, chỉ hỗ trợ khối văn bản theo nhãn. Mẫu có hai câu và lời giải tiếng Việt ở `public/templates/greenedu-cau-hoi-mau.docx`. Xem [question-bank.md](question-bank.md).
+- **Hoạt động nhóm** đã hoàn thành phạm vi người dùng yêu cầu gần nhất; chi tiết bên dưới.
 
-## Đăng nhập bằng tên rút gọn — 11/10/2026, 10:19
+Chưa hoàn thành toàn bộ đề án, chưa nghiệm thu lớp thật, chưa kiểm thử tải, chưa vận hành production. Lộ trình/điểm cần chốt nằm trong [project-status.md](project-status.md).
 
-Trang đăng nhập tự thêm `@greenedu.demo` khi giá trị nhập chưa có `@`, bỏ khoảng trắng đầu/cuối và giữ email đầy đủ với mọi tên miền. Ví dụ `hocsinh` → `hocsinh@greenedu.demo`; vẫn xác thực mật khẩu và luồng đổi mật khẩu tạm. Ô nhập dùng text/inputMode email để trình duyệt cho phép tên rút gọn, có hướng dẫn ngay dưới ô. Không đổi email đã lưu hoặc API xác thực.
+## Yêu cầu hoạt động nhóm đã triển khai
 
-Build riêng `.local/login-email-build` và 8/8 E2E desktop/mobile đạt; chạy lại 8/8 trên build cuối cùng bằng database riêng đạt. Checkout có phần learning đang được bổ sung song song: đã sửa kiểu `fail: never` và chuyển ID SQLite thành string để build đạt. Lần deploy đầu lúc 10:18 chưa khởi động do database cũ thiếu `exam_runs.revision/released`; bổ sung migration thêm hai cột mặc định 0, giữ bản ghi cũ và chạy lặp an toàn. Kiểm thử migration riêng 1/1 đạt.
+Người dùng yêu cầu đối chiếu Word, thêm **Hoạt động nhóm** ở giáo viên; tạo tên/lớp/yêu cầu nhập hoặc tải Word hiển thị trên web/hạn nộp; cấu hình số nhóm và chọn thành viên ngẫu nhiên; học sinh nộp trước hạn; giáo viên gia hạn; sản phẩm Word/PDF/Canva/PowerPoint.
 
-Đã tự deploy thành công lúc 10:19 tại **http://localhost:3002**, PID 94044 khi kiểm tra, `demo:false`, `quickLogin:true`. Backup `.local/backups/database-20261011-101908-496.sqlite`; backup trước lần lỗi `.local/backups/database-20261011-101814-972.sqlite` vẫn giữ. Status/health đạt, HTML/JS/ảnh khớp build, kiểm tra khóa ngoại và ID/số bản ghi của 25 bảng dữ liệu so với backup đạt (không đối chiếu bảng phiên biến động). Không ghi dữ liệu thử vào database chính, không commit/push.
+Quy tắc hiện tại:
 
-## Deploy thiết kế — 11/10/2026, 10:13
+- Cả giáo viên và học sinh có menu Hoạt động nhóm. Lớp được chọn ở thanh đầu ứng dụng.
+- Yêu cầu nhập trực tiếp, Word `.docx` tối đa **5 MB**, hoặc cả hai. Trích chữ từ đoạn/bảng/xuống dòng trên web, giữ bản Word tải về để xem ảnh/bố cục. Word `.doc` cũ cần Save As `.docx`.
+- Chia ngẫu nhiên cân bằng, số nhóm 1..số học sinh. Chốt thành viên một lần, tải lại không chia lại. Đại diện được chọn khi chia; giáo viên đổi được sang thành viên hiện còn trong lớp và thuộc cùng nhóm.
+- **Đại diện nộp cho cả nhóm**, theo phần đại diện trong đề án. Sản phẩm Word `.doc/.docx`, PDF `.pdf`, PowerPoint `.ppt/.pptx` tối đa **10 MB**, hoặc link HTTP/HTTPS (như Canva). Không tải nội dung link bên ngoài; người nộp cần bật quyền xem trên Canva.
+- Nộp nhiều phiên bản trước hạn, giữ file/link cũ, người nộp, thời gian máy chủ và ghi chú. Có mã yêu cầu chống ghi trùng khi mất phản hồi rồi nộp lại.
+- Thời gian máy chủ bằng hoặc vượt hạn thì chặn nộp mới; form ẩn khi hết hạn. Gửi lại một yêu cầu đã được nhận vẫn trả bài cũ sau hạn. Gia hạn chỉ giáo viên, hạn mới sau hạn cũ và tương lai; lưu lịch sử. Kiểm tra phiên bản hạn/đại diện để tránh ghi đè thay đổi vừa có.
+- Giáo viên chỉ thấy lớp mình; học sinh chỉ thấy nhóm/sản phẩm nhóm mình. Word yêu cầu cho cả lớp. Tải file phải có session/quyền lớp/nhóm; không có thư mục upload công khai.
+- File gốc và sản phẩm lưu **SQLite BLOB** cùng database. Migration thêm bảng, giữ dữ liệu cũ; sao lưu database phải gồm file.
+- Học sinh vào lớp sau lúc tạo chưa có nhóm trong hoạt động cũ. Người rời lớp mất quyền truy cập nhưng lịch sử vẫn còn. Chưa có thao tác đổi/thêm thành viên vào nhóm đã chốt.
+- **Phản biện chéo, chấm điểm và thưởng nhóm chưa triển khai.** Trong đề án còn Excel/ảnh và xem nhóm khác sau hạn; đợt này chỉ làm định dạng/quyền hiện tại nêu trên, không mở xem bài nhóm khác tự động.
 
-Đã deploy local; chi tiết và lịch sử thiết kế chuyển sang [app-design.md](app-design.md). Backup `.local/backups/database-20261011-101333-212.sqlite`.
+Xem [group-activities.md](group-activities.md) để biết quy trình và giới hạn.
 
-## Giới hạn avatar 3 MB — 11/10/2026, 10:12
+## Kiến trúc và vị trí mã
 
-Đã nâng giới hạn tải avatar từ 2 MB lên **3 MB (3 × 1024 × 1024 byte)** ở hằng số dùng chung, giao diện và API; giữ định dạng JPG/PNG/WebP và kích thước tối đa 4096 × 4096 pixel. Build riêng `.local/avatar-size-build` đạt, 2/2 kiểm thử upload API và 4/4 E2E desktop/mobile đạt bằng database riêng. API nhận đúng 3 MB, từ chối vượt 1 byte; trình duyệt tải/lưu PNG hợp lệ 2,5 MB.
+React 19 + TypeScript + Vite 6; Express 5; **Node.js 24+** dùng `node:sqlite`; SQLite cho MVP một instance. Font tiếng Việt được phục vụ trong app. Không cần cài SQLite riêng. Các route API yêu cầu session, kiểm tra role/lớp và từ chối ghi khác nguồn.
 
-Đã tự chạy `npm run deploy` theo quyền thường trực, bản 3 MB chạy tại **http://localhost:3002** lúc 10:12, `demo:false`, `quickLogin:true`. Backup trước triển khai `.local/backups/database-20261011-101228-613.sqlite`. Kiểm tra chỉ đọc xác nhận frontend/JavaScript/3 ảnh atlas khớp build, health đạt, khóa ngoại hợp lệ và ID/số bản ghi của 17 bảng dữ liệu được bảo toàn so với backup (không đối chiếu bảng phiên biến động). Không ghi dữ liệu thử vào database chính. Giới hạn 2 MB trong các mục cũ bên dưới là lịch sử.
+| Vị trí                                                   | Vai trò                                                     |
+| -------------------------------------------------------- | ----------------------------------------------------------- |
+| `src/App.tsx`, `src/components.tsx`, `src/styles.css`    | Điều hướng, màn hình chính, modal và CSS responsive         |
+| `src/api.ts`, `src/types.ts`                             | Client API JSON/FormData, kiểu dữ liệu                      |
+| `src/Practice.tsx`, `src/ClassCommunity.tsx`             | Luyện tập/sổ tay, vườn lớp/xếp hạng                         |
+| `src/QuestionBank.tsx`, `src/QuestionFields.tsx`         | Quản lý câu hỏi, phiên bản, nhập file                       |
+| `shared/questions.ts`, `shared/word-questions.ts`        | Kiểm tra câu hỏi/CSV, đọc và tách Word                      |
+| `src/GroupActivities.tsx`, `shared/group-activities.ts`  | Giao diện và kiểu hoạt động nhóm                            |
+| `server/app.ts`, `server/db.ts`, `server/index.ts`       | API, đăng nhập/phân quyền, schema/migration/seed, khởi động |
+| `server/group-activities.ts`, `server/activity-files.ts` | API nhóm, nộp/gia hạn, kiểm tra file/trích Word             |
+| `server/app.test.ts`, `server/group-activities.test.ts`  | Kiểm thử nghiệp vụ/API/database                             |
+| `e2e/workflow.spec.ts`, `e2e/groups.spec.ts`             | Luồng trình duyệt desktop/mobile                            |
+| `playwright.config.ts`                                   | Server/database kiểm thử riêng, cấu hình Chromium           |
+| `scripts/check-node.mjs`, `.nvmrc`, `.env.example`       | Kiểm tra Node 24, phiên bản, cấu hình demo                  |
 
-## Tự deploy khi hoàn tất và bản mới đang chạy — 11/10/2026, 10:05
+## Chạy local Windows và bảo toàn dữ liệu
 
-Người dùng đã cho phép thường trực: sau mỗi yêu cầu thay đổi ứng dụng hoàn thành và kiểm thử phù hợp đạt, agent tự chạy `npm run deploy`, không hỏi lại. Gộp các bước sửa/kiểm thử của cùng yêu cầu thành một lần deploy ở cuối. Yêu cầu mới như “chưa deploy”, “chỉ sửa/kiểm tra” hoặc “dừng server” được ưu tiên. Đã cập nhật `AGENTS.md` và `docs/deploy-local.md`; quy tắc này thay cho ghi chú trước đây về chỉ deploy khi được yêu cầu riêng.
+Lỗi trước đây: `ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite` do Node cũ. Đã thêm kiểm tra Node và hướng dẫn. Cài Node.js 24+, mở lại terminal, kiểm tra `node -v`/`where.exe node`.
 
-Đã deploy ngay các thay đổi đang chờ: tải avatar cá nhân và học sinh không chọn avatar giáo viên. Bản chạy **http://localhost:3002**, PID khi kiểm tra 90608, `demo:false`, `quickLogin:true`; giữ database/cổng/cấu hình. Backup `.local/backups/database-20261011-100541-810.sqlite`. TypeScript/Vite build và health đạt; frontend/JavaScript/3 ảnh khớp build, migration ảnh upload và giới hạn avatar đã có. Đối chiếu SQLite chỉ đọc bảo toàn ID/số bản ghi của 16 bảng dữ liệu, kiểm tra khóa ngoại đạt; loại các bảng phiên biến động và lựa chọn avatar giáo viên của học sinh được reset theo quy tắc mới. Không ghi dữ liệu thử. 45 backend tests/4 E2E của thay đổi đã đạt trước deploy. Các ghi chú “chưa deploy upload/quy tắc” bên dưới là lịch sử trước bản này.
+Trong Command Prompt:
 
-## Rà soát cấp độ ôn tập và kiểm tra — 11/10/2026
+```bat
+cd /d D:\SangKienKn
+git status
+git pull origin main
+npm ci
+npm run build
+npm run demo
+```
 
-Đã đọc lại file Word “ĐỀ ÁN HOÀN THIỆN TÍNH NĂNG app greenedu (1).docx” và đối chiếu mã hiện tại theo yêu cầu phân tích. Chi tiết tại `docs/levels-review-assessment.md`: cây 5 cấp đúng mốc 0/1/2/3/4 giờ; ôn chương chưa trộn ma trận, ôn kỳ chưa có, tỷ lệ báo cáo chưa tính sửa sai, sổ tay đang mở đáp án sau một lượt sai. Vé/phòng thi 20 phút/Săn điểm/Thi chính thức/thưởng/báo cáo thi chưa có. Đề án còn cần chốt ngưỡng chuyển tab, công thức 70%, phạm vi sổ tay sạch, cấp/dùng vé, đồng bộ/trộn đề và cộng dồn thưởng. Các đề xuất trong bản rà soát chưa phải quy tắc đã được người dùng chấp thuận. Chạy lại 4 kiểm thử liên quan đạt, database riêng. Không sửa nghiệp vụ hoặc deploy trong yêu cầu phân tích này.
+Trong PowerShell dùng `Set-Location D:\SangKienKn` thay cho `cd /d`. Nếu có sửa local, bảo toàn/kiểm tra trước khi pull, không reset để ép đồng bộ. Mở **http://localhost:3001** trên chính máy đang chạy và giữ terminal, dừng bằng Ctrl+C. `npm run demo` đọc `.env.example`; không cần tài khoản hosting. Sau pull chạy lại `npm ci`/build. Hướng dẫn phát triển `npm run dev` nằm trong README.
 
-## Học sinh không chọn avatar giáo viên — 11/10/2026
+Database mặc định `.local/greenedu.sqlite` không đi theo Git và không tự đồng bộ cloud → Windows. `SEED_DEMO=1` chỉ seed khi database rỗng; không xóa database cũ để xem tính năng mới. Schema mới được thêm khi khởi động. Tài khoản **demo giả**: `giaovien@greenedu.demo`, `hocsinh@greenedu.demo`; mật khẩu `GreenEdu123!`. Không dùng làm tài khoản triển khai chính thức, không bật seed demo trong production.
 
-Đã giới hạn theo yêu cầu: học sinh chỉ thấy 8 avatar học sinh + 16 thiên nhiên, vẫn tải ảnh cá nhân; giáo viên giữ cả 40. Danh sách nhóm vai trò dùng chung ở `shared/avatars.ts`. API từ chối 403 khi học sinh chọn bất kỳ ID avatar giáo viên, không tin vai trò gửi trong body. Khi mở database bằng mã mới, lựa chọn giáo viên cũ của học sinh trở về chữ viết tắt; giữ các lựa chọn hợp lệ, ảnh upload và tiến độ. Chưa deploy quy tắc này hoặc phần upload.
+## Kết quả kiểm thử đã có
 
-Build vào `.local/avatar-role-build` đạt; 45 backend tests và 4/4 E2E avatar desktop/mobile đạt bằng database riêng, gồm chặn API, ẩn bộ giáo viên, migration giữ tiến độ và các luồng upload/thiên nhiên. Không thay `dist`, không ghi database chính hoặc restart server. Backend hỗ trợ `STATIC_DIR` cho thư mục build riêng; mặc định vẫn `dist`. Playwright dùng `E2E_DIST_DIR` để truyền thư mục này cho server thử, ví dụ `$env:E2E_DIST_DIR='.local/avatar-role-build'; npm run test:e2e -- e2e/avatars.spec.ts`. SPA fallback hỗ trợ build trong `.local`.
+Tại commit tính năng **389a1d6**, đã chạy thật trên cloud:
 
-## Tải avatar cá nhân — 11/10/2026
+- `npm run build`: TypeScript và Vite đạt.
+- `npm test`: **31/31** đạt; gồm phân quyền, câu hỏi/sổ tay, Word/CSV, thời gian/cây, migration, chia nhóm, đại diện, deadline/gia hạn, retry, file/link và giữ dữ liệu qua khởi động lại.
+- `npm run test:e2e`: **14/14** đạt trên desktop/mobile với API thật; thêm Word yêu cầu/tải gốc, đổi đại diện, PDF, mất phản hồi rồi retry, Canva, lịch sử, hết hạn và gia hạn dù đồng hồ học sinh sai.
 
-Đã thêm tải ảnh JPG/PNG/WebP tối đa 2 MB/4096 × 4096 px cho học sinh/giáo viên trong Tài khoản. Có xem trước, hủy file, lưu, thay ảnh, chọn lại ảnh đã tải và quay về bộ 40 avatar/chữ viết tắt. Migration thêm bảng `avatar_uploads`, mỗi tài khoản một ảnh; lưu BLOB cùng database nên backup bao gồm ảnh. API upload chỉ cập nhật người đăng nhập, kiểm tra ảnh/file/CSRF; ảnh được phục vụ qua API có phân quyền tài khoản/Admin/lớp chung. Xem `docs/user-avatars.md`.
+Đây là bằng chứng session trước, chưa phải kết quả chạy trên máy Windows. E2E hiện cấu hình cho cloud/Linux: Chromium mặc định `/usr/bin/chromium` (có override `CHROMIUM_PATH`), lệnh server có biến môi trường kiểu POSIX. **Chưa xác nhận `npm run test:e2e` chạy nguyên trạng trên Windows**; nếu nhiệm vụ local cần E2E, chỉnh cấu hình theo nền tảng rồi kiểm tra. Chạy app/build và `npm test` là các lệnh riêng, không phụ thuộc Chromium.
 
-Build đạt, 44 backend tests và 4/4 E2E avatar desktop/mobile đạt bằng database riêng; đã xem ảnh UI `.local/ui-*-avatar-upload-*.png`. Chưa deploy tính năng upload. Server **http://localhost:3002** (PID khi deploy 91664) vẫn là backend bản 40 avatar; đã khôi phục `dist/index.html` và các assets của bản đó từ `.local/previous-dist-20261011-095328-747` sau khi build kiểm thử. Không restart server/ghi dữ liệu thử vào database chính. Lần kiểm tra sau khôi phục: frontend/3 ảnh/health/API xác thực và dữ liệu có sẵn đều đạt. Lần tiếp theo người dùng yêu cầu deploy chạy `npm run deploy` để đưa upload vào bản chạy. Khi server đang chạy, các build kiểm thử tiếp theo nên dùng `vite build --outDir .local/<thư-mục-build-thử>` để tránh thay frontend đang được phục vụ trước khi backend cập nhật.
+## Các bước tiếp theo và câu hỏi chưa chốt
 
-## Deploy bộ 40 avatar — 11/10/2026
+Không cần phân tích lại các tính năng đã hoàn thành. Chọn công việc theo yêu cầu mới, kiểm tra mã thực tế và cập nhật tài liệu bàn giao sau mỗi đợt.
 
-Đã chạy `npm run deploy` theo yêu cầu, bản local đang chạy tại **http://localhost:3002**, PID khi kiểm tra 91664, `demo:false`. Backup trước triển khai: `.local/backups/database-20261011-095328-747.sqlite`. Build/health đạt, frontend khớp build mới, cả 3 ảnh avatar được phục vụ đúng, API avatar chặn chưa đăng nhập. Kiểm tra SQLite chỉ đọc xác nhận ID dữ liệu có sẵn của 18 bảng và khóa ngoại được giữ; bảng avatar đã có hoạt động mới sau khi server chạy. Không ghi dữ liệu thử vào database chính. Các ghi chú “chưa deploy”/“stopped” bên dưới là lịch sử trước đợt này. Đang tiếp tục yêu cầu cho phép tải avatar cá nhân.
+Các phần còn lại: học kỳ/ma trận/trộn đề; vé/kiểm tra 20 phút; Săn điểm/thi chính thức; Green Points/đổi thưởng; phản biện/chấm điểm nhóm; Excel đầy đủ; AI; nghiệm thu và vận hành hosting khi cần.
 
-## Hai tài khoản vào nhanh và deploy — 11/10/2026, 09:52
+Trước khi xây thi/thưởng cần chốt:
 
-Theo yêu cầu người dùng, trang đăng nhập thêm hai nút Giáo viên/Học sinh, hiển thị tên lấy từ database và đăng nhập ngay bằng phiên/cookie thật. Chọn bản ghi đầu tiên (`ORDER BY rowid`) của từng vai trò; hiện là Nguyễn Minh Anh và Trần Hà Linh. Không lấy/đổi mật khẩu hoặc tạo tài khoản mới. Nếu thiếu vai trò, nút bị vô hiệu hóa. Luồng đổi mật khẩu tạm vẫn được áp dụng, không cho vào nhanh Admin.
+- Đề án ghi chuyển tab “quá 3 lần cảnh báo”, bảng lại “quá 2 lần”: chưa chọn ngưỡng.
+- Tỷ lệ đúng 70% bao gồm sửa sai nhưng chưa chốt tính theo lượt hay câu; sổ tay sạch trong chương hay toàn tài khoản. Không dùng tỷ lệ luyện tập hiện tại để tự cấp vé.
+- Cấp vé ở mốc cây khi điều kiện chưa đủ; trừ vé và xử lý lượt thi gián đoạn.
+- Trần/cộng dồn điểm 4 giờ và điểm thi, phê duyệt/quy đổi; không tự chuyển điểm hệ thống vào học bạ.
+- Thi chính thức: cửa sổ vào thi, muộn/mất mạng, mở đáp án và quyền kết luận điểm.
+- AI cần nhà cung cấp/cấu hình; chưa yêu cầu hoặc có khóa dịch vụ trong repository.
 
-API `/api/auth/quick-login` chỉ bật qua `LOCAL_QUICK_LOGIN=1`, chỉ cho IP kết nối và hostname loopback, luôn tắt trong production, giữ kiểm tra JSON/cross-origin. Health cung cấp tên/vai trò cho hai lựa chọn khi được phép. Script deploy có `-QuickLogin`/`-NoQuickLogin`, lưu lựa chọn và giữ lại qua deploy tiếp theo.
+## Tin nhắn mở session mới
 
-Đã deploy theo yêu cầu bằng `npm run deploy -- -QuickLogin`: **http://localhost:3002**, PID 93264 tại thời điểm kiểm tra; `demo:false`, `quickLogin:true`. Backup `.local/backups/database-20261011-095200-788.sqlite`. Kiểm tra read-only đối chiếu 17 bảng với backup đạt, khóa ngoại hợp lệ, hai tên mặc định đúng database. Kiểm tra qua 3 IP mạng của máy đều không bật đăng nhập nhanh. Ảnh đăng nhập bản đang chạy tại `.local/quick-login-deployed.png`.
+Sau khi pull, mở project **D:\SangKienKn** trong Codex và gửi:
 
-Build đạt; 42/42 API đạt, 6/6 E2E desktop/mobile cho tài khoản, giao diện và vào nhanh đạt bằng database riêng. Bản deploy gồm các thay đổi giao diện/ảnh/avatar đang có trong checkout. Không tạo dữ liệu thử trong database chính, không dừng server ngoài script, không commit/push. Tab in-app của người dùng đang đăng nhập Admin nên giữ phiên đó; muốn thấy hai nút cần tải lại trang và đăng xuất.
+> Đọc AGENTS.md, docs/session-handoff.md và docs/project-status.md để tiếp nhận bối cảnh GreenEdu. Đây là phần tiếp tục của dự án ở session trước. Kiểm tra Git và mã hiện tại, báo ngắn gọn trạng thái, rồi tiếp tục theo yêu cầu tôi gửi. Không cần phân tích lại từ đầu.
 
-Lưu ý trạng thái cũ bên dưới: sandbox có thể không nhìn thấy PID và trả “stopped”; kiểm tra ngoài sandbox xác nhận server thực tế chạy. Luôn kiểm tra health và chạy `deploy:status` với quyền đủ đọc tiến trình trước khi kết luận trạng thái.
-
-## Lưu lựa chọn avatar — 11/10/2026
-
-API chỉ cập nhật avatar người đăng nhập, kiểm tra danh mục và giữ lựa chọn sau khởi động lại. Migration thêm `user_avatars`, không đổi dữ liệu học tập. Hướng dẫn chức năng ở [user-avatars.md](user-avatars.md); toàn bộ hình ảnh, bộ sưu tập, cách trình bày và lịch sử ở [app-design.md](app-design.md).
-
-## Lỗi chức năng Admin khi mở server cũ — 11/10/2026
-
-Kiểm tra hai server: cổng 3001 là demo (PID 78236, khởi động 22:57 ngày 10/10), trước khi `server/app.ts` được bổ sung API Admin lúc 23:44; cổng 3002 là bản do deploy quản lý (PID 90712, khởi động 23:55), health đạt, `demo:false`. Cả hai đọc giao diện `dist` mới, nên bản cũ có thể hiển thị Admin rồi trả 404 “Không tìm thấy chức năng.” cho API tài khoản. Địa chỉ sử dụng là **http://localhost:3002**. Không dừng server ngoài script hoặc redeploy trong lần chẩn đoán này.
-
-Đã chạy lại luồng E2E Admin tạo giáo viên/học sinh → giáo viên tạo/thêm học sinh: 2/2 desktop/mobile đạt, database thử riêng. Kiểm tra read-only database chính hiện có 1 Admin, 1 giáo viên và 3 học sinh; khóa ngoại hợp lệ. Các ghi chú “chưa có Admin” bên dưới là trạng thái trước khi người vận hành tạo tài khoản. README/hướng dẫn deploy/tài khoản đã làm rõ địa chỉ để tránh nhầm cổng. Tab in-app cổng 3002 hiện ở trang đăng nhập; chưa xác nhận địa chỉ tab ngoài ứng dụng trong ảnh lỗi của người dùng.
-
-## Tạo Admin trực tiếp trong terminal — 11/10/2026
-
-Người dùng chạy `npm run create:admin` nhưng chưa có biến môi trường. Đã sửa CLI để hỏi email, họ tên, mật khẩu tạm và xác nhận khi chạy trực tiếp trong terminal; mật khẩu che bằng `*`, kiểm tra lại nhập sai. Vẫn hỗ trợ biến môi trường cho chạy tự động. Hướng dẫn ở `docs/account-management.md` đã cập nhật. Không cần redeploy để dùng CLI mới. Đã thử tương tác trên Windows bằng database riêng `.local/admin-interactive-check.sqlite`, kiểm tra che mật khẩu/dán Unicode/backspace/Ctrl+C và bootstrap tự động. Không tạo Admin thử trong database chính.
-
-## Trạng thái triển khai hiện tại
-
-Đã deploy theo yêu cầu người dùng lúc 23:55 ngày 10/10/2026: **http://localhost:3002**, server chạy ẩn do script quản lý (PID tại thời điểm kiểm tra: 90712). Cổng 3001 đang có server chạy ngoài script nên không dừng; dùng cổng 3002. Lần `npm run deploy` tiếp theo giữ cổng/database này từ `.local/deploy-state.json`.
-
-Health `{ok:true,demo:false}`; frontend khớp build mới, ảnh nền tải được, API yêu cầu đăng nhập. Database `D:\SangKienKn\.local\greenedu.sqlite`; backup trước deploy tại `.local/backups/database-20261010-235542-851.sqlite`. Đã đối chiếu read-only các bảng tài khoản/lớp/thành viên/câu hỏi/lượt làm/tiến độ/nhóm/bài nộp với backup: số bản ghi giữ nguyên, migration vai trò Admin đã chạy và kiểm tra khóa ngoại đạt. Không seed demo mới hoặc ghi dữ liệu kiểm thử vào database chính. Chưa có Admin trong database chính; tạo theo thông tin người vận hành qua `npm run create:admin` và `docs/account-management.md`.
-
-Các đoạn “chưa deploy” bên dưới mô tả trạng thái trước lần triển khai này, không phải trạng thái hiện tại. Luôn dùng `npm run deploy:status` để xác nhận khi tiếp tục.
-
-## Bối cảnh đã tiếp nhận
-
-MVP đã có luyện tập, sổ tay sửa sai, cây, báo cáo, cộng đồng lớp, nhập câu hỏi Word/CSV và hoạt động nhóm. Xem `project-status.md` cho phần còn thiếu; không cần phân tích lại toàn bộ app.
-
-## Triển khai theo yêu cầu
-
-Người dùng muốn một lệnh để tự chạy hoặc yêu cầu agent chạy trong chat. Đã có `scripts/deploy.ps1` và các lệnh `npm run deploy`, `deploy:build`, `deploy:status`, `deploy:stop`. Mặc định chạy local Windows, không bật demo mới và không tự pull. Chưa cấu hình đích hosting công khai. Xem `deploy-local.md`.
-
-Người dùng đã xác nhận lựa chọn chạy/cập nhật trên máy Windows hiện tại. Việc tạo script chưa phải yêu cầu chạy bản chính ngay. Đã kiểm thử bằng database riêng `.local/deploy-test.sqlite` và cổng 3102; server thử đã dừng, file trạng thái thử đã xóa. Redeploy giữ dữ liệu/cấu hình, backup WAL, xử lý lỗi backup/cổng bận và status/stop đều đạt. Khi người dùng tiếp theo yêu cầu deploy, chạy lệnh đã ghi trong `AGENTS.md` và báo URL, health check, trạng thái thực tế.
-
-Phát hiện một tiến trình chạy ngoài script (`node --env-file=.env.example --import tsx server/index.ts`) giữ file esbuild. Không dừng tiến trình đó. Đã sửa cài dependencies bằng staging riêng để không xóa executable Windows đang sử dụng; thư viện hiện khớp lockfile. Luôn kiểm tra cổng và trạng thái thật khi triển khai bản chính; không coi trạng thái demo trong tài liệu cũ là bằng chứng server đang dừng.
-
-## Git
-
-Không tự commit/push. Các ảnh và prompt đã có trong staging trước đợt sửa giao diện; giữ nguyên staging của người dùng. Thay đổi ảnh nền và script/tài liệu hiện tại chưa commit. Kiểm tra `git status` khi tiếp tục.
-
-## Tài khoản — đợt tiếp theo 10/10/2026
-
-- Đã thêm vai trò `admin` thật ở database/API. Admin có màn hình quản lý tài khoản: tìm/lọc, tạo giáo viên/học sinh, chọn lớp cho học sinh, trạng thái đổi mật khẩu, cấp lại mật khẩu. API chặn giáo viên/học sinh quản trị toàn trường. Không tự đổi vai trò các tài khoản cũ.
-- Có `npm run create:admin` để cấp Admin đầu tiên qua biến môi trường; xem `docs/account-management.md`. Chưa tạo Admin trong database chính vì chưa có thông tin tài khoản người vận hành. Chỉ fixture E2E có Admin thử nghiệm.
-- Giáo viên vẫn tạo học sinh trong `Thêm học sinh`, thêm lựa chọn `Tài khoản có sẵn` bằng email. Thêm vào lớp của mình, không ghi đè mật khẩu/tiến độ; hỗ trợ cùng học sinh tham gia nhiều lớp. Admin hỗ trợ reset tài khoản được nhiều giáo viên quản lý.
-- `npm test`: 36 kiểm thử đạt, gồm bootstrap Admin, phân quyền, cấp/reset tài khoản, thêm học sinh có sẵn và migration giữ khóa ngoại/session/tiến độ/nhóm. Sửa thứ tự cleanup test SQLite trên Windows. Build TypeScript/Vite đạt. Có 18 kịch bản E2E desktop/mobile; các luồng cũ đã đạt, phần tài khoản được kiểm tra lại riêng sau chỉnh responsive/selector.
-- Playwright chạy được Windows/macOS/Linux, chọn Chrome Windows nếu có hoặc Chromium cài bởi Playwright; server E2E dùng `.local/e2e-*.sqlite` riêng. Ảnh rà soát lưu trong `.local/ui-*.png` (không đưa Git).
-- Chưa deploy hoặc tạo dữ liệu ở database chính, không commit/push. Khi người dùng yêu cầu deploy, dùng script đã có rồi tạo Admin theo thông tin họ cung cấp nếu cần.
+Nếu muốn làm một mục cụ thể, thêm tên mục vào tin nhắn đó. Giữ bản bàn giao này cập nhật sẽ giúp các session sau tiếp tục mà không cần copy toàn bộ chat.

@@ -1,12 +1,15 @@
-# GreenEdu — tiếp tục làm việc
+# GreenEdu — hướng dẫn tiếp tục dự án
 
-- Đọc `docs/project-status.md` và `docs/session-handoff.md` để nhận bối cảnh hiện tại; tiếp tục yêu cầu của người dùng, không phân tích lại toàn bộ dự án.
-- Khi sửa giao diện, đọc `docs/app-design.md`. Theo yêu cầu người dùng, mọi quy tắc và lịch sử thiết kế tập trung ở tài liệu này; tài liệu chức năng/tiến độ chỉ giữ liên kết và thông tin vận hành.
-- Làm việc trên checkout hiện tại và giữ các thay đổi có sẵn. Không tự tạo worktree, commit, pull hoặc push khi chưa được yêu cầu.
-- Khi người dùng yêu cầu “deploy”, “triển khai local” hoặc “cập nhật bản đang chạy”, chạy `npm run deploy` tại gốc repository. Đây là triển khai trên máy Windows hiện tại, không phải hosting công khai. Không hỏi lại về việc chạy local đã được yêu cầu; nếu người dùng nói tới hosting/máy chủ khác thì xác định đích triển khai trước.
-- Theo yêu cầu ngày 11/10/2026, sau mỗi yêu cầu thay đổi ứng dụng đã hoàn thành và các kiểm thử phù hợp đạt, tự chạy `npm run deploy` để cập nhật bản local, không hỏi lại. Đây là quyền triển khai thường trực cho các lần làm việc tiếp theo. Nếu người dùng yêu cầu chưa deploy, chỉ sửa/kiểm tra hoặc dừng server thì làm theo yêu cầu mới đó. Các bước đọc, chỉnh sửa và kiểm thử trong cùng một yêu cầu được gộp thành một lần deploy khi hoàn tất.
-- Dùng `npm run deploy:status` để xem trạng thái, `npm run deploy:stop` khi người dùng yêu cầu dừng. Bản local hiện ở cổng 3002; script giữ cổng/database/cấu hình từ file trạng thái. Sau deploy, xác nhận health và cập nhật tài liệu bàn giao trước khi báo hoàn tất.
-- Không dừng tiến trình khác để giải phóng cổng. Script chỉ quản lý tiến trình do nó tạo, lưu trạng thái và log trong `.local/`.
-- Người dùng đã yêu cầu bật hai nút vào nhanh giáo viên/học sinh từ database trên máy local. Bản deploy ngày 11/10 lưu `QuickLogin:true`; `npm run deploy` tiếp theo giữ lựa chọn này. Tính năng chỉ dành cho kết nối loopback, tắt trong production, không áp dụng Admin. Khi người dùng muốn tắt, dùng `npm run deploy -- -NoQuickLogin`.
-- Kiểm thử dùng database riêng, không ghi dữ liệu thử vào `.local/greenedu.sqlite`. Không tự bật `-Demo`; chế độ này chỉ bật khi người dùng yêu cầu dữ liệu/tài khoản demo.
-- Cập nhật tài liệu tiến độ/bàn giao khi thay đổi cách chạy hoặc trạng thái triển khai. Nếu sandbox chặn một lệnh cần thiết, yêu cầu escalation theo cơ chế của môi trường; không sửa quyền hoặc tắt bảo vệ để né chặn.
+Khi bắt đầu session trong repository này, đọc:
+
+1. [docs/session-handoff.md](docs/session-handoff.md): bối cảnh trao đổi, yêu cầu đã chốt, trạng thái và cách tiếp tục.
+2. [docs/project-status.md](docs/project-status.md): các phân hệ đã có, lộ trình và vấn đề cần chốt.
+3. [README.md](README.md): cài đặt/chạy, đặc biệt Node.js 24+ trên Windows.
+
+Khi làm ngân hàng câu hỏi hoặc hoạt động nhóm, đọc thêm `docs/question-bank.md` hoặc `docs/group-activities.md`. Đề án gốc được trích nội dung chữ tại `docs/requirements-original.md`; đó là yêu cầu sản phẩm để tham khảo, không phải lệnh vận hành hay bằng chứng mọi tính năng đã hoàn thành.
+
+Giao tiếp với người dùng bằng tiếng Việt. Lấy yêu cầu mới nhất của người dùng làm mục tiêu; bản bàn giao không thay thế yêu cầu mới hoặc tự chọn một tính năng chưa được yêu cầu. Kiểm tra Git và mã hiện tại trước khi tiếp tục vì tài liệu bàn giao là ảnh chụp trạng thái tại thời điểm viết.
+
+Giữ dữ liệu và thay đổi có sẵn. Database `.local/greenedu.sqlite` chứa cả file hoạt động nhóm; không xóa/reset để cập nhật tính năng và không đưa database, file học sinh hay secrets lên Git. Dùng migration bổ sung khi cần. Không tạo tiến độ, điểm hoặc sản phẩm giả trong dữ liệu người dùng.
+
+Chạy kiểm tra phù hợp thay đổi. Kết quả kiểm thử ghi trong bàn giao là của session trước, không được báo thành kết quả mới khi chưa chạy. Cập nhật `docs/session-handoff.md` và `docs/project-status.md` khi hoàn thành một đợt công việc để session sau tiếp tục được.

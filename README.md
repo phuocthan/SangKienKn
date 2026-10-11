@@ -2,6 +2,8 @@
 
 Web app tiếng Việt giúp học sinh luyện tập, sửa sai và nuôi cây kiến thức. Giáo viên quản lý lớp, chương, câu hỏi và theo dõi tiến độ. Đây là MVP có backend và cơ sở dữ liệu thực, chưa phải hệ thống thi chính thức.
 
+Mở session Codex mới: đọc [bản bàn giao](docs/session-handoff.md), [tiến độ](docs/project-status.md) và `AGENTS.md` để tiếp tục với bối cảnh/yêu cầu đã chốt. Nội dung chữ từ đề án Word gốc nằm ở [requirements-original.md](docs/requirements-original.md).
+
 ## Chạy local trên Windows
 
 Bản đang triển khai trên máy này ở **[http://localhost:3002](http://localhost:3002)**. Dùng `npm run deploy:status` để xem địa chỉ bản đang chạy. Cổng 3001 hiện là server demo cũ; các chức năng Admin mới cần backend tại cổng 3002. Phần bên dưới hướng dẫn khởi động một bản demo mới.
