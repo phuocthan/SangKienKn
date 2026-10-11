@@ -1,5 +1,34 @@
 # Ca kiểm thử chức năng GreenEdu
 
+## Ca mới: khu vườn thành viên — 11/10/2026
+
+- GARDEN-MEMBERS: mọi học sinh hiện thuộc lớp xuất hiện một lần, kể cả chưa học/chưa có chương; người đã rời lớp không xuất hiện, avatar null dùng chữ cái. Không ghi tiến độ hoặc dữ liệu người dùng.
+- GARDEN-MAX: hai chương cùng 2 giờ cho cấp 3, không cộng thành cấp 5; chương lớp/môn khác không ảnh hưởng. Vị trí ban đầu ưu tiên cấp cao, reload không nhân đôi, đổi lớp chỉ hiện thành viên/cấp của lớp mới.
+- GARDEN-NAMES: tên hiển thị hai từ cuối; tên một từ giữ nguyên, trùng tên ngắn vẫn là hai cây với ID/avatar và nhãn đầy đủ riêng; bạn hiện tại có nhãn Bạn.
+- GARDEN-ACCESS: chưa đăng nhập 401, học sinh/giáo viên ngoài lớp 403; chủ lớp và học sinh trong lớp đọc cùng dữ liệu, không lộ email/mật khẩu/câu hỏi. Dữ liệu trees cũ còn nguyên.
+- GARDEN-MOTION: frame rào bốn phía, icon/tên/avatar cùng di chuyển (seek animation xác nhận khoảng cách >20px), nút tắt/bật và reduced-motion ngừng cả chuyển động/đung đưa; desktop/mobile không tràn ngang/lỗi JS.
+- GARDEN-HONORS: frame riêng chỉ cấp 5, một người một mục dù nhiều chương đạt; người cấp 5 vẫn có mặt trong vườn chung. Đổi lớp đổi cả vườn và vinh danh; chưa có người đạt thì hiện lời nhắc.
+- GARDEN-CROWD: fixture 47 học sinh mọi cấp; 47 icon vườn/9 vinh danh, kiểm tra bốn điểm đường chuyển động không thoát sàn vườn; khung cuộn nội bộ, cuộn tới thành viên cuối, reload không nhân bản.
+- GARDEN-OLD-API: thiếu members vẫn hiện rào và thông báo chờ API, không tạo cấp giả; gộp trees theo ID để vinh danh một lần, giữ xếp hạng đồng điểm.
+
+Kiểm tra mới: 27/27 backend liên quan đạt; ca garden backend chạy lại sau sửa fixture avatar cũng đạt. 4/4 E2E garden mới và 2/2 E2E tương thích cây cũ đạt, dùng build `.local/student-garden-build`, server/database riêng tại 3179. TypeScript/build/diff check đạt; không chạy test hoặc seed trên Railway.
+
+Lần chỉnh theo phản hồi frame/rào/vinh danh dùng `.local/fenced-garden-build`: **12/12 E2E desktop/mobile đạt**, gồm 6 garden mới/lớp đông, 2 tương thích cây cũ, 4 practice/teacher workflow. Đã cập nhật kỳ vọng cũ “chưa cây cấp 5” sang thành viên cấp Mầm vì vườn giờ chứa toàn lớp, không chỉ cấp 5. Luồng giáo viên cuối suite hiện phụ thuộc ca practice chuẩn bị trạng thái demo, cần chạy cùng khi dùng grep. Backend không đổi lần này. TypeScript/build/diff check đạt; không ghi dữ liệu thật.
+
+## Ca mới: chương/bài, clock và kiểm tra — 11/10/2026
+
+- LEVEL-CHAPTER: hai chương cùng lớp có cấp riêng; chương chưa học vẫn Mầm. Roster/xếp hạng đối chiếu tiến độ từng chương, giữ các lớp/môn/học sinh độc lập.
+- LEVEL-MARKER: đủ năm mốc 0/1/2/3/4 giờ, icon phía trên đúng vạch (sai lệch tâm <2 px), current/earned đúng, đổi lớp/reload/trang tài khoản/hành trình không cộng gộp và không tràn ngang desktop/mobile.
+- LESSON-ADD: chủ lớp thêm bài rỗng; trim/collapse/case/NFC và yêu cầu đồng thời không tạo trùng; bài cùng tên ở chương khác được phép; vai trò/chủ lớp/dữ liệu không hợp lệ bị từ chối.
+- LESSON-DELETE: hủy không đổi; xóa ẩn câu hiện hành khỏi lượt mới, giữ attempt/sổ tay/version/snapshot đề; gọi lại no-op, reopen giữ trạng thái. Khôi phục cùng tên chỉ hiện danh mục, không tự hiện câu hỏi.
+- FEEDBACK: sai không correctIndex/lời giải, kể cả retry/reload dữ liệu phiên cũ; đúng có đáp án/lời giải. UI chỉ tô lựa chọn sai và nhắc chung khi sai.
+- CLOCK: số tạm tính chạy, ẩn/offline thì dừng; authoritative creditedSeconds theo heartbeat server, hidden/gap/replaced không ghi giả thời gian.
+- EXAM-SOURCE: nguồn bank chọn bài cụ thể không lọt bài khác, upload nhiều chương, lỗi/câu trùng không ghi một phần; câu tải lên ẩn, không lộ đáp án trong phòng thi.
+- EXAM-MANUAL: đề tạo chờ đóng; chủ lớp mở ngay bật đúng chương/giờ bắt đầu, học sinh không cần tự học đủ thời gian; teacher khác/student bị từ chối, hết giờ không mở; requestId retry không tạo thêm đề/câu.
+- API-COMPAT: frontend khóa công cụ mới khi overview chưa trả examCreation; giữ sử dụng ma trận cũ, không gửi upload tới API cũ.
+
+Đợt này dùng build riêng `.local/chapter-milestone-build` và SQLite in-memory/E2E riêng. Kết quả cuối xem đầu session-handoff.md; không ghi dữ liệu test Railway.
+
 Đợt kiểm thử ngày 11/10/2026 theo yêu cầu tự tạo test case, kiểm tra tạo lớp, tạo học sinh và không trùng lặp. Quy tắc thiết kế tra cứu tại [app-design.md](app-design.md).
 
 ## Môi trường và phạm vi

@@ -48,6 +48,11 @@ export function ensureLearningSchema(db: DatabaseSync) {
       revision INTEGER NOT NULL DEFAULT 0, released INTEGER NOT NULL DEFAULT 0,
       UNIQUE(student_id,exam_id)
     );
+    CREATE TABLE IF NOT EXISTS exam_creation_requests (
+      request_id TEXT PRIMARY KEY, classroom_id TEXT NOT NULL REFERENCES classrooms(id),
+      teacher_id TEXT NOT NULL REFERENCES users(id), fingerprint TEXT NOT NULL,
+      exam_id TEXT NOT NULL REFERENCES exam_definitions(id)
+    );
     CREATE TABLE IF NOT EXISTS exam_tab_events (
       run_id TEXT NOT NULL REFERENCES exam_runs(id), event_id TEXT NOT NULL,
       created_at INTEGER NOT NULL, PRIMARY KEY(run_id,event_id)

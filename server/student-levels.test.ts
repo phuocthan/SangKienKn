@@ -36,7 +36,7 @@ test("student icon calculation handles empty or invalid totals without inventing
   }
 });
 
-test("API derives each student level within its own classroom/subject and agrees with teacher roster and leaderboard", async (t) => {
+test("API keeps chapter levels independent within each class/subject and agrees with roster and leaderboard", async (t) => {
   const db = openDatabase(":memory:");
   seedDemo(db);
   db.prepare("INSERT INTO progress VALUES (?,?,?)").run(
@@ -123,11 +123,29 @@ test("API derives each student level within its own classroom/subject and agrees
     assert.equal(classroom.studentLevel.level, level);
     assert.equal(classroom.studentLevel.seconds, seconds);
     const roster = await get(`/classrooms/${id}/students`, teacher);
+    const chapterLevels = roster.find(
+      (u: { id: string }) => u.id === "student-demo",
+    ).chapterLevels;
+    assert.deepEqual(
+      chapterLevels.map((ch: any) => [ch.chapterId, ch.level, ch.seconds]),
+      classroom.chapters.map((ch: any) => [ch.id, ch.level, ch.seconds]),
+    );
+    if (id === "class-demo")
+      assert.deepEqual(
+        chapterLevels.map((ch: any) => ch.level),
+        [3, 3, 1],
+      );
     assert.deepEqual(
       roster.find((u: { id: string }) => u.id === "student-demo").studentLevel,
       classroom.studentLevel,
     );
     const board = await get(`/classrooms/${id}/leaderboard`, student);
+    if (seconds > 0)
+      assert.deepEqual(
+        board.effort.find((u: { id: string }) => u.id === "student-demo")
+          .chapterLevels,
+        chapterLevels,
+      );
     if (seconds > 0)
       assert.deepEqual(
         board.effort.find((u: { id: string }) => u.id === "student-demo")

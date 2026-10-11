@@ -1,5 +1,35 @@
 # Thiết kế giao diện GreenEdu
 
+## Khung vườn có rào và vinh danh cấp 5 — 11/10/2026
+
+Theo phản hồi mới, bỏ bố cục danh sách chia tầng. Trang **Khu vườn của lớp** có hai frame riêng dưới thống kê: **Vinh danh Kết Trái · Cấp 5** nền kem/viền vàng, và **Khu vườn [tên lớp]** chứa toàn bộ học sinh trong một cảnh vườn có rào gỗ bốn phía, cổng nhỏ, cỏ, lối đi và hoa trang trí. Mỗi học sinh hiện thuộc lớp có đúng một icon cây đại diện trong vườn, kèm avatar hiện có (chưa chọn thì dùng chữ cái), **hai từ cuối họ tên**, cấp/tên giai đoạn. Người hiện tại nhãn tên xanh và Bạn; họ tên đầy đủ trong nhãn accessible/tooltip phân biệt bạn trùng tên ngắn. Cấp đại diện lấy cao nhất của một chương trong đúng lớp/môn, không cộng thời gian giữa chương.
+
+Icon, tên và avatar di chuyển cùng nhóm quanh vị trí trong vườn theo đường vòng, mỗi bạn có nhịp/chiều riêng; cây thêm đung đưa nhẹ. Sắp vị trí ban đầu ưu tiên cấp cao, không còn hàng tiêu đề theo cấp. Giới hạn đường chuyển động để các nhãn không chạy ra rào; hover dừng để đọc, nút **Tắt/Bật chuyển động** và `prefers-reduced-motion`. Vườn desktop cuộn trong khung tối đa 650 px, mobile 550 px, hai cột; rào/cổng giữ quanh frame khi cuộn lớp đông. Người cấp 5 vẫn có cây trong vườn, đồng thời xuất hiện **một lần** ở frame vinh danh, không nhân bản theo số chương đã đạt. Frame vinh danh có trạng thái chưa có bạn đạt, không gán cấp giả. Component `src/StudentGarden.tsx` và CSS `src/student-garden.css`, giữ SVG/Avatar hiện có.
+
+API `/garden` bổ sung `members`; nếu backend cũ thiếu trường này, vẫn hiện frame/rào nhưng thông báo chờ server, không suy roster/cấp từ tổng leaderboard. Frame vinh danh có thể dùng `trees` thật của API cũ, gộp theo studentId, avatar chưa có dùng chữ cái. Bỏ thẻ trắng trống/banner chỉ dành cho cây cấp 5 cũ. Ảnh kiểm tra mới `.local/fenced-garden-{desktop,mobile}.png` và `.local/fenced-garden-crowd-{desktop,mobile}.png` (fixture 47 bạn, không phải học sinh Railway). Các ảnh student-garden cũ là bố cục đã thay.
+
+## Thẻ Ôn tập & kiểm tra học sinh — 11/10/2026
+
+Mỗi thẻ bắt đầu bằng tên chương, khung nền xanh nhạt ghi **Cấp độ yêu cầu / Cấp 3 · Cây Non** và **Cần vé săn thưởng** kèm số vé còn lại. Bên dưới là tỷ lệ đúng, câu cần sửa và trạng thái giáo viên mở kiểm tra; các lý do tỷ lệ/sửa sai còn thiếu dùng danh sách gọn. Không hiển thị “Cần thêm xx phút học” hoặc lặp lý do thiếu vé/chương khóa. Cấp độ hiện tại có icon nhỏ, tên cấp và thời gian ở cuối thẻ, phía trên nút Săn điểm toàn chiều ngang; khối cuối căn đều giữa các thẻ cùng hàng. Tên chương 18 px, điều kiện/nút 14 px, nhãn/chú thích 13 px; điện thoại một cột. CSS scoped `.hunt-chapter` trong learning.css, không đổi nghiệp vụ/API hoặc dữ liệu.
+
+## Gộp lời nhắc sửa sai vào thống kê — 11/10/2026
+
+Trang chủ học sinh: gộp tiêu đề “Sai một câu, hiểu thêm một điều.”, lời nhắc và nút Mở sổ tay vào ngay dưới số liệu/note của ô Câu cần sửa sai. Dùng số câu của lớp/môn đang chọn; có câu sai thì nhắc làm lại, chưa có thì giải thích câu sai sẽ được lưu. Nội dung có vạch ngăn nhẹ, khoảng cách 10–12 px, nút mở trang sửa sai hiện có. Bỏ thẻ gentle-reminder cạnh khối cấp độ để tránh kéo thẻ vàng cao theo danh sách chương. Khối cấp theo chương dùng toàn hàng; mobile lời nhắc cùng ô thống kê và ở trên danh sách chương. Không đổi dữ liệu hoặc API.
+
+## Mốc cấp theo chương, vé và công cụ kiểm tra — 11/10/2026
+
+Yêu cầu mới thay cấp cộng gộp lớp/môn: mỗi **lớp → môn → chương** có cấp riêng. Khối Cấp độ của bạn hiển thị từng chương; trang Hành trình của tôi dùng cùng `ChapterLevelTimeline`. Thanh chia 0/1/2/3/4 giờ, icon **Mầm → Chồi → Cây Non → Đơm Hoa → Kết Trái** nằm trên đúng vạch mốc, tên và giờ ở dòng riêng. Mốc hiện tại có nền xanh nhạt/nhãn cấp, mốc đã đạt màu đậm; thanh tô theo tổng thời gian chương / 4 giờ. Không dùng màu làm tín hiệu duy nhất. Năm mốc giữ cùng hàng trên điện thoại, tên được xuống dòng khi cần; icon 48 px desktop/36 px mobile. Khối mục tiêu chọn một chương chưa đạt Kết Trái; bỏ badge cấp cộng gộp trên thanh tài khoản. Roster/xếp hạng dùng badge kèm tên từng chương khi API cung cấp, không thay bằng cấp tổng khi API cũ.
+
+Thẻ ôn/thi dùng icon cấp đã duyệt, có dòng **Cấp cần để kiểm tra / Cây Non · Cấp 3 / Từ 2 giờ học trong chương này**. Vé Săn thưởng có icon Ticket màu vàng đất; điều kiện chưa đạt là danh sách mỗi điều kiện một dòng. Giữ riêng điều kiện giáo viên cho phép. Không đổi logic điểm/vé.
+
+Luyện tập/ôn tập: dưới trạng thái ghi nhận có đồng hồ `HH:MM:SS` nhãn **Phiên này · tạm tính**; dòng **Đã ghi nhận** chỉ xuất hiện khi API trả số giây đã lưu. Đồng hồ dừng khi trang ẩn, offline, phiên lỗi, idle hoặc kết thúc; không bù khoảng trình duyệt bị treo. Trả lời sai chỉ đánh dấu lựa chọn sai và lời nhắc chung; không tô đáp án đúng/hiện lời giải. Trả lời đúng mở đáp án/lời giải.
+
+Giáo viên quản lý bài qua nút Thêm bài và Xóa bài trong disclosure danh sách; xóa có popup giải thích bảo toàn lịch sử và xác nhận/hủy. Tên trùng hiển thị lỗi trong popup.
+
+Form kiểm tra thêm nguồn **Ngân hàng / Word–CSV**, phạm vi **Toàn bộ bài / Chọn từng bài**, một/nhiều chương. Upload có file mẫu, chọn chương cho mỗi file, preview và bỏ câu trước khi lưu, tối đa 100 câu. Đang đọc file khóa việc lưu/đổi nguồn/chương. Mặc định giáo viên bấm mở khi sẵn sàng; danh sách đề có **Mở kiểm tra ngay**, cùng thao tác đóng hiện có. Khi backend chưa trả `examCreation`, khóa thao tác mới và báo chờ cập nhật server để không tạo nhầm đề bằng API cũ.
+
+Ảnh đã kiểm tra: `.local/chapter-milestones-desktop.png`, `.local/chapter-milestones-mobile.png`; kiểm thử hình học xác nhận tâm icon khớp vạch mốc, không tràn ngang ở desktop/mobile. Các đoạn mô tả cấp cộng gộp bên dưới là lịch sử.
+
 ## Điều khiển kiểm tra theo chương — 11/10/2026
 
 Trang giáo viên Ôn tập & kiểm tra có thẻ Quyền kiểm tra theo chương phía trên khối học kỳ/ma trận. Mỗi hàng gồm tên chương, trạng thái Đang khóa/Đã mở và nút Mở kiểm tra (primary)/Khóa kiểm tra (secondary). Sử dụng learning-section/list/row hiện có, nhãn nút accessible gồm tên chương; busy khóa điều khiển trong khi lưu, thông báo thành công/lỗi và refresh trạng thái. Hàng tự xuống cột trên điện thoại. Điều khiển riêng không reset draft học kỳ/ma trận. Khi server chưa có trường mới, nút disabled kèm trạng thái chờ cập nhật.

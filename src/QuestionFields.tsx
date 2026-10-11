@@ -7,6 +7,7 @@ export function readQuestionForm(form: HTMLFormElement) {
     lesson: fields.lesson,
     text: fields.text,
     explanation: fields.explanation,
+    topic: fields.topic,
     choices: [fields.a, fields.b, fields.c, fields.d],
     correctIndex: Number(fields.correctIndex),
   });
@@ -15,9 +16,11 @@ export function readQuestionForm(form: HTMLFormElement) {
 export function QuestionFields({
   question,
   lessons = [],
+  topicSupported = true,
 }: {
   question?: Question;
   lessons?: string[];
+  topicSupported?: boolean;
 }) {
   return (
     <>
@@ -36,6 +39,19 @@ export function QuestionFields({
             <option key={title} value={title} />
           ))}
         </datalist>
+      </label>
+      <label>
+        Chủ đề trong bài (không bắt buộc)
+        <input
+          name="topic"
+          disabled={!topicSupported}
+          maxLength={120}
+          defaultValue={question?.topic ?? ""}
+          placeholder="Ví dụ: Biên độ và quỹ đạo"
+        />
+        <small>
+          Dùng cùng tên cho các câu cùng chủ đề để trộn câu đa dạng hơn.
+        </small>
       </label>
       <label>
         Nội dung câu hỏi

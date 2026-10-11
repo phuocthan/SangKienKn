@@ -765,6 +765,7 @@ test("community is visible only to class members and owner; it exposes no creden
   ).data;
   assert.deepEqual(Object.keys(board.effort[0]).sort(), [
     "bloomedTrees",
+    "chapterLevels",
     "id",
     "name",
     "rank",
@@ -951,7 +952,16 @@ test("question edits keep original answers and notebook; old retry works but new
   const retry = await f.request("/attempts", attempt, student);
   assert.equal(retry.status, 200);
   assert.equal(retry.data.correct, false);
-  assert.equal(retry.data.explanation, before.explanation);
+  assert.equal(retry.data.correctIndex, undefined);
+  assert.equal(
+    retry.data.explanation,
+    "Hãy xem lại kiến thức và tự làm lại câu này.",
+  );
+  assert.equal(
+    f.db.prepare("SELECT explanation FROM questions WHERE id=?").get(before.id)!
+      .explanation,
+    before.explanation,
+  );
   assert.equal(
     (
       await f.request(

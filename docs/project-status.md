@@ -1,5 +1,31 @@
 # Tiến độ và lộ trình GreenEdu
 
+Ngày 11/10 theo yêu cầu trực tiếp đã điều chỉnh **dautay@greenedu.nk lên cấp 5 ở đủ 4 chương Vật Lý lớp 11/2** trên Railway: progress mỗi chương tối thiểu 14.400 giây. Đây là điều chỉnh thủ công theo yêu cầu, không phải thời gian học mới. Backup/audit trên volume; transaction kiểm tra 30 bảng khác và progress ngoài phạm vi không đổi, integrity/khóa ngoại đạt; đọc lại sau commit xác nhận đủ 4 chương. Không deploy/push/restart, chi tiết [session-handoff.md](session-handoff.md).
+
+Ngày 11/10 theo phản hồi mới đã thay bố cục tầng bằng **frame vườn có rào gỗ**, icon cấp cao nhất/tên/avatar dạo quanh vườn chung chứa toàn lớp. Thêm **frame Vinh danh Kết Trái · Cấp 5 riêng**, mỗi bạn một mục và vẫn có cây trong vườn. Có pause/reduced-motion, cuộn nội bộ lớp đông; API cũ vẫn hiện frame chờ, vinh danh gộp cây thật cũ theo học sinh. Không đổi backend/cấp/dữ liệu trong đợt này. Local5173 HMR cập nhật, **chưa deploy Railway**, cần API members để hiện vườn đầy đủ thật. Thiết kế [app-design.md](app-design.md), kiểm tra cuối [session-handoff.md](session-handoff.md); bố cục tầng ở ghi chú sau là lịch sử đã thay.
+
+Kiểm tra cuối frame/rào/vinh danh: **12/12 E2E desktop/mobile đạt**, gồm lớp 47 thành viên, chuyển động/bounds/reduced-motion, API cũ và hồi quy practice/teacher workflow. TypeScript/build/diff check đạt; ảnh đã xem, dùng database riêng, không ghi Railway.
+
+Ngày 11/10 thêm **khu vườn mỗi học sinh một cây**: avatar, hai từ cuối tên, cấp cao nhất của một chương trong đúng lớp/môn, cấp cao đứng trên; chưa học vẫn Mầm, cùng tên ngắn không gộp. Có chuyển động nhẹ/nút tắt/bật/reduced-motion. API garden bổ sung members, giữ trees/quyền cũ, không sửa dữ liệu. **27 backend liên quan, 4 E2E mới và 2 E2E tương thích cây cũ đạt**, TypeScript/build/ảnh desktop/mobile đạt trên môi trường riêng. Frontend local 5173 cập nhật; **chưa deploy Railway, cần API mới để hiện danh sách thật**. Thiết kế [app-design.md](app-design.md), nghiệp vụ [student-levels.md](student-levels.md), chi tiết [session-handoff.md](session-handoff.md).
+
+## Bộ câu hỏi Bài 1 Vật lí 11 và chủ đề — 11/10/2026
+
+Đã tạo [Word 50 câu](../artifacts/question-banks/vat-li-11-chuong-1-bai-1-50-cau.docx) cho Chương I Dao động, `Bài 1: Dao động điều hoà`, có đủ 4 phương án/đáp án/lời giải và 10 chủ đề × 5 câu. [Danh mục nhóm](../artifacts/question-banks/README.md). Đã bổ sung nhãn topic vào phiên bản câu hỏi, nhập Word/CSV và UI giáo viên; migration thêm cột giữ dữ liệu. Trộn câu ưu tiên phủ đều chủ đề trong bài, tránh liền nhau khi có nhóm khác, giữ quota ma trận/tập câu thi chính thức/snapshot resume và lịch sử sửa sai. Nhãn tùy chọn, mẫu cũ tương thích; đổi nhãn không lách chống trùng. Quy tắc [question-bank.md](question-bank.md).
+
+103 backend đạt trong lượt đầu; 29 ca app/topic chạy lại sau tinh chỉnh cuối đạt; TypeScript/build cuối riêng đạt; 10 E2E desktop/mobile nhập/ôn/thi đạt và 4 ca topic chạy lại trên mã cuối đạt. Word đã kiểm tra parser thực tế và xem 18 trang render bằng Word ẩn/Poppler. **Chưa nhập 50 câu hoặc deploy/push Railway**: API production cần được cập nhật trước khi nhập file có chủ đề; frontend local chặn xác nhận khi API cũ thiếu capability để không mất nhãn. Không ghi dữ liệu/tiến độ thật. Chi tiết ở bàn giao.
+
+Ngày 11/10 thiết kế lại thẻ học sinh **Ôn tập & kiểm tra**: tên chương/khung **Cấp độ yêu cầu**, **Cần vé săn thưởng** ở trên; cấp/icon/thời gian hiện tại xuống cuối, nút Săn điểm toàn chiều ngang. Bỏ thông báo “Cần thêm xx phút học”, gộp lý do thiếu vé/quyền giáo viên vào khung/pill; giữ điều kiện và số liệu thật. TypeScript/build riêng đạt; **14/14 learning E2E desktop/mobile** đạt sau chạy vào thư mục kết quả riêng, đã xem ảnh. Local 5173 HMR cập nhật; chưa push/deploy Railway, không ghi dữ liệu thử production. Chi tiết ở [session-handoff.md](session-handoff.md).
+
+Xác minh bố cục gộp sửa sai: 2/2 ca trình duyệt desktop/mobile trên build riêng đạt, ảnh ô thống kê đã xem, không tràn ngang; dùng server/database riêng tại 3179. TypeScript/build/diff check đạt, không ghi dữ liệu Railway.
+
+Ngày 11/10 đã đưa lời nhắc sửa sai và Mở sổ tay vào ô Câu cần sửa sai phía trên trang chủ; bỏ thẻ vàng cao cạnh danh sách cấp, khối cấp theo chương trải toàn hàng. Không đổi API/database. TypeScript/build riêng đạt, local 5173 HMR cập nhật; chưa deploy/push Railway. Thiết kế/chi tiết ở app-design.md/session-handoff.md.
+
+## Cấp từng chương, mốc icon và công cụ kiểm tra — 11/10/2026
+
+Đã sửa cấp riêng **lớp → môn → chương**, có icon trên từng vạch 0/1/2/3/4 giờ tại khối cấp độ và trang hành trình; mục tiêu/roster/xếp hạng dùng chương, bỏ badge tổng lớp. Giữ thời gian thật, không tạo tiến độ mới. Đã hoàn thiện trong mã Thêm/Xóa bài (archive giữ lịch sử/chống trùng), clock phiên, đáp án/lời giải chỉ khi đúng, icon vé và điều kiện mỗi dòng, kiểm tra từ Word/CSV hoặc bank chọn chương/bài và giáo viên mở ngay. API mới có capability chống frontend dùng nhầm backend cũ. Nghiệp vụ/thiết kế/ca test đã cập nhật; chi tiết session-handoff.md.
+
+TypeScript/build riêng đạt; hồi quy backend 97/97, chạy lại sau cập nhật module đồng thời vẫn đạt, 18 ca learning/cấp desktop/mobile và 2 ca bài đã đạt sau sửa selector/kỳ vọng test. Đã xem ảnh mốc desktop/mobile, không tràn ngang. Có chỉnh chủ đề ngân hàng câu hỏi đồng thời đang được giữ riêng, cần kiểm tra tích hợp khi triển khai. **Chưa deploy/push Railway**, local 5173 HMR dùng API Railway cũ, công cụ giáo viên mới chờ deploy server. Không ghi dữ liệu thử production.
+
 ## Giáo viên mở kiểm tra theo từng chương — 11/10/2026
 
 Theo yêu cầu mới, đã thêm quyền theo chương vào mã: mặc định khóa với chương cũ/mới; chỉ giáo viên sở hữu lớp mở/khóa tại Ôn tập & kiểm tra. Săn điểm cần thêm quyền này ngoài điều kiện >=2 giờ, >=70%, sửa sai sạch, còn vé. API chặn lượt mới cả khi học sinh dùng trang cũ/gọi trực tiếp; không dùng vé khi bị chặn. Kiểm tra chính thức cần các chương xuất hiện trong snapshot đề được mở, cùng lịch/enabled hiện có; giữ miễn điều kiện thời gian/vé cho thi chính thức. Khóa chương chỉ ngăn lượt mới; giữ bài/đáp án đang làm và retry cùng requestId; muốn thu bài chính thức vẫn dùng Đóng bài thi hiện có. Ôn tập không bị khóa theo quyền mới.

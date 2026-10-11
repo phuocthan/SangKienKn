@@ -55,6 +55,104 @@ async function noOverflow(page: Page) {
   ).toBeTruthy();
 }
 
+test("teacher selects individual lessons or uploads a private exam and manually opens it", async ({
+  page,
+}, info) => {
+  await login(page, true);
+  const form = page.locator(".learning-form");
+  await form.getByLabel("Loại bộ câu").selectOption("exam");
+  await form.getByLabel("Chương ôn I", { exact: true }).check();
+  await form.getByLabel("Phạm vi bài").selectOption("selected");
+  await expect(
+    form.getByRole("button", { name: "Lưu lịch kiểm tra" }),
+  ).toBeDisabled();
+  await form.getByLabel("Chương ôn I · Bài 1", { exact: false }).check();
+  await form.getByLabel("Số câu", { exact: true }).fill("2");
+  const bankTitle = `Bài chọn ${info.project.name} ${Date.now()}`;
+  await form.getByLabel("Tên bộ câu").fill(bankTitle);
+  await form.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã tạo kiểm tra");
+  const bank = page
+    .locator(".learning-row")
+    .filter({ has: page.getByText(bankTitle, { exact: true }) })
+    .first();
+  await expect(bank).toContainText("2 câu");
+  await expect(bank).toContainText("Đã đóng");
+  await form.getByLabel("Nguồn đề").selectOption("upload");
+  const uploadTitle = `Đề riêng ${info.project.name} ${Date.now()}`;
+  await form.getByLabel("Tên bộ câu").fill(uploadTitle);
+  await form
+    .getByLabel("File đề (.docx hoặc .csv)")
+    .setInputFiles({
+      name: "de.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from(
+        "Bài học,Câu hỏi,A,B,C,D,Đáp án,Lời giải\nBài tải riêng,Câu riêng không phát hành,A,B,C,D,C,Chọn C\n",
+      ),
+    });
+  await expect(form).toContainText("1 câu đã chọn / tối đa 100");
+  await form.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã tạo kiểm tra");
+  const row = page
+    .locator(".learning-row")
+    .filter({ has: page.getByText(uploadTitle, { exact: true }) })
+    .first();
+  await expect(row).toContainText("1 câu");
+  await row.getByRole("button", { name: "Mở kiểm tra ngay" }).click();
+  await expect(page.getByRole("status")).toContainText("Đã mở kiểm tra");
+  await expect(row).toContainText("Đang mở");
+  await noOverflow(page);
+});
+
+test("practice clock advances, pauses while hidden or offline, and wrong answers reveal no solution", async ({
+  page,
+  context,
+}) => {
+  await login(page);
+  await page.clock.install();
+  await page.getByLabel("Chương ôn I", { exact: true }).check();
+  await page.getByRole("button", { name: "Bắt đầu ôn", exact: true }).click();
+  await expect(page.locator(".question-card")).toBeVisible();
+  const clock = page.getByLabel("Thời gian phiên học").locator("time");
+  await expect(clock).toHaveText("00:00:00");
+  await expect(page.locator(".practice-clock")).toContainText(
+    "Đang ghi nhận thời gian",
+  );
+  // Wait for the API session before advancing the browser's display clock.
+  await expect
+    .poll(async () => (await page.request.get("/api/health")).ok())
+    .toBeTruthy();
+  await page.clock.runFor(3000);
+  await expect(clock).not.toHaveText("00:00:00");
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      get: () => true,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  const hiddenTime = await clock.textContent();
+  await page.clock.runFor(3000);
+  await expect(clock).toHaveText(hiddenTime!);
+  await page.evaluate(() => {
+    delete (document as any).hidden;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await context.setOffline(true);
+  const offlineTime = await clock.textContent();
+  await page.clock.runFor(3000);
+  await expect(clock).toHaveText(offlineTime!);
+  await context.setOffline(false);
+  await page.locator(".choices .choice").nth(1).click();
+  await page.getByRole("button", { name: "Kiểm tra đáp án" }).click();
+  await expect(page.locator(".wrong-choice")).toHaveCount(1);
+  await expect(page.locator(".correct-choice")).toHaveCount(0);
+  await expect(page.locator(".explanation")).not.toContainText(
+    "Phương án A là đáp án đúng",
+  );
+  await page.getByRole("button", { name: "Kết thúc phiên" }).click();
+});
+
 test("teacher controls chapter access; qualified students wait, opening another chapter does not unlock it, and stale starts are rejected", async ({
   page,
   browser,
@@ -189,6 +287,10 @@ test("student reviews semester, resumes exact question and repairs without revea
   await expect(page.locator(".question-meta")).toContainText("Câu 1/8");
   await page.locator(".choices .choice").nth(1).click();
   await page.getByRole("button", { name: "Kiểm tra đáp án" }).click();
+  await expect(page.locator(".correct-choice")).toHaveCount(0);
+  await expect(page.locator(".explanation")).not.toContainText(
+    "Phương án A là đáp án đúng",
+  );
   await page.getByRole("button", { name: "Câu tiếp theo" }).click();
   await expect(page.locator(".question-meta")).toContainText("Câu 2/8");
   const text = await page.locator(".question-card h2").innerText();
@@ -332,7 +434,13 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
   const title = `Thi ${info.project.name} ${Date.now()}`;
   await page.getByLabel("Tên bộ câu").fill(title);
   await page.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
-  await expect(page.getByRole("status")).toContainText("Đã tạo lịch kiểm tra");
+  await expect(page.getByRole("status")).toContainText("Đã tạo kiểm tra");
+  await page
+    .locator(".learning-row")
+    .filter({ has: page.getByText(title, { exact: true }) })
+    .first()
+    .getByRole("button", { name: "Mở kiểm tra ngay" })
+    .click();
   await noOverflow(page);
   await page.screenshot({
     path: info.outputPath("learning-teacher.png"),

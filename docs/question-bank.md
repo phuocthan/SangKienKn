@@ -24,6 +24,7 @@ Tải mẫu bằng nút **Tải mẫu Word (.docx)** trong ứng dụng hoặc m
 ```text
 Câu 1: Đơn vị cơ bản của độ dài trong hệ SI là gì?
 Bài học: Bài 1 · Đơn vị đo
+Chủ đề: Đơn vị cơ bản
 A. Mét
 B. Centimét
 C. Kilômét
@@ -33,6 +34,7 @@ Lời giải: Mét (m) là đơn vị cơ bản của độ dài trong hệ SI.
 ```
 
 - Mỗi câu bắt đầu bằng `Câu 1:`, `Câu 2:`… hoặc `Câu hỏi:`; giữ đủ nhãn `Bài học:`, `A.`, `B.`, `C.`, `D.`, `Đáp án:`, `Lời giải:`. Số thứ tự dùng để phân khối, không bắt buộc liên tục.
+- `Chủ đề:` là nhãn tùy chọn, tối đa 120 ký tự, đặt ở dòng riêng. Dùng cùng tên/mã cho các câu cùng nội dung kiến thức; không ghép chủ đề vào `Bài học:`. File mẫu cũ không có nhãn này vẫn nhập được.
 - Đáp án là một chữ A/B/C/D. Chấp nhận chữ thường, nhãn `Đáp án đúng:` và lựa chọn dạng `A)` hoặc `A:`. Bốn phương án phải khác nhau.
 - Chữ đậm, nghiêng và các đoạn chữ trong cùng dòng vẫn được đọc. Dòng tiếp theo không có nhãn tiếp tục câu hỏi, phương án hoặc lời giải trước đó; giữ các nhãn ở đầu dòng riêng.
 - Chỉ nhận `.docx`, không nhận `.doc` cũ. Với `.doc`, chọn Save As → Word Document (.docx) trong Word. Không nhận file Word có hình ảnh, Equation, hộp văn bản hay nội dung nhúng trong phần nội dung; dùng văn bản và công thức gõ bằng chữ. Chấp nhận/từ chối Track Changes trước khi nhập.
@@ -48,13 +50,24 @@ CSV UTF-8, có thể có BOM. Các cột theo đúng thứ tự:
 | Bài 1 · Đơn vị đo | Đơn vị cơ bản của độ dài trong hệ SI? | Mét | Centimét | Kilômét | Milimét | A      | Mét là đơn vị cơ bản của độ dài trong hệ SI. |
 
 - Giữ nguyên tiêu đề; đáp án là A/B/C/D (chấp nhận chữ thường). Bốn lựa chọn cần khác nhau.
+- CSV 8 cột cũ vẫn hợp lệ. Có thể thêm cột thứ 9 tên `Chủ đề` ở cuối; giữ đủ 9 ô trên mỗi dòng nếu thêm cột này.
 - Dấu phân cách là dấu phẩy hoặc chấm phẩy. Ô chứa dấu phân cách, xuống dòng hoặc ngoặc kép phải được bao bằng ngoặc kép; ngoặc kép bên trong ghi thành hai ngoặc kép. Excel có thể lưu CSV UTF-8 theo quy tắc này.
 - Mỗi file 1–100 câu, tối đa 512 KB ở giao diện. Tên bài tối đa 120 ký tự; câu hỏi/lời giải tối đa 3.000 ký tự; mỗi phương án tối đa 1.000 ký tự.
 - Nếu bất kỳ câu nào lỗi, nút xác nhận bị khóa. App vẫn cho xem các câu hợp lệ, nhưng không tự nhập một phần.
 - Bộ nhập API kiểm tra lại tất cả câu trước khi lưu và ghi trong một transaction. Câu trùng toàn bộ nội dung trong file hoặc trùng phiên bản hiện tại của ngân hàng (kể cả câu đã ẩn) bị từ chối; cần bỏ dòng trùng rồi nhập lại.
 - Mã của lần xác nhận được giữ khi mạng lỗi. Nếu server đã lưu mà trình duyệt chưa nhận kết quả, xác nhận lại không tạo câu trùng.
 
-Cả Word và CSV dùng cùng bộ nhập API: giữ phân quyền giáo viên, kiểm tra trùng, lưu toàn bộ hoặc không lưu và chống ghi trùng khi gửi lại. Chưa tự tách đề Word có bố cục bất kỳ, đọc PDF hoặc nhập `.xlsx`. Học kỳ, ma trận và trộn đề chưa thuộc phần đã hoàn thành.
+Cả Word và CSV dùng cùng bộ nhập API: giữ phân quyền giáo viên, kiểm tra trùng, lưu toàn bộ hoặc không lưu và chống ghi trùng khi gửi lại. Đổi nhãn chủ đề không làm nội dung câu trở thành câu mới để nhập trùng. Chưa tự tách đề Word có bố cục bất kỳ, đọc PDF hoặc nhập `.xlsx`. Ôn tập, học kỳ, ma trận và trộn đề đã có; xem [learning.md](learning.md).
+
+## Chọn và sắp thứ tự câu theo chủ đề
+
+Ngày 11/10/2026 bổ sung `topic` vào từng phiên bản câu hỏi bằng migration thêm cột, mặc định rỗng cho câu cũ. Giáo viên xem/sửa nhãn trong ngân hàng và bản xem trước nhập Word/CSV. Sửa nhãn tạo phiên bản mới; sổ tay, lượt làm và snapshot đã lưu giữ nhãn/nội dung cũ. Client cũ không gửi trường chủ đề khi sửa sẽ giữ nhãn hiện có; nhập từ API cũ chưa hỗ trợ được chặn ở giao diện nếu file có chủ đề để tránh mất nhãn.
+
+Luyện tập sắp câu xen kẽ; ôn tập/Săn điểm/tạo đề chọn câu theo các nhóm chủ đề trong từng lớp/chương/bài, ưu tiên nhóm đã được chọn ít hơn và tránh hai câu liên tiếp cùng nhóm khi còn nhóm khác. Ma trận theo bài giữ nguyên số câu đã phân bổ; chỉ cân bằng chủ đề bên trong mỗi bài. Thi chính thức giữ toàn bộ tập câu đã chốt và chỉ đổi thứ tự; phiên đã bắt đầu tiếp tục dùng snapshot cũ. Không loại câu khỏi sổ tay sửa sai hoặc tự đổi đề giữa phiên.
+
+Với bộ Bài 1 gồm 10 nhóm, mỗi nhóm 5 câu, chọn 10 câu sẽ lấy 1 câu/nhóm; chọn 20 lấy 2 câu/nhóm; chọn 23 lấy 2–3 câu/nhóm. Nếu một nhóm hết câu, lấy từ nhóm còn lại để đủ số lượng, không lặp lại cùng câu. Câu chưa có nhãn được tính thành nhóm chưa phân loại của bài khi trộn chung; ngân hàng hoàn toàn chưa có nhãn giữ cách chọn cũ. Quy tắc cân bằng áp dụng trong một lượt chọn, chưa loại câu đã gặp ở phiên trước.
+
+Bộ Word 50 câu có đáp án/lời giải: [Vật lí 11 Chương I Bài 1](../artifacts/question-banks/vat-li-11-chuong-1-bai-1-50-cau.docx). Tất cả dùng đúng tên `Bài 1: Dao động điều hoà`, không tạo 10 bài con. **Chưa triển khai backend Railway hoặc nhập bộ câu vào dữ liệu thật trong đợt này.** Frontend local có thể xem trước; cần backend hỗ trợ nhãn trước khi xác nhận nhập file này.
 
 ## Lưu trữ
 

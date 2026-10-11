@@ -119,6 +119,243 @@ async function fixture(t: TestContext) {
   };
 }
 
+test("practice and review conceal answers after wrong submissions, retries and reload, including legacy saved feedback", async (t) => {
+  const f = await fixture(t);
+  const wrong = await f.attempt(1);
+  assert.equal(wrong.correct, false);
+  assert.equal(wrong.correctIndex, undefined);
+  assert.equal(
+    wrong.explanation,
+    "Hãy xem lại kiến thức và tự làm lại câu này.",
+  );
+  const right = await f.attempt(0);
+  assert.equal(right.correctIndex, 0);
+  const review = await f.post("/classrooms/class-demo/reviews", {
+    chapterIds: ["chapter-1"],
+    questionCount: 2,
+    requestId: randomUUID(),
+  });
+  const path = `/learning/reviews/${review.id}`;
+  const session = await f.read(path);
+  const q = session.questions[0];
+  const correct = Number(
+    f.db.prepare("SELECT correct_index FROM questions WHERE id=?").get(q.id)!
+      .correct_index,
+  );
+  const body = { questionId: q.id, selected: (correct + 1) % 4 };
+  const feedback = await f.post(`${path}/answer`, body);
+  assert.equal(feedback.correctIndex, undefined);
+  assert.equal(feedback.explanation, wrong.explanation);
+  assert.deepEqual(await f.post(`${path}/answer`, body), feedback);
+  // Existing sessions may contain answers saved before concealment was introduced.
+  f.db
+    .prepare("UPDATE review_sessions SET answers=? WHERE id=?")
+    .run(
+      JSON.stringify({
+        [q.id]: {
+          ...feedback,
+          correctIndex: correct,
+          explanation: "LEGACY ANSWER MUST STAY PRIVATE",
+        },
+      }),
+      review.id,
+    );
+  assert.deepEqual((await f.read(path)).answers[q.id], feedback);
+  assert.deepEqual(await f.post(`${path}/answer`, body), feedback);
+  await f.post(`${path}/next`, { index: 1 });
+  const next = (await f.read(path)).questions[1];
+  const nextCorrect = Number(
+    f.db.prepare("SELECT correct_index FROM questions WHERE id=?").get(next.id)!
+      .correct_index,
+  );
+  const success = await f.post(`${path}/answer`, {
+    questionId: next.id,
+    selected: nextCorrect,
+  });
+  assert.equal(success.correctIndex, nextCorrect);
+  assert.equal(
+    success.explanation,
+    f.db.prepare("SELECT explanation FROM questions WHERE id=?").get(next.id)!
+      .explanation,
+  );
+});
+
+test("teacher creates a manual exam from chosen lessons, opens immediately, and students enter without study prerequisites", async (t) => {
+  const f = await fixture(t);
+  f.db
+    .prepare(
+      "UPDATE questions SET lesson=CASE WHEN id='question-1' THEN 'Bài được chọn' ELSE 'Bài khác' END WHERE chapter_id='chapter-1'",
+    )
+    .run();
+  const body = {
+    title: "Kiểm tra tự mở",
+    chapterIds: ["chapter-1"],
+    source: "bank",
+    manualOpen: true,
+    questionCount: 1,
+    lessonKeys: ["chapter-1::Bài được chọn"],
+    startsAt: f.now() + 60000,
+    closesAt: f.now() + 3600000,
+    requestId: randomUUID(),
+  };
+  assert.equal(
+    (await f.request("/classrooms/class-demo/exams", body, f.student)).status,
+    403,
+  );
+  const exam = await f.post("/classrooms/class-demo/exams", body, f.teacher);
+  assert.deepEqual(
+    await f.post("/classrooms/class-demo/exams", body, f.teacher),
+    exam,
+  );
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exams",
+        { ...body, title: "Changed" },
+        f.teacher,
+      )
+    ).status,
+    409,
+  );
+  const saved = f.db
+    .prepare("SELECT * FROM exam_definitions WHERE id=?")
+    .get(exam.id)!;
+  assert.equal(saved.enabled, 0);
+  assert.deepEqual(
+    JSON.parse(String(saved.questions)).map((q: any) => q.id),
+    ["question-1"],
+  );
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exam-runs",
+        { examId: exam.id, requestId: randomUUID() },
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  const open = `/learning/exams/${exam.id}/open`;
+  assert.equal((await f.request(open, {}, f.other)).status, 403);
+  assert.equal((await f.request(open, {}, f.student)).status, 403);
+  await f.post(open, {}, f.teacher);
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT enabled FROM chapter_exam_access WHERE chapter_id='chapter-1'",
+      )
+      .get()!.enabled,
+    1,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT starts_at FROM exam_definitions WHERE id=?")
+      .get(exam.id)!.starts_at,
+    f.now(),
+  );
+  const run = await f.start({ examId: exam.id });
+  assert.equal(
+    (await f.read(`/learning/exam-runs/${run.id}`)).questions.length,
+    1,
+  );
+  assert.equal(f.db.prepare("SELECT COUNT(*) AS n FROM progress").get()!.n, 0);
+  f.advance(3600001);
+  assert.equal((await f.request(open, {}, f.teacher)).status, 409);
+});
+
+test("uploaded multi-chapter exams validate atomically, keep questions unpublished, and retry without duplication", async (t) => {
+  const f = await fixture(t);
+  const question = {
+    text: "Đề riêng của giáo viên",
+    lesson: "Bài mới",
+    choices: ["A", "B", "C", "D"],
+    correctIndex: 2,
+    explanation: "C là đáp án đúng của đề riêng.",
+  };
+  const body = {
+    title: "Đề nhiều chương",
+    chapterIds: ["chapter-1", "chapter-2"],
+    source: "upload",
+    manualOpen: true,
+    startsAt: f.now(),
+    closesAt: f.now() + 3600000,
+    questions: [
+      { chapterId: "chapter-1", question },
+      { chapterId: "chapter-2", question },
+    ],
+    requestId: randomUUID(),
+  };
+  const before = Number(
+    f.db.prepare("SELECT COUNT(*) AS n FROM questions").get()!.n,
+  );
+  for (const invalid of [
+    { ...body, questions: [body.questions[0], body.questions[0]] },
+    {
+      ...body,
+      questions: [
+        { chapterId: "chapter-1", question: { ...question, correctIndex: 9 } },
+      ],
+    },
+    { ...body, lessonKeys: [], source: "bank", questionCount: 1 },
+  ])
+    assert.equal(
+      (await f.request("/classrooms/class-demo/exams", invalid, f.teacher))
+        .status,
+      400,
+    );
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exams",
+        { ...body, questions: [{ chapterId: "other-chapter", question }] },
+        f.teacher,
+      )
+    ).status,
+    403,
+  );
+  assert.equal(
+    f.db.prepare("SELECT COUNT(*) AS n FROM questions").get()!.n,
+    before,
+  );
+  const exam = await f.post("/classrooms/class-demo/exams", body, f.teacher);
+  assert.deepEqual(
+    await f.post("/classrooms/class-demo/exams", body, f.teacher),
+    exam,
+  );
+  assert.equal(
+    f.db.prepare("SELECT COUNT(*) AS n FROM questions").get()!.n,
+    before + 2,
+  );
+  const saved = JSON.parse(
+    String(
+      f.db
+        .prepare("SELECT questions FROM exam_definitions WHERE id=?")
+        .get(exam.id)!.questions,
+    ),
+  );
+  for (const q of saved)
+    assert.equal(
+      f.db.prepare("SELECT active FROM questions WHERE id=?").get(q.id)!.active,
+      0,
+    );
+  await f.post(`/learning/exams/${exam.id}/open`, {}, f.teacher);
+  assert.equal(
+    f.db
+      .prepare("SELECT COUNT(*) AS n FROM chapter_exam_access WHERE enabled=1")
+      .get()!.n,
+    2,
+  );
+  const run = await f.start({ examId: exam.id });
+  const room = await f.read(`/learning/exam-runs/${run.id}`);
+  assert.equal(room.questions.length, 2);
+  assert.ok(
+    room.questions.every(
+      (q: any) => q.correctIndex === undefined && q.explanation === undefined,
+    ),
+  );
+  assert.deepEqual(f.db.prepare("PRAGMA foreign_key_check").all(), []);
+});
+
 test("chapter exams default closed; only owning teacher can open, without bypassing study requirements or consuming tickets on rejection", async (t) => {
   const f = await fixture(t);
   f.eligible();

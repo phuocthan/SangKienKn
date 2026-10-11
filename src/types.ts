@@ -15,6 +15,7 @@ export type Chapter = {
   questionCount: number;
   lessons: { title: string; questionCount: number }[];
   canManageLessons?: boolean;
+  canTagQuestions?: boolean;
   seconds: number;
   level: number;
   total: number;
@@ -32,6 +33,7 @@ export type Classroom = {
   chapters: Chapter[];
 };
 export type Question = {
+  topic?: string;
   id: string;
   chapterId: string;
   lesson?: string;
@@ -52,6 +54,10 @@ export type Result = {
   resolved: boolean;
 };
 export type Student = {
+  chapterLevels?: (StudentLevel & {
+    chapterId: string;
+    chapterTitle: string;
+  })[];
   studentLevel?: StudentLevel;
   avatarId?: string | null;
   id: string;
@@ -70,7 +76,17 @@ export type ClassTree = {
   chapterId: string;
   chapterTitle: string;
 };
+export type ClassGardenMember = {
+  studentId: string;
+  studentName: string;
+  avatarId: string | null;
+  level: number;
+};
 export type CommunityMember = {
+  chapterLevels?: (StudentLevel & {
+    chapterId: string;
+    chapterTitle: string;
+  })[];
   studentLevel?: StudentLevel;
   id: string;
   name: string;

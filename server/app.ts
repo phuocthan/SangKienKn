@@ -4,9 +4,10 @@ import express, {
   type NextFunction,
 } from "express";
 import type { DatabaseSync } from "node:sqlite";
-import { createHash, randomUUID, randomBytes } from "node:crypto";
+import { createHash, randomUUID, randomBytes, randomInt } from "node:crypto";
 import { hashPassword, verifyPassword } from "./db.js";
-import { questionInput, type QuestionInput } from "../shared/questions.js";
+import { questionInput, questionContentKey, type QuestionInput } from "../shared/questions.js";
+import { sampleByTopic } from "../shared/question-topics.js";
 import { isGroupUploadPath, registerGroupRoutes } from "./group-activities.js";
 import {
   grantLearningMilestones,
@@ -93,6 +94,7 @@ export function createApp(
     next();
   });
   app.use("/api/chapters/:id/questions/import", express.json({ limit: "1mb" }));
+  app.use("/api/classrooms/:id/exams", express.json({ limit: "4mb" }));
   app.use(express.json({ limit: "100kb" }));
   app.use("/api", (req, _res, next) => {
     if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {
@@ -485,6 +487,7 @@ export function createApp(
           ...ch,
           lessons: chapterLessons(db, ch.id),
           canManageLessons: req.user!.role === "teacher",
+          canTagQuestions: true,
           questionCount: (
             db
               .prepare(
@@ -605,7 +608,34 @@ export function createApp(
     `,
       )
       .all(classId);
-    res.json({ trees });
+    const members = (
+      db
+        .prepare(
+          `
+      SELECT u.id AS studentId,u.name AS studentName,a.avatar_id AS avatarId,
+        COALESCE((SELECT MAX(CAST(p.seconds AS INTEGER)) FROM progress p
+          JOIN chapters ch ON ch.id=p.chapter_id
+          WHERE p.student_id=u.id AND ch.classroom_id=?),0) AS highestSeconds
+      FROM memberships m JOIN users u ON u.id=m.student_id
+      LEFT JOIN user_avatars a ON a.user_id=u.id
+      WHERE m.classroom_id=?
+    `,
+        )
+        .all(classId, classId) as Row[]
+    )
+      .map((member) => ({
+        studentId: String(member.studentId),
+        studentName: String(member.studentName),
+        avatarId: member.avatarId ?? null,
+        level: studentLevel(Number(member.highestSeconds)).level,
+      }))
+      .sort(
+        (a, b) =>
+          b.level - a.level ||
+          a.studentName.localeCompare(b.studentName, "vi") ||
+          a.studentId.localeCompare(b.studentId),
+      );
+    res.json({ trees, members });
   });
 
   app.get("/api/classrooms/:id/leaderboard", (req: AppRequest, res) => {
@@ -633,6 +663,7 @@ export function createApp(
       name: String(r.name),
       seconds: Number(r.seconds),
       studentLevel: studentLevel(Number(r.seconds)),
+      chapterLevels: chapterLevels(classId, String(r.id)),
       bloomedTrees: Number(r.bloomedTrees),
       resolvedCorrections: Number(r.resolvedCorrections),
     }));
@@ -678,6 +709,19 @@ export function createApp(
     });
   });
 
+  function chapterLevels(classId: string, studentId: string) {
+    return (
+      db
+        .prepare(
+          "SELECT ch.id,ch.title,COALESCE(p.seconds,0) AS seconds FROM chapters ch LEFT JOIN progress p ON p.chapter_id=ch.id AND p.student_id=? WHERE ch.classroom_id=? ORDER BY ch.rowid",
+        )
+        .all(studentId, classId) as Row[]
+    ).map((ch) => ({
+      chapterId: String(ch.id),
+      chapterTitle: String(ch.title),
+      ...studentLevel(Number(ch.seconds)),
+    }));
+  }
   function roster(classId: string) {
     return (
       db
@@ -695,6 +739,7 @@ export function createApp(
         name: String(u.name),
         email: String(u.email),
         avatarId: u.avatarId ?? null,
+        chapterLevels: chapterLevels(classId, String(u.id)),
         seconds: summaries.reduce((n, s) => n + s.seconds, 0),
         studentLevel: studentLevel(
           summaries.reduce((n, s) => n + s.seconds, 0),
@@ -850,6 +895,7 @@ export function createApp(
       choices: JSON.parse(q.choices),
       correctIndex: q.correct_index,
       explanation: q.explanation,
+      ...(q.topic ? { topic: String(q.topic) } : {}),
     };
   }
   function insertQuestion(
@@ -862,8 +908,8 @@ export function createApp(
     const id = randomUUID();
     db.prepare(
       `INSERT INTO questions
-      (id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,family_id,changed_at)
-      VALUES (?,?,?,?,?,?,?,?,1,?,?,?)`,
+      (id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,family_id,changed_at,topic)
+      VALUES (?,?,?,?,?,?,?,?,1,?,?,?,?)`,
     ).run(
       id,
       chapterId,
@@ -876,6 +922,7 @@ export function createApp(
       metadata?.version ?? 1,
       metadata?.familyId ?? null,
       now(),
+      content.topic ?? "",
     );
     return id;
   }
@@ -894,6 +941,7 @@ export function createApp(
       chapterId: q.chapter_id,
       lesson: q.lesson,
       text: q.text,
+      ...(q.topic ? { topic: String(q.topic) } : {}),
       choices: JSON.parse(q.choices),
       active: !!q.active,
       isCurrent: !!q.is_current,
@@ -937,7 +985,22 @@ export function createApp(
         `SELECT q.* FROM questions q WHERE q.chapter_id = ? AND ${scope} ORDER BY q.rowid`,
       )
       .all(...params) as Row[];
-    res.json(rows.map((q) => questionView(q, req)));
+    const ordered =
+      req.user!.role === "student" &&
+      req.query.mode !== "correction" &&
+      rows.some((q) => q.topic)
+        ? sampleByTopic(
+            rows,
+            rows.length,
+            (q) => ({
+              chapterId: String(q.chapter_id),
+              lesson: String(q.lesson),
+              topic: String(q.topic ?? ""),
+            }),
+            randomInt,
+          )
+        : rows;
+    res.json(ordered.map((q) => questionView(q, req)));
   });
   app.post("/api/chapters/:id/questions", (req: AppRequest, res) => {
     teacher(req);
@@ -949,7 +1012,10 @@ export function createApp(
     const q = ownedQuestion(req);
     if (!q.is_current)
       fail(409, "Câu hỏi đã có phiên bản mới. Hãy tải lại ngân hàng câu hỏi.");
-    const content = questionPayload(req.body);
+    const content = questionPayload({
+      ...req.body,
+      ...(req.body?.topic === undefined && q.topic ? { topic: q.topic } : {}),
+    });
     if (JSON.stringify(content) === JSON.stringify(questionContent(q)))
       return res.json({ id: q.id, version: q.version });
     let id: string;
@@ -1017,7 +1083,7 @@ export function createApp(
         );
       }
     }) as QuestionInput[];
-    const fingerprints = content.map((row) => JSON.stringify(row));
+    const fingerprints = content.map(questionContentKey);
     if (new Set(fingerprints).size !== content.length)
       fail(400, "File có câu hỏi trùng nhau.");
     const fingerprint = createHash("sha256")
@@ -1041,7 +1107,7 @@ export function createApp(
       )
       .all(chapterId) as Row[];
     const currentKeys = new Set(
-      stored.map((q) => JSON.stringify(questionContent(q))),
+      stored.map((q) => questionContentKey(questionContent(q))),
     );
     const duplicate = fingerprints.findIndex((key) => currentKeys.has(key));
     if (duplicate !== -1)
@@ -1141,7 +1207,7 @@ export function createApp(
     }
     res.json({
       correct: selected === q.correct_index,
-      ...(mode === "correction" && selected !== q.correct_index
+      ...(selected !== q.correct_index
         ? { explanation: "Hãy xem lại kiến thức và tự làm lại câu này." }
         : { correctIndex: q.correct_index, explanation: q.explanation }),
       resolved: mode === "correction" && selected === q.correct_index,

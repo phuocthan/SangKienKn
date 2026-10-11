@@ -10,7 +10,6 @@ import {
   BookOpen,
   CheckCircle2,
   ChevronDown,
-  CircleHelp,
   Clock3,
   Download,
   Flower2,
@@ -35,7 +34,6 @@ import {
   Logo,
   Modal,
   SectionTitle,
-  Tree,
 } from "./components";
 import { Practice } from "./Practice";
 import { Lessons } from "./Lessons";
@@ -44,7 +42,13 @@ import { ClassCommunity } from "./ClassCommunity";
 import { GroupActivities } from "./GroupActivities";
 import { AdminWorkspace } from "./Accounts";
 import { Avatar, AvatarPicker } from "./Avatars";
-import { StudentLevelBadge, StudentLevelCard } from "./StudentLevel";
+import {
+  ChapterLevelTimeline,
+  StudentLevelBadge,
+  StudentLevelCard,
+  StudentLevelIcon,
+} from "./StudentLevel";
+import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { GardenGoal } from "./GardenGoal";
 import { QuestionBank } from "./QuestionBank";
 import { QuestionFields } from "./QuestionFields";
@@ -72,7 +76,7 @@ type Study = {
 };
 type Editor =
   "class" | "chapter" | "student" | "question" | { student: Student } | null;
-const stages = ["Hạt mầm", "Nảy mầm", "Cây non", "Trưởng thành", "Ra hoa"];
+const stages = STUDENT_LEVEL_NAMES;
 type QuickAccount = { role: "teacher" | "student"; name: string };
 
 export default function App() {
@@ -415,13 +419,6 @@ export default function App() {
               <div>
                 <strong>{user.name}</strong>
                 <small>{isTeacher ? "Giáo viên" : "Học sinh"}</small>
-                {!isTeacher && current && (
-                  <StudentLevelBadge
-                    seconds={totalSeconds}
-                    scope={`${current.name} · ${current.subject}`}
-                    compact
-                  />
-                )}
               </div>
             </div>
           </div>
@@ -602,7 +599,10 @@ export default function App() {
                         onPractice={() => navigate("practice")}
                       />
                     </div>
-                    <StudentStats classroom={current} />
+                    <StudentStats
+                      classroom={current}
+                      onCorrections={() => navigate("corrections")}
+                    />
                     <SectionTitle
                       title="Những mầm xanh của bạn"
                       description={`${current.subject} · ${current.name}`}
@@ -618,25 +618,7 @@ export default function App() {
                         setStudy({ chapter: ch, mode: "practice", lesson })
                       }
                     />
-                    <div className="garden-journey-grid">
-                      <StudentLevelCard classroom={current} />
-                      <div className="gentle-reminder">
-                        <span>
-                          <CircleHelp size={23} />
-                        </span>
-                        <div>
-                          <strong>Sai một câu, hiểu thêm một điều.</strong>
-                          <p>
-                            {openCorrections
-                              ? `Bạn có ${openCorrections} câu cần ôn lại trong sổ tay. Cùng biến lỗi sai thành kiến thức nhé.`
-                              : "Các câu chưa đúng sẽ được lưu vào sổ tay để bạn có thể quay lại và làm tốt hơn."}
-                          </p>
-                        </div>
-                        <LinkButton onClick={() => navigate("corrections")}>
-                          Mở sổ tay
-                        </LinkButton>
-                      </div>
-                    </div>
+                    <StudentLevelCard classroom={current} />
                   </div>
                 ))}
               {page === "learning" && (
@@ -740,10 +722,17 @@ export default function App() {
                           </span>
                           <div>
                             <h3>{ch.title}</h3>
-                            <p>{ch.lessons.length} bài · {ch.questionCount} câu hỏi</p>
-                            <Lessons chapter={ch} onChange={async () => {
-                              await reload(); setRevision((value) => value + 1);
-                            }} />
+                            <p>
+                              {ch.lessons.length} bài · {ch.questionCount} câu
+                              hỏi
+                            </p>
+                            <Lessons
+                              chapter={ch}
+                              onChange={async () => {
+                                await reload();
+                                setRevision((value) => value + 1);
+                              }}
+                            />
                           </div>
                           <LinkButton
                             onClick={() => {
@@ -825,6 +814,7 @@ export default function App() {
                         </label>
                       </div>
                       <QuestionBank
+                        topicSupported={!!(current.chapters.find(ch => ch.id === questionChapter) ?? current.chapters[0]).canTagQuestions}
                         key={questionChapter || current.chapters[0].id}
                         chapterId={questionChapter || current.chapters[0].id}
                         lesson={questionLesson}
@@ -897,26 +887,10 @@ export default function App() {
                     />
                     <div className="card progress-table">
                       {current.chapters.map((ch) => (
-                        <div className="progress-row" key={ch.id}>
-                          <div className="tiny-tree">
-                            <Tree level={ch.level} />
-                          </div>
-                          <div className="progress-details">
-                            <strong>{ch.title}</strong>
-                            <div className="progress-track">
-                              <span
-                                style={{
-                                  width: `${Math.min(100, (ch.seconds / 14400) * 100)}%`,
-                                }}
-                              />
-                            </div>
-                            <small>
-                              {duration(ch.seconds)} / 4 giờ · {ch.total} lượt
-                              luyện tập
-                            </small>
-                          </div>
-                          <span className="pill">{stages[ch.level - 1]}</span>
-                        </div>
+                        <article className="chapter-level-card" key={ch.id}>
+                          <h3>{ch.title}</h3>
+                          <ChapterLevelTimeline chapter={ch} />
+                        </article>
                       ))}
                     </div>
                   </>
@@ -1200,7 +1174,13 @@ function Login({
     </div>
   );
 }
-function StudentStats({ classroom }: { classroom: Classroom }) {
+function StudentStats({
+  classroom,
+  onCorrections,
+}: {
+  classroom: Classroom;
+  onCorrections?: () => void;
+}) {
   const seconds = classroom.chapters.reduce((n, c) => n + c.seconds, 0),
     total = classroom.chapters.reduce((n, c) => n + c.total, 0),
     correct = classroom.chapters.reduce((n, c) => n + c.correct, 0),
@@ -1230,7 +1210,19 @@ function StudentStats({ classroom }: { classroom: Classroom }) {
         value={String(open)}
         note="Mỗi lỗi sai là một cơ hội"
         color="amber"
-      />
+      >
+        {onCorrections && (
+          <div className="stat-correction-details">
+            <strong>Sai một câu, hiểu thêm một điều.</strong>
+            <p>
+              {open
+                ? "Cùng biến lỗi sai trong sổ tay thành kiến thức nhé."
+                : "Các câu chưa đúng sẽ được lưu vào sổ tay để bạn có thể quay lại và làm tốt hơn."}
+            </p>
+            <LinkButton onClick={onCorrections}>Mở sổ tay</LinkButton>
+          </div>
+        )}
+      </Stat>
     </div>
   );
 }
@@ -1240,12 +1232,14 @@ function Stat({
   value,
   note,
   color = "green",
+  children,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
   note: string;
   color?: string;
+  children?: ReactNode;
 }) {
   return (
     <div className="stat-card card">
@@ -1253,6 +1247,7 @@ function Stat({
       <span className="stat-label">{label}</span>
       <strong>{value}</strong>
       <small>{note}</small>
+      {children}
     </div>
   );
 }
@@ -1284,7 +1279,7 @@ function ChapterGrid({
             <span className="pill chapter-level">
               Cấp {ch.level} · {stages[ch.level - 1]}
             </span>
-            <Tree level={ch.level} />
+            <StudentLevelIcon level={ch.level} />
           </div>
           <div className="chapter-body">
             <span className="eyebrow">{classroom.subject.toUpperCase()}</span>
@@ -1338,7 +1333,12 @@ function ChapterGrid({
             )}
             <button
               className="button outline full"
-              disabled={!ch.questionCount || (!!selectedLessons[ch.id] && !ch.lessons.find(l => l.title === selectedLessons[ch.id])?.questionCount)}
+              disabled={
+                !ch.questionCount ||
+                (!!selectedLessons[ch.id] &&
+                  !ch.lessons.find((l) => l.title === selectedLessons[ch.id])
+                    ?.questionCount)
+              }
               onClick={() => onStudy(ch, selectedLessons[ch.id] || undefined)}
             >
               {ch.questionCount ? "Chăm cây · Luyện tập" : "Đang chờ câu hỏi"}
@@ -1703,11 +1703,19 @@ function Roster({
                         <div>
                           <strong>{s.name}</strong>
                           <small>{s.email}</small>
-                          <StudentLevelBadge
-                            seconds={s.seconds}
-                            scope={`${classroom.name} · ${classroom.subject}`}
-                            compact
-                          />
+                          {s.chapterLevels?.map((ch) => (
+                            <div
+                              key={ch.chapterId}
+                              className="chapter-level-member"
+                            >
+                              <small>{ch.chapterTitle}</small>
+                              <StudentLevelBadge
+                                seconds={ch.seconds}
+                                scope={ch.chapterTitle}
+                                compact
+                              />
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </td>
@@ -2016,6 +2024,7 @@ function EditorForm({
             </select>
           </label>
           <QuestionFields
+            topicSupported={!!classroom?.chapters.some(ch => ch.canTagQuestions)}
             lessons={[
               ...new Set(
                 classroom?.chapters.flatMap((ch) =>

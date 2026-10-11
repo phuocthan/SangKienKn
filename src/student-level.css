@@ -33,6 +33,116 @@
   padding: 24px;
   margin: 20px 0;
 }
+.chapter-level-card {
+  padding: 22px 0;
+  border-top: 1px solid var(--border, #e4eadb);
+}
+.chapter-level-card h3 {
+  margin: 0 0 16px;
+}
+.chapter-level-timeline {
+  min-width: 0;
+  width: 100%;
+}
+.chapter-level-milestones {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+}
+.chapter-level-milestones li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  color: #65746c;
+  font-size: var(--text-caption);
+  padding: 6px 2px;
+  border-radius: 12px;
+}
+.chapter-level-milestones .current {
+  background: #eef3e2;
+  color: #164b35;
+  font-weight: 700;
+}
+.chapter-level-milestones .earned {
+  color: #216b4a;
+}
+.chapter-level-milestones small {
+  font-weight: 400;
+}
+.chapter-level-rail {
+  position: relative;
+  height: 8px;
+  background: #e9efdf;
+  border-radius: 8px;
+  margin: 0 10%;
+}
+.chapter-level-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #84a970;
+}
+.chapter-level-tick {
+  position: absolute;
+  top: -3px;
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  background: #bac9ae;
+}
+.chapter-level-tick.earned {
+  background: #315e40;
+}
+.chapter-level-summary {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+  font-size: var(--text-caption);
+  color: #65746c;
+}
+.chapter-level-summary strong {
+  color: #315e40;
+}
+.chapter-level-next {
+  margin: 8px 0 0;
+  color: #65746c;
+  font-size: var(--text-caption);
+}
+.chapter-level-member {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.chapter-level-member small {
+  overflow-wrap: anywhere;
+}
+.chapter-art > .student-level-icon {
+  width: 88px;
+  height: 88px;
+}
+.class-tree-art > .student-level-icon {
+  width: 72px;
+  height: 72px;
+}
+@media (max-width: 600px) {
+  .chapter-level-milestones .student-level-icon {
+    width: 36px;
+    height: 36px;
+  }
+  .chapter-level-milestones span {
+    max-width: 100%;
+    overflow-wrap: normal;
+  }
+}
 .student-level-overview {
   display: flex;
   align-items: center;

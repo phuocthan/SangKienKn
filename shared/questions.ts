@@ -4,7 +4,16 @@ export type QuestionInput = {
   choices: string[];
   correctIndex: number;
   explanation: string;
+  topic?: string;
 };
+
+// Topic labels classify content; changing a label does not make a new question.
+export function questionContentKey({
+  topic: _topic,
+  ...content
+}: QuestionInput) {
+  return JSON.stringify(content);
+}
 
 export function questionInput(value: unknown): QuestionInput {
   const row = value as Partial<QuestionInput> | null;
@@ -34,6 +43,10 @@ export function questionInput(value: unknown): QuestionInput {
     choices,
     correctIndex: row.correctIndex!,
     explanation: field(row.explanation, "Lời giải", 3000),
+    ...(row.topic === undefined ||
+    (typeof row.topic === "string" && !row.topic.trim())
+      ? {}
+      : { topic: field(row.topic, "Chủ đề", 120).normalize("NFC") }),
   };
 }
 
@@ -113,8 +126,10 @@ export function parseQuestionCsv(source: string): {
   if (cell || row.length || closed) endRow();
   if (
     !rows.length ||
-    rows[0].length !== csvHeaders.length ||
-    rows[0].some((cell, i) => cell.trim() !== csvHeaders[i])
+    ![8, 9].includes(rows[0].length) ||
+    rows[0].some(
+      (cell, i) => cell.trim() !== (i === 8 ? "Chủ đề" : csvHeaders[i]),
+    )
   )
     return {
       questions: [],
@@ -129,7 +144,8 @@ export function parseQuestionCsv(source: string): {
     seen = new Set<string>();
   rows.slice(1).forEach((cells, index) => {
     try {
-      if (cells.length !== 8) throw new Error("Cần đúng 8 cột.");
+      if (cells.length !== rows[0].length)
+        throw new Error(`Cần đúng ${rows[0].length} cột.`);
       const correctIndex = ["A", "B", "C", "D"].indexOf(
         cells[6].trim().toUpperCase(),
       );
@@ -139,8 +155,9 @@ export function parseQuestionCsv(source: string): {
         choices: cells.slice(2, 6),
         correctIndex,
         explanation: cells[7],
+        ...(cells.length === 9 ? { topic: cells[8] } : {}),
       });
-      const key = JSON.stringify(question);
+      const key = questionContentKey(question);
       if (seen.has(key))
         throw new Error("Câu hỏi trùng với một dòng trước đó.");
       seen.add(key);

@@ -11,10 +11,15 @@ export function GardenGoal({
   classroom: Classroom;
   onPractice: () => void;
 }) {
-  const seconds = classroom.chapters.reduce(
-    (sum, chapter) => sum + chapter.seconds,
-    0,
-  );
+  const chapter = [...classroom.chapters].sort((a, b) => {
+    const left = studentLevel(a.seconds),
+      right = studentLevel(b.seconds);
+    return (
+      Number(left.level === 5) - Number(right.level === 5) ||
+      left.remainingSeconds - right.remainingSeconds
+    );
+  })[0];
+  const seconds = chapter?.seconds ?? 0;
   const stage = studentLevel(seconds);
   const flowers = classroom.chapters.filter(
     (chapter) => chapter.level === 5,
@@ -40,7 +45,7 @@ export function GardenGoal({
           </strong>
           <p>
             {stage.level === 5
-              ? "Bạn đã đạt cấp cao nhất trong lớp này."
+              ? "Bạn đã đạt cấp cao nhất trong chương này."
               : `Còn ${duration(stage.remainingSeconds)} để lên cấp kế tiếp.`}
           </p>
         </div>
@@ -56,13 +61,13 @@ export function GardenGoal({
         <span style={{ width: `${stage.progressPercent}%` }} />
       </div>
       <small>
-        {duration(seconds)} đã học · {classroom.name}
+        {duration(seconds)} đã học · {chapter?.title ?? "Chưa có chương học"}
       </small>
       <div className="garden-goal-flowers">
-        <Flower2 size={17} /> {flowers}/{classroom.chapters.length} cây đã ra
-        hoa
+        <Flower2 size={17} /> {flowers}/{classroom.chapters.length} cây đã Kết
+        Trái
       </div>
-      <button className="text-button" onClick={onPractice}>
+      <button className="text-button" onClick={onPractice} disabled={!chapter}>
         Bắt đầu một bước nhỏ <ArrowRight size={17} />
       </button>
     </section>

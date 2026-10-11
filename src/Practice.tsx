@@ -454,12 +454,12 @@ export function Practice({
                   );
                 requestId.current = crypto.randomUUID();
               }}
-              className={`choice ${selected === i ? "selected" : ""} ${result && i === result.correctIndex ? "correct-choice" : ""} ${result && selected === i && !result.correct ? "wrong-choice" : ""}`}
+              className={`choice ${selected === i ? "selected" : ""} ${result?.correct && i === result.correctIndex ? "correct-choice" : ""} ${result && selected === i && !result.correct ? "wrong-choice" : ""}`}
               aria-pressed={selected === i}
             >
               <span className="choice-letter">{"ABCD"[i]}</span>
               <span>{choice}</span>
-              {result && i === result.correctIndex ? (
+              {result?.correct && i === result.correctIndex ? (
                 <Check size={20} />
               ) : result && selected === i && !result.correct ? (
                 <X size={20} />
@@ -487,7 +487,11 @@ export function Practice({
                   : "Chưa đúng, cùng xem lại kiến thức nhé."}
               </strong>
             </div>
-            <p>{result.explanation}</p>
+            <p>
+              {result.correct
+                ? result.explanation
+                : "Hãy xem lại kiến thức và tự làm lại câu này."}
+            </p>
             {!result.correct && (
               <small>
                 Câu hỏi đã được lưu vào sổ tay sửa sai để bạn làm lại.

@@ -1,8 +1,8 @@
-# Cấp icon học sinh theo lớp và môn
+# Cấp icon học sinh theo lớp, môn và chương
 
-Người dùng đã chọn phương án 1 ngày 11/10/2026: cấp icon tính bằng **tổng thời gian học được ghi nhận trong lớp/môn đang chọn**.
+Theo yêu cầu mới ngày 11/10/2026, cấp icon tính bằng **thời gian học được ghi nhận trong từng chương**, thuộc đúng lớp/môn đang chọn. Quy tắc này thay lựa chọn tổng theo lớp/môn trước đó.
 
-| Cấp | Tên      | Thời gian học của lớp/môn    |
+| Cấp | Tên      | Thời gian học của chương    |
 | --- | -------- | ---------------------------- |
 | 1   | Mầm      | Dưới 1 giờ, gồm học sinh mới |
 | 2   | Chồi     | Từ 1 giờ đến dưới 2 giờ      |
@@ -10,12 +10,16 @@ Người dùng đã chọn phương án 1 ngày 11/10/2026: cấp icon tính b�
 | 4   | Đơm Hoa  | Từ 3 giờ đến dưới 4 giờ      |
 | 5   | Kết Trái | Từ 4 giờ trở lên             |
 
-Một lớp trong GreenEdu gắn với một môn và giáo viên sở hữu. Cấp tính riêng theo `classroom_id`, cộng thời gian của các chương thuộc đúng lớp đó. Hai lớp khác nhau cùng môn cũng có cấp riêng. Không cộng thời gian từ lớp khác, môn khác hoặc học sinh khác. Ví dụ học sinh có 4 giờ ở Vật lý đạt Kết Trái, 1 giờ ở Toán đạt Chồi, và 0 giờ ở một lớp Vật lý khác vẫn là Mầm.
+Một lớp trong GreenEdu gắn với một môn và giáo viên sở hữu. Cấp tính riêng theo `student_id + chapter_id`; chương thuộc `classroom_id` xác định đúng lớp/môn. Không cộng thời gian từ chương khác, lớp khác, môn khác hoặc học sinh khác. Ví dụ hai chương Vật lý cùng có 2 giờ thì mỗi chương đạt Cây Non; tổng 4 giờ không làm cả hai đạt Kết Trái. Chương chưa học vẫn là Mầm.
 
 Chỉ dùng thời gian có hoạt động đã ghi trong bảng `progress` qua đồng hồ/heartbeat máy chủ. Thời gian làm bài kiểm tra, trang bị ẩn và thời gian không hoạt động vẫn theo quy tắc hiện có; icon không tự tạo thời gian hoặc điểm. Tổng sử dụng số giây nguyên của từng chương như danh sách tiến độ/xếp hạng. Không có trường cấp độ do học sinh tự gửi hoặc bảng cấp riêng cần đồng bộ: cấp được suy ra từ tiến độ hiện có, giữ qua restart.
 
-API danh sách lớp trả `studentLevel` cho học sinh trong từng lớp; giáo viên có giá trị null tại danh sách lớp. Roster và xếp hạng trả cùng metadata cấp của từng học sinh trong lớp đó. Công thức và tên cấp tập trung tại `shared/student-levels.ts`.
+API danh sách lớp trả seconds/level theo chương. Roster và xếp hạng thêm `chapterLevels` gồm chapterId/chapterTitle và metadata cấp từ thời gian riêng. Trường studentLevel tổng cũ còn để tương thích, không được dùng hiển thị cấp cá nhân trong UI mới. Công thức và tên cấp tập trung tại `shared/student-levels.ts`.
 
-Cấp icon học sinh là tổng theo lớp/môn. Cây kiến thức, vé và các điều kiện ôn/thi hiện có vẫn tính theo chương: tổng đủ 4 giờ của lớp không cấp thêm vé, thưởng cây chương hoặc tự mở bài thi. Cấp icon không thay mật khẩu, vai trò, avatar đã chọn hay dữ liệu tiến độ.
+**Khu vườn của lớp (11/10/2026):** API `GET /api/classrooms/:id/garden` bổ sung `members` gồm studentId, studentName, avatarId và level cho toàn bộ học sinh đang thuộc lớp. Mỗi bạn xuất hiện một lần với cấp đại diện là **cấp cao nhất trong các chương của lớp đó** (MAX giây từng chương rồi tính cấp), không dùng SUM thời gian. Hai chương cùng 2 giờ vẫn đại diện Cây Non, tiến độ môn/lớp khác không làm tăng cấp. Chưa học hoặc lớp chưa có chương vẫn Mầm; học sinh đã rời lớp không xuất hiện. Endpoint giữ kiểm tra chủ lớp/thành viên và dữ liệu `trees` cũ để tương thích, không trả email/mật khẩu hay tạo tiến độ. Cấp riêng từng chương và điều kiện kiểm tra không đổi. Thiết kế/animation xem [app-design.md](app-design.md).
+
+Theo phản hồi cùng ngày, vườn hiển thị toàn bộ thành viên ở một frame có rào, icon/tên/avatar chuyển động; **Vinh danh Kết Trái · Cấp 5** là frame riêng lọc `members.level === 5`. Học sinh cấp 5 vẫn nằm trong vườn chung, vinh danh một lần dù nhiều chương đạt cấp 5. Với API cũ chưa có members, chỉ có thể dùng trees để vinh danh những học sinh đã được xác nhận đạt 4 giờ; không tự suy cấp hoặc danh sách đầy đủ. Backend/quy tắc tiến độ không đổi trong lần chỉnh bố cục này.
+
+Cấp icon, cây kiến thức, vé và các điều kiện ôn/thi đều theo chương: tổng đủ 4 giờ của lớp không cấp thêm vé, thưởng cây chương hoặc tự mở bài thi. Cấp icon không thay mật khẩu, vai trò, avatar đã chọn hay dữ liệu tiến độ. Không cần migration tiến độ: dùng số giây từng chương đã có.
 
 Hình thức icon/vị trí/responsive xem [app-design.md](app-design.md); danh mục kiểm thử xem [functional-test-cases.md](functional-test-cases.md). Kiểm thử API có mốc chính xác, phân tách hai môn/hai lớp cùng môn và đối chiếu học sinh–roster–xếp hạng. Trình duyệt kiểm tra đủ năm icon, đổi lớp, tải lại, trang Tài khoản và giáo viên ở desktop/mobile bằng database riêng.

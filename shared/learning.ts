@@ -69,6 +69,7 @@ export type LearningReward = {
   createdAt: number;
 };
 export type LearningOverview = {
+  examCreation?: boolean;
   chapters: LearningChapter[];
   matrix: MatrixRow[];
   blueprints: {

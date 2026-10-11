@@ -37,6 +37,11 @@
   height: 100px;
   align-self: center;
 }
+.learning-chapter > .student-level-icon {
+  width: 88px;
+  height: 88px;
+  align-self: center;
+}
 .learning-chapter h3 {
   margin: 10px 0;
 }
@@ -267,4 +272,128 @@
   .exam-numbers {
     grid-template-columns: repeat(6, 1fr);
   }
+}
+.learning-requirements {
+  padding-left: 20px;
+  color: #65746c;
+}
+.learning-requirements li {
+  margin: 6px 0;
+}
+.reward-ticket-icon {
+  color: #a87c29;
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+.exam-required-level {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.exam-required-level > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.hunt-chapter {
+  gap: 16px;
+}
+.hunt-chapter h3 {
+  margin: 0;
+  min-height: 2.8em;
+  font-size: var(--text-card);
+  line-height: 1.4;
+}
+.hunt-entry-requirements {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #f3f6ec;
+}
+.hunt-chapter .exam-required-level {
+  margin-top: 0;
+}
+.hunt-chapter .exam-required-level > .student-level-icon {
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+}
+.hunt-chapter .exam-required-level small,
+.hunt-current-level small {
+  color: var(--muted);
+  font-size: var(--text-caption);
+}
+.hunt-required-ticket {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: var(--text-label);
+}
+.hunt-required-ticket strong {
+  margin-left: auto;
+  color: #806124;
+  white-space: nowrap;
+}
+.hunt-chapter dl {
+  margin: 0;
+  font-size: var(--text-label);
+}
+.hunt-chapter dl div {
+  margin: 0 0 10px;
+}
+.hunt-chapter dl div:last-child {
+  margin-bottom: 0;
+}
+.hunt-chapter .learning-requirements {
+  margin: 0;
+  font-size: var(--text-caption);
+  line-height: 1.6;
+}
+.hunt-chapter .learning-ready {
+  margin: 0;
+  flex: none;
+}
+.hunt-current-level {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.hunt-current-level > .student-level-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+.hunt-current-level > div {
+  display: grid;
+  gap: 3px;
+}
+.hunt-current-level strong {
+  font-size: var(--text-label);
+}
+.hunt-current-level > span {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: var(--text-caption);
+  white-space: nowrap;
+}
+.hunt-chapter > .button {
+  width: 100%;
+  justify-content: center;
+}
+.exam-upload .learning-row {
+  align-items: flex-start;
+}
+.exam-upload strong {
+  overflow-wrap: anywhere;
 }

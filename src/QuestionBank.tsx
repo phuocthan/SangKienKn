@@ -27,11 +27,13 @@ type Dialog =
 
 export function QuestionBank({
   chapterId,
+  topicSupported,
   lesson,
   revision,
   onChange,
 }: {
   chapterId: string;
+  topicSupported: boolean;
   lesson: string;
   revision: number;
   onChange: () => void;
@@ -178,12 +180,17 @@ export function QuestionBank({
           onClose={() => setDialog(null)}
         >
           {dialog.type === "edit" && (
-            <EditForm question={dialog.question} onSaved={saved} />
+            <EditForm
+              question={dialog.question}
+              onSaved={saved}
+              topicSupported={topicSupported}
+            />
           )}
           {dialog.type === "import" && (
             <ImportForm
               chapterId={chapterId}
               initialFormat={dialog.format}
+              topicSupported={topicSupported}
               onSaved={saved}
             />
           )}
@@ -240,6 +247,7 @@ function QuestionCard({
         </span>
       </div>
       <h3>{q.text}</h3>
+      {q.topic && <p className="subtle-note">Chủ đề: {q.topic}</p>}
       <div className="bank-choices">
         {q.choices.map((choice, index) => (
           <div
@@ -264,8 +272,10 @@ function QuestionCard({
 function EditForm({
   question,
   onSaved,
+  topicSupported,
 }: {
   question: Question;
+  topicSupported: boolean;
   onSaved: () => void;
 }) {
   const [busy, setBusy] = useState(false),
@@ -277,7 +287,10 @@ function EditForm({
     setBusy(true);
     setError("");
     try {
-      await api(`/questions/${question.id}/edit`, readQuestionForm(form));
+      await api(`/questions/${question.id}/edit`, {
+        ...readQuestionForm(form),
+        topic: new FormData(form).get("topic") ?? question.topic ?? "",
+      });
       onSaved();
     } catch (e) {
       setError(errorMessage(e));
@@ -291,7 +304,7 @@ function EditForm({
         Nội dung thay đổi sẽ tạo phiên bản mới. Những lượt làm bài và câu cần
         sửa trước đây giữ nguyên nội dung cũ.
       </p>
-      <QuestionFields question={question} />
+      <QuestionFields question={question} topicSupported={topicSupported} />
       {error && (
         <div className="error-banner" role="alert">
           {error}
@@ -341,9 +354,11 @@ function ImportForm({
   chapterId,
   initialFormat,
   onSaved,
+  topicSupported,
 }: {
   chapterId: string;
   initialFormat: ImportFormat;
+  topicSupported: boolean;
   onSaved: () => void;
 }) {
   const [format, setFormat] = useState<ImportFormat>(initialFormat);
@@ -355,6 +370,7 @@ function ImportForm({
     [filename, setFilename] = useState("");
   const requestId = useRef(crypto.randomUUID()),
     sequence = useRef(0);
+  const unsupportedTopics = !topicSupported && questions.some((q) => q.topic);
   async function read(file?: File) {
     const current = ++sequence.current;
     setQuestions([]);
@@ -426,7 +442,14 @@ function ImportForm({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   async function save() {
-    if (busy || reading || errors.length || !questions.length) return;
+    if (
+      busy ||
+      reading ||
+      errors.length ||
+      !questions.length ||
+      unsupportedTopics
+    )
+      return;
     setBusy(true);
     setSaveError("");
     try {
@@ -520,6 +543,7 @@ function ImportForm({
                   {index + 1}. {q.text}
                 </summary>
                 <p>{q.lesson}</p>
+                {q.topic && <p>Chủ đề: {q.topic}</p>}
                 <ol type="A">
                   {q.choices.map((choice, i) => (
                     <li key={i}>
@@ -534,6 +558,12 @@ function ImportForm({
           </div>
         </>
       )}
+      {unsupportedTopics && (
+        <div className="error-banner" role="alert">
+          Máy chủ hiện tại chưa hỗ trợ chủ đề câu hỏi. Cần cập nhật máy chủ
+          trước khi nhập bộ câu này để giữ đầy đủ chủ đề.
+        </div>
+      )}
       {saveError && (
         <div className="error-banner" role="alert">
           {saveError} Bạn có thể thử xác nhận lại.
@@ -541,7 +571,13 @@ function ImportForm({
       )}
       <button
         className="button primary"
-        disabled={busy || reading || !!errors.length || !questions.length}
+        disabled={
+          busy ||
+          reading ||
+          !!errors.length ||
+          !questions.length ||
+          unsupportedTopics
+        }
         onClick={() => void save()}
       >
         {busy ? "Đang nhập…" : `Xác nhận nhập ${questions.length} câu`}

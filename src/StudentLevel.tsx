@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { STUDENT_LEVEL_NAMES, studentLevel } from "../shared/student-levels";
-import type { Classroom } from "./types";
+import type { Chapter, Classroom } from "./types";
 import { duration } from "./api";
 
 export function StudentLevelIcon({
@@ -234,64 +234,94 @@ export function StudentLevelBadge({
   );
 }
 
-export function StudentLevelCard({ classroom }: { classroom: Classroom }) {
-  const stage =
-    classroom.studentLevel ??
-    studentLevel(classroom.chapters.reduce((n, ch) => n + ch.seconds, 0));
+export function ChapterLevelTimeline({ chapter }: { chapter: Chapter }) {
+  const stage = studentLevel(chapter.seconds);
+  const percent = Math.min(100, (stage.seconds / 14400) * 100);
   return (
-    <section
-      className="card student-level-card"
-      aria-label="Cấp độ của bạn trong lớp"
-      data-classroom-id={classroom.id}
+    <div
+      className="chapter-level-timeline"
+      data-chapter-id={chapter.id}
       data-level={stage.level}
     >
-      <div className="student-level-overview">
-        <StudentLevelIcon level={stage.level} />
-        <div className="student-level-copy">
-          <span className="eyebrow">CẤP ĐỘ CỦA BẠN</span>
-          <h2>
-            Cấp {stage.level} · {stage.name}
-          </h2>
-          <p>
-            {classroom.name} · {classroom.subject}
-          </p>
-          <small>{duration(stage.seconds)} đã học trong lớp này</small>
-        </div>
-      </div>
-      <div className="student-level-journey" aria-label="Năm cấp độ học tập">
+      <ol
+        className="chapter-level-milestones"
+        aria-label={`Mốc cấp độ ${chapter.title}`}
+      >
         {STUDENT_LEVEL_NAMES.map((name, index) => (
-          <div
+          <li
             key={name}
-            className={`student-level-step ${index + 1 === stage.level ? "current" : index + 1 < stage.level ? "earned" : ""}`}
+            className={
+              index + 1 === stage.level
+                ? "current"
+                : index + 1 < stage.level
+                  ? "earned"
+                  : ""
+            }
             aria-current={index + 1 === stage.level ? "step" : undefined}
           >
             <StudentLevelIcon level={index + 1} />
             <span>{name}</span>
-            <small>{index === 0 ? "Bắt đầu" : `${index} giờ`}</small>
-          </div>
+            <small>{index} giờ</small>
+          </li>
+        ))}
+      </ol>
+      <div
+        className="chapter-level-rail"
+        role="progressbar"
+        aria-label={`Tiến độ ${chapter.title}`}
+        aria-valuemin={0}
+        aria-valuemax={14400}
+        aria-valuenow={Math.min(stage.seconds, 14400)}
+        aria-valuetext={`${duration(stage.seconds)} · Cấp ${stage.level} · ${stage.name}`}
+      >
+        <span className="chapter-level-fill" style={{ width: `${percent}%` }} />
+        {STUDENT_LEVEL_NAMES.map((name, index) => (
+          <span
+            key={name}
+            className={`chapter-level-tick ${index + 1 <= stage.level ? "earned" : ""}`}
+            style={{ left: `${index * 25}%` }}
+          />
         ))}
       </div>
-      <div className="student-level-next">
-        <div
-          className="progress-track"
-          role="progressbar"
-          aria-label="Tiến độ cấp học sinh"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={stage.progressPercent}
-        >
-          <span style={{ width: `${stage.progressPercent}%` }} />
-        </div>
-        <p>
-          {stage.level === 5
-            ? "Bạn đã đạt cấp Kết Trái trong lớp này. Tiếp tục chăm các cây kiến thức nhé!"
-            : `Còn ${duration(stage.remainingSeconds)} để lên ${STUDENT_LEVEL_NAMES[stage.level]}.`}
-        </p>
-        <small>
-          Mỗi lớp và môn học có cấp độ riêng, tính từ thời gian học được ghi
-          nhận.
-        </small>
+      <div className="chapter-level-summary">
+        <span>
+          {duration(stage.seconds)} / 4 giờ · {chapter.total} lượt luyện tập
+        </span>
+        <strong>
+          Cấp {stage.level} · {stage.name}
+        </strong>
       </div>
+      <p className="chapter-level-next">
+        {stage.level === 5
+          ? "Đã đạt Kết Trái trong chương này."
+          : `Còn ${duration(stage.remainingSeconds)} để lên ${STUDENT_LEVEL_NAMES[stage.level]}.`}
+      </p>
+    </div>
+  );
+}
+
+export function StudentLevelCard({ classroom }: { classroom: Classroom }) {
+  return (
+    <section
+      className="card student-level-card"
+      aria-label="Cấp độ của bạn theo chương"
+      data-classroom-id={classroom.id}
+    >
+      <span className="eyebrow">CẤP ĐỘ CỦA BẠN</span>
+      <h2>
+        {classroom.name} · {classroom.subject}
+      </h2>
+      <p>
+        Mỗi chương có cấp riêng, tính từ thời gian học được ghi nhận trong
+        chương đó.
+      </p>
+      {classroom.chapters.map((chapter) => (
+        <article className="chapter-level-card" key={chapter.id}>
+          <h3>{chapter.title}</h3>
+          <ChapterLevelTimeline chapter={chapter} />
+        </article>
+      ))}
+      {!classroom.chapters.length && <p>Chưa có chương học.</p>}
     </section>
   );
 }

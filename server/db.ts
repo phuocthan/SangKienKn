@@ -165,6 +165,7 @@ export function openDatabase(path: string) {
       .map((c) => c.name),
   );
   for (const [name, definition] of [
+    ["topic", "TEXT NOT NULL DEFAULT ''"],
     ["active", "INTEGER NOT NULL DEFAULT 1"],
     ["is_current", "INTEGER NOT NULL DEFAULT 1"],
     ["version", "INTEGER NOT NULL DEFAULT 1"],

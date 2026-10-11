@@ -1,6 +1,9 @@
 import type { Express } from "express";
 import type { DatabaseSync } from "node:sqlite";
-import { randomInt, randomUUID } from "node:crypto";
+import { randomInt, randomUUID, createHash } from "node:crypto";
+import { questionInput } from "../shared/questions.js";
+import { sampleByTopic } from "../shared/question-topics.js";
+import { lessonIsArchived } from "./lesson-catalog.js";
 import { zipSync, strToU8 } from "fflate";
 import type { AppRequest, Row } from "./app.js";
 
@@ -13,6 +16,7 @@ type Context = {
   classroom: (req: AppRequest, id: string) => Row;
 };
 type Snapshot = {
+  topic?: string;
   id: string;
   chapterId: string;
   chapterTitle: string;
@@ -33,6 +37,19 @@ const shuffle = <T>(values: T[]) => {
 };
 const cleanQuestion = ({ correctIndex: _c, explanation: _e, ...q }: Snapshot) =>
   q;
+const studyFeedback = (answer: {
+  selected: number;
+  correct: boolean;
+  correctIndex?: number;
+  explanation?: string;
+}) =>
+  answer.correct
+    ? answer
+    : {
+        selected: answer.selected,
+        correct: false,
+        explanation: "Hãy xem lại kiến thức và tự làm lại câu này.",
+      };
 
 export function grantLearningMilestones(
   db: DatabaseSync,
@@ -213,6 +230,7 @@ export function registerLearningRoutes(
         choices: json<string[]>(q.choices),
         correctIndex: Number(q.correct_index),
         explanation: String(q.explanation),
+        ...(q.topic ? { topic: String(q.topic) } : {}),
       }));
   }
   function matrix(classId: string) {
@@ -225,10 +243,35 @@ export function registerLearningRoutes(
       .all(classId)
       .map((q) => ({ ...q, key: `${q.chapterId}::${q.lesson}` }));
   }
-  function sample(ids: string[], count: number, weights: unknown): Snapshot[] {
-    const all = bank(ids);
+  function sample(
+    ids: string[],
+    count: number,
+    weights: unknown,
+    lessonKeys?: unknown,
+  ): Snapshot[] {
+    let all = bank(ids);
+    if (lessonKeys !== undefined) {
+      if (
+        !Array.isArray(lessonKeys) ||
+        !lessonKeys.length ||
+        lessonKeys.length > 100 ||
+        new Set(lessonKeys).size !== lessonKeys.length ||
+        lessonKeys.some(
+          (key) =>
+            typeof key !== "string" ||
+            !all.some((q) => `${q.chapterId}::${q.lesson}` === key),
+        )
+      )
+        fail(
+          400,
+          "Danh sách bài không hợp lệ hoặc không thuộc chương đã chọn.",
+        );
+      all = all.filter((q) =>
+        lessonKeys.includes(`${q.chapterId}::${q.lesson}`),
+      );
+    }
     if (!all.length) fail(409, "Các chương được chọn chưa có câu hỏi.");
-    if (!count) return shuffle(all).slice(0, 100);
+    if (!count) return sampleByTopic(all, 100, (q) => q, randomInt);
     if (all.length < count)
       fail(409, `Ngân hàng chỉ có ${all.length} câu, cần ${count} câu.`);
     if (!weights || typeof weights !== "object" || Array.isArray(weights))
@@ -239,7 +282,7 @@ export function registerLearningRoutes(
       const key = `${q.chapterId}::${q.lesson}`;
       groups.set(key, [...(groups.get(key) ?? []), q]);
     }
-    if (!Object.keys(w).length) return shuffle(all).slice(0, count);
+    if (!Object.keys(w).length) return sampleByTopic(all, count, (q) => q, randomInt);
     for (const [key, value] of Object.entries(w))
       if (
         !groups.has(key) ||
@@ -266,9 +309,9 @@ export function registerLearningRoutes(
           409,
           `Bài ${available[0].lesson} thiếu câu: cần ${quota.n}, hiện có ${available.length}.`,
         );
-      chosen.push(...shuffle(available).slice(0, quota.n));
+      chosen.push(...sampleByTopic(available, quota.n, (q) => q, randomInt));
     }
-    return shuffle(chosen);
+    return sampleByTopic(chosen, chosen.length, (q) => q, randomInt);
   }
   function examAllowed(chapterId: string) {
     return (
@@ -421,6 +464,7 @@ export function registerLearningRoutes(
     const args = own ? [c.id, req.user!.id] : [c.id];
     res.json({
       chapters,
+      examCreation: true,
       matrix: matrix(c.id),
       blueprints: db
         .prepare(
@@ -606,7 +650,11 @@ export function registerLearningRoutes(
       currentIndex: r.current_index,
       completed: !!r.completed,
       questions: json<Snapshot[]>(r.questions).map(cleanQuestion),
-      answers: json(r.answers),
+      answers: Object.fromEntries(
+        Object.entries(
+          json<Record<string, Parameters<typeof studyFeedback>[0]>>(r.answers),
+        ).map(([id, answer]) => [id, studyFeedback(answer)]),
+      ),
     });
   });
   app.post("/api/learning/reviews/:id/answer", (req: AppRequest, res) => {
@@ -630,7 +678,7 @@ export function registerLearningRoutes(
     const selected = number(req.body?.selected, "Đáp án", 0, 3);
     if (answers[q.id]) {
       if (answers[q.id].selected !== selected) fail(409, "Câu đã trả lời.");
-      return res.json(answers[q.id]);
+      return res.json(studyFeedback(answers[q.id]));
     }
     if (r.completed || qs[Number(r.current_index)]?.id !== q.id)
       fail(409, "Hãy tiếp tục từ câu đang làm.");
@@ -665,7 +713,7 @@ export function registerLearningRoutes(
       db.exec("ROLLBACK");
       throw e;
     }
-    res.json(result);
+    res.json(studyFeedback(result));
   });
   app.post("/api/learning/reviews/:id/next", (req: AppRequest, res) => {
     const r = review(req),
@@ -684,24 +732,182 @@ export function registerLearningRoutes(
     teacher(req);
     const c = classroom(req, String(req.params.id)),
       ids = chapterIds(c.id, req.body?.chapterIds),
-      count = number(req.body?.questionCount, "Số câu", 1, 100);
+      source = req.body?.source ?? "bank";
+    if (!["bank", "upload"].includes(source))
+      fail(400, "Nguồn đề không hợp lệ.");
+    if (
+      req.body?.manualOpen !== undefined &&
+      typeof req.body.manualOpen !== "boolean"
+    )
+      fail(400, "Cách mở không hợp lệ.");
+    const title = text(req.body?.title, "Tên kiểm tra", 120);
+    const tabLimit = number(
+      req.body?.tabLimit ?? 4,
+      "Ngưỡng chuyển tab",
+      1,
+      10,
+    );
     const starts = number(req.body?.startsAt, "Giờ mở", 1, 8640000000000000),
       closes = number(req.body?.closesAt, "Giờ đóng", 1, 8640000000000000);
+    const requestId =
+      req.body?.requestId === undefined
+        ? null
+        : text(req.body.requestId, "Mã tạo kiểm tra", 100);
+    const fingerprint = createHash("sha256")
+      .update(JSON.stringify(req.body))
+      .digest("hex");
+    if (requestId) {
+      const existing = db
+        .prepare("SELECT * FROM exam_creation_requests WHERE request_id=?")
+        .get(requestId);
+      if (existing) {
+        if (
+          existing.teacher_id !== req.user!.id ||
+          existing.classroom_id !== c.id ||
+          existing.fingerprint !== fingerprint
+        )
+          fail(409, "Mã tạo kiểm tra đã dùng cho nội dung khác.");
+        return res.json({ id: existing.exam_id });
+      }
+    }
     if (closes <= starts || closes <= now())
       fail(400, "Giờ đóng phải sau giờ mở và hiện tại.");
-    const questions = sample(ids, count, req.body?.weights ?? {}),
-      id = randomUUID();
-    db.prepare("INSERT INTO exam_definitions VALUES(?,?,?,?,?,?,?,1,?)").run(
-      id,
-      c.id,
-      text(req.body?.title, "Tên kiểm tra", 120),
-      JSON.stringify(questions),
-      starts,
-      closes,
-      number(req.body?.tabLimit ?? 4, "Ngưỡng chuyển tab", 1, 10),
-      now(),
-    );
+    let uploaded: {
+      chapterId: string;
+      content: ReturnType<typeof questionInput>;
+    }[] = [];
+    let questions: Snapshot[] = [];
+    if (source === "bank")
+      questions = sample(
+        ids,
+        number(req.body?.questionCount, "Số câu", 1, 100),
+        req.body?.weights ?? {},
+        req.body?.lessonKeys,
+      );
+    else {
+      if (
+        !Array.isArray(req.body?.questions) ||
+        !req.body.questions.length ||
+        req.body.questions.length > 100
+      )
+        fail(400, "Đề tải lên cần 1–100 câu hợp lệ.");
+      uploaded = req.body.questions.map((row: any) => {
+        if (!row || !ids.includes(row.chapterId))
+          fail(403, "Câu tải lên phải thuộc chương đã chọn.");
+        let content: ReturnType<typeof questionInput>;
+        try {
+          content = questionInput(row.question);
+        } catch (error) {
+          fail(
+            400,
+            error instanceof Error
+              ? error.message
+              : "Câu tải lên không hợp lệ.",
+          );
+        }
+        if (lessonIsArchived(db, row.chapterId, content.lesson))
+          fail(409, "Bài trong đề đã bị xóa; thêm lại bài trước.");
+        return { chapterId: row.chapterId, content };
+      });
+      if (
+        new Set(
+          uploaded.map((row) =>
+            JSON.stringify([
+              row.chapterId,
+              row.content.text
+                .normalize("NFC")
+                .toLowerCase()
+                .replace(/\s+/g, " "),
+            ]),
+          ),
+        ).size !== uploaded.length
+      )
+        fail(400, "Đề tải lên có câu trùng trong cùng chương.");
+    }
+    const id = randomUUID();
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      for (const { chapterId, content } of uploaded) {
+        const questionId = randomUUID();
+        // Private exam questions support grading/notebook without publishing to practice.
+        db.prepare(
+          `INSERT INTO questions(id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,changed_at,topic)
+          VALUES(?,?,?,?,?,?,?,0,1,1,?,?)`,
+        ).run(
+          questionId,
+          chapterId,
+          content.text,
+          JSON.stringify(content.choices),
+          content.correctIndex,
+          content.explanation,
+          content.lesson,
+          now(),
+          content.topic ?? "",
+        );
+        questions.push({
+          ...content,
+          id: questionId,
+          chapterId,
+          chapterTitle: String(
+            db.prepare("SELECT title FROM chapters WHERE id=?").get(chapterId)!
+              .title,
+          ),
+        });
+      }
+      db.prepare("INSERT INTO exam_definitions VALUES(?,?,?,?,?,?,?,?,?)").run(
+        id,
+        c.id,
+        title,
+        JSON.stringify(questions),
+        starts,
+        closes,
+        tabLimit,
+        req.body?.manualOpen ? 0 : 1,
+        now(),
+      );
+      if (requestId)
+        db.prepare("INSERT INTO exam_creation_requests VALUES(?,?,?,?,?)").run(
+          requestId,
+          c.id,
+          req.user!.id,
+          fingerprint,
+          id,
+        );
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
     res.status(201).json({ id });
+  });
+  app.post("/api/learning/exams/:id/open", (req: AppRequest, res) => {
+    teacher(req);
+    const e = db
+      .prepare("SELECT * FROM exam_definitions WHERE id=?")
+      .get(String(req.params.id));
+    if (!e) fail(404, "Không tìm thấy kiểm tra.");
+    classroom(req, String(e.classroom_id));
+    const timestamp = now();
+    if (Number(e.closes_at) <= timestamp)
+      fail(409, "Bài đã hết giờ. Tạo lịch kiểm tra mới để mở.");
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      for (const chapterId of new Set(
+        json<Snapshot[]>(e.questions).map((q) => q.chapterId),
+      ))
+        db.prepare(
+          `INSERT INTO chapter_exam_access VALUES(?,1,?,?) ON CONFLICT(chapter_id)
+          DO UPDATE SET enabled=1,updated_by=excluded.updated_by,updated_at=excluded.updated_at`,
+        ).run(chapterId, req.user!.id, timestamp);
+      db.prepare(
+        "UPDATE exam_definitions SET enabled=1,starts_at=MIN(starts_at,?) WHERE id=?",
+      ).run(timestamp, e.id);
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+    res.json({ ok: true });
   });
   app.post("/api/learning/exams/:id/state", (req: AppRequest, res) => {
     teacher(req);
@@ -780,7 +986,7 @@ export function registerLearningRoutes(
           403,
           `Giáo viên chưa mở kiểm tra: ${blocked.map((ch) => ch.title).join(" · ")}.`,
         );
-      questions = shuffle(snapshot);
+      questions = sampleByTopic(snapshot, snapshot.length, (q) => q, randomInt);
       deadline = Math.min(now() + 1200000, Number(e.closes_at));
       title = String(e.title);
       tabLimit = Number(e.tab_limit);

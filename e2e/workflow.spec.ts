@@ -421,9 +421,8 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
     .getByRole("navigation")
     .getByRole("button", { name: "Khu vườn của lớp", exact: true })
     .click();
-  await expect(
-    page.getByRole("heading", { name: "Khu vườn đang chờ cây ra hoa" }),
-  ).toBeVisible();
+  await expect(page.locator('.garden-student[data-student-id="student-demo"]')).toHaveCount(1);
+  await expect(page.locator(".garden-honoree")).toHaveCount(0);
   await page
     .getByRole("navigation")
     .getByRole("button", { name: "Xếp hạng chăm chỉ", exact: true })
@@ -447,7 +446,7 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
   expect(errors).toEqual([]);
 });
 
-test("community renders multiple earned trees and tied ranks without overflowing the viewport", async ({
+test("community honors earned students once with old API and keeps tied ranks without overflowing", async ({
   page,
 }, info) => {
   // Presentation fixtures are intercepted only in this browser; persisted demo data is unchanged.
@@ -507,9 +506,9 @@ test("community renders multiple earned trees and tied ranks without overflowing
     .getByRole("button", { name: "Khu vườn của lớp", exact: true })
     .click();
   await expect(
-    page.getByRole("img", { name: "Cây kiến thức cấp 5" }),
-  ).toHaveCount(4);
-  await expect(page.locator(".class-tree-card.community-mine")).toHaveCount(2);
+    page.getByRole("img", { name: "Cấp 5 · Kết Trái" }),
+  ).toHaveCount(2);
+  await expect(page.locator(".garden-honoree.is-mine")).toHaveCount(1);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -521,8 +520,8 @@ test("community renders multiple earned trees and tied ranks without overflowing
   });
   await page.getByRole("button", { name: "Cập nhật", exact: true }).click();
   await expect(
-    page.getByRole("img", { name: "Cây kiến thức cấp 5" }),
-  ).toHaveCount(4);
+    page.getByRole("img", { name: "Cấp 5 · Kết Trái" }),
+  ).toHaveCount(2);
   await page
     .getByRole("navigation")
     .getByRole("button", { name: "Xếp hạng chăm chỉ", exact: true })
@@ -656,9 +655,9 @@ test("teacher creates content and student account; student changes password, lea
     .getByRole("navigation")
     .getByRole("button", { name: "Khu vườn của lớp", exact: true })
     .click();
-  await expect(
-    page.getByRole("heading", { name: "Khu vườn đang chờ cây ra hoa" }),
-  ).toBeVisible();
+  await expect(page.locator(".garden-student")).toHaveCount(1);
+  await expect(page.locator(".garden-student")).toHaveAttribute("title", studentName);
+  await expect(page.locator(".garden-honoree")).toHaveCount(0);
   await page
     .getByRole("navigation")
     .getByRole("button", { name: "Xếp hạng chăm chỉ", exact: true })

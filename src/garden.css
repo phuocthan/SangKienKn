@@ -338,6 +338,27 @@ a:focus-visible {
 .student-stats {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+.stat-correction-details {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: 10px;
+  min-width: 0;
+}
+.stat-correction-details > strong {
+  color: #8d7136;
+  font-size: var(--text-label);
+}
+.stat-correction-details p {
+  margin: 6px 0 10px;
+  font-size: var(--text-caption);
+  color: var(--muted);
+  line-height: 1.6;
+}
+.stat-correction-details .text-button {
+  padding: 0;
+  color: #8d7136;
+}
 .stat-card {
   min-height: 116px;
   padding: 20px;

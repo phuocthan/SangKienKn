@@ -1,5 +1,9 @@
 import { Unzip, UnzipInflate } from "fflate";
-import { questionInput, type QuestionInput } from "./questions";
+import {
+  questionInput,
+  questionContentKey,
+  type QuestionInput,
+} from "./questions";
 
 export const wordFileLimit = 5 * 1024 * 1024;
 export const wordXmlLimit = 2 * 1024 * 1024;
@@ -73,10 +77,19 @@ export function readWordDocument(data: Uint8Array): string {
 }
 
 type Field =
-  "text" | "lesson" | "A" | "B" | "C" | "D" | "answer" | "explanation";
+  | "text"
+  | "lesson"
+  | "topic"
+  | "A"
+  | "B"
+  | "C"
+  | "D"
+  | "answer"
+  | "explanation";
 const fieldNames: Record<Field, string> = {
   text: "Câu hỏi",
   lesson: "Bài học",
+  topic: "Chủ đề",
   A: "A",
   B: "B",
   C: "C",
@@ -110,7 +123,9 @@ export function parseQuestionWordText(source: string): {
     }
     if (!current) continue; // Introductory instructions precede the first question.
     const label =
-      /^(Bài\s+học|Đáp\s+án(?:\s+đúng)?|Lời\s+giải)\s*:\s*(.*)$/iu.exec(line);
+      /^(Bài\s+học|Chủ\s+đề|Đáp\s+án(?:\s+đúng)?|Lời\s+giải)\s*:\s*(.*)$/iu.exec(
+        line,
+      );
     const choice = /^([ABCD])\s*[.):]\s*(.*)$/iu.exec(line);
     let field: Field | undefined,
       value = "";
@@ -118,9 +133,11 @@ export function parseQuestionWordText(source: string): {
       const key = label[1].toLocaleLowerCase("vi");
       field = key.startsWith("bài")
         ? "lesson"
-        : key.startsWith("đáp")
-          ? "answer"
-          : "explanation";
+        : key.startsWith("chủ")
+          ? "topic"
+          : key.startsWith("đáp")
+            ? "answer"
+            : "explanation";
       value = label[2];
     } else if (choice) {
       field = choice[1].toUpperCase() as Field;
@@ -147,7 +164,7 @@ export function parseQuestionWordText(source: string): {
     seen = new Set<string>();
   blocks.forEach(({ fields, errors: blockErrors }, index) => {
     const missing = (Object.keys(fieldNames) as Field[]).filter(
-      (field) => !fields[field]?.trim(),
+      (field) => field !== "topic" && !fields[field]?.trim(),
     );
     if (missing.length)
       blockErrors.push(
@@ -167,8 +184,9 @@ export function parseQuestionWordText(source: string): {
         choices: [fields.A, fields.B, fields.C, fields.D],
         correctIndex: "ABCD".indexOf(answer),
         explanation: fields.explanation,
+        ...(fields.topic !== undefined ? { topic: fields.topic } : {}),
       });
-      const key = JSON.stringify(question);
+      const key = questionContentKey(question);
       if (seen.has(key)) throw new Error("Câu hỏi trùng với một câu trước đó.");
       seen.add(key);
       questions.push(question);

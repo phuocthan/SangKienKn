@@ -54,7 +54,7 @@ db.prepare(
 db.prepare(
   "INSERT INTO attempts VALUES('learning-seed','learning-student','learning-ch1-q1',0,1,'practice',0)",
 ).run();
-// Separate level-icon fixtures: five classroom/subject totals, never live data.
+// Separate level-icon fixtures: five chapters across subjects, never live data.
 db.prepare("INSERT INTO users VALUES (?,?,?,?,?,0)").run(
   "levels-student",
   "levels@greenedu.test",
@@ -92,6 +92,59 @@ for (const [index, subject] of [
     chapterId,
     index * 3600,
   );
+  db.prepare("INSERT INTO chapters VALUES (?,?,?)").run(
+    `${classId}-untouched`,
+    classId,
+    "Chương 2 chưa học",
+  );
 }
+// Student garden fixtures: chapter maxima, never aggregate levels or production data.
+db.prepare(
+  "INSERT INTO classrooms VALUES('garden-class','Lớp vườn','Vật lý','11','teacher-demo')",
+).run();
+for (const id of ["garden-ch1", "garden-ch2"])
+  db.prepare("INSERT INTO chapters VALUES(?,'garden-class',?)").run(id, id);
+const gardenPassword = hashPassword("GardenTest123!");
+for (const [level, name] of [
+  [5, "Trần Hoàng Nhã Linh"],
+  [4, "Nguyễn Thị Nhã Linh"],
+  [3, "Huỳnh Văn Long Vũ"],
+  [2, "Trần Duy Quốc Huy"],
+  [1, "An"],
+] as const) {
+  const id = `garden-student-${level}`;
+  db.prepare("INSERT INTO users VALUES(?,?,?,?,?,0)").run(
+    id,
+    `${id}@greenedu.test`,
+    name,
+    gardenPassword,
+    "student",
+  );
+  db.prepare("INSERT INTO memberships VALUES('garden-class',?)").run(id);
+  db.prepare("INSERT INTO progress VALUES(?,'garden-ch1',?)").run(
+    id,
+    (level - 1) * 3600,
+  );
+  if (level > 1)
+    db.prepare("INSERT INTO user_avatars(user_id,avatar_id) VALUES(?,?)").run(
+      id,
+      `student-${level}`,
+    );
+}
+db.prepare(
+  "INSERT INTO progress VALUES('garden-student-3','garden-ch2',7200)",
+).run();
+db.prepare(
+  "INSERT INTO classrooms VALUES('garden-other-class','Lớp khác','Toán','11','teacher-demo')",
+).run();
+db.prepare(
+  "INSERT INTO chapters VALUES('garden-other-ch','garden-other-class','Chương khác')",
+).run();
+db.prepare(
+  "INSERT INTO memberships VALUES('garden-other-class','garden-student-3')",
+).run();
+db.prepare(
+  "INSERT INTO progress VALUES('garden-student-3','garden-other-ch',86400)",
+).run();
 db.close();
 await import("../server/index.js");

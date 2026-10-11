@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { Clock3, Flower2, RefreshCw, Users } from "lucide-react";
 import { api, duration, errorMessage } from "./api";
-import { Empty, SectionTitle, Tree } from "./components";
+import { Empty, SectionTitle } from "./components";
 import { StudentLevelBadge } from "./StudentLevel";
+import { StudentGarden } from "./StudentGarden";
 import type {
   ClassLeaderboard,
   Classroom,
   ClassTree,
   CommunityMember,
+  ClassGardenMember,
 } from "./types";
 
 const studyTime = (seconds: number) =>
@@ -26,6 +28,7 @@ export function ClassCommunity({
 }) {
   const [data, setData] = useState<{
     trees: ClassTree[];
+    members?: ClassGardenMember[];
     board: ClassLeaderboard;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,11 +39,14 @@ export function ClassCommunity({
     setLoading(true);
     setError("");
     Promise.all([
-      api<{ trees: ClassTree[] }>(`/classrooms/${classroom.id}/garden`),
+      api<{ trees: ClassTree[]; members?: ClassGardenMember[] }>(
+        `/classrooms/${classroom.id}/garden`,
+      ),
       api<ClassLeaderboard>(`/classrooms/${classroom.id}/leaderboard`),
     ])
       .then(([garden, board]) => {
-        if (alive) setData({ trees: garden.trees, board });
+        if (alive)
+          setData({ trees: garden.trees, members: garden.members, board });
       })
       .catch((e) => {
         if (alive) setError(errorMessage(e));
@@ -63,7 +69,7 @@ export function ClassCommunity({
           </h1>
           <p>
             {page === "garden"
-              ? "Mỗi cây ra hoa là một đóng góp của bạn vào khu vườn chung."
+              ? "Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp."
               : "Ghi nhận thời gian học, cây ra hoa và nỗ lực khắc phục lỗi sai."}
           </p>
         </div>
@@ -116,43 +122,13 @@ export function ClassCommunity({
             </div>
           </div>
           {page === "garden" ? (
-            <>
-              <div className="community-banner">
-                <Flower2 size={25} />
-                <p>
-                  Học đủ 4 giờ có hoạt động trong một chương, cây của bạn đạt
-                  cấp 5 và xuất hiện ở đây. Cây vẫn ở trong khu vườn cá nhân của
-                  bạn.
-                </p>
-              </div>
-              {data.trees.length ? (
-                <div className="class-tree-grid">
-                  {data.trees.map((tree) => (
-                    <article
-                      className={`card class-tree-card ${tree.studentId === userId ? "community-mine" : ""}`}
-                      key={`${tree.studentId}-${tree.chapterId}`}
-                    >
-                      <div className="class-tree-art">
-                        <Tree level={5} />
-                      </div>
-                      <div className="class-tree-copy">
-                        <span className="pill">Cấp 5 · Ra hoa</span>
-                        <h2>
-                          {tree.studentName}
-                          {tree.studentId === userId && <small> · Bạn</small>}
-                        </h2>
-                        <p>{tree.chapterTitle}</p>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <Empty
-                  title="Khu vườn đang chờ cây ra hoa"
-                  text="Chưa có cây nào đạt cấp 5. Cùng luyện tập để góp những cây đầu tiên cho lớp nhé."
-                />
-              )}
-            </>
+            <StudentGarden
+              members={data.members}
+              trees={data.trees}
+              userId={userId}
+              subject={classroom.subject}
+              classroomName={classroom.name}
+            />
           ) : (
             <>
               <SectionTitle
@@ -241,7 +217,16 @@ function Ranking({
                   <span className="pill community-you">Bạn</span>
                 )}
                 <div>
-                  <StudentLevelBadge seconds={member.seconds} compact />
+                  {member.chapterLevels?.map((ch) => (
+                    <div key={ch.chapterId} className="chapter-level-member">
+                      <small>{ch.chapterTitle}</small>
+                      <StudentLevelBadge
+                        seconds={ch.seconds}
+                        scope={ch.chapterTitle}
+                        compact
+                      />
+                    </div>
+                  ))}
                 </div>
               </th>
               <td>

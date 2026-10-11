@@ -14,6 +14,14 @@ Trạng thái triển khai 11/10/2026: đã triển khai trong mã và kiểm th
 
 ## Cách sử dụng
 
+Giáo viên tạo kiểm tra có hai nguồn: ngân hàng câu hỏi (một/nhiều chương, toàn bộ bài hoặc từng bài; số câu/trọng số phải đủ ngân hàng) và Word/CSV theo mẫu có đáp án. Có thể tải nhiều file, gắn mỗi file vào chương đã chọn. Đề tải lên tối đa 100 câu, kiểm tra toàn bộ trước khi lưu, chặn câu trùng trong cùng chương; câu riêng lưu ẩn để chấm/sổ tay, không tự phát hành cho luyện tập. Lưu đề có requestId chống tạo lặp khi retry, transaction giữ đề/câu atomically.
+
+Mặc định đề mới ở trạng thái đóng chờ giáo viên. **Mở kiểm tra ngay** bật đề, đưa giờ bắt đầu về hiện tại nếu đang ở tương lai và cho phép những chương thực sự có trong đề; giữ giờ đóng đã chọn. Chỉ giáo viên sở hữu lớp được mở, không mở lại đề đã hết giờ. Kiểm tra chính thức không yêu cầu thời gian tự học/vé; học sinh có thể vào khi giáo viên yêu cầu. Có thể chọn chế độ theo lịch thay mở thủ công; vẫn cần các chương được cho phép. Đóng bài thi vẫn thu bài đang làm theo quy tắc cũ.
+
+Luyện tập và ôn tập chỉ trả correctIndex/lời giải khi trả lời đúng. Trả lời sai, retry và tải lại phiên cũ đều lọc thông tin tiết lộ; lời nhắc chung không chứa đáp án. Công bố kết quả thi chính thức sau đóng khung thi giữ nguyên.
+
+Clock phiên có số giây tạm tính ở frontend và số giây API heartbeat đã ghi nhận riêng; không thay thời gian server hoặc giả tiến độ. Cấp hiển thị theo từng chương, xem [student-levels.md](student-levels.md).
+
 Giáo viên mở **Ôn tập & kiểm tra**, gắn học kỳ cho từng chương. Mặc định tỷ lệ mở Săn điểm tính tất cả lượt luyện tập và sửa sai theo lựa chọn của người dùng. Có thể tạo bộ ôn hoặc thi chính thức, chọn chương, số câu và trọng số bài. Trọng số được chia theo tỷ lệ, làm tròn bằng phần dư lớn nhất. Không đủ câu thì báo thiếu; không nhân bản câu. Để trống trọng số chọn ngẫu nhiên trong phạm vi đã chọn.
 
 Học sinh dùng Luyện tập để học từng bài; dùng **Ôn tập & kiểm tra** để ôn chương, nhiều chương hoặc toàn học kỳ, hoặc chọn ma trận giáo viên đã lưu. Bộ câu được trộn và giữ nguyên trong phiên; trả lời/vị trí được lưu. Sau tải lại, bấm **Tiếp tục ôn**. Đổi chương trong phiên ôn kỳ thì thời gian tính đúng chương của câu hiện tại.
