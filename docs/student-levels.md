@@ -1,5 +1,13 @@
 # Cấp icon học sinh theo lớp, môn và chương
 
+## Thời gian mỗi cấp do giáo viên cài đặt — 11/10/2026
+
+Giáo viên sở hữu lớp đặt **số phút cho mỗi cấp** tại Ôn tập & kiểm tra → Thời gian tăng cấp. Phạm vi từng lớp/môn, áp dụng mọi chương của lớp; mặc định **60 phút**, số nguyên 1–1440 phút. Với m phút, cấp 1 bắt đầu 0, cấp 2/3/4/5 từ m/2m/3m/4m phút của riêng chương. Ví dụ 30 phút: Chồi 30 phút, Cây Non 60 phút, Đơm Hoa 90 phút, Kết Trái 120 phút. Bảng phía dưới là trường hợp mặc định 60 phút.
+
+Schema bổ sung `classroom_level_settings` (classroom_id, minutes, updated_by, updated_at), không sửa `progress`. Cấp, remainingSeconds, thanh tiến độ, roster/xếp hạng, đại diện MAX chương trong vườn và cây Kết Trái cùng dùng mốc này. API lớp/chương/chapterLevels/learning trả `levelMinutes`; công thức tập trung ở shared/student-levels.ts, backend tra mốc ở server/level-settings.ts. POST `/api/classrooms/:id/level-settings` chỉ chủ lớp được ghi; học sinh/giáo viên khác bị chặn.
+
+Vé cấp 3/4/5 ở 2m/3m/4m; điểm cây cấp 5 ở 4m. Khi thay đổi mốc, cấp/điều kiện vào Săn điểm tính lại từ giây đã ghi, không tạo thời gian. Vé đã cấp/dùng và thưởng đã cấp/duyệt không bị xóa; nguồn vé/thưởng vẫn unique, không cấp lại khi đổi mốc qua lại. Học sinh đọc learning/heartbeat tiếp tục đồng bộ các mốc mới đã đạt theo cơ chế sẵn có. Nâng mốc có thể hạ cấp tính toán nhưng không thu hồi lịch sử.
+
 Theo yêu cầu mới ngày 11/10/2026, cấp icon tính bằng **thời gian học được ghi nhận trong từng chương**, thuộc đúng lớp/môn đang chọn. Quy tắc này thay lựa chọn tổng theo lớp/môn trước đó.
 
 | Cấp | Tên      | Thời gian học của chương    |

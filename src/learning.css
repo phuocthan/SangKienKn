@@ -4,6 +4,103 @@
   gap: 24px;
   min-width: 0;
 }
+.level-settings-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.level-settings-heading h2 {
+  margin: 0;
+}
+.level-settings-heading p {
+  margin: 6px 0 20px;
+  color: var(--muted);
+}
+.level-settings-symbol {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: #edf3e2;
+  color: #476b42;
+}
+.level-settings-controls {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.level-settings-controls label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+  margin: 0;
+}
+.level-settings-input {
+  position: relative;
+  max-width: 240px;
+}
+.level-settings-input input {
+  width: 100%;
+  padding-right: 64px;
+  box-sizing: border-box;
+}
+.level-settings-input > span {
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-weight: 400;
+  pointer-events: none;
+}
+.level-settings-preview {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  list-style: none;
+  gap: 10px;
+  padding: 0;
+  margin: 22px 0;
+}
+.level-settings-preview li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 8px;
+  background: #f4f7ed;
+  border: 1px solid #dfe8d6;
+  border-radius: 16px;
+  text-align: center;
+}
+.level-settings-preview .student-level-icon {
+  width: 52px;
+  height: 52px;
+}
+.level-settings-preview strong {
+  font-size: var(--text-caption);
+}
+.level-settings-preview small {
+  color: var(--muted);
+}
+@media (max-width: 600px) {
+  .level-settings-preview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .level-settings-preview li:last-child {
+    grid-column: 1 / -1;
+  }
+  .level-settings-controls,
+  .level-settings-controls label,
+  .level-settings-input {
+    width: 100%;
+    max-width: none;
+  }
+  .level-settings-controls .button {
+    width: 100%;
+  }
+}
 .learning-heading,
 .learning-row {
   display: flex;

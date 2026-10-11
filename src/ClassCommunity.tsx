@@ -222,6 +222,7 @@ function Ranking({
                       <small>{ch.chapterTitle}</small>
                       <StudentLevelBadge
                         seconds={ch.seconds}
+                        levelMinutes={ch.levelMinutes}
                         scope={ch.chapterTitle}
                         compact
                       />

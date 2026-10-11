@@ -1,5 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
 import { randomUUID } from "node:crypto";
+import { matchingLessonTitle } from "../shared/lesson-titles.js";
 
 export function ensureLessonSchema(db: DatabaseSync) {
   db.exec(`CREATE TABLE IF NOT EXISTS lessons (
@@ -73,6 +74,23 @@ function lessonNames(db: DatabaseSync, chapterId: string) {
     UNION SELECT lesson AS title FROM questions WHERE chapter_id=?`,
     )
     .all(chapterId, chapterId);
+}
+export function resolveQuestionLesson(
+  db: DatabaseSync,
+  chapterId: string,
+  title: string,
+) {
+  try {
+    return matchingLessonTitle(
+      title,
+      lessonNames(db, chapterId).map((row) => String(row.title)),
+    );
+  } catch (error) {
+    throw new LessonError(
+      409,
+      error instanceof Error ? error.message : "Tên bài không rõ ràng.",
+    );
+  }
 }
 export function addLesson(db: DatabaseSync, chapterId: string, title: string) {
   db.exec("BEGIN IMMEDIATE");

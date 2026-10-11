@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Cài đặt thời gian tăng cấp của giáo viên — 11/10/2026
+
+Trang **Ôn tập & kiểm tra** thêm thẻ **Thời gian tăng cấp** phía trên Quyền kiểm tra theo chương. Giữ nền kem, icon đồng hồ trong ô xanh nhạt, input số **Số phút cho mỗi cấp** và nút **Lưu thời gian**; mặc định 60 phút, phạm vi 1–1440 phút. Xem trước Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái với icon/tên/mốc giờ thay ngay theo draft; chưa lưu không thay dữ liệu. Preview desktop năm ô cùng hàng, mobile hai cột và cấp 5 toàn hàng; nút/input toàn chiều ngang mobile. Nút disabled khi chưa thay đổi, số sai, đang lưu hoặc API cũ thiếu `canConfigureLevels`.
+
+Thông báo lưu thành công/lỗi theo learning hiện có; giữ draft các form khác. Cài đặt áp dụng từng lớp/môn, mọi chương; nhắc vé/điểm đã cấp được giữ. Timeline chương, mục tiêu, tiến độ và badge roster/xếp hạng đọc cùng `levelMinutes`, thay mốc cố định 0/1/2/3/4 giờ trong mô tả lịch sử phía dưới. Khi API Railway chưa có capability, hiển thị trạng thái chờ cập nhật server và khóa ghi. Nghiệp vụ tại student-levels.md/learning.md; ảnh QA `.local/level-settings-{desktop,mobile}.png` dùng fixture riêng.
+
 ## Khung vườn có rào và vinh danh cấp 5 — 11/10/2026
 
 Theo phản hồi mới, bỏ bố cục danh sách chia tầng. Trang **Khu vườn của lớp** có hai frame riêng dưới thống kê: **Vinh danh Kết Trái · Cấp 5** nền kem/viền vàng, và **Khu vườn [tên lớp]** chứa toàn bộ học sinh trong một cảnh vườn có rào gỗ bốn phía, cổng nhỏ, cỏ, lối đi và hoa trang trí. Mỗi học sinh hiện thuộc lớp có đúng một icon cây đại diện trong vườn, kèm avatar hiện có (chưa chọn thì dùng chữ cái), **hai từ cuối họ tên**, cấp/tên giai đoạn. Người hiện tại nhãn tên xanh và Bạn; họ tên đầy đủ trong nhãn accessible/tooltip phân biệt bạn trùng tên ngắn. Cấp đại diện lấy cao nhất của một chương trong đúng lớp/môn, không cộng thời gian giữa chương.

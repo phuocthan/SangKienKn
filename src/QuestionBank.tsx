@@ -17,6 +17,7 @@ import {
   type QuestionInput,
 } from "../shared/questions";
 import type { Question } from "./types";
+import { matchingLessonTitle } from "../shared/lesson-titles";
 
 type ImportFormat = "csv" | "word";
 
@@ -29,12 +30,14 @@ export function QuestionBank({
   chapterId,
   topicSupported,
   lesson,
+  lessonTitles,
   revision,
   onChange,
 }: {
   chapterId: string;
   topicSupported: boolean;
   lesson: string;
+  lessonTitles: string[];
   revision: number;
   onChange: () => void;
 }) {
@@ -192,6 +195,8 @@ export function QuestionBank({
               initialFormat={dialog.format}
               topicSupported={topicSupported}
               onSaved={saved}
+              initialLesson={lesson}
+              lessonTitles={lessonTitles}
             />
           )}
           {dialog.type === "history" && (
@@ -355,13 +360,18 @@ function ImportForm({
   initialFormat,
   onSaved,
   topicSupported,
+  initialLesson,
+  lessonTitles,
 }: {
   chapterId: string;
   initialFormat: ImportFormat;
   topicSupported: boolean;
+  initialLesson: string;
+  lessonTitles: string[];
   onSaved: () => void;
 }) {
   const [format, setFormat] = useState<ImportFormat>(initialFormat);
+  const [targetLesson, setTargetLesson] = useState(initialLesson);
   const [questions, setQuestions] = useState<QuestionInput[]>([]),
     [errors, setErrors] = useState<string[]>([]);
   const [saveError, setSaveError] = useState("");
@@ -371,6 +381,19 @@ function ImportForm({
   const requestId = useRef(crypto.randomUUID()),
     sequence = useRef(0);
   const unsupportedTopics = !topicSupported && questions.some((q) => q.topic);
+  let mappedQuestions = questions,
+    lessonError = "";
+  try {
+    mappedQuestions = questions.map((q) => ({
+      ...q,
+      lesson: targetLesson || matchingLessonTitle(q.lesson, lessonTitles),
+    }));
+  } catch (error) {
+    lessonError = errorMessage(error);
+  }
+  const newLessonTitles = [
+    ...new Set(mappedQuestions.map((q) => q.lesson)),
+  ].filter((title) => !lessonTitles.includes(title));
   async function read(file?: File) {
     const current = ++sequence.current;
     setQuestions([]);
@@ -447,7 +470,8 @@ function ImportForm({
       reading ||
       errors.length ||
       !questions.length ||
-      unsupportedTopics
+      unsupportedTopics ||
+      lessonError
     )
       return;
     setBusy(true);
@@ -455,7 +479,7 @@ function ImportForm({
     try {
       await api(`/chapters/${chapterId}/questions/import`, {
         requestId: requestId.current,
-        questions,
+        questions: mappedQuestions,
       });
       onSaved();
     } catch (e) {
@@ -470,6 +494,34 @@ function ImportForm({
         Nhập câu hỏi vào chương đang chọn. Tải mẫu, điền nội dung rồi chọn file
         để xem trước. Chọn đáp án A, B, C hoặc D. Mỗi file tối đa 100 câu.
       </p>
+      <label>
+        Bài nhận câu hỏi
+        <select
+          value={targetLesson}
+          disabled={busy}
+          onChange={(e) => {
+            setTargetLesson(e.target.value);
+            requestId.current = crypto.randomUUID();
+            setSaveError("");
+          }}
+        >
+          <option value="">Theo tên bài trong file</option>
+          {lessonTitles.map((title) => (
+            <option key={title} value={title}>
+              {title}
+            </option>
+          ))}
+        </select>
+      </label>
+      <p className="subtle-note">
+        Chọn bài có sẵn để nhập toàn bộ câu vào bài đó. Chủ đề chỉ là nhãn của
+        câu hỏi, không tạo bài học.
+      </p>
+      {lessonError && (
+        <div className="error-banner" role="alert">
+          {lessonError}
+        </div>
+      )}
       <label>
         Định dạng file
         <select
@@ -533,11 +585,17 @@ function ImportForm({
       {questions.length > 0 && (
         <>
           <h3>Xem trước · {questions.length} câu hợp lệ</h3>
+          {!targetLesson && newLessonTitles.length > 0 && (
+            <p className="subtle-note">
+              Tên bài chưa có trong chương: {newLessonTitles.join("; ")}. Chọn
+              bài nhận câu hỏi ở trên nếu muốn gộp vào bài có sẵn.
+            </p>
+          )}
           <p className="subtle-note">
             {filename} · Các câu chỉ được lưu khi bạn bấm xác nhận.
           </p>
           <div className="import-preview">
-            {questions.map((q, index) => (
+            {mappedQuestions.map((q, index) => (
               <details key={index}>
                 <summary>
                   {index + 1}. {q.text}
@@ -576,7 +634,8 @@ function ImportForm({
           reading ||
           !!errors.length ||
           !questions.length ||
-          unsupportedTopics
+          unsupportedTopics ||
+          !!lessonError
         }
         onClick={() => void save()}
       >

@@ -212,14 +212,16 @@ export function StudentLevelIcon({
 
 export function StudentLevelBadge({
   seconds,
+  levelMinutes,
   scope = "",
   compact = false,
 }: {
   seconds: number;
+  levelMinutes?: number;
   scope?: string;
   compact?: boolean;
 }) {
-  const stage = studentLevel(seconds);
+  const stage = studentLevel(seconds, levelMinutes);
   return (
     <span
       className={`student-level-badge ${compact ? "compact" : ""}`}
@@ -235,8 +237,9 @@ export function StudentLevelBadge({
 }
 
 export function ChapterLevelTimeline({ chapter }: { chapter: Chapter }) {
-  const stage = studentLevel(chapter.seconds);
-  const percent = Math.min(100, (stage.seconds / 14400) * 100);
+  const stage = studentLevel(chapter.seconds, chapter.levelMinutes);
+  const maximum = 4 * (chapter.levelMinutes ?? 60) * 60;
+  const percent = Math.min(100, (stage.seconds / maximum) * 100);
   return (
     <div
       className="chapter-level-timeline"
@@ -261,7 +264,7 @@ export function ChapterLevelTimeline({ chapter }: { chapter: Chapter }) {
           >
             <StudentLevelIcon level={index + 1} />
             <span>{name}</span>
-            <small>{index} giờ</small>
+            <small>{duration(index * (chapter.levelMinutes ?? 60) * 60)}</small>
           </li>
         ))}
       </ol>
@@ -270,8 +273,8 @@ export function ChapterLevelTimeline({ chapter }: { chapter: Chapter }) {
         role="progressbar"
         aria-label={`Tiến độ ${chapter.title}`}
         aria-valuemin={0}
-        aria-valuemax={14400}
-        aria-valuenow={Math.min(stage.seconds, 14400)}
+        aria-valuemax={maximum}
+        aria-valuenow={Math.min(stage.seconds, maximum)}
         aria-valuetext={`${duration(stage.seconds)} · Cấp ${stage.level} · ${stage.name}`}
       >
         <span className="chapter-level-fill" style={{ width: `${percent}%` }} />
@@ -285,7 +288,8 @@ export function ChapterLevelTimeline({ chapter }: { chapter: Chapter }) {
       </div>
       <div className="chapter-level-summary">
         <span>
-          {duration(stage.seconds)} / 4 giờ · {chapter.total} lượt luyện tập
+          {duration(stage.seconds)} / {duration(maximum)} · {chapter.total} lượt
+          luyện tập
         </span>
         <strong>
           Cấp {stage.level} · {stage.name}

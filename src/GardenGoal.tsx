@@ -12,15 +12,15 @@ export function GardenGoal({
   onPractice: () => void;
 }) {
   const chapter = [...classroom.chapters].sort((a, b) => {
-    const left = studentLevel(a.seconds),
-      right = studentLevel(b.seconds);
+    const left = studentLevel(a.seconds, a.levelMinutes),
+      right = studentLevel(b.seconds, b.levelMinutes);
     return (
       Number(left.level === 5) - Number(right.level === 5) ||
       left.remainingSeconds - right.remainingSeconds
     );
   })[0];
   const seconds = chapter?.seconds ?? 0;
-  const stage = studentLevel(seconds);
+  const stage = studentLevel(seconds, chapter?.levelMinutes);
   const flowers = classroom.chapters.filter(
     (chapter) => chapter.level === 5,
   ).length;

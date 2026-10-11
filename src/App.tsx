@@ -626,6 +626,7 @@ export default function App() {
                   key={current.id}
                   classroom={current}
                   user={user}
+                  onSettingsChanged={refresh}
                   onReview={(reviewId, chapter) =>
                     setStudy({ chapter, mode: "practice", reviewId })
                   }
@@ -814,10 +815,17 @@ export default function App() {
                         </label>
                       </div>
                       <QuestionBank
-                        topicSupported={!!(current.chapters.find(ch => ch.id === questionChapter) ?? current.chapters[0]).canTagQuestions}
+                        topicSupported={
+                          !!(
+                            current.chapters.find(
+                              (ch) => ch.id === questionChapter,
+                            ) ?? current.chapters[0]
+                          ).canTagQuestions
+                        }
                         key={questionChapter || current.chapters[0].id}
                         chapterId={questionChapter || current.chapters[0].id}
                         lesson={questionLesson}
+                        lessonTitles={(current.chapters.find(ch => ch.id === questionChapter) ?? current.chapters[0]).lessons.map(l => l.title)}
                         revision={revision}
                         onChange={() => {
                           setQuestionLesson("");
@@ -883,7 +891,7 @@ export default function App() {
                     <StudentStats classroom={current} />
                     <SectionTitle
                       title="Tiến độ theo chương"
-                      description="Cây đạt các cấp mới ở mốc 1, 2, 3 và 4 giờ học có hoạt động."
+                      description={`Mỗi ${current.levelMinutes ?? 60} phút học có hoạt động trong chương tăng một cấp, tối đa cấp 5.`}
                     />
                     <div className="card progress-table">
                       {current.chapters.map((ch) => (
@@ -1297,7 +1305,7 @@ function ChapterGrid({
             <div className="progress-track">
               <span
                 style={{
-                  width: `${Math.min(100, (ch.seconds / 14400) * 100)}%`,
+                  width: `${Math.min(100, (ch.seconds / (4 * (ch.levelMinutes ?? 60) * 60)) * 100)}%`,
                 }}
               />
             </div>
@@ -1305,10 +1313,16 @@ function ChapterGrid({
               <span>
                 {ch.level === 5
                   ? "Cây đã ra hoa!"
-                  : `Còn ${duration(ch.level * 3600 - ch.seconds)} đến cấp ${ch.level + 1}`}
+                  : `Còn ${duration(ch.level * (ch.levelMinutes ?? 60) * 60 - ch.seconds)} đến cấp ${ch.level + 1}`}
               </span>
               <strong>
-                {Math.round(Math.min(100, (ch.seconds / 14400) * 100))}%
+                {Math.round(
+                  Math.min(
+                    100,
+                    (ch.seconds / (4 * (ch.levelMinutes ?? 60) * 60)) * 100,
+                  ),
+                )}
+                %
               </strong>
             </div>
             {ch.lessons.length > 0 && (
@@ -1711,6 +1725,7 @@ function Roster({
                               <small>{ch.chapterTitle}</small>
                               <StudentLevelBadge
                                 seconds={ch.seconds}
+                                levelMinutes={ch.levelMinutes}
                                 scope={ch.chapterTitle}
                                 compact
                               />
@@ -2024,7 +2039,9 @@ function EditorForm({
             </select>
           </label>
           <QuestionFields
-            topicSupported={!!classroom?.chapters.some(ch => ch.canTagQuestions)}
+            topicSupported={
+              !!classroom?.chapters.some((ch) => ch.canTagQuestions)
+            }
             lessons={[
               ...new Set(
                 classroom?.chapters.flatMap((ch) =>

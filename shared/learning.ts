@@ -14,6 +14,7 @@ export type MatrixRow = {
   available: number;
 };
 export type LearningChapter = {
+  levelMinutes?: number;
   id: string;
   title: string;
   semester: string;
@@ -69,6 +70,8 @@ export type LearningReward = {
   createdAt: number;
 };
 export type LearningOverview = {
+  levelMinutes?: number;
+  canConfigureLevels?: boolean;
   examCreation?: boolean;
   chapters: LearningChapter[];
   matrix: MatrixRow[];

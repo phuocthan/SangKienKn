@@ -28,6 +28,14 @@ test("teacher imports the 50-question Word with topics and student gets a balanc
       })
     ).ok(),
   ).toBeTruthy();
+  const lessonTitle = "Bài 1 - Dao động điều hòa";
+  expect(
+    (
+      await page.request.post(`/api/chapters/${chapter.id}/lessons`, {
+        data: { title: lessonTitle },
+      })
+    ).ok(),
+  ).toBeTruthy();
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption(classroom.id);
   await page
@@ -36,6 +44,7 @@ test("teacher imports the 50-question Word with topics and student gets a balanc
     .click();
   await page.getByRole("button", { name: "Nhập file Word" }).click();
   const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Bài nhận câu hỏi").selectOption(lessonTitle);
   await dialog
     .getByLabel("File câu hỏi Word (.docx)")
     .setInputFiles(
@@ -68,6 +77,14 @@ test("teacher imports the 50-question Word with topics and student gets a balanc
     await page.request.get(`/api/chapters/${chapter.id}/questions`)
   ).json();
   expect(bank.every((q: { topic?: string }) => !!q.topic)).toBeTruthy();
+  expect(
+    bank.every((q: { lesson: string }) => q.lesson === lessonTitle),
+  ).toBeTruthy();
+  const classes = await (await page.request.get("/api/classrooms")).json();
+  expect(
+    classes.find((c: { id: string }) => c.id === classroom.id).chapters[0]
+      .lessons,
+  ).toEqual([{ title: lessonTitle, questionCount: 50 }]);
   await page.request.post("/api/auth/logout", { data: {} });
   expect(
     (

@@ -10,6 +10,7 @@ export type User = {
   uploadedAvatarId?: string | null;
 };
 export type Chapter = {
+  levelMinutes?: number;
   id: string;
   title: string;
   questionCount: number;
@@ -23,6 +24,7 @@ export type Chapter = {
   openCorrections: number;
 };
 export type Classroom = {
+  levelMinutes?: number;
   studentLevel?: StudentLevel | null;
   id: string;
   name: string;
@@ -55,6 +57,7 @@ export type Result = {
 };
 export type Student = {
   chapterLevels?: (StudentLevel & {
+    levelMinutes?: number;
     chapterId: string;
     chapterTitle: string;
   })[];
@@ -84,6 +87,7 @@ export type ClassGardenMember = {
 };
 export type CommunityMember = {
   chapterLevels?: (StudentLevel & {
+    levelMinutes?: number;
     chapterId: string;
     chapterTitle: string;
   })[];

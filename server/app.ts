@@ -6,8 +6,13 @@ import express, {
 import type { DatabaseSync } from "node:sqlite";
 import { createHash, randomUUID, randomBytes, randomInt } from "node:crypto";
 import { hashPassword, verifyPassword } from "./db.js";
-import { questionInput, questionContentKey, type QuestionInput } from "../shared/questions.js";
+import {
+  questionInput,
+  questionContentKey,
+  type QuestionInput,
+} from "../shared/questions.js";
 import { sampleByTopic } from "../shared/question-topics.js";
+import { matchingLessonTitle } from "../shared/lesson-titles.js";
 import { isGroupUploadPath, registerGroupRoutes } from "./group-activities.js";
 import {
   grantLearningMilestones,
@@ -16,13 +21,18 @@ import {
 } from "./learning.js";
 import { findAvatar, avatarCollectionsFor } from "../shared/avatars.js";
 import { registerAvatarUploads } from "./avatar-uploads.js";
-import { studentLevel } from "../shared/student-levels.js";
+import { studentLevel, levelStepSeconds } from "../shared/student-levels.js";
+import {
+  classroomLevelMinutes,
+  chapterLevelMinutes,
+} from "./level-settings.js";
 import { enqueueWelcome } from "./welcome-email.js";
 import {
   chapterLessons,
   addLesson,
   archiveLesson,
   lessonIsArchived,
+  resolveQuestionLesson,
   LessonError,
 } from "./lesson-catalog.js";
 import { loginEmail } from "../shared/login-email.js";
@@ -31,8 +41,7 @@ export type Row = Record<string, any>;
 export type AppRequest = Request & { user?: Row; tokenHash?: string };
 const tokenHash = (token: string) =>
   createHash("sha256").update(token).digest("hex");
-export const treeLevel = (seconds: number) =>
-  Math.min(5, Math.floor(seconds / 3600) + 1);
+export const treeLevel = (seconds: number) => studentLevel(seconds).level;
 
 class ApiError extends Error {
   constructor(
@@ -437,7 +446,8 @@ export function createApp(
       .get(chapterId, userId) as Row;
     return {
       seconds,
-      level: treeLevel(seconds),
+      levelMinutes: chapterLevelMinutes(db, chapterId),
+      level: studentLevel(seconds, chapterLevelMinutes(db, chapterId)).level,
       total: Number(a.total),
       correct: Number(a.correct),
       openCorrections: Number(c.count),
@@ -458,6 +468,7 @@ export function createApp(
         subject: c.subject,
         grade: c.grade,
         teacherName: c.teacherName,
+        levelMinutes: classroomLevelMinutes(db, c.id),
         studentLevel:
           req.user!.role === "student"
             ? studentLevel(
@@ -468,6 +479,7 @@ export function createApp(
                     )
                     .get(req.user!.id, c.id)!.seconds,
                 ),
+                classroomLevelMinutes(db, c.id),
               )
             : null,
         studentCount: (
@@ -603,11 +615,11 @@ export function createApp(
       JOIN users u ON u.id = p.student_id
       JOIN chapters ch ON ch.id = p.chapter_id
       JOIN memberships m ON m.student_id = p.student_id AND m.classroom_id = ch.classroom_id
-      WHERE ch.classroom_id = ? AND p.seconds >= 14400
+      WHERE ch.classroom_id = ? AND p.seconds >= ?
       ORDER BY u.name, ch.rowid, u.id
     `,
       )
-      .all(classId);
+      .all(classId, 4 * levelStepSeconds(classroomLevelMinutes(db, classId)));
     const members = (
       db
         .prepare(
@@ -627,7 +639,10 @@ export function createApp(
         studentId: String(member.studentId),
         studentName: String(member.studentName),
         avatarId: member.avatarId ?? null,
-        level: studentLevel(Number(member.highestSeconds)).level,
+        level: studentLevel(
+          Number(member.highestSeconds),
+          classroomLevelMinutes(db, classId),
+        ).level,
       }))
       .sort(
         (a, b) =>
@@ -649,7 +664,7 @@ export function createApp(
           JOIN chapters ch ON ch.id = p.chapter_id
           WHERE p.student_id = u.id AND ch.classroom_id = ?), 0) AS seconds,
         (SELECT COUNT(*) FROM progress p JOIN chapters ch ON ch.id = p.chapter_id
-          WHERE p.student_id = u.id AND ch.classroom_id = ? AND p.seconds >= 14400) AS bloomedTrees,
+          WHERE p.student_id = u.id AND ch.classroom_id = ? AND p.seconds >= ?) AS bloomedTrees,
         (SELECT COUNT(*) FROM corrections cr JOIN questions q ON q.id = cr.question_id
           JOIN chapters ch ON ch.id = q.chapter_id
           WHERE cr.student_id = u.id AND ch.classroom_id = ? AND cr.resolved = 1) AS resolvedCorrections
@@ -657,12 +672,21 @@ export function createApp(
       WHERE m.classroom_id = ?
     `,
       )
-      .all(classId, classId, classId, classId) as Row[];
+      .all(
+        classId,
+        classId,
+        4 * levelStepSeconds(classroomLevelMinutes(db, classId)),
+        classId,
+        classId,
+      ) as Row[];
     const members = rows.map((r) => ({
       id: String(r.id),
       name: String(r.name),
       seconds: Number(r.seconds),
-      studentLevel: studentLevel(Number(r.seconds)),
+      studentLevel: studentLevel(
+        Number(r.seconds),
+        classroomLevelMinutes(db, classId),
+      ),
       chapterLevels: chapterLevels(classId, String(r.id)),
       bloomedTrees: Number(r.bloomedTrees),
       resolvedCorrections: Number(r.resolvedCorrections),
@@ -719,7 +743,8 @@ export function createApp(
     ).map((ch) => ({
       chapterId: String(ch.id),
       chapterTitle: String(ch.title),
-      ...studentLevel(Number(ch.seconds)),
+      levelMinutes: classroomLevelMinutes(db, classId),
+      ...studentLevel(Number(ch.seconds), classroomLevelMinutes(db, classId)),
     }));
   }
   function roster(classId: string) {
@@ -743,6 +768,7 @@ export function createApp(
         seconds: summaries.reduce((n, s) => n + s.seconds, 0),
         studentLevel: studentLevel(
           summaries.reduce((n, s) => n + s.seconds, 0),
+          classroomLevelMinutes(db, classId),
         ),
         total: summaries.reduce((n, s) => n + s.total, 0),
         correct: summaries.reduce((n, s) => n + s.correct, 0),
@@ -903,6 +929,7 @@ export function createApp(
     content: QuestionInput,
     metadata?: { familyId: string; version: number; active: boolean },
   ) {
+    content = { ...content, lesson: resolveQuestionLesson(db, chapterId, content.lesson) };
     if (lessonIsArchived(db, chapterId, content.lesson))
       fail(409, "Bài đã bị xóa. Thêm lại bài trước khi thêm hoặc sửa câu hỏi.");
     const id = randomUUID();
@@ -1012,10 +1039,11 @@ export function createApp(
     const q = ownedQuestion(req);
     if (!q.is_current)
       fail(409, "Câu hỏi đã có phiên bản mới. Hãy tải lại ngân hàng câu hỏi.");
-    const content = questionPayload({
+    const input = questionPayload({
       ...req.body,
       ...(req.body?.topic === undefined && q.topic ? { topic: q.topic } : {}),
     });
+    const content = { ...input, lesson: resolveQuestionLesson(db, String(q.chapter_id), input.lesson) };
     if (JSON.stringify(content) === JSON.stringify(questionContent(q)))
       return res.json({ id: q.id, version: q.version });
     let id: string;
@@ -1073,7 +1101,7 @@ export function createApp(
       req.body.questions.length > 100
     )
       fail(400, "Mỗi lần nhập cần từ 1 đến 100 câu hỏi.");
-    const content = req.body.questions.map((row: unknown, index: number) => {
+    const input = req.body.questions.map((row: unknown, index: number) => {
       try {
         return questionInput(row);
       } catch (e) {
@@ -1083,11 +1111,13 @@ export function createApp(
         );
       }
     }) as QuestionInput[];
+    const content: QuestionInput[] = [];
+    for (const row of input) content.push({ ...row, lesson: matchingLessonTitle(resolveQuestionLesson(db, chapterId, row.lesson), content.map(q => q.lesson)) });
     const fingerprints = content.map(questionContentKey);
     if (new Set(fingerprints).size !== content.length)
       fail(400, "File có câu hỏi trùng nhau.");
     const fingerprint = createHash("sha256")
-      .update(JSON.stringify(content))
+      .update(JSON.stringify(input))
       .digest("hex");
     const existing = db
       .prepare("SELECT * FROM question_imports WHERE id = ?")

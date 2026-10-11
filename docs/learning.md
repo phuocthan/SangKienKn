@@ -2,6 +2,10 @@
 
 Cập nhật 11/10/2026. Kế hoạch và phạm vi: [learning-implementation-plan.md](learning-implementation-plan.md). Thiết kế: [app-design.md](app-design.md).
 
+Rà soát quy định vi phạm/xử lý học sinh: [violations-audit.md](violations-audit.md). Cơ chế chính đã có, nhưng đã tái hiện lỗi 4 lần rời tab khi offline vẫn nhận đáp án chọn sau ngưỡng; chỉ theo dõi hidden, chưa mất focus khi trang visible; AI sai lặp lại chưa có. Ca idle mobile mô phỏng chưa đạt, cần kiểm tra thiết bị thật. Đây là kết quả audit, chưa sửa runtime/triển khai các khoảng trống đó.
+
+**Thay đổi mới nhất:** giáo viên đặt thời gian mỗi cấp theo lớp/môn tại Ôn tập & kiểm tra, mặc định 60 phút. Nếu đặt m phút, Cây Non/cấp 3 cần 2m phút trong chương, vé cấp 3/4/5 ở 2m/3m/4m, điểm Kết Trái ở 4m. Các mốc 2/3/4 giờ trong tài liệu phía dưới là mặc định 60 phút. Tỷ lệ đúng 70%, sửa sai, quyền mở chương, thời gian thi 20 phút và điểm thi không đổi. Khi đổi mốc giữ progress, vé/điểm lịch sử; không tự cấp trùng. Chi tiết [student-levels.md](student-levels.md).
+
 ## Quyền kiểm tra theo chương
 
 Mặc định mọi chương khóa kiểm tra, kể cả học sinh đã đủ điều kiện thời gian. Giáo viên sở hữu lớp mở Ôn tập & kiểm tra → Quyền kiểm tra theo chương → Mở kiểm tra ở chương lớp đã học/ôn đến. Quyền áp dụng cho toàn bộ học sinh của đúng chương/lớp, lưu qua restart; học sinh và giáo viên khác không thay đổi được.

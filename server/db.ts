@@ -5,6 +5,7 @@ import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { ensureLearningSchema } from "./learning-db.js";
 import { ensureWelcomeSchema } from "./welcome-email.js";
 import { ensureLessonSchema } from "./lesson-catalog.js";
+import { ensureLevelSettingsSchema } from "./level-settings.js";
 
 export function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -182,6 +183,7 @@ export function openDatabase(path: string) {
       question_ids TEXT NOT NULL
     );`);
   ensureLearningSchema(db);
+  ensureLevelSettingsSchema(db);
   ensureLessonSchema(db);
   ensureWelcomeSchema(db);
   return db;

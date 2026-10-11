@@ -6,6 +6,8 @@ import { sampleByTopic } from "../shared/question-topics.js";
 import { lessonIsArchived } from "./lesson-catalog.js";
 import { zipSync, strToU8 } from "fflate";
 import type { AppRequest, Row } from "./app.js";
+import { studentLevel, levelStepSeconds } from "../shared/student-levels.js";
+import { classroomLevelMinutes } from "./level-settings.js";
 
 type Context = {
   now: () => number;
@@ -68,12 +70,14 @@ export function grantLearningMilestones(
     )
     .all(studentId);
   for (const row of rows) {
+    const minutes = classroomLevelMinutes(db, String(row.classroom_id));
+    const step = levelStepSeconds(minutes);
     for (const level of [3, 4, 5])
-      if (Number(row.seconds) >= (level - 1) * 3600)
+      if (Number(row.seconds) >= (level - 1) * step)
         db.prepare(
           "INSERT OR IGNORE INTO learning_tickets(student_id,chapter_id,level,granted_at) VALUES(?,?,?,?)",
         ).run(studentId, row.chapter_id, level, now);
-    if (Number(row.seconds) >= 14400)
+    if (Number(row.seconds) >= 4 * step)
       db.prepare(
         "INSERT OR IGNORE INTO learning_rewards(id,student_id,classroom_id,chapter_id,source,label,points,created_at) VALUES(?,?,?,?,?,?,1,?)",
       ).run(
@@ -82,7 +86,7 @@ export function grantLearningMilestones(
         row.classroom_id,
         row.chapter_id,
         `tree:${studentId}:${row.chapter_id}`,
-        "Chăm cây đủ 4 giờ",
+        minutes === 60 ? "Chăm cây đủ 4 giờ" : "Chăm cây đạt Kết Trái · Cấp 5",
         now,
       );
   }
@@ -282,7 +286,8 @@ export function registerLearningRoutes(
       const key = `${q.chapterId}::${q.lesson}`;
       groups.set(key, [...(groups.get(key) ?? []), q]);
     }
-    if (!Object.keys(w).length) return sampleByTopic(all, count, (q) => q, randomInt);
+    if (!Object.keys(w).length)
+      return sampleByTopic(all, count, (q) => q, randomInt);
     for (const [key, value] of Object.entries(w))
       if (
         !groups.has(key) ||
@@ -326,6 +331,8 @@ export function registerLearningRoutes(
       .map(([id, title]) => ({ id, title }));
   }
   function eligibility(ch: Row, userId: string) {
+    const levelMinutes = classroomLevelMinutes(db, String(ch.classroom_id));
+    const requiredSeconds = 2 * levelStepSeconds(levelMinutes);
     const seconds = Number(
       db
         .prepare(
@@ -367,8 +374,10 @@ export function registerLearningRoutes(
     const missing: string[] = [];
     const allowed = examAllowed(String(ch.id));
     if (!allowed) missing.push("Giáo viên chưa mở kiểm tra chương này");
-    if (seconds < 7200)
-      missing.push(`Cần thêm ${Math.ceil((7200 - seconds) / 60)} phút học`);
+    if (seconds < requiredSeconds)
+      missing.push(
+        `Cần thêm ${Math.ceil((requiredSeconds - seconds) / 60)} phút học`,
+      );
     if (accuracy < 70) missing.push("Tỷ lệ đúng chưa đạt 70%");
     if (openCorrections)
       missing.push(`Còn ${openCorrections} câu cần sửa trong chương`);
@@ -380,7 +389,8 @@ export function registerLearningRoutes(
       accuracyBasis: settings?.accuracy_basis ?? "all",
       examAllowed: allowed,
       seconds,
-      level: Math.min(5, Math.floor(seconds / 3600) + 1),
+      levelMinutes,
+      level: studentLevel(seconds, levelMinutes).level,
       accuracy,
       answered: rows.length,
       openCorrections,
@@ -464,6 +474,8 @@ export function registerLearningRoutes(
     const args = own ? [c.id, req.user!.id] : [c.id];
     res.json({
       chapters,
+      levelMinutes: classroomLevelMinutes(db, String(c.id)),
+      canConfigureLevels: req.user!.role === "teacher",
       examCreation: true,
       matrix: matrix(c.id),
       blueprints: db
@@ -535,6 +547,24 @@ export function registerLearningRoutes(
           createdAt: r.created_at,
         })),
     });
+  });
+  app.post("/api/classrooms/:id/level-settings", (req: AppRequest, res) => {
+    teacher(req);
+    const c = classroom(req, String(req.params.id));
+    const minutes = req.body?.minutes;
+    if (
+      typeof minutes !== "number" ||
+      !Number.isInteger(minutes) ||
+      minutes < 1 ||
+      minutes > 1440
+    )
+      fail(400, "Thời gian mỗi cấp phải là số phút nguyên từ 1 đến 1440.");
+    db.prepare(
+      `INSERT INTO classroom_level_settings(classroom_id,minutes,updated_by,updated_at)
+      VALUES(?,?,?,?) ON CONFLICT(classroom_id) DO UPDATE SET
+      minutes=excluded.minutes,updated_by=excluded.updated_by,updated_at=excluded.updated_at`,
+    ).run(c.id, minutes, req.user!.id, now());
+    res.json({ ok: true, levelMinutes: minutes });
   });
   app.post("/api/chapters/:id/exam-access", (req: AppRequest, res) => {
     teacher(req);

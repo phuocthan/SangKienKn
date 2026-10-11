@@ -1,5 +1,13 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Cấu hình thời gian tăng cấp cho giáo viên — 11/10/2026
+
+Đã thêm khối **Thời gian tăng cấp** tại Ôn tập & kiểm tra, theo lớp/môn, default **60 phút/cấp**, số nguyên1–1440. Xem trước năm mốc; lưu/reload và các cấp chương, tiến độ, roster/xếp hạng, vườn, vé/thưởng cùng dùng cấu hình. Migration additive classroom_level_settings, API chỉ chủ lớp; giữ progress và vé/điểm lịch sử, không cấp trùng. Nghiệp vụ student-levels.md/learning.md, thiết kế app-design.md.
+
+Đã đạt107/107 backend,22/22 E2E learning/cấp/cài đặt desktop/mobile, TypeScript/build riêng. Frontend local5173 đang chạy/HMR; **chưa push/deploy Railway**, server cũ khiến cài đặt tạm khóa/chờ cập nhật, không tự ghi cấu hình production hoặc khởi động API offline. Chi tiết session-handoff.md.
+
+Ngày11/10 audit quy định vi phạm/xử lý học sinh với Word gốc và quyết định tự nộp lần4: cơ chế ôn120+10giây/treo, sổ tay và thi4tab/deadline có trong mã. **Chưa đầy đủ**: đã tái hiện offline4tab vẫn chọn thêm đáp án và sync nhận trước tự nộp; visible mất focus không ghi; Thần Rừng sai lặp chưa có, nhật ký/ngoại lệ cần bổ sung. 9backend đạt; browseraudit7 đạt/1 mobile idle chưa xác nhận bằng mô phỏng, cần QA điện thoại thật. Các ca tái hiện gap không phải đã sửa. [Báo cáo và hướng xử lý](violations-audit.md); chỉ audit, chưa sửa runtime/deploy/ghi dữ liệu thật. Local5173 vẫn API Railway; kết luận mã/test checkout không thay nghiệm thu production.
+
 Ngày 11/10 theo yêu cầu trực tiếp đã điều chỉnh **dautay@greenedu.nk lên cấp 5 ở đủ 4 chương Vật Lý lớp 11/2** trên Railway: progress mỗi chương tối thiểu 14.400 giây. Đây là điều chỉnh thủ công theo yêu cầu, không phải thời gian học mới. Backup/audit trên volume; transaction kiểm tra 30 bảng khác và progress ngoài phạm vi không đổi, integrity/khóa ngoại đạt; đọc lại sau commit xác nhận đủ 4 chương. Không deploy/push/restart, chi tiết [session-handoff.md](session-handoff.md).
 
 Ngày 11/10 theo phản hồi mới đã thay bố cục tầng bằng **frame vườn có rào gỗ**, icon cấp cao nhất/tên/avatar dạo quanh vườn chung chứa toàn lớp. Thêm **frame Vinh danh Kết Trái · Cấp 5 riêng**, mỗi bạn một mục và vẫn có cây trong vườn. Có pause/reduced-motion, cuộn nội bộ lớp đông; API cũ vẫn hiện frame chờ, vinh danh gộp cây thật cũ theo học sinh. Không đổi backend/cấp/dữ liệu trong đợt này. Local5173 HMR cập nhật, **chưa deploy Railway**, cần API members để hiện vườn đầy đủ thật. Thiết kế [app-design.md](app-design.md), kiểm tra cuối [session-handoff.md](session-handoff.md); bố cục tầng ở ghi chú sau là lịch sử đã thay.

@@ -1,5 +1,19 @@
 # Ca kiểm thử chức năng GreenEdu
 
+## Audit vi phạm khi ôn và thi — 11/10/2026
+
+Đã chạy lại 9 backend liên quan giờ/idle/sổ tay/thi4tab/deadline/duyệt thưởng. Tám ca trình duyệt audit desktop/mobile: desktop idle đạt; online4tab/reload/nộp khóa, offline4tab vẫn nhận đáp án sau ngưỡng, blur trang visible không đếm đều xác nhận trên hai viewport. Kết quả7 đạt/1 mobile idle chưa xác nhận ở mốc mô phỏng, cần QA thiết bị thật. Tests gap passing xác nhận hành vi lỗi hiện tại, không đồng nghĩa đã sửa. Chỉ server/DB riêng3187/build `.local/violations-audit-build`; [chi tiết](violations-audit.md). Không ghi Railway hoặc áp quy tắc phạt mới.
+
+## Ca mới: thời gian tăng cấp do giáo viên đặt — 11/10/2026
+
+- LEVEL-CONFIG-BOUNDARY: mặc định 60 phút; mốc chính xác cho 1/30/60/90/1440 phút, giây phân số dưới mốc chưa lên cấp.
+- LEVEL-CONFIG-ACCESS: chỉ chủ lớp ghi; học sinh/giáo viên ngoài lớp bị chặn; null/string/0/âm/thập phân/>1440 không tạo bản ghi.
+- LEVEL-CONFIG-SYNC: cấu hình lớp 30 phút đối chiếu cấp chương, learning, roster, xếp hạng, vườn MAX và cây cấp 5; lớp/môn khác/chương chưa học giữ độc lập.
+- LEVEL-CONFIG-HISTORY: giảm/tăng mốc không sửa progress hoặc thu hồi vé/điểm; đọc lặp/đổi mốc không cấp trùng. Migration/reopen giữ cài đặt, khóa ngoại và integrity.
+- LEVEL-CONFIG-UI: giáo viên xem draft năm mốc, lưu/reload; học sinh nhận timeline/mốc mới. Desktop/mobile không tràn ngang. API cũ thiếu capability khóa input/nút và không gửi ghi.
+
+Ca backend `server/level-settings.test.ts`; browser `e2e/level-settings.spec.ts`. Chỉ chạy server/database kiểm thử riêng.
+
 ## Ca mới: khu vườn thành viên — 11/10/2026
 
 - GARDEN-MEMBERS: mọi học sinh hiện thuộc lớp xuất hiện một lần, kể cả chưa học/chưa có chương; người đã rời lớp không xuất hiện, avatar null dùng chữ cái. Không ghi tiến độ hoặc dữ liệu người dùng.
