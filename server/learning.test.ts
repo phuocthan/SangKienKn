@@ -43,9 +43,9 @@ async function fixture(t: TestContext) {
   }
   const login = async (email: string) =>
     (await request("/auth/login", { email, password: "GreenEdu123!" })).cookie;
-  const teacher = await login("giaovien@greenedu.demo"),
-    student = await login("hocsinh@greenedu.demo"),
-    peer = await login("minhkhoi@greenedu.demo"),
+  const teacher = await login("giaovien@greenedu.nk"),
+    student = await login("hocsinh@greenedu.nk"),
+    peer = await login("minhkhoi@greenedu.nk"),
     other = await login("other@test.local");
   const read = async (path: string, cookie = student) => {
     const r = await request(path, undefined, cookie);
@@ -66,14 +66,22 @@ async function fixture(t: TestContext) {
     });
   const eligible = () => {
     db.prepare(
+      "INSERT INTO chapter_exam_access VALUES('chapter-1',1,'teacher-demo',?) ON CONFLICT(chapter_id) DO UPDATE SET enabled=1",
+    ).run(clock);
+    db.prepare(
       "INSERT INTO progress VALUES('student-demo','chapter-1',14400) ON CONFLICT(student_id,chapter_id) DO UPDATE SET seconds=14400",
     ).run();
     db.prepare(
       "INSERT INTO attempts VALUES(?,'student-demo','question-1',0,1,'practice',?)",
     ).run(randomUUID(), clock);
   };
-  const official = (overrides: object = {}) =>
-    post(
+  const official = async (overrides: object = {}) => {
+    const ids = (overrides as { chapterIds?: string[] }).chapterIds ?? [
+      "chapter-1",
+    ];
+    for (const id of ids)
+      await post(`/chapters/${id}/exam-access`, { enabled: true }, teacher);
+    return post(
       "/classrooms/class-demo/exams",
       {
         title: "Thi chính thức",
@@ -86,6 +94,7 @@ async function fixture(t: TestContext) {
       },
       teacher,
     );
+  };
   const start = (body: object) =>
     post("/classrooms/class-demo/exam-runs", {
       requestId: randomUUID(),
@@ -109,6 +118,247 @@ async function fixture(t: TestContext) {
     advance: (ms: number) => (clock += ms),
   };
 }
+
+test("chapter exams default closed; only owning teacher can open, without bypassing study requirements or consuming tickets on rejection", async (t) => {
+  const f = await fixture(t);
+  f.eligible();
+  // Existing progress qualifies, but permission must still come from the teacher.
+  await f.post(
+    "/chapters/chapter-1/exam-access",
+    { enabled: false },
+    f.teacher,
+  );
+  let ch = (await f.read("/classrooms/class-demo/learning")).chapters[0];
+  assert.equal(ch.examAllowed, false);
+  assert.equal(ch.eligible, false);
+  assert.equal(ch.tickets.remaining, 3);
+  assert.deepEqual(ch.missing, ["Giáo viên chưa mở kiểm tra chương này"]);
+  const denied = await f.request(
+    "/classrooms/class-demo/exam-runs",
+    {
+      chapterId: "chapter-1",
+      requestId: randomUUID(),
+    },
+    f.student,
+  );
+  assert.equal(denied.status, 403);
+  assert.match(denied.data.error, /Giáo viên chưa mở/);
+  assert.equal(f.db.prepare("SELECT COUNT(*) AS n FROM exam_runs").get()!.n, 0);
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT COUNT(*) AS n FROM learning_tickets WHERE used_by IS NOT NULL",
+      )
+      .get()!.n,
+    0,
+  );
+  for (const cookie of [f.student, f.other])
+    assert.equal(
+      (
+        await f.request(
+          "/chapters/chapter-1/exam-access",
+          { enabled: true },
+          cookie,
+        )
+      ).status,
+      403,
+    );
+  for (const enabled of ["true", 1, null])
+    assert.equal(
+      (
+        await f.request(
+          "/chapters/chapter-1/exam-access",
+          { enabled },
+          f.teacher,
+        )
+      ).status,
+      400,
+    );
+  assert.equal(
+    (
+      await f.request(
+        "/chapters/missing/exam-access",
+        { enabled: true },
+        f.teacher,
+      )
+    ).status,
+    404,
+  );
+  await f.post("/chapters/chapter-1/exam-access", { enabled: true }, f.teacher);
+  await f.post("/chapters/chapter-1/exam-access", { enabled: true }, f.teacher);
+  ch = (await f.read("/classrooms/class-demo/learning")).chapters[0];
+  assert.equal(ch.examAllowed, true);
+  assert.equal(ch.eligible, true);
+  const second = (await f.read("/classrooms/class-demo/learning")).chapters[1];
+  assert.equal(second.examAllowed, false);
+  await f.post("/chapters/chapter-2/exam-access", { enabled: true }, f.teacher);
+  assert.equal(
+    (await f.read("/classrooms/class-demo/learning")).chapters[1].eligible,
+    false,
+  );
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exam-runs",
+        {
+          chapterId: "chapter-2",
+          requestId: randomUUID(),
+        },
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  await f.post(
+    "/chapters/chapter-2/exam-access",
+    { enabled: false },
+    f.teacher,
+  );
+  // Review remains available even when an exam is locked.
+  await f.post("/classrooms/class-demo/reviews", {
+    chapterIds: ["chapter-2"],
+    questionCount: 1,
+    requestId: randomUUID(),
+  });
+});
+
+test("locking a chapter prevents new starts but preserves the active run, answers and retry without consuming another ticket", async (t) => {
+  const f = await fixture(t);
+  f.eligible();
+  const body = { chapterId: "chapter-1", requestId: randomUUID() };
+  const run = await f.post("/classrooms/class-demo/exam-runs", body);
+  await f.post(
+    "/chapters/chapter-1/exam-access",
+    { enabled: false },
+    f.teacher,
+  );
+  assert.equal(
+    (await f.read(`/learning/exam-runs/${run.id}`)).status,
+    "active",
+  );
+  assert.deepEqual(await f.post("/classrooms/class-demo/exam-runs", body), run);
+  const q = (await f.read(`/learning/exam-runs/${run.id}`)).questions[0];
+  await f.post(`/learning/exam-runs/${run.id}/answers`, {
+    revision: 0,
+    answers: { [q.id]: 0 },
+  });
+  assert.equal(
+    (await f.read(`/learning/exam-runs/${run.id}`)).answers[q.id],
+    0,
+  );
+  await f.post(`/learning/exam-runs/${run.id}/submit`, {});
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exam-runs",
+        {
+          chapterId: "chapter-1",
+          requestId: randomUUID(),
+        },
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT COUNT(*) AS n FROM learning_tickets WHERE used_by IS NOT NULL",
+      )
+      .get()!.n,
+    1,
+  );
+  assert.equal(f.db.prepare("SELECT COUNT(*) AS n FROM exam_runs").get()!.n, 1);
+});
+
+test("scheduled exams require every chapter in their snapshot to be opened, while keeping existing schedule and resume rules", async (t) => {
+  const f = await fixture(t);
+  const e = await f.post(
+    "/classrooms/class-demo/exams",
+    {
+      title: "Two chapters",
+      chapterIds: ["chapter-1", "chapter-2"],
+      questionCount: 6,
+      startsAt: f.now(),
+      closesAt: f.now() + 3600000,
+    },
+    f.teacher,
+  );
+  let exam = (await f.read("/classrooms/class-demo/learning")).exams[0];
+  assert.equal(exam.blockedChapters.length, 2);
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exam-runs",
+        {
+          examId: e.id,
+          requestId: randomUUID(),
+        },
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  await f.post("/chapters/chapter-1/exam-access", { enabled: true }, f.teacher);
+  exam = (await f.read("/classrooms/class-demo/learning")).exams[0];
+  assert.deepEqual(
+    exam.blockedChapters.map((ch: any) => ch.id),
+    ["chapter-2"],
+  );
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exam-runs",
+        {
+          examId: e.id,
+          requestId: randomUUID(),
+        },
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  await f.post("/chapters/chapter-2/exam-access", { enabled: true }, f.teacher);
+  await f.post(`/learning/exams/${e.id}/state`, { enabled: false }, f.teacher);
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exam-runs",
+        {
+          examId: e.id,
+          requestId: randomUUID(),
+        },
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  await f.post(`/learning/exams/${e.id}/state`, { enabled: true }, f.teacher);
+  // Scheduled exams keep their previous exemption from personal study/ticket conditions.
+  const body = { examId: e.id, requestId: randomUUID() };
+  const run = await f.post("/classrooms/class-demo/exam-runs", body);
+  await f.post(
+    "/chapters/chapter-1/exam-access",
+    { enabled: false },
+    f.teacher,
+  );
+  assert.equal(
+    (await f.read(`/learning/exam-runs/${run.id}`)).status,
+    "active",
+  );
+  assert.equal(
+    (await f.post("/classrooms/class-demo/exam-runs", body)).id,
+    run.id,
+  );
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT COUNT(*) AS n FROM learning_tickets WHERE used_by IS NOT NULL",
+      )
+      .get()!.n,
+    0,
+  );
+});
 
 test("milestones are exact, grant three tickets and one tree reward once; eligibility counts all repairs and chapter notebook", async (t) => {
   const f = await fixture(t);
@@ -136,6 +386,10 @@ test("milestones are exact, grant three tickets and one tree reward once; eligib
   f.db
     .prepare("INSERT INTO corrections VALUES('student-demo','question-4',0,0)")
     .run();
+  ch = (await f.read("/classrooms/class-demo/learning")).chapters[0];
+  assert.equal(ch.examAllowed, false);
+  assert.equal(ch.eligible, false);
+  await f.post("/chapters/chapter-1/exam-access", { enabled: true }, f.teacher);
   ch = (await f.read("/classrooms/class-demo/learning")).chapters[0];
   assert.equal(ch.eligible, true);
   assert.ok(ch.accuracy >= 70);

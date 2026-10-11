@@ -1,8 +1,10 @@
 # Quản lý tài khoản GreenEdu
 
+**Tên miền đăng nhập hiện tại từ 11/10/2026: @greenedu.nk.** Toàn bộ 51 tài khoản sẵn có trên Railway (kể cả Admin và giáo viên) đã đổi đuôi, giữ nguyên tên trước @ và mật khẩu. Ví dụ truongnhavy@greenedu.nk hoặc chỉ truongnhavy. Email cũ không còn là tên đăng nhập; phiên đã đăng nhập vẫn gắn với cùng ID. Đợt chuyển đổi có backup/kiểm tra va chạm, không chạy tự động mỗi lần mở database. Dữ liệu SQLite offline cũ không tự chuyển đổi.
+
 ## Nhập tài khoản khi đăng nhập
 
-Trang đăng nhập cho phép nhập tên tài khoản hoặc email đầy đủ. Nếu chưa có ký tự `@`, app tự thêm `@greenedu.demo` khi gửi đăng nhập: `hocsinh` tương đương `hocsinh@greenedu.demo`. Khoảng trắng đầu/cuối được bỏ; email đã có `@` được giữ nguyên, kể cả tên miền khác. Vẫn cần mật khẩu đúng và đổi mật khẩu tạm khi được yêu cầu.
+Trang đăng nhập cho phép nhập tên tài khoản hoặc email đầy đủ. Nếu chưa có ký tự `@`, app tự thêm `@greenedu.nk` khi gửi đăng nhập: `hocsinh` tương đương `hocsinh@greenedu.nk`. Khoảng trắng đầu/cuối được bỏ; email đã có `@` được giữ nguyên, kể cả tên miền khác. Vẫn cần mật khẩu đúng và đổi mật khẩu tạm khi được yêu cầu.
 
 ## Admin đầu tiên
 
@@ -69,4 +71,4 @@ Giáo viên chỉ thêm học sinh vào lớp mình sở hữu, không tạo gi�
 
 Database cũ tự cập nhật ràng buộc vai trò khi mở bản mới; giữ ID người dùng, mật khẩu, session, lớp, tiến độ và liên kết hoạt động nhóm. Kiểm thử migration dùng database riêng và kiểm tra khóa ngoại sau cập nhật. Sao lưu trước khi cập nhật bản chạy bằng script deploy hiện có.
 
-Tài khoản `admin@greenedu.test` chỉ nằm trong database E2E riêng, không được tạo trong dữ liệu demo hoặc database chính. Chưa có tự đăng ký, nhập tài khoản hàng loạt, xóa tài khoản hay gửi email tự động.
+Tài khoản `admin@greenedu.test` chỉ nằm trong database E2E riêng, không được tạo trong dữ liệu demo hoặc database chính. Chưa có tự đăng ký, nhập tài khoản hàng loạt hoặc xóa tài khoản. Đã chuẩn bị email xác nhận tài khoản mới theo vai trò, mặc định tắt; cần kết nối EmailJS/Gmail và triển khai backend Railway để dùng thật. Xem [welcome-email.md](welcome-email.md). Không gửi mật khẩu trong email hoặc gửi lại khi thêm tài khoản có sẵn vào lớp.

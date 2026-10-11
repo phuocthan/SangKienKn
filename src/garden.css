@@ -560,6 +560,38 @@ tbody tr:hover {
   background: #1b362b66;
   backdrop-filter: blur(5px);
 }
+.account-avatar-button {
+  flex-shrink: 0;
+}
+.account-details {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.account-settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.avatar-dialog {
+  max-width: 760px;
+}
+.avatar-dialog .avatar-picker > h2 {
+  font-size: var(--text-card);
+}
+.avatar-dialog .modal-head {
+  position: sticky;
+  top: -27px;
+  z-index: 1;
+  background: #fffefa;
+  padding: 12px 0;
+}
+.password-dialog .password-form {
+  max-width: none;
+  margin-top: 0;
+}
 .info-panel {
   background: #eef3e5;
   border-color: #dce6cc;
@@ -895,5 +927,77 @@ tbody tr:hover {
   .nav-item,
   .progress-track > span {
     transition: none;
+  }
+}
+.curriculum-lessons {
+  margin-top: 12px;
+}
+.curriculum-lessons summary {
+  cursor: pointer;
+  color: var(--green);
+  font-weight: 600;
+}
+.curriculum-lessons ol {
+  margin: 12px 0 0;
+  padding-left: 24px;
+}
+.curriculum-lessons li {
+  margin: 10px 0;
+  padding-left: 4px;
+}
+.curriculum-lessons li small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+}
+.lesson-management {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin-top: 12px;
+}
+.lesson-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.lesson-row > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.chapter-row > div {
+  min-width: 0;
+}
+.practice-clock {
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+  text-align: right;
+  min-width: 0;
+}
+.practice-elapsed {
+  display: grid;
+  gap: 3px;
+}
+.practice-elapsed small {
+  color: var(--muted);
+  font-size: var(--text-caption);
+}
+.practice-elapsed time {
+  color: var(--green);
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 600px) {
+  .practice-top {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .practice-clock {
+    margin-left: auto;
+    max-width: 100%;
   }
 }

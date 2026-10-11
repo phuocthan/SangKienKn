@@ -81,13 +81,13 @@ async function fixture(t: TestContext) {
   ).cookie;
   const teacher = (
     await request("/auth/login", {
-      email: "giaovien@greenedu.demo",
+      email: "giaovien@greenedu.nk",
       password: "GreenEdu123!",
     })
   ).cookie;
   const student = (
     await request("/auth/login", {
-      email: "hocsinh@greenedu.demo",
+      email: "hocsinh@greenedu.nk",
       password: "GreenEdu123!",
     })
   ).cookie;
@@ -338,7 +338,7 @@ test("admin reset revokes sessions and forces password change, while teachers ca
   );
   assert.equal((await f.request("/auth/me", undefined, f.teacher)).status, 401);
   const login = await f.request("/auth/login", {
-    email: "giaovien@greenedu.demo",
+    email: "giaovien@greenedu.nk",
     password: "ResetPass123!",
   });
   assert.equal(login.data.mustChange, true);
@@ -628,7 +628,7 @@ test("invalid student/account input and unauthorized creation leave users and me
     (
       await f.request(
         "/classrooms/class-demo/memberships",
-        { email: "giaovien@greenedu.demo" },
+        { email: "giaovien@greenedu.nk" },
         f.teacher,
       )
     ).status,
@@ -676,7 +676,7 @@ test("shared student password recovery requires admin and preserves both class m
   );
   assert.equal((await f.request("/auth/me", undefined, f.student)).status, 401);
   const login = await f.request("/auth/login", {
-    email: "hocsinh@greenedu.demo",
+    email: "hocsinh@greenedu.nk",
     password: reset.password,
   });
   assert.equal(login.status, 200);

@@ -74,9 +74,9 @@ test("upload is atomic, private to authorized classmates, size-limited and survi
     ).headers
       .get("set-cookie")!
       .split(";")[0];
-  const student = await login("hocsinh@greenedu.demo");
-  const teacher = await login("giaovien@greenedu.demo");
-  const peer = await login("minhkhoi@greenedu.demo");
+  const student = await login("hocsinh@greenedu.nk");
+  const teacher = await login("giaovien@greenedu.nk");
+  const peer = await login("minhkhoi@greenedu.nk");
   const outsider = await login("outsider@example.test", "OtherPass123!");
   function upload(
     cookie = student,

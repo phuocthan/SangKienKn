@@ -62,7 +62,7 @@ test("teacher roster and class leaderboard show the same student stage for the s
   await page.goto("/");
   await page
     .getByLabel("Email", { exact: true })
-    .fill("giaovien@greenedu.demo");
+    .fill("giaovien@greenedu.nk");
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();

@@ -2,6 +2,11 @@ import type { DatabaseSync } from "node:sqlite";
 
 export function ensureLearningSchema(db: DatabaseSync) {
   db.exec(`
+    CREATE TABLE IF NOT EXISTS chapter_exam_access (
+      chapter_id TEXT PRIMARY KEY REFERENCES chapters(id),
+      enabled INTEGER NOT NULL DEFAULT 0 CHECK(enabled IN (0,1)),
+      updated_by TEXT NOT NULL REFERENCES users(id), updated_at INTEGER NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS chapter_learning (
       chapter_id TEXT PRIMARY KEY REFERENCES chapters(id), semester TEXT NOT NULL DEFAULT '',
       accuracy_basis TEXT NOT NULL DEFAULT 'all' CHECK(accuracy_basis IN ('all','latest'))
@@ -52,10 +57,15 @@ export function ensureLearningSchema(db: DatabaseSync) {
     CREATE INDEX IF NOT EXISTS learning_reward_class ON learning_rewards(classroom_id,status);
   `);
   const columns = new Set(
-    db.prepare("PRAGMA table_info(exam_runs)").all().map((column) => column.name),
+    db
+      .prepare("PRAGMA table_info(exam_runs)")
+      .all()
+      .map((column) => column.name),
   );
   for (const name of ["revision", "released"]) {
     if (!columns.has(name))
-      db.exec(`ALTER TABLE exam_runs ADD COLUMN ${name} INTEGER NOT NULL DEFAULT 0`);
+      db.exec(
+        `ALTER TABLE exam_runs ADD COLUMN ${name} INTEGER NOT NULL DEFAULT 0`,
+      );
   }
 }

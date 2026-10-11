@@ -4,6 +4,8 @@ Cập nhật 11/10/2026. Toàn bộ thiết kế, hình ảnh, prompt, bộ sưu
 
 Học sinh và giáo viên chọn/lưu avatar trong Tài khoản. Giáo viên có 40 ID trong danh mục; học sinh dùng 24 ID dành cho học sinh/thiên nhiên, không được dùng 16 ID giáo viên. Avatar không thay đổi vai trò. Có thể dùng ảnh cá nhân hoặc khôi phục chữ viết tắt.
 
+Từ lượt chỉnh giao diện 11/10/2026, click ảnh đại diện/nút **Đổi avatar** trong trang Tài khoản hoặc avatar thanh đầu để mở popup. Chọn/tải ảnh rồi bấm **Lưu avatar**; đóng khi chưa lưu bỏ lựa chọn và ảnh tạm, giữ avatar hiện tại. Đây là thay đổi frontend local 5173, chưa push/deploy Railway.
+
 Upload nhận JPG/PNG/WebP tối đa **3 MB (3 × 1024 × 1024 byte)** và 4096 × 4096 px. Mỗi tài khoản lưu một ảnh, tải ảnh mới thay bản trước. API kiểm tra kích thước/chữ ký và lưu atomically. Không nhận URL ảnh tùy ý hoặc ID ảnh thuộc tài khoản khác.
 
 - POST /api/auth/avatar: cập nhật lựa chọn của người đang đăng nhập, kiểm tra quyền theo vai trò; học sinh gửi ID giáo viên bị từ chối 403.

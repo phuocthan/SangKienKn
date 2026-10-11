@@ -8,6 +8,57 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+test("chapter exam permission migration preserves old settings and progress, defaults closed and persists on reopen", (t) => {
+  const dir = mkdtempSync(join(tmpdir(), "greenedu-exam-access-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, "access.sqlite");
+  let db = openDatabase(path);
+  try {
+    seedDemo(db);
+    db.exec("DROP TABLE chapter_exam_access");
+    db.prepare(
+      "INSERT INTO chapter_learning VALUES('chapter-1','Học kỳ I','latest')",
+    ).run();
+    db.prepare(
+      "INSERT INTO progress VALUES('student-demo','chapter-1',14400)",
+    ).run();
+    const settings = db.prepare("SELECT * FROM chapter_learning").all();
+    const progress = db.prepare("SELECT * FROM progress").all();
+    ensureLearningSchema(db);
+    ensureLearningSchema(db);
+    assert.equal(
+      db.prepare("SELECT COUNT(*) AS n FROM chapter_exam_access").get()!.n,
+      0,
+    );
+    assert.deepEqual(
+      db.prepare("SELECT * FROM chapter_learning").all(),
+      settings,
+    );
+    assert.deepEqual(db.prepare("SELECT * FROM progress").all(), progress);
+    db.prepare(
+      "INSERT INTO chapter_exam_access VALUES('chapter-1',1,'teacher-demo',123)",
+    ).run();
+    db.close();
+    db = openDatabase(path);
+    assert.equal(
+      db
+        .prepare(
+          "SELECT enabled FROM chapter_exam_access WHERE chapter_id='chapter-1'",
+        )
+        .get()!.enabled,
+      1,
+    );
+    assert.deepEqual(
+      db.prepare("SELECT * FROM chapter_learning").all(),
+      settings,
+    );
+    assert.deepEqual(db.prepare("SELECT * FROM progress").all(), progress);
+    assert.deepEqual(db.prepare("PRAGMA foreign_key_check").all(), []);
+  } finally {
+    db.close();
+  }
+});
+
 test("old exam schema gains revision/released while keeping existing runs", () => {
   const db = openDatabase(":memory:");
   try {

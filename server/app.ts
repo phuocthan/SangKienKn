@@ -16,6 +16,15 @@ import {
 import { findAvatar, avatarCollectionsFor } from "../shared/avatars.js";
 import { registerAvatarUploads } from "./avatar-uploads.js";
 import { studentLevel } from "../shared/student-levels.js";
+import { enqueueWelcome } from "./welcome-email.js";
+import {
+  chapterLessons,
+  addLesson,
+  archiveLesson,
+  lessonIsArchived,
+  LessonError,
+} from "./lesson-catalog.js";
+import { loginEmail } from "../shared/login-email.js";
 
 export type Row = Record<string, any>;
 export type AppRequest = Request & { user?: Row; tokenHash?: string };
@@ -53,6 +62,7 @@ export function createApp(
     production?: boolean;
     demo?: boolean;
     quickLogin?: boolean;
+    welcomeEmail?: boolean;
   } = {},
 ) {
   const now = options.now ?? Date.now;
@@ -177,7 +187,11 @@ export function createApp(
   });
   const loginAttempts = new Map<string, { count: number; until: number }>();
   app.post("/api/auth/login", (req, res) => {
-    const email = text(req.body?.email, "Email", 254).toLowerCase();
+    const email = text(
+      loginEmail(text(req.body?.email, "Email", 254)),
+      "Email",
+      254,
+    ).toLowerCase();
     const pw = password(req.body?.password);
     const key = req.ip ?? "unknown";
     if (loginAttempts.size > 1000)
@@ -351,6 +365,7 @@ export function createApp(
       );
       if (classId)
         db.prepare("INSERT INTO memberships VALUES (?,?)").run(classId, id);
+      if (options.welcomeEmail) enqueueWelcome(db, id, now());
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");
@@ -447,7 +462,7 @@ export function createApp(
                 Number(
                   db
                     .prepare(
-                  "SELECT COALESCE(SUM(CAST(p.seconds AS INTEGER)),0) AS seconds FROM progress p JOIN chapters ch ON ch.id=p.chapter_id WHERE p.student_id=? AND ch.classroom_id=?",
+                      "SELECT COALESCE(SUM(CAST(p.seconds AS INTEGER)),0) AS seconds FROM progress p JOIN chapters ch ON ch.id=p.chapter_id WHERE p.student_id=? AND ch.classroom_id=?",
                     )
                     .get(req.user!.id, c.id)!.seconds,
                 ),
@@ -468,11 +483,8 @@ export function createApp(
             .all(c.id) as Row[]
         ).map((ch) => ({
           ...ch,
-          lessons: db
-            .prepare(
-              "SELECT lesson AS title, COUNT(*) AS questionCount FROM questions WHERE chapter_id = ? AND active = 1 AND is_current = 1 GROUP BY lesson ORDER BY MIN(rowid)",
-            )
-            .all(ch.id),
+          lessons: chapterLessons(db, ch.id),
+          canManageLessons: req.user!.role === "teacher",
           questionCount: (
             db
               .prepare(
@@ -530,6 +542,38 @@ export function createApp(
       throw error;
     }
     res.status(201).json({ id });
+  });
+  app.post("/api/chapters/:id/lessons", (req: AppRequest, res) => {
+    teacher(req);
+    const ch = chapter(req, String(req.params.id));
+    try {
+      res
+        .status(201)
+        .json(
+          addLesson(db, String(ch.id), text(req.body?.title, "Tên bài", 120)),
+        );
+    } catch (error) {
+      if (error instanceof LessonError) fail(error.status, error.message);
+      throw error;
+    }
+  });
+  app.post("/api/chapters/:id/lessons/delete", (req: AppRequest, res) => {
+    teacher(req);
+    const ch = chapter(req, String(req.params.id));
+    try {
+      res.json(
+        archiveLesson(
+          db,
+          String(ch.id),
+          text(req.body?.title, "Tên bài", 120),
+          req.user!.id,
+          now(),
+        ),
+      );
+    } catch (error) {
+      if (error instanceof LessonError) fail(error.status, error.message);
+      throw error;
+    }
   });
   app.post("/api/classrooms/:id/chapters", (req: AppRequest, res) => {
     teacher(req);
@@ -691,6 +735,7 @@ export function createApp(
         "student",
       );
       db.prepare("INSERT INTO memberships VALUES (?,?)").run(c.id, id);
+      if (options.welcomeEmail) enqueueWelcome(db, id, now());
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");
@@ -812,6 +857,8 @@ export function createApp(
     content: QuestionInput,
     metadata?: { familyId: string; version: number; active: boolean },
   ) {
+    if (lessonIsArchived(db, chapterId, content.lesson))
+      fail(409, "Bài đã bị xóa. Thêm lại bài trước khi thêm hoặc sửa câu hỏi.");
     const id = randomUUID();
     db.prepare(
       `INSERT INTO questions
@@ -929,6 +976,11 @@ export function createApp(
       fail(409, "Chỉ thay đổi trạng thái của phiên bản hiện tại.");
     if (typeof req.body?.active !== "boolean")
       fail(400, "Trạng thái câu hỏi không hợp lệ.");
+    if (
+      req.body.active &&
+      lessonIsArchived(db, String(q.chapter_id), String(q.lesson))
+    )
+      fail(409, "Bài đã bị xóa. Thêm lại bài trước khi hiện câu hỏi.");
     db.prepare("UPDATE questions SET active = ? WHERE id = ?").run(
       Number(req.body.active),
       q.id,
@@ -1157,7 +1209,10 @@ export function createApp(
       s.id,
     );
     grantLearningMilestones(db, req.user!.id, now());
-    res.json(summary(s.chapter_id, req.user!.id));
+    res.json({
+      ...summary(s.chapter_id, req.user!.id),
+      creditedSeconds: seconds,
+    });
   });
   app.post("/api/study/stop", (req: AppRequest, res) => {
     student(req);

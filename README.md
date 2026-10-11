@@ -76,8 +76,8 @@ Tài khoản mẫu, chỉ dùng cho dữ liệu thử:
 
 | Vai trò   | Email                  | Mật khẩu mẫu |
 | --------- | ---------------------- | ------------ |
-| Giáo viên | giaovien@greenedu.demo | GreenEdu123! |
-| Học sinh  | hocsinh@greenedu.demo  | GreenEdu123! |
+| Giáo viên | giaovien@greenedu.nk | GreenEdu123! |
+| Học sinh  | hocsinh@greenedu.nk  | GreenEdu123! |
 
 Đăng nhập mẫu không tạo tiến độ giả. Lớp Vật lý 10A1 có 3 chương và 9 câu hỏi; học sinh bắt đầu từ 0 phút. Seed chỉ chạy khi bật `SEED_DEMO=1` và database chưa có người dùng, không ghi đè dữ liệu.
 

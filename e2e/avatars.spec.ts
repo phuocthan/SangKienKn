@@ -14,7 +14,7 @@ for (const role of ["teacher", "student"] as const) {
     await page
       .getByLabel("Email", { exact: true })
       .fill(
-        role === "teacher" ? "giaovien@greenedu.demo" : "hocsinh@greenedu.demo",
+        role === "teacher" ? "giaovien@greenedu.nk" : "hocsinh@greenedu.nk",
       );
     await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
     await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();

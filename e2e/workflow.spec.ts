@@ -130,7 +130,7 @@ async function demoLogin(page: Page, role: "Học sinh" | "Giáo viên") {
   await page
     .getByLabel("Email", { exact: true })
     .fill(
-      role === "Giáo viên" ? "giaovien@greenedu.demo" : "hocsinh@greenedu.demo",
+      role === "Giáo viên" ? "giaovien@greenedu.nk" : "hocsinh@greenedu.nk",
     );
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();

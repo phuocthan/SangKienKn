@@ -199,12 +199,70 @@ export function Learning({
         <div className="loading-panel">Đang tải tiến độ…</div>
       ) : (
         <>
+          {teacher && (
+            <section
+              className="card learning-section"
+              aria-labelledby="chapter-exam-access"
+            >
+              <h2 id="chapter-exam-access">Quyền kiểm tra theo chương</h2>
+              <p>
+                Chỉ mở khi lớp đã học và ôn đến chương đó. Săn điểm vẫn yêu cầu
+                đủ thời gian, tỷ lệ đúng, sửa sai và vé. Khóa chương ngăn lượt
+                mới; lượt đang làm được hoàn thành.
+              </p>
+              <div className="learning-list">
+                {data.chapters.map((ch) => (
+                  <div className="learning-row" key={ch.id}>
+                    <div>
+                      <strong>{ch.title}</strong>
+                      <p
+                        className={ch.examAllowed ? "learning-ready" : "muted"}
+                      >
+                        {ch.examAllowed
+                          ? "Đã mở kiểm tra"
+                          : "Đang khóa kiểm tra"}
+                      </p>
+                    </div>
+                    <button
+                      className={`button ${ch.examAllowed ? "secondary" : "primary"} small`}
+                      disabled={busy || typeof ch.examAllowed !== "boolean"}
+                      aria-label={`${ch.examAllowed ? "Khóa" : "Mở"} kiểm tra · ${ch.title}`}
+                      onClick={() =>
+                        void act(
+                          () =>
+                            api(`/chapters/${ch.id}/exam-access`, {
+                              enabled: !ch.examAllowed,
+                            }),
+                          ch.examAllowed
+                            ? "Đã khóa kiểm tra chương."
+                            : "Đã mở kiểm tra chương.",
+                        )
+                      }
+                    >
+                      {ch.examAllowed ? "Khóa kiểm tra" : "Mở kiểm tra"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {data.chapters.some(
+                (ch) => typeof ch.examAllowed !== "boolean",
+              ) && (
+                <p className="muted">
+                  Chức năng mở kiểm tra theo chương đang chờ cập nhật server.
+                </p>
+              )}
+              {!data.chapters.length && (
+                <p className="muted">Tạo chương để thiết lập quyền kiểm tra.</p>
+              )}
+            </section>
+          )}
           {!teacher && (
             <section aria-labelledby="learning-eligibility">
               <h2 id="learning-eligibility">Cấp độ & vé Săn điểm</h2>
               <p>
                 Cấp 3 / 4 / 5 tương ứng 2 / 3 / 4 giờ, mỗi mốc nhận một vé. Bài
-                thi dài 20 phút; thời gian thi không cộng vào cây.
+                thi dài 20 phút; thời gian thi không cộng vào cây. Cần được giáo
+                viên mở kiểm tra chương trước khi bắt đầu.
               </p>
               <div className="learning-grid">
                 {data.chapters.map((ch) => (
@@ -235,15 +293,36 @@ export function Learning({
                         </dd>
                       </div>
                     </dl>
-                    <p className={ch.eligible ? "learning-ready" : "muted"}>
-                      {ch.eligible
+                    <span className="pill">
+                      {ch.examAllowed
+                        ? "Giáo viên đã mở kiểm tra"
+                        : "Chờ giáo viên mở kiểm tra"}
+                    </span>
+                    <p
+                      className={
+                        ch.eligible && ch.examAllowed
+                          ? "learning-ready"
+                          : "muted"
+                      }
+                    >
+                      {ch.eligible && ch.examAllowed
                         ? "Đã đủ điều kiện Săn điểm."
-                        : ch.missing.join(" · ")}
+                        : (!ch.examAllowed &&
+                          !ch.missing.some((reason) =>
+                            reason.includes("Giáo viên chưa mở"),
+                          )
+                            ? [
+                                "Giáo viên chưa mở kiểm tra chương này",
+                                ...ch.missing,
+                              ]
+                            : ch.missing
+                          ).join(" · ")}
                     </p>
                     <button
                       className="button primary"
                       disabled={
                         busy ||
+                        !ch.examAllowed ||
                         !ch.eligible ||
                         data.runs.some((r) => r.status === "active")
                       }
@@ -595,6 +674,13 @@ export function Learning({
                               ? "Đã hết giờ"
                               : "Đang mở"}
                       </small>
+                      {!!ex.blockedChapters?.length && (
+                        <p>
+                          Chờ giáo viên mở kiểm tra:{" "}
+                          {ex.blockedChapters.map((ch) => ch.title).join(" · ")}
+                          .
+                        </p>
+                      )}
                     </div>
                     {teacher ? (
                       <button
@@ -618,6 +704,8 @@ export function Learning({
                         disabled={
                           busy ||
                           !ex.enabled ||
+                          !ex.blockedChapters ||
+                          ex.blockedChapters.length > 0 ||
                           Date.now() < ex.startsAt ||
                           Date.now() >= ex.closesAt
                         }

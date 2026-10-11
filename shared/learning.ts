@@ -18,6 +18,7 @@ export type LearningChapter = {
   title: string;
   semester: string;
   accuracyBasis: "all" | "latest";
+  examAllowed: boolean;
   seconds: number;
   level: number;
   accuracy: number;
@@ -35,6 +36,7 @@ export type ExamDefinition = {
   tabLimit: number;
   enabled: boolean;
   questionCount: number;
+  blockedChapters: { id: string; title: string }[];
 };
 export type ExamRun = {
   id: string;

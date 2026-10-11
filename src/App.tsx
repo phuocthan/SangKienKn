@@ -38,6 +38,7 @@ import {
   Tree,
 } from "./components";
 import { Practice } from "./Practice";
+import { Lessons } from "./Lessons";
 import { Learning } from "./Learning";
 import { ClassCommunity } from "./ClassCommunity";
 import { GroupActivities } from "./GroupActivities";
@@ -48,6 +49,7 @@ import { GardenGoal } from "./GardenGoal";
 import { QuestionBank } from "./QuestionBank";
 import { QuestionFields } from "./QuestionFields";
 import type { Chapter, Classroom, Question, Student, User } from "./types";
+import { loginEmail } from "../shared/login-email";
 
 type Page =
   | "home"
@@ -91,6 +93,9 @@ export default function App() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [editor, setEditor] = useState<Editor>(null);
+  const [accountDialog, setAccountDialog] = useState<
+    "avatar" | "password" | null
+  >(null);
   const [questionChapter, setQuestionChapter] = useState("");
   const [questionLesson, setQuestionLesson] = useState("");
   useEffect(() => setQuestionLesson(""), [questionChapter, classId]);
@@ -163,6 +168,7 @@ export default function App() {
     setRevision((r) => r + 1);
   }, [reload]);
   const closeEditor = useCallback(() => setEditor(null), []);
+  const closeAccountDialog = useCallback(() => setAccountDialog(null), []);
   function navigate(next: Page) {
     setPage(next);
     setStudy(null);
@@ -401,7 +407,8 @@ export default function App() {
               <button
                 className="profile-avatar-button"
                 aria-label="Đổi avatar"
-                onClick={() => navigate("settings")}
+                aria-haspopup="dialog"
+                onClick={() => setAccountDialog("avatar")}
               >
                 <Avatar name={user.name} avatarId={user.avatarId} />
               </button>
@@ -459,12 +466,20 @@ export default function App() {
               <div className="card settings-card">
                 <h2>Thông tin tài khoản</h2>
                 <div className="account-info">
-                  <Avatar
-                    name={user.name}
-                    avatarId={user.avatarId}
-                    className="large"
-                  />
-                  <div>
+                  <button
+                    type="button"
+                    className="profile-avatar-button account-avatar-button"
+                    aria-label="Đổi ảnh đại diện"
+                    aria-haspopup="dialog"
+                    onClick={() => setAccountDialog("avatar")}
+                  >
+                    <Avatar
+                      name={user.name}
+                      avatarId={user.avatarId}
+                      className="large"
+                    />
+                  </button>
+                  <div className="account-details">
                     <strong>{user.name}</strong>
                     <p>{user.email}</p>
                     <span className="pill">
@@ -472,16 +487,26 @@ export default function App() {
                     </span>
                   </div>
                 </div>
-                <hr />
-                <AvatarPicker user={user} onUpdate={setUser} />
-                <hr />
-                <h2>Đổi mật khẩu</h2>
-                <PasswordForm
-                  onUpdate={(u) => {
-                    setUser(u);
-                    setNotice("Đã đổi mật khẩu.");
-                  }}
-                />
+                <div className="account-settings-actions">
+                  <button
+                    type="button"
+                    className="button outline"
+                    aria-haspopup="dialog"
+                    onClick={() => setAccountDialog("avatar")}
+                  >
+                    <Sprout size={18} />
+                    Đổi avatar
+                  </button>
+                  <button
+                    type="button"
+                    className="button outline"
+                    aria-haspopup="dialog"
+                    onClick={() => setAccountDialog("password")}
+                  >
+                    <ShieldCheck size={18} />
+                    Đổi mật khẩu
+                  </button>
+                </div>
               </div>
               {!isTeacher && current && (
                 <StudentLevelCard classroom={current} />
@@ -715,7 +740,10 @@ export default function App() {
                           </span>
                           <div>
                             <h3>{ch.title}</h3>
-                            <p>{ch.questionCount} câu hỏi</p>
+                            <p>{ch.lessons.length} bài · {ch.questionCount} câu hỏi</p>
+                            <Lessons chapter={ch} onChange={async () => {
+                              await reload(); setRevision((value) => value + 1);
+                            }} />
                           </div>
                           <LinkButton
                             onClick={() => {
@@ -908,6 +936,27 @@ export default function App() {
           </footer>
         </main>
       </div>
+      {accountDialog && (
+        <Modal
+          title={accountDialog === "avatar" ? "Đổi avatar" : "Đổi mật khẩu"}
+          className={
+            accountDialog === "avatar" ? "avatar-dialog" : "password-dialog"
+          }
+          onClose={closeAccountDialog}
+        >
+          {accountDialog === "avatar" ? (
+            <AvatarPicker user={user} onUpdate={setUser} />
+          ) : (
+            <PasswordForm
+              onUpdate={(updated) => {
+                setUser(updated);
+                setNotice("Đã đổi mật khẩu.");
+                closeAccountDialog();
+              }}
+            />
+          )}
+        </Modal>
+      )}
       {editor && (
         <Modal
           title={
@@ -990,11 +1039,9 @@ function Login({
     setBusy(true);
     setError("");
     try {
-      const enteredEmail = email.trim();
-      const loginEmail = enteredEmail.includes("@")
-        ? enteredEmail
-        : `${enteredEmail}@greenedu.demo`;
-      onLogin(await api<User>("/auth/login", { email: loginEmail, password }));
+      onLogin(
+        await api<User>("/auth/login", { email: loginEmail(email), password }),
+      );
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -1048,15 +1095,11 @@ function Login({
                 autoComplete="username"
                 autoCapitalize="none"
                 spellCheck={false}
-                aria-describedby="login-email-hint"
                 placeholder="Tên tài khoản hoặc email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </label>
-            <p id="login-email-hint" className="login-email-hint">
-              Nếu chưa có @, tự thêm @greenedu.demo khi đăng nhập.
-            </p>
             <label>
               Mật khẩu
               <input
@@ -1082,7 +1125,7 @@ function Login({
           </form>
           <p className="forgot-hint">
             <ShieldCheck size={16} />
-            Quên mật khẩu? Nhờ giáo viên cấp lại mật khẩu tạm.
+            Liên hệ giáo viên chủ nhiệm để cấp lại.
           </p>
           {quickLogin && (
             <div className="quick-login-box">
@@ -1126,7 +1169,7 @@ function Login({
                   className="button outline small"
                   type="button"
                   onClick={() => {
-                    setEmail("hocsinh@greenedu.demo");
+                    setEmail("hocsinh@greenedu.nk");
                     setPassword("GreenEdu123!");
                     setError("");
                   }}
@@ -1138,7 +1181,7 @@ function Login({
                   className="button outline small"
                   type="button"
                   onClick={() => {
-                    setEmail("giaovien@greenedu.demo");
+                    setEmail("giaovien@greenedu.nk");
                     setPassword("GreenEdu123!");
                     setError("");
                   }}
@@ -1273,7 +1316,7 @@ function ChapterGrid({
                 {Math.round(Math.min(100, (ch.seconds / 14400) * 100))}%
               </strong>
             </div>
-            {ch.questionCount > 0 && (
+            {ch.lessons.length > 0 && (
               <select
                 className="lesson-select"
                 aria-label={`Luyện tập theo bài · ${ch.title}`}
@@ -1295,7 +1338,7 @@ function ChapterGrid({
             )}
             <button
               className="button outline full"
-              disabled={!ch.questionCount}
+              disabled={!ch.questionCount || (!!selectedLessons[ch.id] && !ch.lessons.find(l => l.title === selectedLessons[ch.id])?.questionCount)}
               onClick={() => onStudy(ch, selectedLessons[ch.id] || undefined)}
             >
               {ch.questionCount ? "Chăm cây · Luyện tập" : "Đang chờ câu hỏi"}

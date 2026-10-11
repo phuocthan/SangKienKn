@@ -5,7 +5,7 @@ import { unzipSync, strFromU8 } from "fflate";
 test.afterEach(async ({ request }) => {
   // Close this scenario's exam windows before reusing the dedicated student in another project.
   const login = await request.post("/api/auth/login", {
-    data: { email: "giaovien@greenedu.demo", password: "GreenEdu123!" },
+    data: { email: "giaovien@greenedu.nk", password: "GreenEdu123!" },
   });
   expect(login.ok()).toBeTruthy();
   const overview = await (
@@ -26,7 +26,7 @@ async function login(page: Page, teacher = false) {
   await page.goto("/");
   await page
     .getByLabel("Email")
-    .fill(teacher ? "giaovien@greenedu.demo" : "learning@greenedu.test");
+    .fill(teacher ? "giaovien@greenedu.nk" : "learning@greenedu.test");
   await page
     .getByLabel("Mật khẩu", { exact: true })
     .fill(teacher ? "GreenEdu123!" : "LearningTest123!");
@@ -54,6 +54,129 @@ async function noOverflow(page: Page) {
     ),
   ).toBeTruthy();
 }
+
+test("teacher controls chapter access; qualified students wait, opening another chapter does not unlock it, and stale starts are rejected", async ({
+  page,
+  browser,
+}, info) => {
+  await login(page, true);
+  // Make this scenario independent of previous desktop/mobile scenarios.
+  for (const id of ["learning-ch1", "learning-ch2"])
+    expect(
+      (
+        await page.request.post(`/api/chapters/${id}/exam-access`, {
+          data: { enabled: false },
+        })
+      ).ok(),
+    ).toBeTruthy();
+  await page.getByRole("button", { name: "Làm mới", exact: true }).click();
+  const permission = page.getByRole("region", {
+    name: "Quyền kiểm tra theo chương",
+  });
+  const studentContext = await browser.newContext({
+    viewport: page.viewportSize()!,
+  });
+  const student = await studentContext.newPage();
+  try {
+    await login(student);
+    // Earlier scenarios can leave notebook errors in the shared E2E student.
+    // Restore personal eligibility before asserting only the teacher gate.
+    const corrections = await (
+      await student.request.get("/api/corrections")
+    ).json();
+    for (const q of corrections)
+      expect(
+        (
+          await student.request.post("/api/attempts", {
+            data: {
+              questionId: q.id,
+              selected: 0,
+              mode: "correction",
+              requestId: crypto.randomUUID(),
+            },
+          })
+        ).ok(),
+      ).toBeTruthy();
+    for (let i = 0; i < 8; i++)
+      expect(
+        (
+          await student.request.post("/api/attempts", {
+            data: {
+              questionId: "learning-ch1-q1",
+              selected: 0,
+              mode: "practice",
+              requestId: crypto.randomUUID(),
+            },
+          })
+        ).ok(),
+      ).toBeTruthy();
+    await student.getByRole("button", { name: "Làm mới", exact: true }).click();
+    const chapter = student
+      .locator(".learning-chapter")
+      .filter({ hasText: "Chương ôn I" })
+      .first();
+    const hunt = chapter.getByRole("button", { name: "Săn điểm", exact: true });
+    await expect(chapter).toContainText("Chờ giáo viên mở kiểm tra");
+    await expect(hunt).toBeDisabled();
+    await permission
+      .getByRole("button", { name: "Mở kiểm tra · Chương ôn II", exact: true })
+      .click();
+    await expect(
+      permission.getByRole("button", {
+        name: "Khóa kiểm tra · Chương ôn II",
+        exact: true,
+      }),
+    ).toBeEnabled();
+    await student.getByRole("button", { name: "Làm mới", exact: true }).click();
+    await expect(hunt).toBeDisabled();
+    await permission
+      .getByRole("button", { name: "Mở kiểm tra · Chương ôn I", exact: true })
+      .click();
+    await expect(
+      permission.getByRole("button", {
+        name: "Khóa kiểm tra · Chương ôn I",
+        exact: true,
+      }),
+    ).toBeEnabled();
+    await student.getByRole("button", { name: "Làm mới", exact: true }).click();
+    await expect(hunt).toBeEnabled();
+    await student.reload();
+    await student
+      .getByRole("navigation")
+      .getByRole("button", { name: "Ôn tập & kiểm tra" })
+      .click();
+    await expect(hunt).toBeEnabled();
+    await permission
+      .getByRole("button", { name: "Khóa kiểm tra · Chương ôn I", exact: true })
+      .click();
+    await expect(
+      permission.getByRole("button", {
+        name: "Mở kiểm tra · Chương ôn I",
+        exact: true,
+      }),
+    ).toBeEnabled();
+    // The student has not refreshed; server must independently reject their stale button.
+    await hunt.click();
+    await expect(student.getByRole("alert")).toContainText(
+      "Giáo viên chưa mở kiểm tra",
+    );
+    await expect(student.locator(".exam-room")).toHaveCount(0);
+    await student.getByRole("button", { name: "Làm mới", exact: true }).click();
+    await expect(hunt).toBeDisabled();
+    await noOverflow(page);
+    await noOverflow(student);
+    await page.screenshot({
+      path: info.outputPath("chapter-access-teacher.png"),
+      fullPage: true,
+    });
+    await student.screenshot({
+      path: info.outputPath("chapter-access-student.png"),
+      fullPage: true,
+    });
+  } finally {
+    await studentContext.close();
+  }
+});
 
 test("student reviews semester, resumes exact question and repairs without revealing a wrong answer", async ({
   page,
@@ -111,7 +234,18 @@ test("student reviews semester, resumes exact question and repairs without revea
 
 test("student uses hunt ticket and teacher approves the earned point", async ({
   page,
+  request,
 }, info) => {
+  await request.post("/api/auth/login", {
+    data: { email: "giaovien@greenedu.nk", password: "GreenEdu123!" },
+  });
+  expect(
+    (
+      await request.post("/api/chapters/learning-ch1/exam-access", {
+        data: { enabled: true },
+      })
+    ).ok(),
+  ).toBeTruthy();
   await login(page);
   const corrections = await (await page.request.get("/api/corrections")).json();
   for (const q of corrections)
@@ -178,6 +312,14 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
   browser,
 }, info) => {
   await login(page, true);
+  const permission = page.getByRole("region", {
+    name: "Quyền kiểm tra theo chương",
+  });
+  const openChapter = permission.getByRole("button", {
+    name: "Mở kiểm tra · Chương ôn I",
+    exact: true,
+  });
+  if (await openChapter.count()) await openChapter.click();
   await page.getByLabel("Tên bộ câu").fill(`Ôn ma trận ${info.project.name}`);
   await page
     .locator("fieldset")

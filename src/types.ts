@@ -14,6 +14,7 @@ export type Chapter = {
   title: string;
   questionCount: number;
   lessons: { title: string; questionCount: number }[];
+  canManageLessons?: boolean;
   seconds: number;
   level: number;
   total: number;

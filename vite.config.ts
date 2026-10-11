@@ -7,10 +7,14 @@ export default defineConfig(({ mode }) => {
   const railway = railwayProxy("https://greenedu.up.railway.app");
   return {
     plugins: [react(), ...(remote ? [railway.plugin] : [])],
+    // Scan the app only; release snapshots and previews have their own entries.
+    optimizeDeps: { entries: ["index.html"] },
     server: {
       host: "127.0.0.1",
       port: 5173,
       strictPort: true,
+      // Local build/release files must not invalidate the running app's cache.
+      watch: { ignored: ["**/.local/**"] },
       proxy: {
         "^/api(?:/|\\?|$)": remote
           ? railway.proxy

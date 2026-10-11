@@ -58,3 +58,7 @@ npm run test:e2e
 ```
 
 Không chạy dev offline đồng thời với frontend Railway ở cổng 5173. Khi cần demo độc lập, đặt `DATABASE_PATH` riêng và `SEED_DEMO=1`; không đặt seed cho Railway. Lệnh `npm run deploy` cũ vẫn dành cho build + API + SQLite local, hướng dẫn tại [deploy-local.md](deploy-local.md); không còn là thao tác tự động sau mỗi yêu cầu sửa giao diện.
+
+## Chrome báo 504 Outdated Optimize Dep
+
+Nếu Chrome giữ URL thư viện React có hash cũ sau khi cache Vite thay đổi, mở lại http://localhost:5173 rồi nhấn Ctrl+Shift+R. Nếu vẫn lỗi, chạy `npm run local -- -Action Stop`, sau đó `npm run local` và tải lại trang. Cấu hình chỉ quét index.html của app và bỏ theo dõi .local để các bản build/release tạm không làm mất cache đang dùng. Thao tác này chỉ khởi động lại frontend; API/database Railway giữ nguyên.

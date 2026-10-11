@@ -346,7 +346,7 @@ test("activity permissions restrict classes, student view and submission files t
   assert.ok(
     visible.groups[0].members.some((m: any) => m.id === "student-demo"),
   );
-  assert.equal(JSON.stringify(visible).includes("greenedu.demo"), false);
+  assert.equal(JSON.stringify(visible).includes("greenedu.nk"), false);
   const group = activity.groups[0],
     rep = await f.login(group.representativeId);
   const uploaded = await f.request(

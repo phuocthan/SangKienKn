@@ -106,8 +106,8 @@ test("API derives each student level within its own classroom/subject and agrees
     assert.equal(response.status, 200);
     return response.headers.get("set-cookie")!.split(";")[0];
   }
-  const student = await login("hocsinh@greenedu.demo");
-  const teacher = await login("giaovien@greenedu.demo");
+  const student = await login("hocsinh@greenedu.nk");
+  const teacher = await login("giaovien@greenedu.nk");
   async function get(path: string, cookie: string) {
     const response = await fetch(base + path, { headers: { Cookie: cookie } });
     assert.equal(response.status, 200);

@@ -1,8 +1,24 @@
 # Thiết kế giao diện GreenEdu
 
+## Điều khiển kiểm tra theo chương — 11/10/2026
+
+Trang giáo viên Ôn tập & kiểm tra có thẻ Quyền kiểm tra theo chương phía trên khối học kỳ/ma trận. Mỗi hàng gồm tên chương, trạng thái Đang khóa/Đã mở và nút Mở kiểm tra (primary)/Khóa kiểm tra (secondary). Sử dụng learning-section/list/row hiện có, nhãn nút accessible gồm tên chương; busy khóa điều khiển trong khi lưu, thông báo thành công/lỗi và refresh trạng thái. Hàng tự xuống cột trên điện thoại. Điều khiển riêng không reset draft học kỳ/ma trận. Khi server chưa có trường mới, nút disabled kèm trạng thái chờ cập nhật.
+
+Thẻ Săn điểm học sinh có pill Giáo viên đã mở kiểm tra/Chờ giáo viên mở kiểm tra và lý do chưa thể bắt đầu; nút chỉ sáng khi toàn bộ điều kiện đạt. Danh sách kiểm tra chính thức ghi tên các chương còn khóa và khóa nút vào bài tương ứng. Không dùng màu làm tín hiệu duy nhất. Các ca desktop/mobile mới kiểm tra mở/khóa, reload, nút cũ bị API từ chối, không tràn ngang; ảnh trong test-results/learning-teacher-controls--58ff7-d-stale-starts-are-rejected-{desktop,mobile}. Nghiệp vụ/triển khai ở learning.md.
+
+## Danh mục chương/bài chưa có câu hỏi — 11/10/2026
+
+Giáo viên, trang **Lớp học của tôi**: mỗi thẻ chương có số bài/số câu, disclosure **Xem danh sách bài** bằng details/summary hỗ trợ bàn phím. Danh sách theo thứ tự dạy, giữ số bài trong tên; dưới mỗi bài là số câu hoặc **Chưa có câu hỏi**. Mỗi chương mở độc lập, giữ nút Quản lý câu hỏi. CSS .curriculum-lessons dùng khoảng cách 10–12 px, màu xanh/chữ phụ hiện có; tên dài tự xuống dòng trên điện thoại.
+
+Học sinh: ô chọn bài vẫn hiện khi chương có danh mục nhưng 0 câu hỏi; lựa chọn ghi tên bài/số câu, nút luyện tập disabled khi chương hoặc bài được chọn chưa có câu. Không ẩn danh mục hoặc thêm tiến độ minh họa. Rà soát mới teacher/student tại 1440/390 px không tràn ngang/lỗi JS; ảnh .local/ui-physics-curriculum. UI mới đang ở frontend local 5173, API/danh mục Railway đã cập nhật; frontend production chưa triển khai disclosure này.
+
 Tài liệu tra cứu duy nhất về hình thức giao diện, cập nhật 11/10/2026. Quy tắc nghiệp vụ/tài khoản/triển khai được lưu ở các tài liệu chức năng; khi sửa hình thức giao diện, cập nhật tài liệu này.
 
 ## Định hướng và chữ
+
+Đăng nhập bỏ dòng giải thích tự thêm đuôi email; lời hướng dẫn dưới nút là **“Liên hệ giáo viên chủ nhiệm để cấp lại.”** theo yêu cầu ngày 11/10/2026.
+
+Email xác nhận tài khoản dùng mẫu gọn: chữ GreenEdu xanh đậm, nền sáng, khối nội dung tối đa 560 px, font Arial 15 px/line-height 1.7 để đọc được trong trình đọc mail, một nút xanh **Mở GreenEdu**. Nội dung theo vai trò do server tạo; mẫu có biến được escape, không nhận HTML từ họ tên. Template tại [emailjs-welcome-template.html](emailjs-welcome-template.html), nghiệp vụ/cấu hình tại [welcome-email.md](welcome-email.md). Không thay bố cục ứng dụng trong yêu cầu email này.
 
 Tên thương hiệu hiển thị **GreenEdu** (G và E viết hoa), nét đậm 800 đồng nhất cho cả tên, theo ảnh preview đã duyệt. Component `Logo` dùng chung ở đăng nhập/sidebar/các màn hình tài khoản; sửa chi tiết còn viết thường ngày 11/10/2026 sau phản hồi của người dùng.
 
@@ -22,19 +38,21 @@ Trang chủ học sinh có hero và mục tiêu kế tiếp ở hai cột, ba th
 
 Dùng các biến `--text-*` tại `src/styles.css` thay cho cỡ chữ riêng lẻ ở mỗi trang/breakpoint. Nội dung **15 px**, nhãn/nút **14 px**, chú thích **13 px**, trường nhập/chọn **16 px**. Điện thoại giữ nguyên các cỡ chữ này; chỉ thu gọn tiêu đề. Dòng tên trường trong logo là chữ thương hiệu 10 px.
 
-| Vai trò | Desktop | Điện thoại ≤700 px |
-| --- | --- | --- |
-| Tiêu đề trang/đăng nhập | 28 px | 24 px |
-| Tiêu đề mục | 22 px | 20 px |
-| Tiêu đề thẻ | 18 px | 18 px |
-| Câu hỏi luyện tập/thi | 20 px | 20 px |
-| Tiêu đề khối giới thiệu | 30 px | 26 px |
-| Tiêu đề giới thiệu đăng nhập | 36 px | 30 px |
-| Số liệu thống kê | 30 px | 30 px |
+| Vai trò                      | Desktop | Điện thoại ≤700 px |
+| ---------------------------- | ------- | ------------------ |
+| Tiêu đề trang/đăng nhập      | 28 px   | 24 px              |
+| Tiêu đề mục                  | 22 px   | 20 px              |
+| Tiêu đề thẻ                  | 18 px   | 18 px              |
+| Câu hỏi luyện tập/thi        | 20 px   | 20 px              |
+| Tiêu đề khối giới thiệu      | 30 px   | 26 px              |
+| Tiêu đề giới thiệu đăng nhập | 36 px   | 30 px              |
+| Số liệu thống kê             | 30 px   | 30 px              |
 
 Nội dung dùng giãn dòng khoảng 1,7, chú thích/nhãn khoảng 1,5–1,6; tiêu đề bớt ép khoảng cách ký tự. Giới hạn chiều dài mô tả, cho tiêu đề/thao tác xuống hàng khi thiếu chỗ. Thẻ thống kê đặt số liệu trên hàng riêng; bộ lọc đặt nhãn phía trên trường chọn và tự xuống hàng. Chữ phụ của bảng/chương/thống kê dùng màu đậm hơn `#586b60`. Quy tắc áp dụng cả ôn/thi và thẻ cấp độ; không thu chú thích xuống 8–11 px trên mobile.
 
 ## Bố cục và thành phần
+
+- Trang Tài khoản & bảo mật giáo viên/học sinh chỉ hiển thị thông tin cá nhân, ảnh đại diện và hai nút Đổi avatar/Đổi mật khẩu. Click ảnh hoặc nút mở popup tương ứng; avatar thanh đầu mở trực tiếp bộ chọn. Popup avatar rộng tối đa 760 px, cuộn nội dung, giữ nút đóng ở đầu; mật khẩu dùng popup riêng. Đóng bằng X/Escape/nền, bỏ draft chưa lưu và trả focus về nút mở; không cho focus tới input file ẩn. Admin đổi mật khẩu qua popup; màn hình đổi mật khẩu tạm bắt buộc vẫn riêng.
 
 - Desktop dùng sidebar xanh rừng, vùng nội dung sáng và thanh đầu trang có tài khoản/lớp đang chọn.
 - Mobile dùng điều hướng cuộn ngang, thẻ chương một cột ở màn hình hẹp, bảng tài khoản chuyển thành thẻ. Không cắt thao tác hoặc tạo cuộn ngang toàn trang.

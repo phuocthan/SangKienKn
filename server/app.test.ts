@@ -170,7 +170,7 @@ async function fixture(t: TestContext) {
   async function login(role: "teacher" | "student") {
     const r = await request("/auth/login", {
       email:
-        role === "teacher" ? "giaovien@greenedu.demo" : "hocsinh@greenedu.demo",
+        role === "teacher" ? "giaovien@greenedu.nk" : "hocsinh@greenedu.nk",
       password: "GreenEdu123!",
     });
     assert.equal(r.status, 200);
@@ -194,7 +194,7 @@ test("authentication rejects invalid passwords, expires sessions and revokes log
   assert.equal(
     (
       await f.request("/auth/login", {
-        email: "hocsinh@greenedu.demo",
+        email: "hocsinh@greenedu.nk",
         password: "incorrect",
       })
     ).status,
@@ -494,18 +494,23 @@ test("study time uses server clock; hidden tabs, gaps and replaced sessions earn
   f.advance(15000);
   let r = await pulse();
   assert.equal(r.data.seconds, 15);
+  assert.equal(r.data.creditedSeconds, 15);
   f.advance(15000);
   r = await pulse(false, false);
   assert.equal(r.data.seconds, 15);
+  assert.equal(r.data.creditedSeconds, 0);
   f.advance(15000);
   r = await pulse(true, true);
   assert.equal(r.data.seconds, 15);
+  assert.equal(r.data.creditedSeconds, 0);
   f.advance(15000);
   r = await pulse();
   assert.equal(r.data.seconds, 30);
+  assert.equal(r.data.creditedSeconds, 15);
   f.advance(60000);
   r = await pulse();
   assert.equal(r.data.seconds, 30);
+  assert.equal(r.data.creditedSeconds, 0);
   f.advance(5000);
   await f.request("/study/stop", { sessionId: s.sessionId }, cookie);
   await f.request("/study/stop", { sessionId: s.sessionId }, cookie);

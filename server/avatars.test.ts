@@ -42,11 +42,11 @@ test("avatars belong to the signed-in account, validate catalog IDs and survive 
     401,
   );
   const teacher = await request("/auth/login", {
-    email: "giaovien@greenedu.demo",
+    email: "giaovien@greenedu.nk",
     password: "GreenEdu123!",
   });
   const student = await request("/auth/login", {
-    email: "hocsinh@greenedu.demo",
+    email: "hocsinh@greenedu.nk",
     password: "GreenEdu123!",
   });
   assert.equal(teacher.data.avatarId, null);
@@ -115,7 +115,7 @@ test("avatars belong to the signed-in account, validate catalog IDs and survive 
     "student-4",
   );
   const relogin = await request("/auth/login", {
-    email: "hocsinh@greenedu.demo",
+    email: "hocsinh@greenedu.nk",
     password: "GreenEdu123!",
   });
   assert.equal(relogin.data.avatarId, "student-4");

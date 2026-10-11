@@ -156,10 +156,12 @@ export function Modal({
   title,
   children,
   onClose,
+  className = "",
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
+  className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -172,10 +174,11 @@ export function Modal({
         ...(ref.current?.querySelectorAll<HTMLElement>(
           'button, input, textarea, select, [tabindex="0"]',
         ) ?? []),
-      ].filter((e) => !e.hasAttribute("disabled"));
-    elements()
-      .find((e) => e.tagName !== "BUTTON")
-      ?.focus();
+      ].filter(
+        (e) => !e.hasAttribute("disabled") && e.getClientRects().length > 0,
+      );
+    const initial = elements();
+    (initial.find((e) => e.tagName !== "BUTTON") ?? initial[0])?.focus();
     function key(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
       if (event.key === "Tab") {
@@ -206,7 +209,7 @@ export function Modal({
       }}
     >
       <div
-        className="modal"
+        className={`modal ${className}`}
         ref={ref}
         role="dialog"
         aria-modal="true"

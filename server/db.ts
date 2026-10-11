@@ -3,6 +3,8 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { ensureLearningSchema } from "./learning-db.js";
+import { ensureWelcomeSchema } from "./welcome-email.js";
+import { ensureLessonSchema } from "./lesson-catalog.js";
 
 export function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -179,6 +181,8 @@ export function openDatabase(path: string) {
       question_ids TEXT NOT NULL
     );`);
   ensureLearningSchema(db);
+  ensureLessonSchema(db);
+  ensureWelcomeSchema(db);
   return db;
 }
 
@@ -192,28 +196,28 @@ export function seedDemo(db: DatabaseSync) {
   try {
     insertUser.run(
       "teacher-demo",
-      "giaovien@greenedu.demo",
+      "giaovien@greenedu.nk",
       "Nguyễn Minh Anh",
       hashPassword("GreenEdu123!"),
       "teacher",
     );
     insertUser.run(
       "student-demo",
-      "hocsinh@greenedu.demo",
+      "hocsinh@greenedu.nk",
       "Trần Hà Linh",
       hashPassword("GreenEdu123!"),
       "student",
     );
     insertUser.run(
       "student-2",
-      "minhkhoi@greenedu.demo",
+      "minhkhoi@greenedu.nk",
       "Lê Minh Khôi",
       hashPassword("GreenEdu123!"),
       "student",
     );
     insertUser.run(
       "student-3",
-      "baongan@greenedu.demo",
+      "baongan@greenedu.nk",
       "Phạm Bảo Ngân",
       hashPassword("GreenEdu123!"),
       "student",

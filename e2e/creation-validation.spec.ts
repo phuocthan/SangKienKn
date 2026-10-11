@@ -5,7 +5,7 @@ async function login(page: Page, role: "teacher" | "admin") {
   await page.goto("/");
   await page
     .getByLabel("Email", { exact: true })
-    .fill(role === "admin" ? "admin@greenedu.test" : "giaovien@greenedu.demo");
+    .fill(role === "admin" ? "admin@greenedu.test" : "giaovien@greenedu.nk");
   await page
     .getByLabel("Mật khẩu", { exact: true })
     .fill(role === "admin" ? "AdminTest123!" : "GreenEdu123!");

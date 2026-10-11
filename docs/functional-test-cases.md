@@ -111,3 +111,14 @@ Các ca tự động không thay thế nghiệm thu với dữ liệu/quy mô l�
 Theo yêu cầu mới, bộ cấp là Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái; cập nhật kỳ vọng trong kiểm thử và icon tương ứng. TypeScript/build, **26/26 backend** (student-levels/app) và **4/4 E2E** cấp độ desktop/mobile đạt, không skip/flaky; database thử riêng. Ảnh đủ năm cấp đã kiểm tra trên hai kích thước. Báo cáo `.local/student-stages-renamed-browser-results.json`.
 
 Đã deploy tại http://localhost:3002, PID 92676; backup `.local/backups/database-20261011-114736-419.sqlite`. Xác nhận frontend khớp build đã kiểm thử, đủ năm tên mới, health và khóa ngoại đạt, bảo toàn khóa 47 bản ghi trong 25 bảng dữ liệu bằng kiểm tra chỉ đọc.
+
+## Quyền kiểm tra theo chương — 11/10/2026
+
+- Học sinh đủ thời gian/tỷ lệ/vé vẫn bị chặn khi giáo viên chưa mở chương; request trực tiếp trả 403, không tạo lượt hoặc dùng vé.
+- Chỉ chủ lớp mở/khóa, boolean input hợp lệ; học sinh/giáo viên khác bị chặn; chương khác giữ trạng thái riêng.
+- Mở không vượt điều kiện cá nhân Săn điểm; ôn tập chương bị khóa vẫn hoạt động.
+- Khóa lại chặn lượt mới/trang cũ; giữ bài đang làm/đáp án và retry không dùng thêm vé.
+- Thi chính thức cần mọi chương xuất hiện trong snapshot được mở; vẫn kiểm tra lịch/enabled, không tự áp dụng vé/thời gian tự học.
+- Migration giữ thiết lập/chương/tiến độ cũ, không mở tự động, quyền lưu qua reopen.
+
+Kết quả mới: 91 backend, 10 E2E ôn/thi desktop/mobile đạt bằng database riêng; TypeScript/build đạt. Backend Railway chưa deploy, không dùng production để tạo ca thử. Chi tiết ở session-handoff.md.

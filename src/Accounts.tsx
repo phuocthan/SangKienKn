@@ -49,6 +49,8 @@ export function AdminWorkspace({
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("all");
   const [editor, setEditor] = useState<"create" | Account | null>(null);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const closePassword = useCallback(() => setPasswordOpen(false), []);
   const close = useCallback(() => setEditor(null), []);
   const reload = useCallback(async () => {
     setLoading(true);
@@ -150,7 +152,17 @@ export function AdminWorkspace({
                 </div>
               </div>
               <section className="card account-settings">
-                {passwordForm}
+                <h2>Đổi mật khẩu</h2>
+                <p>Cập nhật mật khẩu để bảo vệ tài khoản quản trị.</p>
+                <button
+                  type="button"
+                  className="button outline"
+                  aria-haspopup="dialog"
+                  onClick={() => setPasswordOpen(true)}
+                >
+                  <ShieldCheck size={18} />
+                  Đổi mật khẩu
+                </button>
               </section>
             </>
           ) : (
@@ -306,6 +318,15 @@ export function AdminWorkspace({
                 )}
               </section>
             </>
+          )}
+          {passwordOpen && (
+            <Modal
+              title="Đổi mật khẩu"
+              className="password-dialog"
+              onClose={closePassword}
+            >
+              {passwordForm}
+            </Modal>
           )}
           {editor && (
             <AccountEditor

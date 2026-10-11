@@ -44,6 +44,10 @@ export function Practice({
   const [warning, setWarning] = useState<number | null>(null);
   const [sessionError, setSessionError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [recordedSeconds, setRecordedSeconds] = useState<number | null>(null);
+  const [hidden, setHidden] = useState(document.hidden);
+  const [offline, setOffline] = useState(!navigator.onLine);
   const lastInteraction = useRef(Date.now());
   const interacted = useRef(true);
   const pausedRef = useRef(false);
@@ -126,7 +130,9 @@ export function Practice({
     if (!canStudy) return;
     let sessionId: string | undefined,
       disposed = false,
-      sending = false;
+      sending = false,
+      failed = false;
+    let lastTick = performance.now();
     lastInteraction.current = Date.now();
     interacted.current = true;
     pausedRef.current = false;
@@ -139,17 +145,30 @@ export function Practice({
       const activity = interacted.current;
       interacted.current = false;
       try {
-        await api("/study/heartbeat", {
-          sessionId,
-          active: !document.hidden && !pausedRef.current && !doneRef.current,
-          interacted: activity,
-        });
+        const response = await api<{ creditedSeconds?: number }>(
+          "/study/heartbeat",
+          {
+            sessionId,
+            active: !document.hidden && !pausedRef.current && !doneRef.current,
+            interacted: activity,
+          },
+        );
         if (!disposed) {
+          failed = false;
+          if (
+            typeof response.creditedSeconds === "number" &&
+            Number.isFinite(response.creditedSeconds)
+          )
+            setRecordedSeconds(
+              (seconds) =>
+                (seconds ?? 0) + Math.max(0, response.creditedSeconds!),
+            );
           setSessionError("");
           onProgressRef.current();
         }
       } catch (e) {
         if (!disposed) {
+          failed = true;
           setSessionError(errorMessage(e));
           interacted.current ||= activity;
         }
@@ -171,12 +190,29 @@ export function Practice({
           return;
         }
         sessionId = s.sessionId;
+        lastTick = performance.now();
       })
       .catch((e) => {
         if (!disposed) setSessionError(errorMessage(e));
       });
     const timer = window.setInterval(() => {
-      if (disposed || pausedRef.current || document.hidden) return;
+      const tick = performance.now();
+      const delta = (tick - lastTick) / 1000;
+      lastTick = tick;
+      if (
+        disposed ||
+        pausedRef.current ||
+        document.hidden ||
+        doneRef.current ||
+        !sessionId ||
+        failed ||
+        !navigator.onLine
+      )
+        return;
+      // Display an estimate only; server heartbeats remain authoritative.
+      // A suspended browser must not catch up wall-clock time on wake.
+      if (delta > 0 && delta <= 2)
+        setElapsedSeconds((seconds) => seconds + delta);
       const idle = Math.floor((Date.now() - lastInteraction.current) / 1000);
       if (idle >= 130) {
         pausedRef.current = true;
@@ -186,12 +222,23 @@ export function Practice({
       } else if (idle >= 120) setWarning(130 - idle);
     }, 1000);
     const pulse = window.setInterval(() => void heartbeat(), 15000);
-    const visibility = () => void heartbeat();
+    const visibility = () => {
+      lastTick = performance.now();
+      setHidden(document.hidden);
+      void heartbeat();
+    };
+    const connection = () => {
+      lastTick = performance.now();
+      setOffline(!navigator.onLine);
+      if (navigator.onLine) void heartbeat();
+    };
     const events = ["pointerdown", "keydown", "scroll"];
     events.forEach((name) =>
       window.addEventListener(name, activity, { passive: true, capture: true }),
     );
     document.addEventListener("visibilitychange", visibility);
+    window.addEventListener("online", connection);
+    window.addEventListener("offline", connection);
     return () => {
       disposed = true;
       clearInterval(timer);
@@ -200,6 +247,8 @@ export function Practice({
         window.removeEventListener(name, activity, true),
       );
       document.removeEventListener("visibilitychange", visibility);
+      window.removeEventListener("online", connection);
+      window.removeEventListener("offline", connection);
       if (sessionId) void api("/study/stop", { sessionId }).catch(() => {});
       onProgressRef.current();
     };
@@ -335,14 +384,27 @@ export function Practice({
           <ArrowLeft size={16} />
           Kết thúc phiên
         </button>
-        <span className={`pill ${paused || sessionError ? "amber" : ""}`}>
-          <Clock3 size={14} />
-          {sessionError
-            ? "Chưa ghi nhận thời gian"
-            : paused
-              ? "Đã tạm dừng tính giờ"
-              : "Đang ghi nhận thời gian"}
-        </span>
+        <div className="practice-clock">
+          <span
+            className={`pill ${paused || hidden || offline || sessionError ? "amber" : ""}`}
+          >
+            <Clock3 size={14} />
+            {sessionError || offline
+              ? "Chưa ghi nhận thời gian"
+              : paused || hidden
+                ? "Đã tạm dừng tính giờ"
+                : "Đang ghi nhận thời gian"}
+          </span>
+          <span className="practice-elapsed" aria-label="Thời gian phiên học">
+            <small>Phiên này · tạm tính</small>
+            <time>{clockTime(elapsedSeconds)}</time>
+          </span>
+          {recordedSeconds !== null && (
+            <small className="muted">
+              Đã ghi nhận: {clockTime(recordedSeconds)}
+            </small>
+          )}
+        </div>
       </div>
       {sessionError && (
         <div className="error-banner" role="alert">
@@ -472,4 +534,10 @@ export function Practice({
 }
 function SproutMark() {
   return <span aria-hidden="true">✦</span>;
+}
+function clockTime(seconds: number) {
+  const value = Math.max(0, Math.floor(seconds));
+  return [Math.floor(value / 3600), Math.floor(value / 60) % 60, value % 60]
+    .map((part) => String(part).padStart(2, "0"))
+    .join(":");
 }

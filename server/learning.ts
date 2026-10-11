@@ -270,6 +270,18 @@ export function registerLearningRoutes(
     }
     return shuffle(chosen);
   }
+  function examAllowed(chapterId: string) {
+    return (
+      db
+        .prepare("SELECT enabled FROM chapter_exam_access WHERE chapter_id=?")
+        .get(chapterId)?.enabled === 1
+    );
+  }
+  function blockedExamChapters(questions: Snapshot[]) {
+    return [...new Map(questions.map((q) => [q.chapterId, q.chapterTitle]))]
+      .filter(([id]) => !examAllowed(id))
+      .map(([id, title]) => ({ id, title }));
+  }
   function eligibility(ch: Row, userId: string) {
     const seconds = Number(
       db
@@ -310,6 +322,8 @@ export function registerLearningRoutes(
       .get(userId, ch.id)!;
     const remaining = Number(tickets.granted) - Number(tickets.used ?? 0);
     const missing: string[] = [];
+    const allowed = examAllowed(String(ch.id));
+    if (!allowed) missing.push("Giáo viên chưa mở kiểm tra chương này");
     if (seconds < 7200)
       missing.push(`Cần thêm ${Math.ceil((7200 - seconds) / 60)} phút học`);
     if (accuracy < 70) missing.push("Tỷ lệ đúng chưa đạt 70%");
@@ -321,6 +335,7 @@ export function registerLearningRoutes(
       title: ch.title,
       semester: settings?.semester ?? "",
       accuracyBasis: settings?.accuracy_basis ?? "all",
+      examAllowed: allowed,
       seconds,
       level: Math.min(5, Math.floor(seconds / 3600) + 1),
       accuracy,
@@ -432,6 +447,7 @@ export function registerLearningRoutes(
           tabLimit: e.tab_limit,
           enabled: !!e.enabled,
           questionCount: json<Snapshot[]>(e.questions).length,
+          blockedChapters: blockedExamChapters(json<Snapshot[]>(e.questions)),
         })),
       runs: db
         .prepare(
@@ -475,6 +491,22 @@ export function registerLearningRoutes(
           createdAt: r.created_at,
         })),
     });
+  });
+  app.post("/api/chapters/:id/exam-access", (req: AppRequest, res) => {
+    teacher(req);
+    const ch = db
+      .prepare("SELECT * FROM chapters WHERE id=?")
+      .get(String(req.params.id));
+    if (!ch) fail(404, "Không tìm thấy chương.");
+    classroom(req, String(ch.classroom_id));
+    if (typeof req.body?.enabled !== "boolean")
+      fail(400, "Trạng thái không hợp lệ.");
+    db.prepare(
+      `INSERT INTO chapter_exam_access(chapter_id,enabled,updated_by,updated_at)
+      VALUES(?,?,?,?) ON CONFLICT(chapter_id) DO UPDATE SET
+      enabled=excluded.enabled,updated_by=excluded.updated_by,updated_at=excluded.updated_at`,
+    ).run(ch.id, Number(req.body.enabled), req.user!.id, now());
+    res.json({ ok: true, examAllowed: req.body.enabled });
   });
   app.post("/api/chapters/:id/learning", (req: AppRequest, res) => {
     teacher(req);
@@ -741,7 +773,14 @@ export function registerLearningRoutes(
         now() >= Number(e.closes_at)
       )
         fail(403, "Kiểm tra chưa mở hoặc đã đóng.");
-      questions = shuffle(json<Snapshot[]>(e.questions));
+      const snapshot = json<Snapshot[]>(e.questions);
+      const blocked = blockedExamChapters(snapshot);
+      if (blocked.length)
+        fail(
+          403,
+          `Giáo viên chưa mở kiểm tra: ${blocked.map((ch) => ch.title).join(" · ")}.`,
+        );
+      questions = shuffle(snapshot);
       deadline = Math.min(now() + 1200000, Number(e.closes_at));
       title = String(e.title);
       tabLimit = Number(e.tab_limit);

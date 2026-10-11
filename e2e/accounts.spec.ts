@@ -134,7 +134,7 @@ test("all teacher/student pages fit desktop/mobile and group filters show real d
 }, info) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await login(page, "giaovien@greenedu.demo", "GreenEdu123!");
+  await login(page, "giaovien@greenedu.nk", "GreenEdu123!");
   await expect(page.getByRole("navigation")).toBeVisible();
   await page.getByLabel("Chọn lớp học").selectOption("class-demo");
   for (const [label, name] of [
@@ -186,7 +186,7 @@ test("all teacher/student pages fit desktop/mobile and group filters show real d
   await page.getByRole("button", { name: "Tài khoản", exact: true }).click();
   await checkLayout(page, "teacher-settings", info.project.name);
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
-  await login(page, "hocsinh@greenedu.demo", "GreenEdu123!");
+  await login(page, "hocsinh@greenedu.nk", "GreenEdu123!");
   await expect(page.getByRole("navigation")).toBeVisible();
   for (const [label, name] of [
     ["Khu vườn của tôi", "student-home"],

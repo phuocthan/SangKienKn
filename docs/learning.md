@@ -2,6 +2,16 @@
 
 Cập nhật 11/10/2026. Kế hoạch và phạm vi: [learning-implementation-plan.md](learning-implementation-plan.md). Thiết kế: [app-design.md](app-design.md).
 
+## Quyền kiểm tra theo chương
+
+Mặc định mọi chương khóa kiểm tra, kể cả học sinh đã đủ điều kiện thời gian. Giáo viên sở hữu lớp mở Ôn tập & kiểm tra → Quyền kiểm tra theo chương → Mở kiểm tra ở chương lớp đã học/ôn đến. Quyền áp dụng cho toàn bộ học sinh của đúng chương/lớp, lưu qua restart; học sinh và giáo viên khác không thay đổi được.
+
+Săn điểm cần được mở **và** đủ các điều kiện cá nhân dưới đây. Kiểm tra chính thức nhiều chương cần mọi chương có câu trong đề được mở, bài enabled và trong khung giờ; giữ quy tắc không cần vé/điều kiện tự học. Học sinh thấy chương đang chờ giáo viên cho phép; server kiểm tra lại lúc bắt đầu, không chỉ khóa nút. Ôn tập vẫn sử dụng bình thường.
+
+Khóa kiểm tra ngăn lượt mới và không hủy bài đang làm, mất đáp án hoặc dùng thêm vé khi tiếp tục/gửi lại. Đóng bài thi chính thức vẫn là thao tác riêng để thu bài. Migration thêm chapter_exam_access, không thay dữ liệu học cũ; chương không có quyền được coi là khóa.
+
+Trạng thái triển khai 11/10/2026: đã triển khai trong mã và kiểm thử độc lập, **chưa deploy backend Railway**. Frontend local hiện chờ API mới để sử dụng điều khiển.
+
 ## Cách sử dụng
 
 Giáo viên mở **Ôn tập & kiểm tra**, gắn học kỳ cho từng chương. Mặc định tỷ lệ mở Săn điểm tính tất cả lượt luyện tập và sửa sai theo lựa chọn của người dùng. Có thể tạo bộ ôn hoặc thi chính thức, chọn chương, số câu và trọng số bài. Trọng số được chia theo tỷ lệ, làm tròn bằng phần dư lớn nhất. Không đủ câu thì báo thiếu; không nhân bản câu. Để trống trọng số chọn ngẫu nhiên trong phạm vi đã chọn.
