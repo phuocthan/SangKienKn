@@ -35,9 +35,11 @@ try {
 }
 ```
 
-Lệnh từ chối email đã tồn tại, không ghi đè hoặc đổi quyền tài khoản. Không đưa mật khẩu vào đối số dòng lệnh, Git hoặc tài liệu. Admin đăng nhập bằng email vừa tạo và đổi mật khẩu trước khi dùng. Việc cập nhật bản chạy vẫn dùng `npm run deploy` theo yêu cầu; không cần tạo lại Admin mỗi lần deploy.
+Lệnh từ chối email đã tồn tại, không ghi đè hoặc đổi quyền tài khoản. Không đưa mật khẩu vào đối số dòng lệnh, Git hoặc tài liệu. Admin đăng nhập bằng email vừa tạo và đổi mật khẩu trước khi dùng. CLI chạy trên máy local chỉ ghi database local đã chọn, không tạo Admin Railway; cần chạy tại đúng môi trường/database. Mặc định frontend dùng `npm run local`, cập nhật backend Railway riêng khi được yêu cầu; `npm run deploy` chỉ dành cho bản SQLite offline. Không tạo lại Admin mỗi lần cập nhật.
 
-## Vào nhanh giáo viên và học sinh trên máy local
+## Vào nhanh giáo viên và học sinh trên backend offline
+
+Không áp dụng với mặc định frontend local5173/API Railway: backend production tắt vào nhanh. Đây là chức năng bản offline độc lập, không bật bỏ mật khẩu cho Railway.
 
 Trang đăng nhập có hai lựa chọn **Giáo viên** và **Học sinh** khi bật `LOCAL_QUICK_LOGIN=1`. Mỗi nút đăng nhập ngay vào tài khoản đầu tiên của vai trò tương ứng theo thứ tự bản ghi trong database; tên hiển thị cũng đọc từ database. Không tạo tài khoản mới hoặc đổi mật khẩu. Nếu thiếu một vai trò, nút đó báo chưa có tài khoản và bị vô hiệu hóa. Phiên đăng nhập dùng cookie như đăng nhập thông thường; yêu cầu đổi mật khẩu tạm vẫn được giữ.
 
@@ -45,7 +47,7 @@ Bật bằng `npm run deploy -- -QuickLogin`; script lưu lựa chọn cho các 
 
 ## Admin tạo tài khoản
 
-Trên máy đang triển khai, mở **[http://localhost:3002](http://localhost:3002)**. Cổng 3001 còn chạy backend demo cũ, có thể hiện trang Admin nhưng báo “Không tìm thấy chức năng.” khi tải danh sách/tạo tài khoản. Xem `npm run deploy:status` để xác nhận địa chỉ; dùng tài khoản đã tạo, không cần tạo lại Admin.
+Mặc định mở **[http://localhost:5173](http://localhost:5173)**, đăng nhập Admin bằng tài khoản có trên Railway; thao tác tạo sẽ ghi dữ liệu thật Railway. Bản offline cũ3002 và lỗi backend demo3001 là lịch sử; chỉ dùng `npm run deploy:status` khi đang kiểm tra bản offline được script quản lý. Nếu API chưa có chức năng, kiểm tra đúng backend/phiên bản trước khi tạo lại tài khoản.
 
 1. Mở **Quản lý tài khoản → Tạo tài khoản**.
 2. Chọn **Giáo viên** hoặc **Học sinh**, nhập họ tên, email và mật khẩu tạm.

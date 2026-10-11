@@ -13,4 +13,4 @@ Upload nhận JPG/PNG/WebP tối đa **3 MB (3 × 1024 × 1024 byte)** và 4096 
 - GET /api/avatars/:id: chỉ chủ ảnh, Admin và tài khoản có lớp chung được xem.
 - user_avatars lưu lựa chọn; avatar_uploads lưu BLOB ảnh nên backup SQLite bao gồm cả ảnh. Migration giữ dữ liệu học tập; lựa chọn giáo viên cũ của học sinh được đưa về mặc định theo quy tắc vai trò.
 
-Đã deploy local. API kiểm tra đủ 40 ID, quyền sở hữu, upload đúng 3 MB/chặn vượt 1 byte, giữ dữ liệu sau mở lại SQLite; E2E kiểm tra chọn/lưu/tải lại/upload/khôi phục trên desktop/mobile. Dữ liệu kiểm thử tách khỏi database chính.
+Đã deploy bản offline local ở đợt trước; đây không phải xác nhận trạng thái server hiện tại. Popup mới và trạng thái Railway theo [session-handoff.md](session-handoff.md). Bằng chứng trước đây: API kiểm tra40ID/quyền/upload3MB/chặn vượt1byte/persistence; E2E chọn/lưu/tải lại/upload/khôi phục desktop/mobile trên database riêng. Không báo các kết quả này thành test mới khi chỉ đọc tài liệu.

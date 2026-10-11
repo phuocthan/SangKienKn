@@ -1,0 +1,68 @@
+.bank-management {
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+.bank-selection-tools,
+.bank-management-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+.bank-selection-tools {
+  margin-bottom: 14px;
+}
+.bank-selection-tools label,
+.bank-question-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: var(--text-label);
+}
+.bank-selection-tools input,
+.bank-question-select input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  accent-color: var(--green);
+}
+.bank-selection-tools > span {
+  color: var(--muted);
+  font-size: var(--text-caption);
+}
+.bank-question-selected {
+  outline: 2px solid #62845c;
+  outline-offset: -2px;
+}
+.bank-management .button.bank-delete-button {
+  color: #914735;
+  border-color: #dbc2b8;
+}
+.bank-management .button.bank-delete-button:hover:not(:disabled) {
+  background: #f9eee8;
+}
+.bank-delete-confirm.button.primary {
+  background: #914735;
+}
+.bank-delete-preview {
+  max-height: 220px;
+  overflow: auto;
+  padding-left: 24px;
+}
+.bank-delete-preview li {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+.bank-notice {
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: #edf3e2;
+  color: #315d3e;
+}
+@media (max-width: 600px) {
+  .bank-management-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

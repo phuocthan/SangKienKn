@@ -103,6 +103,7 @@ export function createApp(
     next();
   });
   app.use("/api/chapters/:id/questions/import", express.json({ limit: "1mb" }));
+  app.use("/api/chapters/:id/questions/delete", express.json({ limit: "1mb" }));
   app.use("/api/classrooms/:id/exams", express.json({ limit: "4mb" }));
   app.use(express.json({ limit: "100kb" }));
   app.use("/api", (req, _res, next) => {
@@ -499,6 +500,7 @@ export function createApp(
           ...ch,
           lessons: chapterLessons(db, ch.id),
           canManageLessons: req.user!.role === "teacher",
+          canDeleteQuestions: req.user!.role === "teacher",
           canTagQuestions: true,
           questionCount: (
             db
@@ -1037,6 +1039,56 @@ export function createApp(
     chapter(req, String(req.params.id));
     const id = insertQuestion(String(req.params.id), questionPayload(req.body));
     res.status(201).json({ id });
+  });
+  app.post("/api/chapters/:id/questions/delete", (req: AppRequest, res) => {
+    teacher(req);
+    const chapterId = String(req.params.id);
+    chapter(req, chapterId);
+    const ids = req.body?.questionIds;
+    if (
+      !Array.isArray(ids) ||
+      !ids.length ||
+      ids.length > 5000 ||
+      ids.some(
+        (id: unknown) =>
+          typeof id !== "string" || !id.trim() || id.length > 100,
+      )
+    )
+      fail(400, "Chọn từ 1 đến 5000 câu hỏi hợp lệ.");
+    const selected = [...new Set(ids)] as string[];
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const questions = db
+        .prepare(
+          `SELECT id,chapter_id,is_current FROM questions
+        WHERE id IN (SELECT value FROM json_each(?))`,
+        )
+        .all(JSON.stringify(selected));
+      if (
+        questions.length !== selected.length ||
+        questions.some((q) => q.chapter_id !== chapterId)
+      )
+        fail(
+          404,
+          "Có câu hỏi không tồn tại hoặc không thuộc chương đang chọn.",
+        );
+      if (questions.some((q) => !q.is_current))
+        fail(
+          409,
+          "Có câu hỏi đã có phiên bản mới. Tải lại ngân hàng và chọn lại.",
+        );
+      const result = db
+        .prepare(
+          `UPDATE questions SET active=0 WHERE chapter_id=? AND active=1
+        AND id IN (SELECT value FROM json_each(?))`,
+        )
+        .run(chapterId, JSON.stringify(selected));
+      db.exec("COMMIT");
+      res.json({ ok: true, hiddenQuestions: Number(result.changes) });
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
   });
   app.post("/api/questions/:id/edit", (req: AppRequest, res) => {
     const q = ownedQuestion(req);

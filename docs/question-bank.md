@@ -1,5 +1,13 @@
 # Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
+## Chọn nhiều câu và xóa cả bài — 11/10/2026
+
+Giáo viên sở hữu lớp chọn checkbox ở từng câu hoặc **Chọn tất cả trong bài/đang hiển thị**, xem số đã chọn, Bỏ chọn và bấm **Xóa các câu đã chọn**. Popup liệt kê các câu và số lượng, có Hủy/Xác nhận. Đổi chương/bài/bộ lọc hoặc tải lại dữ liệu xóa lựa chọn cũ để không tác động nhầm phạm vi. Chỉ chọn các phiên bản hiện tại đang dùng; tối đa 5000 câu mỗi lần. Câu đã ẩn không chọn lại, dùng Hiện lại khi cần.
+
+Chọn một bài trong bộ lọc rồi bấm **Xóa cả bài** để archive bài và ngừng dùng toàn bộ câu đang dùng của bài đó (bài rỗng cũng xóa được). Popup ghi tên bài/số câu và xác nhận; không xóa bài khác hoặc cả chương. Muốn dùng lại, thêm lại bài rồi hiện các câu cần dùng. Danh mục/bộ đếm được tải lại sau thành công.
+
+“Xóa” là ngừng sử dụng trong lượt mới, giữ bản ghi, phiên bản, attempts, sổ tay sửa sai và snapshot ôn/thi đã lưu. Bật **Hiện cả câu đã ẩn** để xem lại. Không DELETE vật lý hoặc cascade dữ liệu học sinh. POST `/api/chapters/:id/questions/delete` nhận `questionIds`, chỉ chủ lớp; xác thực toàn bộ ID/cùng chương/phiên bản hiện tại trước UPDATE trong một transaction. ID ngoài chương/không tồn tại/phiên bản cũ chặn toàn bộ, gửi lại không xóa thêm. Endpoint bài dùng `/api/chapters/:id/lessons/delete` sẵn có. Capability `Chapter.canDeleteQuestions` khóa thao tác nhiều câu trên API cũ; xóa cả bài dùng `canManageLessons`. Backend cần deploy Railway, local HMR không tự áp dụng API mới.
+
 ## Quy trình giáo viên
 
 Vào Ngân hàng câu hỏi, chọn lớp/chương/bài. Giáo viên có thể thêm một câu, sửa nội dung, ẩn hoặc hiện lại và xem lịch sử phiên bản.
@@ -15,7 +23,7 @@ API cũng ghép tên tương đương khi thêm/sửa/nhập câu; kiểm tra tr
 - Câu hỏi đã xuất bản là một phiên bản có mã riêng. Khi thay đổi nội dung, bài học, lựa chọn, đáp án hoặc lời giải, app tạo mã mới và tăng số phiên bản. Không sửa câu hỏi tại chỗ.
 - Phiên bản mới ở cùng chương; không chuyển câu đã làm sang chương khác. Câu cũ ngừng dùng trong luyện tập mới, nhưng lượt làm và sổ tay vẫn tham chiếu câu cũ.
 - Học sinh sửa sai với nội dung, phương án và đáp án của phiên bản đã làm sai, kể cả khi giáo viên đã ẩn hoặc sửa câu đó.
-- Ẩn chỉ ngừng dùng cho lượt luyện tập mới; hiện lại chỉ áp dụng phiên bản hiện tại. Chỉnh sửa câu đang ẩn không tự công bố nó. Không xóa câu hoặc lượt làm.
+- Ẩn/xóa câu chỉ ngừng dùng cho lượt luyện tập mới; hiện lại chỉ áp dụng phiên bản hiện tại. Chỉnh sửa câu đang ẩn không tự công bố nó. Không xóa vật lý câu hoặc lượt làm.
 - Nếu giáo viên cập nhật/ẩn câu khi học sinh chưa gửi đáp án, lượt luyện tập mới bị từ chối và yêu cầu mở lại bài. Gửi lại mã của lượt đã lưu vẫn trả kết quả cũ và không ghi thêm lượt.
 - Không đổi nội dung thì không tăng phiên bản. Sửa từ một phiên bản đã cũ bị từ chối; giáo viên tải lại trước khi sửa.
 - Số câu và các bài luyện tập chỉ tính phiên bản hiện tại đang sử dụng. Báo cáo lượt làm vẫn bao gồm lịch sử. Một câu sai ở hai phiên bản là hai mục sửa sai riêng, vì nội dung và đáp án có thể khác nhau.

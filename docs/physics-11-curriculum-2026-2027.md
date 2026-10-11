@@ -112,7 +112,7 @@ Hình thức nguồn: trắc nghiệm nhiều lựa chọn, đúng/sai, trả l�
 
 1. Đã có bảng lessons độc lập: id/chapter_id/title/sort_order/kind/number. Chương theo thứ tự nhập hiện có. Bài 0 câu vẫn hiển thị, luyện tập chưa mở; ôn/thi giữ điều kiện ngân hàng hiện tại.
 2. Migration thêm bảng, API gộp bài đăng ký với tên bài từ câu hỏi hiện hành để giữ tương thích. Không sửa/backfill nội dung câu hỏi, phiên bản hoặc lượt làm; câu ẩn/lịch sử còn nguyên, lớp/môn độc lập.
-3. Đã nhập danh mục đã xem xét qua module importCurriculum: assert đúng lớp/teacher trên Railway, tên chuẩn hóa không trùng, giao dịch toàn bộ, gọi lại không tạo thêm. Metadata xung đột bị từ chối, không ghi đè. Chưa thêm UI/API nhập danh mục hay tạo bài thủ công; chuyên đề chưa nhập.
+3. Đã nhập danh mục qua importCurriculum: assert đúng lớp/teacher trên Railway, chuẩn hóa chống trùng, transaction, retry không thêm bản ghi; metadata xung đột bị từ chối. **Cập nhật sau lần nhập:** UI/API giáo viên thêm bài thủ công và xóa dạng archive đã có trong checkout, giữ lịch sử nhưng chưa deploy backend Railway; xem [learning.md](learning.md). Chưa có UI nhập toàn bộ danh mục PPCT; chuyên đề chưa nhập.
 4. Câu hỏi thật nhập sau qua ngân hàng hiện có, chọn đúng tên bài. Yêu cầu cần đạt/mã năng lực chỉ là metadata tham khảo, không tự chuyển thành câu hỏi/đáp án/mức độ khó.
 5. Kiểm thử database riêng: nhập lại không trùng; hai lớp không lẫn; rollback xung đột; câu hỏi cũ còn nguyên; API chỉ gửi lớp sở hữu/đang theo học. Backend tối thiểu đã triển khai Railway, frontend mới ở local để kiểm tra.
 

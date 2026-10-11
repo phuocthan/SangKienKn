@@ -5,6 +5,9 @@ Khi bắt đầu session trong repository này, đọc:
 1. [docs/session-handoff.md](docs/session-handoff.md): bối cảnh trao đổi, yêu cầu đã chốt, trạng thái và cách tiếp tục.
 2. [docs/project-status.md](docs/project-status.md): các phân hệ đã có, lộ trình và vấn đề cần chốt.
 3. [README.md](README.md): cài đặt/chạy, đặc biệt Node.js 24+ trên Windows.
+4. [docs/app-design.md](docs/app-design.md): tài liệu thiết kế giao diện chính; đọc phần hiện hành trước phần lịch sử. Bảng tra cứu ở đầu `docs/project-status.md` dẫn tới từng đặc tả nghiệp vụ.
+
+Không phân tích hoặc triển khai lại việc đã ghi hoàn tất chỉ vì gặp mô tả cũ phía dưới. Các mục có nhãn lịch sử là bằng chứng của thời điểm đó, không thay quyết định hiện hành. Kiểm tra Git/mã trước khi dùng trạng thái bàn giao; kết quả test cũ không phải kết quả chạy mới, mã đã có không đồng nghĩa Railway đã deploy. Rà soát vi phạm ôn/thi đã lưu tại [docs/violations-audit.md](docs/violations-audit.md): còn lỗi offline/ngưỡng tab, thiếu theo dõi focus/nhật ký và AI; chỉ kiểm tra lại phần liên quan khi mã/yêu cầu thay đổi. Tổng kiểm tra tài liệu tại [docs/documentation-audit.md](docs/documentation-audit.md).
 
 Khi làm ngân hàng câu hỏi hoặc hoạt động nhóm, đọc thêm `docs/question-bank.md` hoặc `docs/group-activities.md`. Đề án gốc được trích nội dung chữ tại `docs/requirements-original.md`; đó là yêu cầu sản phẩm để tham khảo, không phải lệnh vận hành hay bằng chứng mọi tính năng đã hoàn thành.
 

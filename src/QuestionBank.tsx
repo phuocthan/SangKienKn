@@ -7,6 +7,7 @@ import {
   History,
   Pencil,
   Upload,
+  Trash2,
 } from "lucide-react";
 import { api, errorMessage } from "./api";
 import { Empty, Modal } from "./components";
@@ -18,17 +19,22 @@ import {
 } from "../shared/questions";
 import type { Question } from "./types";
 import { matchingLessonTitle } from "../shared/lesson-titles";
+import "./question-bank.css";
 
 type ImportFormat = "csv" | "word";
 
 type Dialog =
   | { type: "edit" | "visibility" | "history"; question: Question }
   | { type: "import"; format: ImportFormat }
+  | { type: "deleteQuestions"; questions: Question[] }
+  | { type: "deleteLesson"; lesson: string; count: number }
   | null;
 
 export function QuestionBank({
   chapterId,
   topicSupported,
+  deleteSupported,
+  lessonSupported,
   lesson,
   lessonTitles,
   revision,
@@ -36,6 +42,8 @@ export function QuestionBank({
 }: {
   chapterId: string;
   topicSupported: boolean;
+  deleteSupported: boolean;
+  lessonSupported: boolean;
   lesson: string;
   lessonTitles: string[];
   revision: number;
@@ -49,10 +57,19 @@ export function QuestionBank({
     [dialog, setDialog] = useState<Dialog>(null);
   const [busy, setBusy] = useState(false),
     [mutationError, setMutationError] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [notice, setNotice] = useState("");
+  const selectable = rows.filter((q) => q.active && q.isCurrent !== false);
+  const selectedQuestions = selectable.filter((q) => selected.has(q.id));
+  const allSelected =
+    selectable.length > 0 &&
+    selectedQuestions.length === Math.min(5000, selectable.length);
   useEffect(() => {
     let alive = true;
     setLoading(true);
     setError("");
+    setRows([]);
+    setSelected(new Set());
     const query = new URLSearchParams();
     if (lesson) query.set("lesson", lesson);
     if (showHidden) query.set("showHidden", "1");
@@ -77,6 +94,7 @@ export function QuestionBank({
     setDialog(next);
   }
   function saved() {
+    setSelected(new Set());
     setDialog(null);
     setRetry((n) => n + 1);
     onChange();
@@ -89,6 +107,34 @@ export function QuestionBank({
       await api(`/questions/${dialog.question.id}/visibility`, {
         active: !dialog.question.active,
       });
+      saved();
+    } catch (e) {
+      setMutationError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function remove() {
+    if (!dialog || busy) return;
+    setBusy(true);
+    setMutationError("");
+    try {
+      if (dialog.type === "deleteQuestions" && deleteSupported) {
+        const result = await api<{ hiddenQuestions: number }>(
+          `/chapters/${chapterId}/questions/delete`,
+          {
+            questionIds: dialog.questions.map((q) => q.id),
+          },
+        );
+        setNotice(`Đã xóa ${result.hiddenQuestions} câu khỏi lượt học mới.`);
+      } else if (dialog.type === "deleteLesson" && lessonSupported) {
+        await api(`/chapters/${chapterId}/lessons/delete`, {
+          title: dialog.lesson,
+        });
+        setNotice(
+          `Đã xóa bài “${dialog.lesson}”. Lịch sử học tập vẫn được giữ.`,
+        );
+      } else return;
       saved();
     } catch (e) {
       setMutationError(errorMessage(e));
@@ -124,6 +170,91 @@ export function QuestionBank({
           </button>
         </div>
       </div>
+      <div
+        className="card bank-management"
+        aria-label="Quản lý câu hỏi hàng loạt"
+      >
+        <div className="bank-selection-tools">
+          <label>
+            <input
+              type="checkbox"
+              checked={allSelected}
+              ref={(node) => {
+                if (node)
+                  node.indeterminate =
+                    selectedQuestions.length > 0 && !allSelected;
+              }}
+              disabled={
+                !deleteSupported || loading || busy || !selectable.length
+              }
+              onChange={(e) =>
+                setSelected(
+                  e.target.checked
+                    ? new Set(selectable.slice(0, 5000).map((q) => q.id))
+                    : new Set(),
+                )
+              }
+            />
+            Chọn tất cả{lesson ? " trong bài" : " đang hiển thị"}
+          </label>
+          <span role="status">Đã chọn {selectedQuestions.length} câu</span>
+          {selectedQuestions.length > 0 && (
+            <button
+              className="text-button"
+              onClick={() => setSelected(new Set())}
+            >
+              Bỏ chọn
+            </button>
+          )}
+        </div>
+        <div className="bank-management-actions">
+          <button
+            className="button outline small bank-delete-button"
+            disabled={
+              !deleteSupported || busy || loading || !selectedQuestions.length
+            }
+            onClick={() =>
+              open({ type: "deleteQuestions", questions: selectedQuestions })
+            }
+          >
+            <Trash2 size={16} /> Xóa các câu đã chọn
+          </button>
+          <button
+            className="button outline small bank-delete-button"
+            disabled={
+              !lessonSupported ||
+              !lesson ||
+              busy ||
+              loading ||
+              !!error ||
+              !lessonTitles.includes(lesson)
+            }
+            onClick={() =>
+              open({ type: "deleteLesson", lesson, count: selectable.length })
+            }
+          >
+            <Trash2 size={16} /> Xóa cả bài
+          </button>
+        </div>
+        {!lesson && (
+          <p className="subtle-note">
+            Chọn một bài trong bộ lọc để xóa cả bài.
+          </p>
+        )}
+        {!deleteSupported && (
+          <p className="subtle-note">
+            Xóa nhiều câu đang chờ cập nhật server Railway.
+          </p>
+        )}
+        {rows.filter((q) => q.active).length > 5000 && (
+          <p className="subtle-note">Mỗi lần chọn tối đa 5000 câu.</p>
+        )}
+      </div>
+      {notice && (
+        <p className="bank-notice" role="status">
+          {notice}
+        </p>
+      )}
       {error ? (
         <div className="error-banner" role="alert">
           {error}
@@ -139,7 +270,28 @@ export function QuestionBank({
       ) : (
         <div className="bank-list">
           {rows.map((q) => (
-            <QuestionCard key={q.id} question={q}>
+            <QuestionCard
+              key={q.id}
+              question={q}
+              selection={
+                q.active && q.isCurrent !== false
+                  ? {
+                      checked: selected.has(q.id),
+                      disabled:
+                        !deleteSupported ||
+                        busy ||
+                        (!selected.has(q.id) && selected.size >= 5000),
+                      onChange: (checked: boolean) =>
+                        setSelected((previous) => {
+                          const next = new Set(previous);
+                          if (checked) next.add(q.id);
+                          else next.delete(q.id);
+                          return next;
+                        }),
+                    }
+                  : undefined
+              }
+            >
               <div className="question-actions">
                 <button
                   className="button outline small"
@@ -176,11 +328,17 @@ export function QuestionBank({
                 ? "Nhập bộ câu hỏi"
                 : dialog.type === "history"
                   ? "Lịch sử câu hỏi"
-                  : dialog.question.active
-                    ? "Ẩn câu hỏi"
-                    : "Hiện lại câu hỏi"
+                  : dialog.type === "deleteQuestions"
+                    ? `Xóa ${dialog.questions.length} câu hỏi`
+                    : dialog.type === "deleteLesson"
+                      ? "Xóa cả bài học"
+                      : dialog.question.active
+                        ? "Ẩn câu hỏi"
+                        : "Hiện lại câu hỏi"
           }
-          onClose={() => setDialog(null)}
+          onClose={() => {
+            if (!busy) setDialog(null);
+          }}
         >
           {dialog.type === "edit" && (
             <EditForm
@@ -224,6 +382,67 @@ export function QuestionBank({
               </button>
             </>
           )}
+          {(dialog.type === "deleteQuestions" ||
+            dialog.type === "deleteLesson") && (
+            <>
+              {dialog.type === "deleteLesson" ? (
+                <>
+                  <h3>{dialog.lesson}</h3>
+                  <p>
+                    Xóa bài này khỏi danh mục và ngừng dùng toàn bộ{" "}
+                    {dialog.count} câu hỏi đang sử dụng trong bài.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    Ngừng dùng {dialog.questions.length} câu đã chọn trong các
+                    lượt học mới.
+                  </p>
+                  <ul className="bank-delete-preview">
+                    {dialog.questions.map((q) => (
+                      <li key={q.id}>{q.text}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              <p>
+                Lịch sử làm bài, sổ tay sửa sai và đề kiểm tra đã lưu vẫn được
+                giữ. Câu đã xóa có thể xem lại bằng “Hiện cả câu đã ẩn”.
+              </p>
+              {dialog.type === "deleteLesson" && (
+                <p>
+                  Muốn sử dụng lại, hãy thêm lại bài rồi hiện lại những câu cần
+                  dùng.
+                </p>
+              )}
+              {mutationError && (
+                <div className="error-banner" role="alert">
+                  {mutationError}
+                </div>
+              )}
+              <div className="button-group">
+                <button
+                  className="button outline"
+                  disabled={busy}
+                  onClick={() => setDialog(null)}
+                >
+                  Hủy
+                </button>
+                <button
+                  className="button primary bank-delete-confirm"
+                  disabled={busy}
+                  onClick={() => void remove()}
+                >
+                  {busy
+                    ? "Đang xóa…"
+                    : dialog.type === "deleteLesson"
+                      ? "Xác nhận xóa bài"
+                      : `Xác nhận xóa ${dialog.questions.length} câu`}
+                </button>
+              </div>
+            </>
+          )}
         </Modal>
       )}
     </>
@@ -233,13 +452,34 @@ export function QuestionBank({
 function QuestionCard({
   question: q,
   children,
+  selection,
 }: {
   question: Question;
   children?: import("react").ReactNode;
+  selection?: {
+    checked: boolean;
+    disabled: boolean;
+    onChange: (checked: boolean) => void;
+  };
 }) {
   return (
-    <article className="card bank-question">
+    <article
+      className={`card bank-question ${selection?.checked ? "bank-question-selected" : ""}`}
+      data-question-id={q.id}
+    >
       <div className="question-meta">
+        {selection && (
+          <label className="bank-question-select">
+            <input
+              type="checkbox"
+              checked={selection.checked}
+              disabled={selection.disabled}
+              aria-label={`Chọn câu hỏi: ${q.text}`}
+              onChange={(e) => selection.onChange(e.target.checked)}
+            />
+            Chọn câu
+          </label>
+        )}
         <span className="eyebrow">
           {q.lesson} · Phiên bản {q.version ?? 1}
         </span>

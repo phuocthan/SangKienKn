@@ -1,5 +1,25 @@
 # Bàn giao session GreenEdu
 
+## Giáo viên chọn nhiều câu/xóa cả bài trong ngân hàng — 11/10/2026
+
+Yêu cầu mới: quản lý ngân hàng tốt hơn, xóa nhiều câu trong bài hoặc cả bài. Đã thêm checkbox từng câu đang dùng, Chọn tất cả trong bài/đang hiển thị, số đã chọn/Bỏ chọn, hai nút Xóa các câu đã chọn và Xóa cả bài ngay trong ngân hàng. Dialog chốt số câu/danh sách hoặc tên bài/số câu, Hủy/Xác nhận, busy khóa đóng và lỗi tại chỗ. Đổi bộ lọc/chương/tải lại bỏ lựa chọn; thành công refresh danh mục/bộ đếm theo callback hiện có và trả bộ lọc về tất cả. Xóa cả bài hoạt động cả bài rỗng, reuse route archiveLesson sẵn có.
+
+API mới POST /api/chapters/:id/questions/delete nhận questionIds (1–5000), capability Chapter.canDeleteQuestions dành riêng teacher; kiểm tra chủ lớp và toàn bộ ID thuộc chương/phiên bản hiện tại trước transaction UPDATE active=0. Payload route giới hạn1MB đủ5000ID; ID thiếu/ngoài chương/phiên bản cũ chặn toàn bộ; lặp/đồng thời cùng ID không cập nhật thêm. Không DELETE vật lý, không migration, giữ phiên bản/attempts/sổ tay/progress và snapshot ôn/thi. API cũ thiếu capability khóa chọn/xóa nhiều câu, báo chờ Railway; nút xóa bài dùng canManageLessons. CSS scoped src/question-bank.css cùng phong cách vườn, checkbox rõ/nút đỏ đất/mobile toàn hàng.
+
+Kiểm tra mới: **112/112 toàn bộ backend**, **10/10 E2E desktop/mobile** (question-delete, lesson-management, question-topics), TypeScript/build riêng `.local/question-delete-build` và diff check đạt. Lượt backend liên quan đầu 30/31 do payload 5001ID bị middleware100KB trả413; thêm parser1MB chỉ route mới để payload5000 hợp lệ, sau đó full suite đạt. E2E cổng3191/database `.local/e2e-question-delete-*.sqlite`, config/output `.local/question-delete-playwright.config.ts`/`.local/question-delete-e2e-results`; đã xem ảnh selection/popup. Kiểm tra lịch sử gồm phiên ôn đã lưu vẫn trả câu và nhận đáp án sau khi câu ngừng dùng, sửa sai/retry không mất. Không ghi/xóa dữ liệu thật Railway.
+
+Sau xem ảnh, đã tăng specificity CSS để nút xóa giữ màu đỏ đất trước theme outline xanh, và checkbox chọn tất cả có trạng thái chọn một phần. Build/TypeScript chạy lại đạt, **4/4 E2E xóa desktop/mobile chạy lại đạt**; ảnh cuối đã xem.
+
+`npm run local` xác nhận Vite5173 vẫn chạy/HMR. **Chưa push/deploy/restart Railway**; xóa nhiều câu trên database thật chờ backend mới. Giữ toàn bộ sửa tài liệu đồng thời đã có lúc bắt đầu (AGENTS/README và docs audit); không đổi việc của luồng khác. Nghiệp vụ question-bank.md, thiết kế app-design.md, ca functional-test-cases.md đã cập nhật.
+
+## Tiếp nhận session mới và kiểm tra tài liệu — 11/10/2026
+
+Đã rà soát **21 Markdown lõi** (AGENTS/README và 19 file docs trước khi thêm báo cáo). Đã đồng bộ mô tả cấp theo chương/mốc giáo viên, vườn toàn lớp/vinh danh riêng, chỉ đúng mới mở lời giải, thêm/xóa bài, đăng nhập/deploy hiện hành và thông số nền CSS. Báo cáo tại [documentation-audit.md](documentation-audit.md), bảng tra cứu hiện hành ở đầu [project-status.md](project-status.md). **Thiết kế chính [app-design.md](app-design.md) đã bổ sung audit vi phạm và các khoảng trống chưa sửa**, không còn chỉ nằm ở báo cáo/bàn giao.
+
+Session mới đọc AGENTS → phần tra cứu hiện hành/project-status → các đợt liên quan tại handoff → app-design và đặc tả chức năng tương ứng. Không phân tích lại toàn bộ đề án hoặc làm lại việc đã hoàn tất; các đợt bên dưới giữ bằng chứng lịch sử, không thay yêu cầu người dùng hay cấp quyền tự deploy. Kiểm tra Git/mã khi tiếp tục; HEAD khi rà soát là e3f85a9, không coi HEAD/PID hoặc kết quả cũ là trạng thái tương lai. Không cộng số test giữa các lượt, không báo chúng thành lần chạy mới.
+
+Đợt này chỉ sửa Markdown: kiểm tra cuối **22 file / 219 liên kết local, không thiếu đích; git diff --check đạt**. Không sửa runtime, chạy lại backend/E2E, deploy/push/restart hoặc ghi Railway. Audit 9 backend / 7 browser đạt + 1 mobile chưa xác nhận là kết quả lượt trước; lỗi offline/focus/AI vẫn chưa sửa. Tiếp tục phần còn thiếu khi được yêu cầu, không dùng checklist lịch sử kế hoạch10:39 để khẳng định thi đã nghiệm thu đầy đủ.
+
 ## Nhập câu có chủ đề vào bài đã có — 11/10/2026
 
 Yêu cầu mới: chủ đề chỉ là nhãn tham khảo/phục vụ trộn câu, không ghép vào tên bài hoặc sinh một bài cho mỗi chủ đề. Kiểm tra file Word 50 câu đã tạo: parser giữ `lesson` và `topic` riêng. Cách phân bài trước đây dùng nguyên chuỗi tên; khác `:`, `-`, `·` hoặc `hoà/hòa` có thể làm xuất hiện bài riêng.
@@ -266,7 +286,9 @@ Người dùng đã deploy service `SangKienKn` trong project `zooming-light` / 
 
 Để tạo Admin ngay trong Railway, mở service → **Console** (trong ảnh nằm giữa Metrics và Settings). Console có shell trong trình duyệt; không cần cài CLI để dùng cách này. Kiểm tra `DATABASE_PATH=/data/greenedu.sqlite`, rồi chạy `cd /app` và `npm run create:admin`; mật khẩu nhập riêng trong terminal. SSH/Copy SSH Command là cách thay thế. Railway đã công bố Console dùng chung từ 05/06/2026: https://railway.com/changelog/2026-06-05-sandboxes. Không tự chuyển dữ liệu local, ghi dữ liệu thử, commit/push hoặc deploy local trong yêu cầu hướng dẫn này. Các trạng thái hosting trong tài liệu lịch sử bên dưới có thể thuộc thời điểm trước lần deploy Railway.
 
-Cập nhật ngày **10/10/2026**, múi giờ người dùng Asia/Bangkok (UTC+7). Đây là bản tổng hợp bối cảnh và quyết định của trao đổi trước, **không phải bản chép nguyên văn toàn bộ chat**. Session mới không tự nhận lịch sử chat, file đính kèm, tiến trình hay database của máy cloud; cần đọc các file trong repository và kiểm tra trạng thái thực tế.
+## Bản bàn giao gốc — lịch sử 10/10/2026
+
+**Các phần từ đây tới cuối thuộc bối cảnh ban đầu**, giữ để đối chiếu kiến trúc/yêu cầu/bằng chứng. Những mô tả chưa có hosting, chưa thi/vé, .demo, cấp tổng, cổng3002, E2E chỉ Linux hoặc mục chưa chốt đã được thay ở các cập nhật phía trên. Không dùng chúng làm trạng thái/lệnh hiện hành. Múi giờ người dùng Asia/Bangkok (UTC+7); session mới vẫn cần đọc repository và kiểm tra Git/mã thực tế.
 
 ## Mục tiêu và cách làm việc
 

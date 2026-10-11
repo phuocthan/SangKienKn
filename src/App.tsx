@@ -815,6 +815,20 @@ export default function App() {
                         </label>
                       </div>
                       <QuestionBank
+                        deleteSupported={
+                          !!(
+                            current.chapters.find(
+                              (ch) => ch.id === questionChapter,
+                            ) ?? current.chapters[0]
+                          ).canDeleteQuestions
+                        }
+                        lessonSupported={
+                          !!(
+                            current.chapters.find(
+                              (ch) => ch.id === questionChapter,
+                            ) ?? current.chapters[0]
+                          ).canManageLessons
+                        }
                         topicSupported={
                           !!(
                             current.chapters.find(
@@ -825,7 +839,11 @@ export default function App() {
                         key={questionChapter || current.chapters[0].id}
                         chapterId={questionChapter || current.chapters[0].id}
                         lesson={questionLesson}
-                        lessonTitles={(current.chapters.find(ch => ch.id === questionChapter) ?? current.chapters[0]).lessons.map(l => l.title)}
+                        lessonTitles={(
+                          current.chapters.find(
+                            (ch) => ch.id === questionChapter,
+                          ) ?? current.chapters[0]
+                        ).lessons.map((l) => l.title)}
                         revision={revision}
                         onChange={() => {
                           setQuestionLesson("");

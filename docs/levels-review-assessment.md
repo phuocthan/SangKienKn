@@ -1,6 +1,6 @@
 # Đối chiếu cấp độ cây ôn tập và kiểm tra GreenEdu
 
-**Bản rà soát trước triển khai.** Các thiếu sót trong phạm vi ôn/thi đã được xử lý theo [kế hoạch](learning-implementation-plan.md) và [hướng dẫn hiện tại](learning.md); giữ nội dung dưới đây làm đối chiếu lịch sử.
+**Bản rà soát lịch sử trước triển khai.** Ôn kỳ/ma trận/vé/phòng thi đã được bổ sung sau bản này; các tên cấp, bằng chứng dòng code và câu hỏi chưa chốt phía dưới thuộc thời điểm cũ, không phải trạng thái hiện tại. Đọc [learning.md](learning.md), [student-levels.md](student-levels.md) và [violations-audit.md](violations-audit.md) để tiếp tục: còn gap offline/focus/AI và QA mobile, chưa được coi đã xử lý toàn bộ. Không lặp lại phân tích này hoặc tự triển khai mọi đề xuất lịch sử.
 
 Ngày rà soát: 11/10/2026. Nguồn yêu cầu: file “ĐỀ ÁN HOÀN THIỆN TÍNH NĂNG app greenedu (1).docx” người dùng gửi, các mục 1, 2, 4, 5 và bảng tổng hợp cuối tài liệu. Đối chiếu mã trong checkout hiện tại; các nội dung được đề xuất dưới đây chưa phải quy tắc đã được người dùng phê duyệt.
 

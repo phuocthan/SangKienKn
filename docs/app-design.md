@@ -1,5 +1,23 @@
 # Thiết kế giao diện GreenEdu
 
+## Quản lý/xóa câu hỏi hàng loạt — 11/10/2026
+
+Ngân hàng câu hỏi thêm frame kem **Quản lý câu hỏi hàng loạt** dưới toolbar nhập file: checkbox Chọn tất cả trong bài/đang hiển thị, số đã chọn, Bỏ chọn, hai nút **Xóa các câu đã chọn / Xóa cả bài**. Checkbox từng câu nằm trên thẻ; thẻ được chọn viền xanh, chỉ câu đang dùng/phiên bản hiện tại được chọn. Xóa cả bài bật khi bộ lọc đã chọn một bài, kể cả rỗng. Nút xóa viền/nội dung đỏ đất; mobile tự xuống dòng và hai nút toàn hàng.
+
+Popup xóa nhiều câu có số lượng/danh sách cuộn; popup xóa bài có tên/số câu và cách khôi phục. Cả hai nhắc giữ lịch sử/sổ tay/đề đã lưu, Hủy + Xác nhận, busy khóa đóng/lưu và hiện lỗi tại chỗ. Thành công tải lại danh mục/bộ đếm, bỏ chọn và thông báo; đổi phạm vi không mang lựa chọn cũ sang bài/chương khác. API cũ thiếu capability khóa chọn/xóa nhiều câu kèm thông báo chờ server. Nghiệp vụ [question-bank.md](question-bank.md); CSS scoped src/question-bank.css, không đổi các thẻ nhập/sửa/lịch sử.
+
+## Cách đọc và tiếp tục session — 11/10/2026
+
+Đây là **tài liệu thiết kế giao diện chính**. Quyết định hiện hành ở đầu tài liệu ưu tiên các mô tả lịch sử phía dưới; yêu cầu mới của người dùng và mã hiện tại quyết định bước tiếp theo. Tra cứu nghiệp vụ/trạng thái triển khai tại [project-status.md](project-status.md), bối cảnh tại [session-handoff.md](session-handoff.md). Không tự làm lại ảnh nền, icon, vườn hoặc audit đã có chỉ vì một ghi chú cũ mô tả khác; không coi ảnh QA/test checkout là giao diện đã deploy Railway.
+
+Các quyết định hiện hành: cấp riêng **lớp → môn → chương**, năm tên **Mầm → Chồi → Cây Non → Đơm Hoa → Kết Trái**, mốc thời gian theo cài đặt lớp/môn (mặc định 60 phút/cấp); vườn có rào chứa toàn bộ lớp, frame vinh danh cấp 5 riêng; sửa sai nằm trong ô thống kê phía trên; sai chưa hiện đáp án/lời giải; thẻ kiểm tra hiển thị cấp yêu cầu, vé và quyền giáo viên. Frontend local5173 dùng API/database Railway; công cụ mới thiếu capability phải báo chờ server, không giả dữ liệu.
+
+### Trạng thái giao diện xử lý vi phạm ôn/thi
+
+Đã đối chiếu đề án gốc và kiểm thử tại [violations-audit.md](violations-audit.md). Ôn tập có cảnh báo sau120 giây, đếm10 giây rồi dừng ghi nhận; sai lưu sổ tay và chỉ mở lời giải khi đúng. Phòng kiểm tra theo quyết định người dùng tự nộp lần rời tab thứ4 mặc định, không áp tự nộp cho phiên ôn. Không tự thêm trừ điểm kỷ luật hoặc khóa tài khoản.
+
+**Chưa sửa/triển khai:** offline đạt ngưỡng vẫn chọn thêm đáp án và đồng bộ đáp án trước sự kiện; trang visible mất focus chưa ghi cảnh báo; chưa có nhật ký/ngoại lệ chi tiết cho giáo viên, chưa có hỗ trợ Thần Rừng sau lần sai thứ3. UI cảnh báo pending/offline và lời nhắc mỗi lần rời cần hoàn thiện theo báo cáo. Mobile idle cần QA thiết bị thật; kết quả audit7/8 không phải đã nghiệm thu toàn bộ. Thưởng bài tự nộp do tab và cách hủy cảnh báo bằng tương tác còn là điểm cần thống nhất, không tự thay quy chế. Session mới tiếp tục từ các khoảng trống này khi được yêu cầu, không tái phân tích toàn bộ đề án hoặc coi đề xuất đã thành code.
+
 ## Cài đặt thời gian tăng cấp của giáo viên — 11/10/2026
 
 Trang **Ôn tập & kiểm tra** thêm thẻ **Thời gian tăng cấp** phía trên Quyền kiểm tra theo chương. Giữ nền kem, icon đồng hồ trong ô xanh nhạt, input số **Số phút cho mỗi cấp** và nút **Lưu thời gian**; mặc định 60 phút, phạm vi 1–1440 phút. Xem trước Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái với icon/tên/mốc giờ thay ngay theo draft; chưa lưu không thay dữ liệu. Preview desktop năm ô cùng hàng, mobile hai cột và cấp 5 toàn hàng; nút/input toàn chiều ngang mobile. Nút disabled khi chưa thay đổi, số sai, đang lưu hoặc API cũ thiếu `canConfigureLevels`.
@@ -23,6 +41,8 @@ Mỗi thẻ bắt đầu bằng tên chương, khung nền xanh nhạt ghi **C�
 Trang chủ học sinh: gộp tiêu đề “Sai một câu, hiểu thêm một điều.”, lời nhắc và nút Mở sổ tay vào ngay dưới số liệu/note của ô Câu cần sửa sai. Dùng số câu của lớp/môn đang chọn; có câu sai thì nhắc làm lại, chưa có thì giải thích câu sai sẽ được lưu. Nội dung có vạch ngăn nhẹ, khoảng cách 10–12 px, nút mở trang sửa sai hiện có. Bỏ thẻ gentle-reminder cạnh khối cấp độ để tránh kéo thẻ vàng cao theo danh sách chương. Khối cấp theo chương dùng toàn hàng; mobile lời nhắc cùng ô thống kê và ở trên danh sách chương. Không đổi dữ liệu hoặc API.
 
 ## Mốc cấp theo chương, vé và công cụ kiểm tra — 11/10/2026
+
+Các mốc giờ ở phần này là **mặc định 60 phút/cấp**; dùng cài đặt m để đặt icon/vạch và thời gian đúng lớp/môn. Mô tả thẻ “Từ 2 giờ” dưới đây là bố cục trước đợt Thẻ Ôn tập & kiểm tra học sinh ở trên, không đưa lại dòng đã bỏ.
 
 Yêu cầu mới thay cấp cộng gộp lớp/môn: mỗi **lớp → môn → chương** có cấp riêng. Khối Cấp độ của bạn hiển thị từng chương; trang Hành trình của tôi dùng cùng `ChapterLevelTimeline`. Thanh chia 0/1/2/3/4 giờ, icon **Mầm → Chồi → Cây Non → Đơm Hoa → Kết Trái** nằm trên đúng vạch mốc, tên và giờ ở dòng riêng. Mốc hiện tại có nền xanh nhạt/nhãn cấp, mốc đã đạt màu đậm; thanh tô theo tổng thời gian chương / 4 giờ. Không dùng màu làm tín hiệu duy nhất. Năm mốc giữ cùng hàng trên điện thoại, tên được xuống dòng khi cần; icon 48 px desktop/36 px mobile. Khối mục tiêu chọn một chương chưa đạt Kết Trái; bỏ badge cấp cộng gộp trên thanh tài khoản. Roster/xếp hạng dùng badge kèm tên từng chương khi API cung cấp, không thay bằng cấp tổng khi API cũ.
 
@@ -66,7 +86,7 @@ Thiết kế khu vườn ấm áp đã được người dùng duyệt qua ảnh
 
 Sidebar xanh rừng bo 24 px, nền kem với ảnh trường mờ, thẻ trắng ấm viền nhẹ, nút xanh và nút phụ có viền cùng chiều cao tối thiểu 44–46 px. Đồng bộ biểu mẫu, bảng, modal và màn hình đăng nhập cho Học sinh/Giáo viên/Admin. Logo trường vẫn dùng nguồn gốc riêng; cây từ sách dùng ảnh `knowledge-garden-v1.webp` đã có. Giữ trạng thái focus, lỗi/đúng/sai, disabled và điều hướng hiện tại.
 
-Trang chủ học sinh có hero và mục tiêu kế tiếp ở hai cột, ba thống kê dữ liệu thực, thẻ chương gọn với số chương/cây/tiến độ/chọn bài/nút luyện tập, cuối trang là hành trình năm cấp và sổ tay. `GardenGoal.tsx` suy ra mục tiêu lên cấp từ thời gian lớp/môn hiện tại; không sử dụng số liệu giả 10/15 phút theo ngày trong mockup vì API chưa cung cấp dữ liệu theo ngày. Số cây ra hoa chuyển sang thẻ mục tiêu. Không đổi quy tắc cây theo chương hoặc cấp học sinh, không lấy tên các cấp minh họa thay nghiệp vụ hiện có.
+Trang chủ học sinh có hero và mục tiêu kế tiếp ở hai cột, ba thống kê dữ liệu thực, thẻ chương gọn với số chương/cây/tiến độ/chọn bài/nút luyện tập. `GardenGoal.tsx` suy ra mục tiêu của **một chương** chưa đạt Kết Trái và mốc cài đặt lớp/môn; không dùng tổng giờ lớp làm cấp cá nhân hoặc số liệu giả theo ngày. Khối cấp theo chương trải toàn hàng, lời nhắc/sổ tay gộp trong ô Câu cần sửa sai phía trên theo cập nhật mới; bố cục cuối trang cũ đã thay.
 
 Ở màn hình 701–1200 px hero và mục tiêu xếp dọc; điện thoại dùng điều hướng ngang, các khối một cột, giữ chữ nội dung 15 px/nhãn 14 px/chú thích 13 px/ô nhập 16 px. Tiêu đề hero học sinh 26–34 px desktop và 27 px điện thoại; số liệu 26 px (23 px tablet). Hỗ trợ `prefers-reduced-motion`. Bản prototype 5180 vẫn riêng; giao diện thật ở frontend local 5173 dùng API/database Railway.
 
@@ -86,22 +106,28 @@ Dùng các biến `--text-*` tại `src/styles.css` thay cho cỡ chữ riêng l
 
 Nội dung dùng giãn dòng khoảng 1,7, chú thích/nhãn khoảng 1,5–1,6; tiêu đề bớt ép khoảng cách ký tự. Giới hạn chiều dài mô tả, cho tiêu đề/thao tác xuống hàng khi thiếu chỗ. Thẻ thống kê đặt số liệu trên hàng riêng; bộ lọc đặt nhãn phía trên trường chọn và tự xuống hàng. Chữ phụ của bảng/chương/thống kê dùng màu đậm hơn `#586b60`. Quy tắc áp dụng cả ôn/thi và thẻ cấp độ; không thu chú thích xuống 8–11 px trên mobile.
 
+Bảng trên là hệ token trước khi áp dụng CSS khu vườn. `garden.css` nạp sau cùng đặt `--text-metric:26px`, thẻ thống kê học sinh26px (23px ở tablet) và hero26–34px; mô tả thiết kế đã duyệt phía trên phản ánh các override này. Khi kiểm tra font thực tế phải xét selector/breakpoint và thứ tự nạp CSS, không coi bảng token là computed style của mọi trang.
+
 ## Bố cục và thành phần
 
 - Trang Tài khoản & bảo mật giáo viên/học sinh chỉ hiển thị thông tin cá nhân, ảnh đại diện và hai nút Đổi avatar/Đổi mật khẩu. Click ảnh hoặc nút mở popup tương ứng; avatar thanh đầu mở trực tiếp bộ chọn. Popup avatar rộng tối đa 760 px, cuộn nội dung, giữ nút đóng ở đầu; mật khẩu dùng popup riêng. Đóng bằng X/Escape/nền, bỏ draft chưa lưu và trả focus về nút mở; không cho focus tới input file ẩn. Admin đổi mật khẩu qua popup; màn hình đổi mật khẩu tạm bắt buộc vẫn riêng.
 
 - Desktop dùng sidebar xanh rừng, vùng nội dung sáng và thanh đầu trang có tài khoản/lớp đang chọn.
 - Mobile dùng điều hướng cuộn ngang, thẻ chương một cột ở màn hình hẹp, bảng tài khoản chuyển thành thẻ. Không cắt thao tác hoặc tạo cuộn ngang toàn trang.
-- Đăng nhập gồm vùng giới thiệu và biểu mẫu; có hai nút vào nhanh với tên tài khoản mặc định từ database. Trên điện thoại hai nút xếp dọc.
+- Đăng nhập gồm vùng giới thiệu và biểu mẫu; chỉ khi backend offline bật `LOCAL_QUICK_LOGIN=1` mới có hai nút vào nhanh với tên từ database. Production/Railway tắt chức năng này, kể cả giao diện chạy local5173. Trên điện thoại hai nút xếp dọc khi được bật.
 - Thẻ thống kê, chương, bảng và modal dùng cùng màu, khoảng cách và trạng thái tải/lỗi/trống. Điều hướng hiện tại có `aria-current`, nhãn form đọc được và nút đủ lớn để chạm.
 - Hoạt động nhóm có tổng quan, tìm/lọc, tiến độ, hạn nộp, yêu cầu và danh sách nhóm dễ phân biệt. Đây là cách trình bày; quyền nộp/đại diện/deadline nằm ở tài liệu chức năng.
 - Giao diện ôn tập/kiểm tra mới tiếp tục hệ thống thành phần này; tránh đưa thuật ngữ backend hoặc dữ liệu kỹ thuật vào luồng học sinh.
+
+### Hoạt động nhóm
+
+Danh sách có thẻ tổng quan, tìm tên/lọc đang nhận bài–đã hết hạn và tiến độ đã nộp. Trang chi tiết đặt hạn/trạng thái ở đầu, yêu cầu/file Word và danh sách nhóm trong hai khu; điện thoại xếp dọc. Giáo viên lọc Tất cả/Chưa nộp/Đã nộp, đổi đại diện và xem lịch sử ngay trong thẻ nhóm. Học sinh xem nhóm mình, form nộp chỉ hiện cho đại diện trước hạn. Trạng thái dùng cả màu và chữ; nghiệp vụ tại [group-activities.md](group-activities.md).
 
 ## Ảnh trường logo và minh họa
 
 Ảnh nền mới nhất: `public/assets/nguyen-khuyen-background-v11.png`, lưu bản nguồn và prompt ở `output/imagegen/nguyen-khuyen-background-v11.png` và `nguyen-khuyen-background-v11-prompt.txt`. Chỉnh bằng ImageGen tích hợp từ ảnh v8: bỏ huy hiệu khỏi nền, tăng cỡ dòng “TRƯỜNG THPT NGUYỄN KHUYẾN”, rồi đẩy cao thêm theo vùng người dùng đánh dấu. Bản v11 có tên trường lớn sát vùng trời phía trên, chừa lề và giữ dấu tiếng Việt. Giữ bố cục hai dãy lớp hình chữ V, phượng đỏ, không có cổng; cột cờ ở vị trí đã chọn. V8/v9/v10 và prompt giữ lại để đối chiếu.
 
-Ảnh trường dùng cả đăng nhập và các trang bên trong. Theo yêu cầu giảm độ mờ để rõ hơn: đăng nhập blur 1 px, bên trong blur 3 px. Giữ lớp phủ sáng bên trong khoảng 89,8% (độ hiện ảnh 10,2%). `.app-shell::before` cố định, bắt đầu phía dưới thanh đầu trang để tên trường không bị che; desktop/tablet hiển thị ảnh theo chiều rộng để không cắt tên trường, mobile dùng cover. Lớp nền không nhận tương tác; chỉ nền bị mờ, nội dung/thẻ/form vẫn rõ. Rà soát 1440/768/390/360 px, ảnh kiểm tra `.local/ui-school-v11/`. Ghi chú blur 5/1,5 px bên dưới là lịch sử.
+Ảnh trường dùng cả đăng nhập và các trang bên trong. **CSS hiện hành** là `src/garden.css` nạp sau styles/design tại `src/main.tsx`: cả hai nền blur **2 px**, ảnh v11 căn giữa phía trên và `cover`. Bên trong phủ gradient kem `#faf9f3dd` → `#faf9f3f2` tại70%; nền cố định `inset:0`. Các giá trị login1px/bên trong3px/phủ89,8% là cấu hình trước thiết kế khu vườn, đã bị override; không dùng làm thông số hiện tại. Lớp nền không nhận tương tác, chữ/thẻ/form vẫn rõ. Ảnh `.local/ui-school-v11/` là bằng chứng lượt trước, không phải QA mới sau lần rà soát tài liệu này.
 
 Logo trường riêng vẫn hiển thị cạnh tên GreenEdu ở đăng nhập và sidebar của cả ba vai trò, qua `Logo school`. `.school-crest` tiếp tục cắt huy hiệu bằng CSS từ ảnh v8 `public/assets/nguyen-khuyen-background.png` (x=832, y=70, cạnh 166 px trên ảnh 1672×941); không dùng ảnh nền v11 đã bỏ huy hiệu. Dòng phụ ghi “THPT NGUYỄN KHUYẾN”. Logo 58 px ở đăng nhập/48 px ở sidebar desktop, 48/38 px trên mobile; có alt tiếng Việt. Giữ nguyên ảnh v8 để logo riêng luôn đúng.
 
@@ -134,6 +160,8 @@ Kiểm tra desktop 1440 px, tablet 768 px và mobile 390/360 px: không tràn ng
 Các thư mục kiểm tra đã dùng: `.local/ui-design/`, `.local/ui-school-background/`, `.local/ui-*-quick-login.png`, `.local/ui-*-avatar-upload-*.png`, `.local/ui-*-avatars-nature-*.png`. Khi server đang chạy, build thử vào `.local/<tên-build>` và dùng `E2E_DIST_DIR`, không thay `dist` trước khi backend được deploy tương ứng.
 
 ## Lịch sử và tài liệu nguồn
+
+**Toàn bộ nội dung sau đây là lịch sử, không phải hướng dẫn vận hành hiện hành.** Các lệnh tự deploy/địa chỉ3002/ảnh chỉ login/blur cũ trong đoạn lưu trữ đã được thay bởi quyết định ở đầu tài liệu và [dev-railway.md](dev-railway.md). Giữ để đối chiếu, không khôi phục lại hoặc thực thi chỉ từ đoạn này.
 
 Ảnh/prompt trong `output/imagegen/` giữ nguyên để đối chiếu. Các ghi chú thiết kế trước đây trong tài liệu bàn giao/tiến độ được gom ở phần dưới, mang tính lịch sử; trạng thái deploy thực tế luôn theo `docs/session-handoff.md` và script deploy.
 

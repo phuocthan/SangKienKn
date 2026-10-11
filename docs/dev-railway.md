@@ -42,7 +42,7 @@ Dừng bằng `Ctrl+C`. Cổng 5173 phải trống; nếu đã chạy nền, d�
 
 Proxy giữ `HttpOnly`/`SameSite` cho cookie phiên; bỏ thuộc tính `Secure` ở phản hồi tới HTTP loopback và bỏ Domain upstream để trình duyệt lưu phiên cho host local. Đường truyền từ proxy tới Railway vẫn HTTPS, kiểm tra chứng chỉ bật. Proxy kiểm tra Origin và chặn cross-site trước khi đổi Host/Origin sang Railway để backend giữ kiểm tra cùng nguồn; không sửa hay mở CORS ở backend production. Không phục vụ proxy này trên LAN hoặc hosting công khai. Tham khảo [cấu hình proxy Vite](https://v6.vite.dev/config/server-options#server-proxy).
 
-Frontend local dùng mã hiện tại, backend dùng **phiên bản đang triển khai trên Railway**. Sửa backend/migration ở máy này chưa có hiệu lực với Railway; cần triển khai backend riêng. Chưa xác minh database/mount trên volume hay bảo toàn dữ liệu qua restart Railway trong lượt thiết lập này.
+Frontend local dùng mã hiện tại, backend dùng **phiên bản đang triển khai trên Railway**. Sửa backend/migration local chưa có hiệu lực với Railway; cần triển khai backend riêng. Ghi chú chưa xác minh volume là giới hạn của lượt thiết lập ban đầu; các đợt triển khai/backup/đối chiếu dữ liệu sau đó ở [session-handoff.md](session-handoff.md). Không suy trạng thái deployment hoặc kết quả bảo toàn hiện tại từ một ghi chú cũ.
 
 ## Chạy độc lập khi kiểm thử
 

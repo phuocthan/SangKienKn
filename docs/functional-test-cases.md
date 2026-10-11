@@ -1,5 +1,16 @@
 # Ca kiểm thử chức năng GreenEdu
 
+## Ca mới: quản lý/xóa câu hỏi hàng loạt — 11/10/2026
+
+- BANK-DELETE-ACCESS: chỉ chủ lớp; chưa đăng nhập/học sinh/giáo viên khác bị chặn, payload sai/rỗng/quá 5000 bị từ chối.
+- BANK-DELETE-ATOMIC: chọn câu ngoài chương/ID thiếu/phiên bản cũ chặn toàn bộ; không cập nhật một phần. Lặp/concurrent retry không xóa trùng hoặc đổi câu chưa chọn.
+- BANK-DELETE-HISTORY: giữ phiên bản, attempts, sổ tay, progress và snapshot ôn; sửa sai/retry/phiên ôn đã lưu tiếp tục được, lượt luyện mới không nhận câu bị xóa.
+- BANK-DELETE-UI: chọn từng câu/tất cả/bỏ chọn/Hủy, đổi bài xóa lựa chọn, xóa nhiều câu và cả bài (kể cả bài rỗng), reload/hidden/đếm đúng. API cũ disabled theo capability; desktop/mobile không tràn ngang.
+
+Backend server/question-delete.test.ts cùng hồi quy lesson-management/app; E2E e2e/question-delete.spec.ts cùng nhập Word và quản lý bài. Chỉ dùng database riêng.
+
+Các kết quả ghi theo từng đợt là **bằng chứng lịch sử**, không cộng số ca giữa các lượt hoặc báo thành kết quả mới. Với thay đổi tài liệu chỉ kiểm tra nội dung/liên kết/diff; khi sửa runtime chạy ca liên quan và hồi quy cần thiết trên database riêng. Các mốc1/2/3/4giờ dưới đây là mặc định60phút/cấp; ca cấu hình bao phủ mốc tùy chỉnh. Trạng thái hiện hành tại [project-status.md](project-status.md).
+
 ## Audit vi phạm khi ôn và thi — 11/10/2026
 
 Đã chạy lại 9 backend liên quan giờ/idle/sổ tay/thi4tab/deadline/duyệt thưởng. Tám ca trình duyệt audit desktop/mobile: desktop idle đạt; online4tab/reload/nộp khóa, offline4tab vẫn nhận đáp án sau ngưỡng, blur trang visible không đếm đều xác nhận trên hai viewport. Kết quả7 đạt/1 mobile idle chưa xác nhận ở mốc mô phỏng, cần QA thiết bị thật. Tests gap passing xác nhận hành vi lỗi hiện tại, không đồng nghĩa đã sửa. Chỉ server/DB riêng3187/build `.local/violations-audit-build`; [chi tiết](violations-audit.md). Không ghi Railway hoặc áp quy tắc phạt mới.
@@ -80,18 +91,18 @@ Lần chỉnh theo phản hồi frame/rào/vinh danh dùng `.local/fenced-garden
 
 Ca tự động mới nằm trong [accounts.test.ts](../server/accounts.test.ts) (sáu ca tổng hợp) và [creation-validation.spec.ts](../e2e/creation-validation.spec.ts) (ba ca chạy ở hai kích thước màn hình).
 
-## Ca mới: icon cấp học sinh theo lớp/môn
+## Ca icon cấp học sinh theo lớp/môn/chương
 
-Người dùng chọn cộng thời gian riêng trong lớp/môn; quy tắc tại [student-levels.md](student-levels.md).
+Cấp hiện hành riêng **lớp → môn → chương**, thay lựa chọn tổng lớp/môn ban đầu; quy tắc tại [student-levels.md](student-levels.md). Garden dùng MAX chương làm đại diện, không SUM.
 
 | Mã       | Thao tác                                        | Kết quả cần đạt                                           | Kiểm tra              |
 | -------- | ----------------------------------------------- | --------------------------------------------------------- | --------------------- |
 | LEVEL-01 | Thời gian đúng trước/tại mốc 1, 2, 3, 4 giờ     | Đúng Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái; không lên cấp sớm | API                   |
 | LEVEL-02 | Học sinh có hai môn với thời gian khác nhau     | Mỗi môn có cấp riêng                                      | API + trình duyệt     |
 | LEVEL-03 | Hai lớp khác nhau cùng môn                      | Không cộng thời gian của lớp kia                          | API                   |
-| LEVEL-04 | Cộng thời gian nhiều chương trong cùng lớp      | Tổng đúng; không cộng của học sinh khác                   | API                   |
-| LEVEL-05 | Giáo viên xem roster và xếp hạng                | Cấp trùng với học sinh ở cùng lớp/môn                     | API + trình duyệt     |
-| LEVEL-06 | Đổi lớp, tải lại, xem Tài khoản                 | Huy hiệu/thẻ cấp theo lớp chọn, đọc từ tiến độ đã lưu     | Trình duyệt           |
+| LEVEL-04 | Hai chương cùng lớp mỗi chương2giờ ở mặc định60 | Mỗi chương cấp3; không SUM thành cấp5, không lẫn học sinh | API                   |
+| LEVEL-05 | Giáo viên xem roster và xếp hạng                | chapterLevels trùng học sinh ở đúng lớp/môn/chương        | API + trình duyệt     |
+| LEVEL-06 | Đổi lớp, tải lại, xem Tài khoản                 | Cấp từng chương theo lớp chọn; không dùng huy hiệu tổng   | Trình duyệt           |
 | LEVEL-07 | Đủ năm icon và các bước trên điện thoại/desktop | Không tràn ngang, icon/nhãn/mốc rõ, không lỗi JS          | Trình duyệt + xem ảnh |
 | LEVEL-08 | Tổng chưa có dữ liệu hoặc không hợp lệ          | Mầm, không tạo thời gian/điểm giả                         | API                   |
 
@@ -99,7 +110,7 @@ Ca tự động tại `server/student-levels.test.ts` (ba ca tổng hợp) và `
 
 ## Hồi quy chức năng có sẵn
 
-Chạy lại toàn bộ bộ kiểm thử, không chỉ ca mới:
+Các nhóm hồi quy cần cân nhắc theo phạm vi thay đổi runtime; không mặc định chạy lại toàn bộ cho chỉnh tài liệu:
 
 | Nhóm              | Nội dung                                                                                                                   |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -139,7 +150,7 @@ npx playwright test e2e/student-levels.spec.ts
 npm run test:e2e
 ```
 
-## Kết quả đợt này
+## Kết quả lịch sử đợt tạo lớp/tài khoản — 11/10/2026, 11:16
 
 Đã tái hiện lỗi tạo lớp trùng trước sửa: hai yêu cầu lặp đều trả 201 thay vì 409. Đã sửa API tạo lớp bằng kiểm tra chuẩn hóa trong transaction `BEGIN IMMEDIATE`, giữ nguyên các lớp có sẵn. Backend **63/63 đạt**, toàn bộ trình duyệt **50/50 đạt** trên desktop/mobile, không skip/flaky; TypeScript và build riêng đạt. Lượt đầu ca trình duyệt tạo lớp dùng sai tên nút/vị trí trang, đã sửa test sang “Lớp học của tôi → Tạo lớp mới” và chạy lại đạt; không tính những lượt lỗi đó là pass.
 

@@ -2,7 +2,7 @@
 
 Web app tiếng Việt giúp học sinh luyện tập, sửa sai và nuôi cây kiến thức. Giáo viên quản lý lớp, chương, câu hỏi và theo dõi tiến độ. Đây là MVP có backend và cơ sở dữ liệu thực, chưa phải hệ thống thi chính thức.
 
-Mở session Codex mới: đọc [bản bàn giao](docs/session-handoff.md), [tiến độ](docs/project-status.md) và `AGENTS.md` để tiếp tục với bối cảnh/yêu cầu đã chốt. Nội dung chữ từ đề án Word gốc nằm ở [requirements-original.md](docs/requirements-original.md).
+Mở session Codex mới: đọc `AGENTS.md`, [bản bàn giao](docs/session-handoff.md), [tiến độ](docs/project-status.md) và [thiết kế chính](docs/app-design.md). Dùng phần hiện hành trước lịch sử; không làm lại việc đã hoàn tất hoặc báo kết quả test cũ thành mới. Nội dung chữ đề án Word gốc tại [requirements-original.md](docs/requirements-original.md); các khoảng trống ôn/thi đã kiểm tra tại [violations-audit.md](docs/violations-audit.md).
 
 ## Chạy local trên Windows
 
@@ -84,7 +84,7 @@ Tài khoản mẫu, chỉ dùng cho dữ liệu thử:
 ## Luồng dùng thử
 
 1. Đăng nhập học sinh → Luyện tập → chọn chương.
-2. Trả lời sai → kiểm tra lời giải → kết thúc phiên → mở Sổ tay sửa sai.
+2. Trả lời sai → nhận lời nhắc chung → kết thúc phiên → mở Sổ tay sửa sai. Đáp án/lời giải chỉ mở khi trả lời đúng trong mã hiện tại; backend Railway cần phiên bản hỗ trợ, xem trạng thái triển khai.
 3. Làm lại đúng trong sổ tay → câu được đánh dấu đã khắc phục và rời danh sách cần sửa.
 4. Đăng xuất → đăng nhập giáo viên → xem Tiến độ học tập của lớp.
 5. Tạo lớp mới, thêm chương, thêm câu hỏi và tạo học sinh mới. Học sinh phải đổi mật khẩu tạm ở lần đăng nhập đầu tiên.
@@ -133,7 +133,7 @@ Biến cấu hình:
 ## Quy tắc thời gian và cây
 
 - Mỗi học sinh/chương có tiến độ riêng, giữ nguyên khi đổi chương.
-- Cây cấp 1 mặc định; cấp 2/3/4/5 ở 1/2/3/4 giờ học có hoạt động.
+- Cấp riêng lớp → môn → chương: Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái. Giáo viên đặt m phút/cấp (mặc định60, phạm vi1–1440); cấp2/3/4/5 ở m/2m/3m/4m phút của chương. Không cộng giờ giữa chương để tính cấp. Công cụ cấu hình cần backend mới; xem [student-levels.md](docs/student-levels.md).
 - Trang luyện tập gửi heartbeat mỗi 15 giây; thời lượng dựa trên đồng hồ backend.
 - Trang ẩn hoặc khoảng kết nối vượt 30 giây không được cộng thời gian.
 - Không tương tác 120 giây: nhắc tiếp tục trong 10 giây; sau đó tạm dừng. Backend cũng giới hạn cửa sổ hoạt động 130 giây.
@@ -145,7 +145,7 @@ Biến cấu hình:
 
 Đã có: đăng nhập session HttpOnly, mật khẩu scrypt, phân quyền theo lớp, tạo lớp/chương/câu hỏi/học sinh, phân câu hỏi theo tên bài, luyện tập theo bài hoặc chương, cấp lại mật khẩu, luyện tập trắc nghiệm 4 phương án, sổ tay, cây kiến thức, dashboard, CSV UTF-8 mở bằng Excel, giao diện responsive và font phục vụ nội bộ.
 
-Đã bổ sung: Khu vườn của lớp hiển thị cây cấp 5 của các thành viên; Xếp hạng chăm chỉ dựa trên thời gian/cây và bảng Bác sĩ cây trồng theo số câu hiện đã khắc phục. Hai phần tính trong lớp đang chọn, không dùng điểm số, không tạo thành tích giả và không trả email qua API cộng đồng.
+Trong mã hiện tại: Khu vườn có rào chứa toàn bộ lớp, mỗi học sinh một cây theo cấp cao nhất của một chương, avatar/tên; frame vinh danh cấp5 riêng. API Railway cũ thiếu members chỉ hiện trạng thái chờ và vinh danh từ trees thật; danh sách đầy đủ cần deploy backend mới. Xếp hạng chăm chỉ dựa trên thời gian/cây và Bác sĩ cây trồng theo số câu hiện đã khắc phục, trong đúng lớp; không tạo thành tích giả hoặc trả email qua API cộng đồng.
 
 Ngân hàng câu hỏi đã có sửa bằng phiên bản mới, ẩn/hiện lại và lịch sử nội dung. Có nhập **Word `.docx` và CSV UTF-8 theo mẫu**, tải mẫu, xem trước/kiểm tra lỗi và xác nhận trước khi lưu; gửi lại khi mạng lỗi không tạo câu trùng. Word nhận các khối câu hỏi văn bản, tối đa 100 câu/5 MB; [file Word mẫu](public/templates/greenedu-cau-hoi-mau.docx) có hai câu minh họa để chỉnh sửa. Sổ tay và lượt làm cũ giữ nguyên đáp án cũ. Xem [hướng dẫn ngân hàng câu hỏi](docs/question-bank.md).
 

@@ -2,6 +2,8 @@
 
 Cập nhật 11/10/2026. Triển khai trên checkout hiện tại, giữ dữ liệu và các thay đổi có sẵn. Tài liệu thiết kế giao diện dùng riêng `docs/app-design.md`.
 
+**Phạm vi kế hoạch ban đầu và bằng chứng nghiệm thu phía dưới là lịch sử đợt10:39, không phải nghiệm thu toàn bộ hiện tại hoặc Railway.** Sau đó bổ sung quyền giáo viên theo chương, tạo đề thủ công/tải file, cấp riêng từng chương và thời gian mỗi cấp tùy chỉnh. Quy tắc hiện hành tại [learning.md](learning.md), [student-levels.md](student-levels.md); audit [violations-audit.md](violations-audit.md) còn lỗi offline/ngưỡng tab, thiếu focus/nhật ký/AI và QA idle mobile. Session mới tiếp tục từ trạng thái [project-status.md](project-status.md), không triển khai lại toàn kế hoạch hoặc mặc định các gap đã sửa.
+
 ## Phạm vi thực hiện
 
 1. Gom màu sắc, font, bố cục, ảnh nền, minh họa, avatar, responsive và lịch sử thiết kế vào một tài liệu; các tài liệu tiến độ/bàn giao trỏ tới đó.
@@ -13,20 +15,20 @@ Cập nhật 11/10/2026. Triển khai trên checkout hiện tại, giữ dữ li
 
 ## Quy tắc đã xác nhận và áp dụng
 
-- Cây giữ mốc 0/1/2/3/4 giờ. Thời gian luyện tập và sửa sai cùng tính tiến độ chương; thời gian thi không cộng vào cây.
+- Cấp riêng từng chương của đúng lớp/môn. Giáo viên đặt m phút/cấp, mặc định60: các mốc0/m/2m/3m/4m phút; bảng1/2/3/4giờ là mặc định. Luyện tập và sửa sai cùng tính tiến độ chương; thời gian thi không cộng vào cây.
 - Người dùng đã chọn tỷ lệ mở thi tính toàn bộ lượt luyện tập và sửa sai; cho phép giáo viên chọn cách tính kết quả mới nhất của từng câu. Hiển thị rõ cách tính.
-- Sổ tay sạch xét đúng chương. Vé cấp tại từng mốc 2/3/4 giờ, mỗi mốc một lần; dùng vé khi bắt đầu thi, tiếp tục cùng lượt sau mất mạng không trừ thêm vé.
-- Thi tự học cần đủ 2 giờ, >=70%, không còn câu sai và còn vé. Thi chính thức do giáo viên mở không yêu cầu điều kiện tự học.
+- Sổ tay sạch xét đúng chương. Vé cấp tại2m/3m/4m phút, mỗi mốc một lần; dùng vé khi bắt đầu Săn điểm, tiếp tục cùng lượt không trừ thêm. Đổi mốc không thu hồi vé/điểm cũ hoặc cấp trùng.
+- Săn điểm cần cấp3 (2m phút), >=70%, không còn câu sai, còn vé **và giáo viên mở chương**. Thi chính thức không yêu cầu điều kiện tự học/vé; vẫn cần đề mở/đúng lịch và các chương có câu trong đề được cho phép.
 - Tự nộp ở lần rời tab thứ 4 theo mục 4.2; giáo viên cấu hình được. Thời gian chuẩn 20 phút theo server.
 - Thi chính thức dùng cùng tập câu cho cả lớp, đảo thứ tự giữa các máy; đáp án được công bố sau khi khung thi đóng. Không trả đáp án khi còn đang làm.
-- Mốc 4 giờ nhận một điểm hệ thống/chương; mỗi lượt Săn điểm >=8 nhận một điểm, tối đa ba lượt/chương. Thưởng có lịch sử và giáo viên duyệt việc ghi nhận; không tự ghi sổ điểm học bạ.
+- Mốc cấp5 (4m phút, mặc định4giờ) nhận một điểm hệ thống/chương; mỗi lượt Săn điểm>=8 nhận một điểm, dùng tối đa3 vé/chương. Thưởng có lịch sử/duyệt, không tự ghi sổ điểm học bạ; quyền thưởng khi bài tự nộp do tab cần thống nhất theo audit, chưa tự thêm hình phạt.
 - Ma trận có số câu và trọng số theo bài/chương. Không đủ câu thì báo thiếu trước khi tạo đề, không lặp câu để bù. Không tự đoán phân loại từ Word ngoài mẫu.
 
 ## Tiêu chí hoàn tất
 
 Các thao tác phải có màn hình sử dụng được, API kiểm tra quyền và trạng thái, dữ liệu lưu bền vững. Gửi lại/tải lại không cấp trùng vé hoặc thưởng, không nộp/chấm trùng; không lộ đáp án trước hạn; database cũ giữ dữ liệu. Phạm vi kế hoạch đã hoàn tất và deploy local ngày 11/10/2026 lúc 10:39.
 
-## Nghiệm thu phạm vi kế hoạch
+## Nghiệm thu lịch sử phạm vi kế hoạch ban đầu — 11/10/2026, 10:39
 
 - [x] Tập trung toàn bộ thiết kế/lịch sử và liên kết tra cứu trong app-design.md.
 - [x] Học kỳ, ma trận theo bài/chương, ôn chương/kỳ ngẫu nhiên, lưu/tiếp tục phiên.

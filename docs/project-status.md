@@ -1,5 +1,34 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Quản lý ngân hàng: chọn nhiều câu/xóa cả bài — 11/10/2026
+
+Đã thêm checkbox/chọn tất cả/bỏ chọn và xác nhận xóa nhiều câu; chọn bài trong bộ lọc để xóa cả bài, kể cả rỗng. Xóa dạng ngừng sử dụng/archive, giữ lịch sử/sổ tay/đề ôn-thi; chỉ giáo viên sở hữu lớp, kiểm tra toàn bộ danh sách trong transaction, gửi lại không xóa thêm. API mới có capability, frontend cũ-server cũ không ghi nhầm. Chi tiết [question-bank.md](question-bank.md), thiết kế [app-design.md](app-design.md).
+
+Kiểm tra mới **112/112 backend, 10/10 E2E desktop/mobile**, TypeScript/build riêng đạt. Frontend local5173/HMR đã cập nhật; **chưa deploy/push Railway**, API xóa nhiều câu cần triển khai mới có hiệu lực trên dữ liệu thật. Không thực hiện thao tác xóa production.
+
+## Bản tra cứu hiện hành cho session mới — 11/10/2026
+
+Đọc phần này trước các ghi chép theo đợt bên dưới. **Mã checkout, bản đang phục vụ Railway và kết quả test là ba trạng thái riêng.** Ghi chép test/deploy cũ không xác nhận tình trạng đang chạy; kiểm tra Git/mã và capability khi tiếp tục. Yêu cầu mới của người dùng chọn việc tiếp theo, không tự triển khai lại toàn bộ đề án. Tổng rà soát tài liệu tại [documentation-audit.md](documentation-audit.md).
+
+| Phạm vi | Quyết định/trạng thái hiện hành | Tra cứu |
+| --- | --- | --- |
+| Thiết kế | Một tài liệu chính cho nền/logo/font/icon/layout/animation; các đoạn lịch sử không ghi đè thiết kế mới. Nền v11, blur2px trong CSS garden hiện tại | [app-design.md](app-design.md) |
+| Chạy và deploy | Frontend local5173/HMR; API/database Railway thật. Không tự deploy/push hoặc chạy API offline; test dùng database riêng | [dev-railway.md](dev-railway.md), [deploy-local.md](deploy-local.md) |
+| Tài khoản | Admin tạo giáo viên/học sinh; giáo viên tạo/thêm học sinh. Railway đã đổi miền đăng nhập@greenedu.nk. Vào nhanh chỉ backend offline; email chào chưa kết nối/gửi thật | [account-management.md](account-management.md), [welcome-email.md](welcome-email.md) |
+| Cấp học sinh | Riêng lớp→môn→chương, Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái. m phút/cấp do chủ lớp đặt, mặc định60; cấu hình mới còn chờ backend Railway | [student-levels.md](student-levels.md) |
+| Vườn và vinh danh | Vườn có rào chứa toàn lớp, avatar/hai từ cuối/cấp MAX một chương; frame cấp5 riêng. Frontend đã có, danh sách thật cần backend members mới | [app-design.md](app-design.md), [student-levels.md](student-levels.md) |
+| Ôn/kiểm tra | Đúng mới mở lời giải; Săn điểm cần cấp3/70% mọi lượt/sổ tay sạch/vé/quyền giáo viên. Thi chính thức mở từ bank hoặc Word/CSV, một/nhiều chương/bài, không cần điều kiện tự học. Các công cụ backend mới chưa deploy | [learning.md](learning.md) |
+| Vi phạm | Audit đã có, không sửa runtime. Còn lỗi nhận đáp án sau ngưỡng offline, thiếu focus/nhật ký/AI; idle mobile cần QA thật. Mặc định lần4 tự nộp, không tự thêm kỷ luật tài khoản | [violations-audit.md](violations-audit.md) |
+| Ngân hàng và PPCT | Railway đã nhập4chương/26bài+1mục bổ sung Vật lý11, chưa nhập câu thật. Thêm/xóa bài dạng archive và topic/trộn theo chủ đề đã có mã, còn chờ backend; Word50câu đã tạo, chưa nhập production | [question-bank.md](question-bank.md), [physics-11-curriculum-2026-2027.md](physics-11-curriculum-2026-2027.md) |
+| Nhóm và avatar | Nhóm giao/chia/đại diện/nộp/gia hạn/lịch sử đã có; chưa phản biện/chấm/thưởng nhóm. Avatar40ID/quyền vai trò/upload3MB; popup mới ở frontend local | [group-activities.md](group-activities.md), [user-avatars.md](user-avatars.md) |
+| Nguồn và kiểm thử | Đề án là nguồn sản phẩm; kế hoạch/audit trước triển khai là lịch sử. Ca kiểm thử và bằng chứng theo từng đợt, không cộng số lượt hoặc báo lại thành test mới | [requirements-original.md](requirements-original.md), [mvp.md](mvp.md), [learning-implementation-plan.md](learning-implementation-plan.md), [levels-review-assessment.md](levels-review-assessment.md), [functional-test-cases.md](functional-test-cases.md) |
+
+Các trạng thái Railway trong bảng dựa trên lần triển khai/kiểm tra đã ghi ở [session-handoff.md](session-handoff.md), không phải gọi lại production trong đợt kiểm tra tài liệu. Còn nghiệm thu lớp thật/tải/vận hành và các khoảng trống audit; không ghi là hoàn thành toàn bộ.
+
+## Nhật ký các đợt công việc
+
+Các mục dưới giữ bối cảnh/bằng chứng theo thời điểm. Mô tả đã thay như cấp tổng lớp, vườn chỉ cấp5, localhost3002, tự deploy sau mỗi sửa, .demo, blur cũ hoặc chưa có hosting phải đọc theo bảng hiện hành ở trên.
+
 ## Nhập câu vào bài có sẵn, chủ đề không tạo bài — 11/10/2026
 
 Hộp nhập Word/CSV có **Bài nhận câu hỏi**, mặc định bài đang lọc; chọn bài có sẵn để gộp toàn bộ câu vào bài đó và giữ nhãn chủ đề riêng. Theo tên trong file thì ghép tên bài có số tương đương về tên đã có trong cùng chương; khác số/nội dung tên không tự gộp, nhiều tên tương đương cần chọn chính xác. API áp dụng cho thêm/sửa/nhập, giữ chống trùng/retry/lịch sử. Word 50 câu vẫn giữ một Bài 1 và 10 nhãn. **37 backend, 4 E2E desktop/mobile, TypeScript/build riêng đạt**; E2E xác nhận 50 câu vào một bài có sẵn. Chưa deploy Railway hoặc đổi bài trùng đã lưu; cần backend mới để áp dụng quy tắc API. Chi tiết ở [question-bank.md](question-bank.md) và [session-handoff.md](session-handoff.md).
@@ -126,9 +155,9 @@ Ngày 11/10 kiểm tra phản hồi “Không tìm thấy chức năng.” ở A
 
 Ngày 11/10 bổ sung nhập trực tiếp khi chạy `npm run create:admin`: hỏi email/họ tên, che mật khẩu và yêu cầu xác nhận. Không cần khai báo biến môi trường khi dùng terminal tương tác; vẫn giữ cách cấp biến cho chạy tự động. Đã kiểm tra trên terminal Windows/database riêng và không tạo tài khoản thử trong database chính.
 
-Đã hoàn thành MVP lõi: giáo viên tạo lớp/câu hỏi/học sinh → học sinh luyện tập → lưu câu sai → sửa sai → ghi nhận thời gian và cây → giáo viên xem tiến độ. Đã bổ sung vườn lớp và xếp hạng chăm chỉ. Đã hoàn thiện sửa/ẩn câu hỏi, lịch sử phiên bản, nhập CSV và Word `.docx` theo mẫu có tải mẫu/xem trước/xác nhận. Đã bổ sung hoạt động nhóm: yêu cầu văn bản/Word, chia ngẫu nhiên, đại diện, nộp sản phẩm, hạn nộp, gia hạn và lịch sử. Chưa hoàn thành toàn bộ đề án, chưa triển khai một website công khai và chưa nghiệm thu với lớp học thật.
+Đã có MVP lõi, ngân hàng phiên bản/Word–CSV, vườn/xếp hạng và hoạt động nhóm trong phạm vi đã mô tả. Railway công khai đã được triển khai ở các đợt ghi phía trên; **chưa hoàn thành toàn bộ đề án hoặc nghiệm thu lớp thật**, không đồng nghĩa mọi thay đổi checkout đã deploy.
 
-Đã triển khai local theo yêu cầu ngày 10/10/2026 tại **http://localhost:3002**, không bật seed demo mới. Kiểm thử tiếp tục dùng server/database riêng; chưa triển khai hosting công khai. Trạng thái vận hành mới nhất ở cuối tài liệu và `docs/session-handoff.md`.
+Triển khai offline3002 ngày10/10 là lịch sử. Mặc định hiện hành local5173/API Railway theo bảng đầu tài liệu; test dùng server/database riêng. Trạng thái triển khai theo từng đợt ở [session-handoff.md](session-handoff.md), không ở nhật ký cũ cuối tài liệu.
 
 | Phân hệ trong đề án                | Trạng thái                                                                                         | Phần còn thiếu                                                                               |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -137,27 +166,27 @@ Ngày 11/10 bổ sung nhập trực tiếp khi chạy `npm run create:admin`: h�
 | Luyện tập và cây                   | Luyện bài/chương, ôn chương/kỳ trộn ma trận, phiên ôn lưu để tiếp tục, cây 5 cấp                   | Nghiệm thu bằng lớp học thật                                                                 |
 | Sổ tay sửa sai                     | Nhận câu sai luyện/ôn/thi; khi sửa sai chưa mở đáp án, tự làm lại đến đúng                         | Gợi ý AI khi có dịch vụ phù hợp                                                              |
 | Dashboard và xuất dữ liệu          | Thời gian, mọi lượt luyện/sửa sai, cây và CSV; kết quả thi/thưởng và Excel .xlsx                   | Điểm và thưởng nhóm sau khi có nghiệp vụ chấm nhóm                                           |
-| Khu vườn của lớp                   | Đã bổ sung cây cấp 5 của thành viên trong lớp                                                      | Màn hình so sánh nhiều lớp nếu cần; hiện giáo viên đổi lớp để xem                            |
+| Khu vườn của lớp                   | Mỗi thành viên một cây/avatar/cấp MAX chương, vườn rào và vinh danh cấp5 riêng trong mã              | Deploy backend members để hiển thị đầy đủ với Railway; nghiệm thu lớp đông                    |
 | Xếp hạng chăm chỉ                  | Đã bổ sung xếp hạng thời gian/cây và bảng sửa sai                                                  | Đánh giá trải nghiệm vinh danh với giáo viên/học sinh thật                                   |
-| Vé và kiểm tra 20 phút             | Vé mốc 3/4/5, điều kiện mở thi, thời hạn server, tự lưu/khôi phục/thu/chấm bài và cảnh báo tab     | Kiểm thử tải, nghiệm thu xử lý sự cố lớp thật                                                |
+| Vé và kiểm tra 20 phút             | Vé mốc3/4/5, quyền giáo viên, server deadline, autosave/khôi phục/thu/chấm và cảnh báo tab trong mã | Khắc phục offline/ngưỡng tab, focus/nhật ký, QA idle mobile theo audit; nghiệm thu lớp thật      |
 | Săn điểm và thi chính thức         | Tối đa 3 lượt/chương, lịch lớp/cùng bộ câu đảo thứ tự, giáo viên đóng/thu bài, báo cáo             | Điều chỉnh/kết luận điểm sau sự cố theo quy trình trường                                     |
 | Green Points/đổi thưởng            | Sổ thưởng cây/thi cấp một lần, duyệt/từ chối và lịch sử                                            | Danh mục quà và quy trình đổi thưởng                                                         |
 | Hoạt động nhóm                     | Đã có tạo hoạt động, yêu cầu Word, chia nhóm, đại diện, nộp file/link, deadline và gia hạn         | Phản biện chéo, chấm điểm/điểm thưởng và điều chỉnh thành viên sau khi chốt nhóm             |
 | Trợ lý AI                          | Chưa triển khai                                                                                    | Kích hoạt sau nhiều lần sai, gợi ý từng bước, bài tương tự, nhà cung cấp và cấu hình sử dụng |
-| Vận hành chính thức                | Chưa triển khai                                                                                    | Hosting/HTTPS, lưu trữ, sao lưu/khôi phục, giám sát và kiểm thử tải                          |
+| Vận hành chính thức                | Railway HTTPS đã có; backup/đối chiếu ở các đợt đã ghi, chưa nghiệm thu vận hành quy mô trường      | Đồng bộ mã/deployment, quy trình khôi phục, giám sát và kiểm thử tải                          |
 
 ## Các bước còn lại theo thứ tự đề xuất
 
 Phạm vi cấp độ/ôn tập/kiểm tra được triển khai theo [kế hoạch](learning-implementation-plan.md), quy tắc tại [learning.md](learning.md).
 
-1. Nghiệm thu ôn/thi với một lớp thật, kiểm thử tải và quy trình xử lý sự cố/điểm.
+1. Khi người dùng yêu cầu sửa, tiếp tục từ gap offline/focus/nhật ký và QA mobile ở violations-audit.md; sau đó nghiệm thu ôn/thi lớp thật/tải/quy trình sự cố. Không mặc định audit đã sửa.
 2. Bổ sung phản biện chéo, chấm và điểm thưởng hoạt động nhóm; hiện chỉ có giao/chia/nộp/gia hạn.
 3. Đổi quà Green Points, nhập tài liệu tùy ý và AI là các phần riêng tiếp theo.
-4. Hosting/HTTPS, sao lưu/khôi phục và vận hành trường học khi người dùng yêu cầu.
+4. Railway HTTPS đã có; còn nghiệm thu backup/khôi phục, giám sát và vận hành trường học khi được yêu cầu.
 
 ## Quy tắc của vườn lớp và xếp hạng hiện tại
 
-- Vườn lớp hiển thị một cây cho mỗi cặp học sinh/chương có ít nhất 14.400 giây đã ghi nhận. Cây cá nhân vẫn tồn tại. Hiển thị từ dữ liệu tiến độ nên cập nhật/tải lại không tạo cây trùng.
+- Vườn chung mỗi thành viên một cây theo cấp MAX một chương, vinh danh cấp5 riêng; không cộng chương hoặc nhân bản người ở frame vinh danh. API trees vẫn giữ cặp học sinh/chương đạt4m phút (mặc định14.400giây) để tương thích/thống kê. API cũ thiếu members không đủ để hiển thị toàn lớp.
 - Chỉ tính dữ liệu chương thuộc lớp đang chọn và học sinh hiện là thành viên. Giáo viên chỉ xem lớp mình sở hữu; học sinh chỉ xem lớp mình tham gia.
 - Xếp hạng chăm vườn: thời gian học giảm dần, sau đó số cây cấp 5 giảm dần. Cùng cả hai chỉ số thì đồng hạng; tên chỉ để giữ thứ tự hiển thị ổn định. Dùng hạng 1, 1, 3 khi hai người dẫn đầu bằng nhau.
 - Bảng “Bác sĩ cây trồng”: số câu hiện đã khắc phục giảm dần, cùng số câu thì đồng hạng. Một câu chỉ tính một lần; nếu làm sai lại, câu đó không còn được tính đến khi khắc phục lại. Đây không phải tổng số lượt gửi đáp án sửa sai.
@@ -168,7 +197,7 @@ Phạm vi cấp độ/ôn tập/kiểm tra được triển khai theo [kế ho�
 
 Người dùng chọn tỷ lệ 70% tính **tất cả lượt luyện tập và sửa sai**, **lần rời tab thứ 4 tự nộp**. Các quy tắc còn lại thực hiện theo [learning.md](learning.md): sổ tay xét từng chương, vé cấp theo mốc cây/dùng lúc bắt đầu, thời gian thi không cộng cây, tối đa 20 phút server, cùng tập câu đảo thứ tự và công bố đáp án thi chính thức khi khung thi đóng.
 
-Điểm cây và Săn điểm có lịch sử/phê duyệt, chưa tự ghi sổ học bạ hoặc đổi quà. Điểm thưởng nhóm chưa tính trong báo cáo vì chưa có phân hệ chấm nhóm. File nhóm giữ giới hạn hiện tại; AI/hosting chưa cần khóa hoặc tài khoản ngoài.
+Điểm cây/Săn điểm có lịch sử/phê duyệt, chưa tự ghi sổ học bạ/đổi quà; thưởng nhóm chưa tính vì chưa chấm nhóm. AI chưa kết nối dịch vụ. Các gap thi/xử lý ngoại lệ theo violations-audit.md, không tự thêm chế độ phạt.
 
 ## Lưu trữ và kiểm thử
 
