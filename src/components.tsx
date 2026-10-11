@@ -17,7 +17,7 @@ export function Logo({ school = false }: { school?: boolean }) {
         )}
       </span>
       <span>
-        green<span className="logo-light">edu</span>
+        GreenEdu
         <small>
           {school ? "THPT NGUYỄN KHUYẾN" : "GIEO TRI THỨC, GẶT TƯƠNG LAI"}
         </small>

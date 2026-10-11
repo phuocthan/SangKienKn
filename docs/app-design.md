@@ -4,6 +4,8 @@ Tài liệu tra cứu duy nhất về hình thức giao diện, cập nhật 11/
 
 ## Định hướng và chữ
 
+Tên thương hiệu hiển thị **GreenEdu** (G và E viết hoa), nét đậm 800 đồng nhất cho cả tên, theo ảnh preview đã duyệt. Component `Logo` dùng chung ở đăng nhập/sidebar/các màn hình tài khoản; sửa chi tiết còn viết thường ngày 11/10/2026 sau phản hồi của người dùng.
+
 Giao diện tiếng Việt theo chủ đề khu vườn kiến thức, màu xanh rừng, nền sáng, thẻ dễ đọc và các thao tác rõ ràng. Font **Be Vietnam Pro** được phục vụ nội bộ, các trọng lượng 400/500/600/700/800. Không phụ thuộc tải font từ dịch vụ ngoài. Icon dùng Lucide; cây cấp độ dùng SVG theo dữ liệu thực tế.
 
 Thiết kế khu vườn ấm áp đã được người dùng duyệt qua ảnh và yêu cầu áp dụng ngày 11/10/2026. Các biến hiện tại trong `src/garden.css`: xanh `#315d3e`, xanh đậm `#153f2c`, chữ phụ `#596d60`, viền `#e2e6d8`, nền phụ `#eef3e4`, nền kem `#faf9f3`, chữ `#203f2c`, bán kính chuẩn 22 px. CSS chức năng/responsive tại `src/styles.css`; lớp diện mạo cũ tại `src/design.css`, cấp học sinh tại `src/student-level.css`; `src/garden.css` được nạp cuối trong `src/main.tsx` để áp dụng thiết kế đã duyệt cho app thật.

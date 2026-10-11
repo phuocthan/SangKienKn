@@ -1,5 +1,11 @@
 # Bàn giao session GreenEdu
 
+## Kiểm tra local và sửa chữ thương hiệu — 11/10/2026
+
+Người dùng phản hồi giao diện Railway chưa giống preview, chữ `greenedu` vẫn thường và yêu cầu chạy local. Git lúc tiếp nhận sạch ở `c32d84b`; kiểm tra mã xác nhận component `Logo` còn chữ thường, đây là chi tiết bị bỏ sót khi áp dụng thiết kế. Đã sửa component chung thành **GreenEdu**, đồng bộ nét đậm cho cả tên ở đăng nhập/sidebar/các vị trí dùng Logo. Không sửa dữ liệu hoặc tự push/deploy đợt này.
+
+`npm run local` xác nhận frontend có sẵn ở **http://localhost:5173/**, dùng API/database Railway. Đã mở tab local trong ứng dụng; HMR hiển thị chữ mới. Tab Railway đang ở màn hình đăng nhập, trong khi ảnh mockup được duyệt là trang chủ học sinh sau đăng nhập; không đăng nhập thử hoặc ghi dữ liệu production. Build/TypeScript mới đạt tại `.local/brand-review-build`; kiểm tra trình duyệt đăng nhập desktop 1312 px/mobile 390 px: chữ GreenEdu, nét 800, không tràn ngang và không log lỗi. Đã khôi phục kích thước trình duyệt; ảnh `.local/brand-local-desktop.png` và `.local/brand-local-mobile.png`. Bản sửa chữ hiện chỉ có local, Railway vẫn dùng commit đã push trước đó.
+
 ## Push GitHub và deploy từ main — 11/10/2026
 
 Theo yêu cầu “push lên git để deploy trên Railway”, đã commit và push **`a8336a1058f99807561360449e915c988b9b5bd2`** (`Apply approved warm garden UI and classroom safeguards`) lên **`origin/main`**, repository **https://github.com/phuocthan/SangKienKn**. Fetch trước push xác nhận main không bị lệch; kiểm tra hash toàn bộ file runtime khớp snapshot đã deploy/kiểm thử đợt trước. Commit gồm mã, tài liệu, kiểm thử và prototype riêng; không database/.env/secrets/file học sinh. TypeScript và `git diff --cached --check` chạy lại đạt; không chạy lại bộ backend/E2E vì mã runtime không đổi so với release đã kiểm thử.
