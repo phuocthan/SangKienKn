@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Push GitHub và deploy từ main — 11/10/2026
+
+Theo yêu cầu “push lên git để deploy trên Railway”, đã commit và push **`a8336a1058f99807561360449e915c988b9b5bd2`** (`Apply approved warm garden UI and classroom safeguards`) lên **`origin/main`**, repository **https://github.com/phuocthan/SangKienKn**. Fetch trước push xác nhận main không bị lệch; kiểm tra hash toàn bộ file runtime khớp snapshot đã deploy/kiểm thử đợt trước. Commit gồm mã, tài liệu, kiểm thử và prototype riêng; không database/.env/secrets/file học sinh. TypeScript và `git diff --cached --check` chạy lại đạt; không chạy lại bộ backend/E2E vì mã runtime không đổi so với release đã kiểm thử.
+
+Railway đã **tự nhận source GitHub / main / commit a8336a1**, deployment **`c07d72e5-00be-4bf3-bfbd-d9607efc449f` SUCCESS**. Không cần upload CLI hoặc đổi service/volume/cấu hình. Kiểm tra công khai mới: HTML/CSS/JS khớp build, ảnh trường/logo tải và giải mã được, đăng nhập 1440/390 px không lỗi JS/tràn ngang, health `ok:true/demo:false/quickLogin:false`, chưa đăng nhập 401; không ghi dữ liệu production. So sánh khóa bản ghi sau restart: 25 bảng/8 bản ghi được giữ nguyên, integrity ok, không vi phạm khóa ngoại. Kết quả `.local/railway-garden-verification.json` và ảnh `.local/ui-railway-garden/` được cập nhật.
+
+Tài liệu bàn giao/tiến độ được bổ sung bằng commit riêng sau commit mã, không đổi runtime. GitHub main đã có thiết kế mới, các ghi chú “chưa push GitHub/main còn mã cũ” bên dưới là lịch sử. Các lượt push sau vào main sẽ kích hoạt deploy Railway theo nguồn đã kết nối; mặc định phát triển vẫn frontend local 5173/API Railway.
+
 ## Deploy Railway thiết kế khu vườn — 11/10/2026
 
 Theo yêu cầu “deploy” sau khi áp dụng ảnh đã duyệt, đã triển khai **https://greenedu.up.railway.app/** bằng Railway CLI từ snapshot mã local, không commit/push GitHub. Đúng project `zooming-light` (`e45def16-099d-454b-a64c-27adf4172a97`), service `SangKienKn` (`d0abfac3-f946-4b3e-8623-a87636bcedc0`), environment `production` (`a515d737-f7a4-4b62-b49a-13a2408e9928`). Deployment **`f313de7d-3787-4dd4-88a7-ca0616abed83` SUCCESS**. CLI đã liên kết checkout với service này. Gói `.local/railway-release-20261011-170511` chứa mã/runtime và ảnh public, không chứa database/.env/log/prototype; manifest/hash tại `.local/railway-release-manifest.json`. Triển khai cả mã hiện tại đã kiểm thử, gồm thiết kế và thay đổi cấp học sinh/chặn lớp trùng có sẵn trên checkout.
