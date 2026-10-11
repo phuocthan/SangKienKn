@@ -53,6 +53,13 @@ export function ensureLearningSchema(db: DatabaseSync) {
       teacher_id TEXT NOT NULL REFERENCES users(id), fingerprint TEXT NOT NULL,
       exam_id TEXT NOT NULL REFERENCES exam_definitions(id)
     );
+    CREATE TABLE IF NOT EXISTS online_exam_sessions (
+      exam_id TEXT PRIMARY KEY REFERENCES exam_definitions(id),
+      duration_minutes INTEGER NOT NULL CHECK(duration_minutes BETWEEN 1 AND 180),
+      preparation_minutes INTEGER NOT NULL DEFAULT 3 CHECK(preparation_minutes BETWEEN 0 AND 60),
+      question_count INTEGER NOT NULL CHECK(question_count BETWEEN 1 AND 100),
+      selection TEXT, started_at INTEGER
+    );
     CREATE TABLE IF NOT EXISTS exam_tab_events (
       run_id TEXT NOT NULL REFERENCES exam_runs(id), event_id TEXT NOT NULL,
       created_at INTEGER NOT NULL, PRIMARY KEY(run_id,event_id)
@@ -73,4 +80,13 @@ export function ensureLearningSchema(db: DatabaseSync) {
         `ALTER TABLE exam_runs ADD COLUMN ${name} INTEGER NOT NULL DEFAULT 0`,
       );
   }
+  if (
+    !db
+      .prepare("PRAGMA table_info(online_exam_sessions)")
+      .all()
+      .some((column) => column.name === "preparation_minutes")
+  )
+    db.exec(
+      "ALTER TABLE online_exam_sessions ADD COLUMN preparation_minutes INTEGER NOT NULL DEFAULT 3 CHECK(preparation_minutes BETWEEN 0 AND 60)",
+    );
 }

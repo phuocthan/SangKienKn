@@ -59,6 +59,48 @@ test("chapter exam permission migration preserves old settings and progress, def
   }
 });
 
+test("online session migration and reopen preserve the announced schedule, selection and frozen paper", (t) => {
+  const dir = mkdtempSync(join(tmpdir(), "greenedu-online-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, "online.sqlite");
+  let db = openDatabase(path);
+  try {
+    seedDemo(db);
+    db.prepare(
+      "INSERT INTO exam_definitions VALUES('online','class-demo','Online','[]',120000,180000,4,1,1)",
+    ).run();
+    db.prepare(
+      "INSERT INTO online_exam_sessions(exam_id,duration_minutes,question_count,selection,started_at) VALUES('online',1,1,'{}',60000)",
+    ).run();
+    db.exec("ALTER TABLE online_exam_sessions DROP COLUMN preparation_minutes");
+    const before = db.prepare("SELECT * FROM online_exam_sessions").get()!;
+    ensureLearningSchema(db);
+    ensureLearningSchema(db);
+    assert.deepEqual(
+      { ...db.prepare("SELECT * FROM online_exam_sessions").get()! },
+      { ...before, preparation_minutes: 3 },
+    );
+    db.close();
+    db = openDatabase(path);
+    assert.equal(
+      db.prepare("SELECT closes_at FROM exam_definitions").get()!.closes_at,
+      180000,
+    );
+    assert.equal(
+      db.prepare("SELECT started_at FROM online_exam_sessions").get()!
+        .started_at,
+      60000,
+    );
+    assert.equal(
+      db.prepare("SELECT COUNT(*) AS n FROM online_exam_sessions").get()!.n,
+      1,
+    );
+    assert.deepEqual(db.prepare("PRAGMA foreign_key_check").all(), []);
+  } finally {
+    db.close();
+  }
+});
+
 test("old exam schema gains revision/released while keeping existing runs", () => {
   const db = openDatabase(":memory:");
   try {

@@ -5,6 +5,21 @@ test("fenced garden includes everyone with moving icons and separate level-5 hon
 }, info) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  const teacherLogin = await page.request.post("/api/auth/login", {
+    data: { email: "giaovien@greenedu.nk", password: "GreenEdu123!" },
+  });
+  expect(teacherLogin.ok()).toBe(true);
+  const teacherProfile = await (await page.request.get("/api/auth/me")).json();
+  expect(
+    (
+      await page.request.post("/api/auth/avatar", {
+        data: { avatarId: "teacher-1" },
+      })
+    ).ok(),
+  ).toBe(true);
+  expect((await page.request.post("/api/auth/logout", { data: {} })).ok()).toBe(
+    true,
+  );
   await page.goto("/");
   await page
     .getByLabel("Email", { exact: true })
@@ -19,6 +34,39 @@ test("fenced garden includes everyone with moving icons and separate level-5 hon
     .click();
   const garden = page.locator(".student-garden");
   await expect(garden).toBeVisible();
+  const classSign = garden.getByRole("group", { name: "Lớp học", exact: true });
+  await expect(classSign).toContainText("Lớp vườn");
+  await expect(classSign).toContainText("Vật lý");
+  await expect(garden).not.toContainText(teacherProfile.name);
+  await expect(classSign.locator(".garden-teacher-avatar")).toHaveCount(0);
+  await expect(
+    garden
+      .getByRole("img", { name: "Avatar giáo viên" })
+      .locator(".garden-teacher-avatar"),
+  ).toHaveCSS("background-image", /avatars-teachers/);
+  const gatePosition = await classSign.evaluate((sign) => {
+    const box = sign.getBoundingClientRect();
+    const enclosure = sign.closest(".garden-enclosure")!;
+    const world = enclosure
+      .querySelector(".garden-world")!
+      .getBoundingClientRect();
+    const fence = enclosure
+      .querySelector(".garden-fence-bottom")!
+      .getBoundingClientRect();
+    return {
+      belowStudents: box.top >= world.bottom,
+      onBottomFence: box.bottom > fence.top && box.top < fence.bottom,
+      centered: Math.abs(
+        (box.left + box.right) / 2 - (fence.left + fence.right) / 2,
+      ),
+      width: box.width,
+    };
+  });
+  expect(gatePosition.belowStudents).toBe(true);
+  expect(gatePosition.onBottomFence).toBe(true);
+  expect(gatePosition.centered).toBeLessThan(2);
+  expect(gatePosition.width).toBeLessThanOrEqual(120);
+  await expect(garden).not.toContainText("Cấp của từng chương vẫn riêng biệt");
   await expect(garden.locator(".garden-student")).toHaveCount(5);
   expect(
     await garden
@@ -98,7 +146,8 @@ test("fenced garden includes everyone with moving icons and separate level-5 hon
   await page.screenshot({
     path: `.local/fenced-garden-${info.project.name}.png`,
     fullPage: true,
-    style: "@media(max-width:700px) { .sidebar { visibility: hidden !important; } }",
+    style:
+      "@media(max-width:700px) { .sidebar { visibility: hidden !important; } }",
   });
   await page.getByRole("button", { name: "Cập nhật", exact: true }).click();
   await expect(garden.locator(".garden-student")).toHaveCount(5);
@@ -167,6 +216,23 @@ test("large class keeps all 47 students inside the fenced scrolling garden and h
     .click();
   await expect(page.locator(".garden-student")).toHaveCount(47);
   await expect(page.locator(".garden-honoree")).toHaveCount(9);
+  const compact = await page.locator(".student-garden").evaluate((garden) => {
+    const world = garden.querySelector(".garden-world")!;
+    const icon = garden.querySelector(".garden-plant > svg")!;
+    const cells = garden.querySelectorAll(".garden-wander-space");
+    const a = cells[0].getBoundingClientRect(),
+      b = cells[1].getBoundingClientRect();
+    return {
+      height: world.getBoundingClientRect().height,
+      icon: icon.getBoundingClientRect().width,
+      spacing: Math.abs(a.x - b.x),
+    };
+  });
+  expect(compact.height).toBeLessThanOrEqual(
+    info.project.name === "mobile" ? 300 : 360,
+  );
+  expect(compact.icon).toBeLessThan(60);
+  expect(compact.spacing).toBeLessThan(140);
   const geometry = await page.locator(".garden-floor").evaluate((floor) => {
     const area = floor.getBoundingClientRect();
     const nodes = [...floor.querySelectorAll<HTMLElement>(".garden-student")];
@@ -199,12 +265,11 @@ test("large class keeps all 47 students inside the fenced scrolling garden and h
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page
-    .locator(".student-garden")
-    .screenshot({
-      path: `.local/fenced-garden-crowd-${info.project.name}.png`,
-    style: "@media(max-width:700px) { .sidebar { visibility: hidden !important; } }",
-    });
+  await page.locator(".student-garden").screenshot({
+    path: `.local/fenced-garden-crowd-${info.project.name}.png`,
+    style:
+      "@media(max-width:700px) { .sidebar { visibility: hidden !important; } }",
+  });
   await page.locator(".garden-world").evaluate((node) => {
     node.scrollTop = node.scrollHeight;
   });

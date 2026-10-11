@@ -35,6 +35,9 @@ export type GroupActivitySummary = {
   hasSubmitted: boolean;
 };
 export type GroupActivity = {
+  discussionOpen?: boolean;
+  canDiscuss?: boolean;
+  myGroupId?: string | null;
   id: string;
   title: string;
   classroomId: string;
@@ -55,4 +58,16 @@ export type GroupActivity = {
     reason: string;
   }[];
   serverNow: number;
+};
+export type GroupDiscussionPost = {
+  id: string;
+  parentId: string | null;
+  authorId: string;
+  authorName: string;
+  authorRole: "teacher" | "student";
+  authorGroupNumber: number | null;
+  kind: "question" | "comment" | "reply";
+  body: string;
+  createdAt: number;
+  submissionVersion: number;
 };

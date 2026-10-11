@@ -1,5 +1,37 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Slide giới thiệu GreenEdu theo mẫu 2026 — 12/10/2026
+
+Đã tạo PowerPoint9slide, dùng trực tiếp nền/nhận diện/kiểu chữ của mẫu người dùng, nội dung GreenEdu và tác giả Nguyễn Thị Thanh Phương. Có ảnh giao diện kiểm thử chú thích rõ, logo trường, QR/link Railway và ghi chú nguồn; chữ chỉnh sửa được. Không tạo số liệu tác động giáo dục khi chưa có đo trước/sau; gia sư AI vẫn là kế hoạch. Đã xem9slide của bản cuối mở lại bằng Artifact Tool, kiểm tra package/layout/font/bullets và giải mã QR đạt; chưa render bằng PowerPoint trực tiếp. Xem [bộ slide và nguồn](../artifacts/presentations/README.md). Công việc tài liệu không thay runtime/dữ liệu hoặc deploy.
+
+## Buổi kiểm tra online có thời gian chuẩn bị và thông báo lớp — 12/10/2026
+
+Đã thêm **Tạo kiểm tra online**: ngân hàng hoặc Word/CSV, nhiều chương/bài, X phút chuẩn bị và Y phút làm bài. Giáo viên bấm bắt đầu chốt đề chung, thông báo trong ứng dụng và đặt giờ mở sau X phút, hạn chung sau thêm Y phút. Học sinh thấy đếm chờ ở Trang chủ/các trang, vào khi tới giờ; mỗi lượt có thứ tự câu ngẫu nhiên giữ qua reload, vào muộn không cộng thêm giờ. Một buổi chỉ phát yêu cầu một lần; đóng/thu bài và quy tắc tự nộp như phòng thi hiện có. Không đổi Săn điểm/thi theo lịch.
+
+Migration bổ sung, scope theo membership, không lộ đề trong thông báo; thiếu ngân hàng chặn/rollback, capability cũ khóa UI mới. **116/116 backend,14/14 E2E hồi quy ôn-thi và6/6 E2E online desktop/mobile đạt**; TypeScript/build riêng và ảnh đã kiểm tra. **Chưa deploy Railway**, local5173 cần backend mới để dùng thật. Nghiệp vụ [online-exams.md](online-exams.md), thiết kế [app-design.md](app-design.md), bằng chứng [session-handoff.md](session-handoff.md).
+
+Poster học sinh bản mới nhất: `artifacts/posters/greenedu-hoc-sinh-qr-lon.png`/PDF A3 cùng tên, tăng QR khoảng36%, vẫn có logo dưới tên trường. Render/giải mã QR đạt; [các bản poster](../artifacts/posters/README.md).
+
+Poster học sinh bản hiện hành có logo trường dưới tên trường, QR ở đầu: `artifacts/posters/greenedu-hoc-sinh-qr-logo-truong.png` và PDF A3 cùng tên. Đã xem render/giải mã QR; logo lấy từ asset web sẵn có. [Các bản và nguồn](../artifacts/posters/README.md).
+
+Poster học sinh cập nhật 12/10: khối QR/link lên trên cùng theo yêu cầu. Bản mới nhất `artifacts/posters/greenedu-hoc-sinh-qr-tren-cung.png` và PDF A3 cùng tên; xem render/kiểm tra QR đạt. [Các bản poster](../artifacts/posters/README.md).
+
+## Poster giới thiệu GreenEdu cho học sinh — 12/10/2026
+
+Đã tạo ảnh poster dọc 300dpi, PDF A3 một trang và QR riêng tại [artifacts/posters](../artifacts/posters/README.md). Hướng dẫn đăng nhập/đổi mật khẩu/avatar, sáu mục học tập và Sổ tay sửa sai, chữ ngắn/minh họa 3D. Đã xem trang thật/render và giải mã QR trên ảnh cuối đúng Railway. Chỉ tạo tài liệu, không ghi dữ liệu hoặc thay ứng dụng; prompt/nguồn/cách in trong README artifact.
+
+## Thu gọn vườn, bảng tên và avatar giáo viên — 12/10/2026
+
+Vườn giảm icon56/46px, ô130px, sát nhau hơn/mobile3cột, cuộn tối đa360/300px; vinh danh riêng cũng gọn/cuộn. **Bảng tên nhỏ120px giữa cổng rào phía dưới chỉ ghi lớp/môn, avatar giáo viên38px để riêng bên trái, không ghi tên cô; bỏ dòng ghi chú dưới vườn.** Giữ toàn bộ thành viên/cấp/dữ liệu. API garden bổ sung teacher metadata; backend cũ dùng chữ viết tắt, giáo viên sở hữu lớp dùng avatar tài khoản đang đăng nhập. Avatar thật ở phía học sinh cần backend Railway mới. **2ca API,6/6 E2E desktop/mobile, TypeScript/build riêng và ảnh lớp47người đạt**; lượt chỉnh cổng/avatar cuối chạy lại TypeScript/build và6/6 E2E. Local5173 phục vụ source mới/HMR, chưa push/deploy/ghi Railway. Chi tiết ở [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).
+
+## Lối tắt sổ tay và thẻ cấp gọn — 12/10/2026
+
+Ôn tập & kiểm tra: nút **Mở sổ tay** dưới lý do còn câu cần sửa mở đúng chương; sổ tay thêm bộ lọc Chương cần sửa/Tất cả chương, sidebar/trang chủ vẫn mở tất cả. **Bỏ thời gian dưới Cấp độ hiện tại**, giữ icon/tên cấp. Chỉ frontend, dùng API sổ tay sẵn có; không thay dữ liệu/cách tính giờ hoặc điều kiện Săn điểm. TypeScript/build riêng và **2/2 E2E desktop/mobile** đạt, frontend5173/HMR đang chạy. Chi tiết [app-design.md](app-design.md), [session-handoff.md](session-handoff.md).
+
+## Database Railway chỉ giữ lớp 11/2 Vật lý — 12/10/2026
+
+Theo yêu cầu người dùng đã xóa hai lớp10A1/Vật Lý và dữ liệu nhóm/membership của chúng, sau khi backup đầy đủ. Railway chỉ còn **Lớp 11/2 ♥ · Vật Lý**, đủ **47 học sinh, 4 chương, 105 bản ghi câu hỏi**; giữ toàn bộ51 tài khoản và dữ liệu lớp này. Hash bảo vệ33 bảng, khóa ngoại/integrity và kiểm tra bằng kết nối mới đạt; backup/audit chi tiết ở session-handoff.md. Không deploy/restart/reset database local; frontend local tải lại để nhận danh sách mới.
+
 ## Quản lý ngân hàng: chọn nhiều câu/xóa cả bài — 11/10/2026
 
 Đã thêm checkbox/chọn tất cả/bỏ chọn và xác nhận xóa nhiều câu; chọn bài trong bộ lọc để xóa cả bài, kể cả rỗng. Xóa dạng ngừng sử dụng/archive, giữ lịch sử/sổ tay/đề ôn-thi; chỉ giáo viên sở hữu lớp, kiểm tra toàn bộ danh sách trong transaction, gửi lại không xóa thêm. API mới có capability, frontend cũ-server cũ không ghi nhầm. Chi tiết [question-bank.md](question-bank.md), thiết kế [app-design.md](app-design.md).
@@ -18,6 +50,7 @@ Kiểm tra mới **112/112 backend, 10/10 E2E desktop/mobile**, TypeScript/build
 | Cấp học sinh | Riêng lớp→môn→chương, Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái. m phút/cấp do chủ lớp đặt, mặc định60; cấu hình mới còn chờ backend Railway | [student-levels.md](student-levels.md) |
 | Vườn và vinh danh | Vườn có rào chứa toàn lớp, avatar/hai từ cuối/cấp MAX một chương; frame cấp5 riêng. Frontend đã có, danh sách thật cần backend members mới | [app-design.md](app-design.md), [student-levels.md](student-levels.md) |
 | Ôn/kiểm tra | Đúng mới mở lời giải; Săn điểm cần cấp3/70% mọi lượt/sổ tay sạch/vé/quyền giáo viên. Thi chính thức mở từ bank hoặc Word/CSV, một/nhiều chương/bài, không cần điều kiện tự học. Các công cụ backend mới chưa deploy | [learning.md](learning.md) |
+| Kiểm tra online | Giáo viên phát yêu cầu, chờ X phút rồi làm Y phút; thông báo trong app, đề chung/đảo câu riêng/hạn chung. Đã có mã và test, chưa deploy Railway | [online-exams.md](online-exams.md) |
 | Vi phạm | Audit đã có, không sửa runtime. Còn lỗi nhận đáp án sau ngưỡng offline, thiếu focus/nhật ký/AI; idle mobile cần QA thật. Mặc định lần4 tự nộp, không tự thêm kỷ luật tài khoản | [violations-audit.md](violations-audit.md) |
 | Ngân hàng và PPCT | Railway đã nhập4chương/26bài+1mục bổ sung Vật lý11, chưa nhập câu thật. Thêm/xóa bài dạng archive và topic/trộn theo chủ đề đã có mã, còn chờ backend; Word50câu đã tạo, chưa nhập production | [question-bank.md](question-bank.md), [physics-11-curriculum-2026-2027.md](physics-11-curriculum-2026-2027.md) |
 | Nhóm và avatar | Nhóm giao/chia/đại diện/nộp/gia hạn/lịch sử đã có; chưa phản biện/chấm/thưởng nhóm. Avatar40ID/quyền vai trò/upload3MB; popup mới ở frontend local | [group-activities.md](group-activities.md), [user-avatars.md](user-avatars.md) |

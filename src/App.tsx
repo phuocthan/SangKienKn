@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   Leaf,
   LogOut,
+  MessageSquare,
   Plus,
   Search,
   Settings,
@@ -38,8 +39,10 @@ import {
 import { Practice } from "./Practice";
 import { Lessons } from "./Lessons";
 import { Learning } from "./Learning";
+import { ExamNotices } from "./ExamNotices";
 import { ClassCommunity } from "./ClassCommunity";
 import { GroupActivities } from "./GroupActivities";
+import { Feedback } from "./Feedback";
 import { AdminWorkspace } from "./Accounts";
 import { Avatar, AvatarPicker } from "./Avatars";
 import {
@@ -66,6 +69,7 @@ type Page =
   | "progress"
   | "garden"
   | "leaderboard"
+  | "feedback"
   | "settings";
 type Study = {
   chapter: Chapter;
@@ -94,6 +98,8 @@ export default function App() {
     location.hash.includes("learning=") ? "learning" : "home",
   );
   const [study, setStudy] = useState<Study | null>(null);
+  const [entryRunId, setEntryRunId] = useState("");
+  const [entryClassId, setEntryClassId] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [editor, setEditor] = useState<Editor>(null);
@@ -102,6 +108,7 @@ export default function App() {
   >(null);
   const [questionChapter, setQuestionChapter] = useState("");
   const [questionLesson, setQuestionLesson] = useState("");
+  const [correctionChapterId, setCorrectionChapterId] = useState("");
   useEffect(() => setQuestionLesson(""), [questionChapter, classId]);
   const [revision, setRevision] = useState(0);
   const [loadingClasses, setLoadingClasses] = useState(false);
@@ -173,10 +180,12 @@ export default function App() {
   }, [reload]);
   const closeEditor = useCallback(() => setEditor(null), []);
   const closeAccountDialog = useCallback(() => setAccountDialog(null), []);
-  function navigate(next: Page) {
+  function navigate(next: Page, chapterId = "") {
+    setEntryRunId("");
     setPage(next);
     setStudy(null);
     setError("");
+    setCorrectionChapterId(next === "corrections" ? chapterId : "");
   }
   function login(u: User) {
     setUser(u);
@@ -322,6 +331,7 @@ export default function App() {
     settings: "Tài khoản",
     garden: "Khu vườn của lớp",
     leaderboard: "Xếp hạng chăm chỉ",
+    feedback: isTeacher ? "Quản lý góp ý" : "Góp ý",
   };
   const totalSeconds =
     current?.chapters.reduce((n, c) => n + c.seconds, 0) ?? 0;
@@ -364,6 +374,15 @@ export default function App() {
                 : "Không cần đi thật nhanh. Chỉ cần tiếp tục lớn lên."}
             </p>
           </div>
+          <button
+            className={`nav-item ${page === "feedback" ? "active" : ""}`}
+            aria-current={page === "feedback" ? "page" : undefined}
+            aria-label={isTeacher ? "Quản lý góp ý" : "Góp ý"}
+            onClick={() => navigate("feedback")}
+          >
+            <MessageSquare size={19} />
+            {isTeacher ? "Quản lý góp ý" : "Góp ý"}
+          </button>
           <button
             className={`nav-item ${page === "settings" ? "active" : ""}`}
             aria-current={page === "settings" ? "page" : undefined}
@@ -424,6 +443,34 @@ export default function App() {
           </div>
         </header>
         <main className="main-content">
+          {!isTeacher && (
+            <ExamNotices
+              key={user.id}
+              inLearning={page === "learning" && !study}
+              onJoin={async (classroomId, runId) => {
+                if (
+                  !classes.some((classroom) => classroom.id === classroomId)
+                ) {
+                  const updated = await api<Classroom[]>("/classrooms");
+                  if (
+                    !updated.some((classroom) => classroom.id === classroomId)
+                  )
+                    throw new Error(
+                      "Bạn không còn trong lớp của buổi kiểm tra này.",
+                    );
+                  setClasses(updated);
+                }
+                location.hash = new URLSearchParams({
+                  learning: classroomId,
+                  exam: runId,
+                }).toString();
+                setClassId(classroomId);
+                navigate("learning");
+                setEntryRunId(runId);
+                setEntryClassId(classroomId);
+              }}
+            />
+          )}
           {notice && (
             <div className="toast" role="status">
               <CheckCircle2 size={18} />
@@ -544,6 +591,9 @@ export default function App() {
             </>
           ) : (
             <>
+              {page === "feedback" && (
+                <Feedback key={current.id} classroom={current} user={user} />
+              )}
               {page === "home" &&
                 (isTeacher ? (
                   <TeacherHome
@@ -626,7 +676,14 @@ export default function App() {
                   key={current.id}
                   classroom={current}
                   user={user}
+                  entryRunId={
+                    entryClassId === current.id ? entryRunId : undefined
+                  }
+                  onExamExit={() => setEntryRunId("")}
                   onSettingsChanged={refresh}
+                  onCorrections={(chapterId) =>
+                    navigate("corrections", chapterId)
+                  }
                   onReview={(reviewId, chapter) =>
                     setStudy({ chapter, mode: "practice", reviewId })
                   }
@@ -660,6 +717,8 @@ export default function App() {
                   classes={classes}
                   revision={revision}
                   onStudy={setStudy}
+                  chapterId={correctionChapterId}
+                  onChapterChange={setCorrectionChapterId}
                 />
               )}
               {page === "classes" && (
@@ -882,6 +941,7 @@ export default function App() {
                   page={page}
                   revision={revision}
                   userId={user.id}
+                  teacherAvatarId={isTeacher ? user.avatarId : undefined}
                 />
               )}
               {page === "progress" &&
@@ -1518,10 +1578,14 @@ function Corrections({
   classes,
   revision,
   onStudy,
+  chapterId,
+  onChapterChange,
 }: {
   classes: Classroom[];
   revision: number;
   onStudy: (s: Study) => void;
+  chapterId: string;
+  onChapterChange: (id: string) => void;
 }) {
   const [rows, setRows] = useState<
       (Question & { chapterTitle: string; className: string })[]
@@ -1547,6 +1611,9 @@ function Corrections({
       alive = false;
     };
   }, [revision, retry]);
+  const filteredRows = chapterId
+    ? rows.filter((q) => q.chapterId === chapterId)
+    : rows;
   return (
     <>
       <PageHeading
@@ -1554,6 +1621,29 @@ function Corrections({
         title="Sổ tay sửa sai"
         text="Một câu chưa đúng không phải điểm kết thúc. Đó là nơi để bắt đầu hiểu sâu hơn."
       />
+      <div className="correction-filter">
+        <label>
+          Chương cần sửa
+          <select
+            value={chapterId}
+            onChange={(e) => onChapterChange(e.target.value)}
+          >
+            <option value="">Tất cả chương</option>
+            {classes.map((classroom) => (
+              <optgroup
+                key={classroom.id}
+                label={`${classroom.name} · ${classroom.subject}`}
+              >
+                {classroom.chapters.map((chapter) => (
+                  <option key={chapter.id} value={chapter.id}>
+                    {chapter.title}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </label>
+      </div>
       {error ? (
         <div className="error-banner" role="alert">
           {error}
@@ -1561,9 +1651,13 @@ function Corrections({
         </div>
       ) : loading ? (
         <div className="loading-panel">Đang mở sổ tay…</div>
-      ) : !rows.length ? (
+      ) : !filteredRows.length ? (
         <Empty
-          title="Sổ tay đang sạch những lỗi sai"
+          title={
+            chapterId
+              ? "Chương này đã sạch lỗi sai"
+              : "Sổ tay đang sạch những lỗi sai"
+          }
           text="Khi bạn trả lời chưa đúng, câu hỏi sẽ tự động được lưu ở đây. Làm đúng trong sổ tay để đánh dấu đã khắc phục."
         />
       ) : (
@@ -1571,12 +1665,13 @@ function Corrections({
           <div className="info-panel">
             <BookOpen size={21} />
             <p>
-              Bạn có <strong>{rows.length} câu</strong> cần làm lại. Các câu sẽ
-              được đánh dấu đã khắc phục khi bạn trả lời đúng trong sổ tay.
+              Bạn có <strong>{filteredRows.length} câu</strong> cần làm lại. Các
+              câu sẽ được đánh dấu đã khắc phục khi bạn trả lời đúng trong sổ
+              tay.
             </p>
           </div>
           <div className="correction-list">
-            {rows.map((q, i) => (
+            {filteredRows.map((q, i) => (
               <div className="card correction-card" key={q.id}>
                 <span className="chapter-index">
                   {String(i + 1).padStart(2, "0")}

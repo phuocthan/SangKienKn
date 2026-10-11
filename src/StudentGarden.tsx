@@ -19,12 +19,16 @@ export function StudentGarden({
   userId,
   subject,
   classroomName,
+  teacherName,
+  teacherAvatarId,
 }: {
   members?: ClassGardenMember[];
   trees: ClassTree[];
   userId: string;
   subject: string;
   classroomName: string;
+  teacherName: string;
+  teacherAvatarId?: string | null;
 }) {
   const [animated, setAnimated] = useState(true);
   const students = [...(members ?? [])].sort(byLevel);
@@ -165,7 +169,7 @@ export function StudentGarden({
                             "--wander-direction":
                               index % 2 ? "reverse" : "normal",
                             "--plant-delay": `${(index % 7) * -0.6}s`,
-                            "--start-y": `${((index % 3) - 1) * 9}px`,
+                            "--start-y": `${((index % 3) - 1) * 4}px`,
                           } as CSSProperties
                         }
                       >
@@ -215,14 +219,30 @@ export function StudentGarden({
           />
           <div className="garden-fence garden-fence-left" aria-hidden="true" />
           <div className="garden-fence garden-fence-right" aria-hidden="true" />
-          <span className="garden-gate" aria-hidden="true">
-            <Sprout size={18} />
-          </span>
+          <div className="garden-entrance">
+            <span
+              className="garden-teacher-portrait"
+              role="img"
+              aria-label="Avatar giáo viên"
+            >
+              <Avatar
+                name={teacherName}
+                avatarId={teacherAvatarId}
+                className="garden-teacher-avatar"
+              />
+            </span>
+            <div
+              className="garden-gate garden-class-sign"
+              role="group"
+              aria-label="Lớp học"
+            >
+              <div className="garden-class-identity">
+                <strong>{classroomName}</strong>
+                <span>{subject}</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <p className="subtle-note">
-          Cấp của từng chương vẫn riêng biệt; khu vườn không cộng dồn thời gian
-          giữa các chương. Cuộn trong vườn để xem thêm khi lớp đông.
-        </p>
       </section>
     </>
   );

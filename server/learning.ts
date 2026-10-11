@@ -434,6 +434,13 @@ export function registerLearningRoutes(
       id: fresh.id,
       title: fresh.title,
       kind: fresh.kind,
+      delivery:
+        definition &&
+        db
+          .prepare("SELECT 1 FROM online_exam_sessions WHERE exam_id=?")
+          .get(definition.id)
+          ? "online"
+          : "scheduled",
       status: fresh.status,
       startedAt: fresh.started_at,
       deadlineAt: fresh.deadline_at,
@@ -461,6 +468,43 @@ export function registerLearningRoutes(
         : {}),
     };
   }
+  app.get("/api/learning/exam-notices", (req: AppRequest, res) => {
+    student(req);
+    sweepLearningExams(db, now());
+    const rows = db
+      .prepare(
+        `SELECT e.*,c.name AS classroomName,c.subject,u.name AS teacherName,
+      o.duration_minutes,o.preparation_minutes,r.id AS runId,r.status AS runStatus
+      FROM online_exam_sessions o JOIN exam_definitions e ON e.id=o.exam_id
+      JOIN classrooms c ON c.id=e.classroom_id JOIN users u ON u.id=c.teacher_id
+      JOIN memberships m ON m.classroom_id=c.id AND m.student_id=?
+      LEFT JOIN exam_runs r ON r.exam_id=e.id AND r.student_id=m.student_id
+      WHERE o.started_at IS NOT NULL AND e.enabled=1 AND e.closes_at>?
+        AND (r.status IS NULL OR r.status='active') ORDER BY e.starts_at DESC`,
+      )
+      .all(req.user!.id, now());
+    res.json({
+      serverNow: now(),
+      notices: rows
+        .filter(
+          (e) => !blockedExamChapters(json<Snapshot[]>(e.questions)).length,
+        )
+        .map((e) => ({
+          id: e.id,
+          classroomId: e.classroom_id,
+          classroomName: e.classroomName,
+          subject: e.subject,
+          teacherName: e.teacherName,
+          title: e.title,
+          startsAt: e.starts_at,
+          closesAt: e.closes_at,
+          durationMinutes: e.duration_minutes,
+          preparationMinutes: e.preparation_minutes,
+          questionCount: json<Snapshot[]>(e.questions).length,
+          runId: e.runId ?? null,
+        })),
+    });
+  });
   app.get("/api/classrooms/:id/learning", (req: AppRequest, res) => {
     const c = classroom(req, String(req.params.id));
     sweepLearningExams(db, now());
@@ -477,6 +521,7 @@ export function registerLearningRoutes(
       levelMinutes: classroomLevelMinutes(db, String(c.id)),
       canConfigureLevels: req.user!.role === "teacher",
       examCreation: true,
+      onlineExams: true,
       matrix: matrix(c.id),
       blueprints: db
         .prepare(
@@ -495,16 +540,26 @@ export function registerLearningRoutes(
           "SELECT * FROM exam_definitions WHERE classroom_id=? ORDER BY starts_at DESC",
         )
         .all(c.id)
-        .map((e) => ({
-          id: e.id,
-          title: e.title,
-          startsAt: e.starts_at,
-          closesAt: e.closes_at,
-          tabLimit: e.tab_limit,
-          enabled: !!e.enabled,
-          questionCount: json<Snapshot[]>(e.questions).length,
-          blockedChapters: blockedExamChapters(json<Snapshot[]>(e.questions)),
-        })),
+        .map((e) => {
+          const online = db
+            .prepare("SELECT * FROM online_exam_sessions WHERE exam_id=?")
+            .get(e.id);
+          return {
+            id: e.id,
+            title: e.title,
+            startsAt: e.starts_at,
+            closesAt: e.closes_at,
+            tabLimit: e.tab_limit,
+            enabled: !!e.enabled,
+            questionCount:
+              online?.question_count ?? json<Snapshot[]>(e.questions).length,
+            delivery: online ? "online" : "scheduled",
+            durationMinutes: online?.duration_minutes ?? 20,
+            preparationMinutes: online?.preparation_minutes ?? 0,
+            startedAt: online?.started_at ?? null,
+            blockedChapters: blockedExamChapters(json<Snapshot[]>(e.questions)),
+          };
+        }),
       runs: db
         .prepare(
           `SELECT r.*,u.name AS studentName,(SELECT COUNT(*) FROM exam_tab_events t WHERE t.run_id=r.id) AS warnings
@@ -770,6 +825,16 @@ export function registerLearningRoutes(
       typeof req.body.manualOpen !== "boolean"
     )
       fail(400, "Cách mở không hợp lệ.");
+    const delivery = req.body?.delivery ?? "scheduled";
+    if (!["scheduled", "online"].includes(delivery))
+      fail(400, "Loại kiểm tra không hợp lệ.");
+    const online = delivery === "online";
+    const durationMinutes = online
+      ? number(req.body?.durationMinutes ?? 20, "Thời gian làm bài", 1, 180)
+      : 20;
+    const preparationMinutes = online
+      ? number(req.body?.preparationMinutes ?? 3, "Thời gian chuẩn bị", 0, 60)
+      : 0;
     const title = text(req.body?.title, "Tên kiểm tra", 120);
     const tabLimit = number(
       req.body?.tabLimit ?? 4,
@@ -777,8 +842,12 @@ export function registerLearningRoutes(
       1,
       10,
     );
-    const starts = number(req.body?.startsAt, "Giờ mở", 1, 8640000000000000),
-      closes = number(req.body?.closesAt, "Giờ đóng", 1, 8640000000000000);
+    const starts = online
+        ? now()
+        : number(req.body?.startsAt, "Giờ mở", 1, 8640000000000000),
+      closes = online
+        ? starts + durationMinutes * 60000
+        : number(req.body?.closesAt, "Giờ đóng", 1, 8640000000000000);
     const requestId =
       req.body?.requestId === undefined
         ? null
@@ -888,13 +957,30 @@ export function registerLearningRoutes(
         id,
         c.id,
         title,
-        JSON.stringify(questions),
+        JSON.stringify(online && source === "bank" ? [] : questions),
         starts,
         closes,
         tabLimit,
-        req.body?.manualOpen ? 0 : 1,
+        online || req.body?.manualOpen ? 0 : 1,
         now(),
       );
+      if (online)
+        db.prepare(
+          "INSERT INTO online_exam_sessions(exam_id,duration_minutes,preparation_minutes,question_count,selection) VALUES(?,?,?,?,?)",
+        ).run(
+          id,
+          durationMinutes,
+          preparationMinutes,
+          questions.length,
+          source === "bank"
+            ? JSON.stringify({
+                chapterIds: ids,
+                questionCount: questions.length,
+                weights: req.body?.weights ?? {},
+                lessonKeys: req.body?.lessonKeys,
+              })
+            : null,
+        );
       if (requestId)
         db.prepare("INSERT INTO exam_creation_requests VALUES(?,?,?,?,?)").run(
           requestId,
@@ -918,10 +1004,52 @@ export function registerLearningRoutes(
     if (!e) fail(404, "Không tìm thấy kiểm tra.");
     classroom(req, String(e.classroom_id));
     const timestamp = now();
-    if (Number(e.closes_at) <= timestamp)
+    const online = db
+      .prepare("SELECT * FROM online_exam_sessions WHERE exam_id=?")
+      .get(e.id);
+    if (online?.started_at != null)
+      return res.json({
+        ok: true,
+        startedAt: online.started_at,
+        closesAt: e.closes_at,
+      });
+    if (!online && Number(e.closes_at) <= timestamp)
       fail(409, "Bài đã hết giờ. Tạo lịch kiểm tra mới để mở.");
     db.exec("BEGIN IMMEDIATE");
     try {
+      if (online) {
+        const selection = online.selection
+          ? json<{
+              chapterIds: string[];
+              questionCount: number;
+              weights: Record<string, number>;
+              lessonKeys?: string[];
+            }>(online.selection)
+          : null;
+        const questions = selection
+          ? sample(
+              selection.chapterIds,
+              selection.questionCount,
+              selection.weights,
+              selection.lessonKeys,
+            )
+          : json<Snapshot[]>(e.questions);
+        db.prepare(
+          "UPDATE exam_definitions SET questions=?,starts_at=?,closes_at=?,enabled=1 WHERE id=?",
+        ).run(
+          JSON.stringify(questions),
+          timestamp + Number(online.preparation_minutes) * 60000,
+          timestamp +
+            (Number(online.preparation_minutes) +
+              Number(online.duration_minutes)) *
+              60000,
+          e.id,
+        );
+        db.prepare(
+          "UPDATE online_exam_sessions SET started_at=? WHERE exam_id=?",
+        ).run(timestamp, e.id);
+        e.questions = JSON.stringify(questions);
+      }
       for (const chapterId of new Set(
         json<Snapshot[]>(e.questions).map((q) => q.chapterId),
       ))
@@ -929,9 +1057,10 @@ export function registerLearningRoutes(
           `INSERT INTO chapter_exam_access VALUES(?,1,?,?) ON CONFLICT(chapter_id)
           DO UPDATE SET enabled=1,updated_by=excluded.updated_by,updated_at=excluded.updated_at`,
         ).run(chapterId, req.user!.id, timestamp);
-      db.prepare(
-        "UPDATE exam_definitions SET enabled=1,starts_at=MIN(starts_at,?) WHERE id=?",
-      ).run(timestamp, e.id);
+      if (!online)
+        db.prepare(
+          "UPDATE exam_definitions SET enabled=1,starts_at=MIN(starts_at,?) WHERE id=?",
+        ).run(timestamp, e.id);
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");
@@ -948,6 +1077,14 @@ export function registerLearningRoutes(
     classroom(req, String(e.classroom_id));
     if (typeof req.body?.enabled !== "boolean")
       fail(400, "Trạng thái không hợp lệ.");
+    if (
+      req.body.enabled &&
+      db.prepare("SELECT 1 FROM online_exam_sessions WHERE exam_id=?").get(e.id)
+    )
+      fail(
+        409,
+        "Buổi kiểm tra online chỉ bắt đầu một lần. Dùng Bắt đầu kiểm tra hoặc tạo buổi mới.",
+      );
     db.prepare("UPDATE exam_definitions SET enabled=? WHERE id=?").run(
       Number(req.body.enabled),
       e.id,
@@ -1016,8 +1153,17 @@ export function registerLearningRoutes(
           403,
           `Giáo viên chưa mở kiểm tra: ${blocked.map((ch) => ch.title).join(" · ")}.`,
         );
-      questions = sampleByTopic(snapshot, snapshot.length, (q) => q, randomInt);
-      deadline = Math.min(now() + 1200000, Number(e.closes_at));
+      const online = db
+        .prepare("SELECT * FROM online_exam_sessions WHERE exam_id=?")
+        .get(e.id);
+      if (online && online.started_at == null)
+        fail(403, "Giáo viên chưa bắt đầu kiểm tra online.");
+      questions = online
+        ? shuffle(snapshot)
+        : sampleByTopic(snapshot, snapshot.length, (q) => q, randomInt);
+      deadline = online
+        ? Number(e.closes_at)
+        : Math.min(now() + 1200000, Number(e.closes_at));
       title = String(e.title);
       tabLimit = Number(e.tab_limit);
       examId = String(e.id);

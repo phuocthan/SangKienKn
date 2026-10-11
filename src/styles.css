@@ -1653,6 +1653,14 @@ tr:last-child td {
   font-size: var(--text-body);
   margin: 5px 0 0;
 }
+.correction-filter {
+  margin-bottom: 20px;
+}
+.correction-filter label {
+  display: grid;
+  gap: 8px;
+  width: min(100%, 480px);
+}
 .correction-list {
   display: flex;
   flex-direction: column;

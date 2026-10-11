@@ -1,0 +1,58 @@
+.exam-notices {
+  padding: 18px;
+  margin-bottom: 24px;
+  border: 1px solid #c3d8ad;
+  border-radius: 20px;
+  background: #f1f7e8;
+  box-shadow: 0 4px 16px #315d3e0d;
+  color: #254e34;
+}
+.exam-notices-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+.exam-invitation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #d6e4c9;
+}
+.exam-invitation > div {
+  min-width: 0;
+}
+.exam-invitation strong {
+  overflow-wrap: anywhere;
+}
+.exam-invitation p {
+  margin: 5px 0;
+}
+.exam-invitation small {
+  color: #52684b;
+}
+.exam-invitation-clock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-weight: 600;
+}
+.exam-invitation button {
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .exam-notices {
+    padding: 14px;
+  }
+  .exam-invitation {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .exam-invitation button {
+    width: 100%;
+  }
+}

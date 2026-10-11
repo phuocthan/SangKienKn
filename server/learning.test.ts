@@ -119,6 +119,264 @@ async function fixture(t: TestContext) {
   };
 }
 
+test("online exam announces first, opens after preparation, shares a frozen paper and deadline, and retries never extend it", async (t) => {
+  const f = await fixture(t);
+  const body = {
+    title: "Online cả lớp",
+    delivery: "online",
+    preparationMinutes: 2,
+    durationMinutes: 45,
+    chapterIds: ["chapter-1", "chapter-2"],
+    questionCount: 6,
+    requestId: randomUUID(),
+  };
+  const exam = await f.post("/classrooms/class-demo/exams", body, f.teacher);
+  assert.deepEqual(
+    await f.post("/classrooms/class-demo/exams", body, f.teacher),
+    exam,
+  );
+  assert.deepEqual((await f.read("/learning/exam-notices")).notices, []);
+  assert.equal(
+    f.db
+      .prepare("SELECT questions FROM exam_definitions WHERE id=?")
+      .get(exam.id)!.questions,
+    "[]",
+  );
+  f.advance(3600000); // A draft does not expire before the teacher starts it.
+  const startTime = f.now();
+  const open = `/learning/exams/${exam.id}/open`;
+  assert.equal((await f.request(open, {}, f.student)).status, 403);
+  assert.equal((await f.request(open, {}, f.other)).status, 403);
+  await f.post(open, {}, f.teacher);
+  const first = f.db
+    .prepare("SELECT * FROM exam_definitions WHERE id=?")
+    .get(exam.id)!;
+  assert.equal(first.starts_at, startTime + 120000);
+  assert.equal(first.closes_at, startTime + (2 + 45) * 60000);
+  const frozen = JSON.parse(String(first.questions));
+  assert.equal(frozen.length, 6);
+  assert.equal(new Set(frozen.map((q: any) => q.id)).size, 6);
+  const notices = (await f.read("/learning/exam-notices")).notices;
+  assert.equal(notices[0].id, exam.id);
+  assert.equal(notices[0].preparationMinutes, 2);
+  assert.equal(notices[0].durationMinutes, 45);
+  assert.equal(notices[0].questions, undefined);
+  assert.equal(
+    (await f.request("/learning/exam-notices", undefined, f.teacher)).status,
+    403,
+  );
+  assert.equal((await f.request("/learning/exam-notices")).status, 401);
+  f.db.prepare("DELETE FROM memberships WHERE student_id='student-2'").run();
+  assert.deepEqual(
+    (await f.read("/learning/exam-notices", f.peer)).notices,
+    [],
+  );
+  f.db
+    .prepare("INSERT INTO memberships VALUES('class-demo','student-2')")
+    .run();
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exam-runs",
+        { examId: exam.id, requestId: randomUUID() },
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  f.advance(120000);
+  f.db
+    .prepare(
+      "UPDATE questions SET text='Changed after launch',active=0 WHERE chapter_id IN ('chapter-1','chapter-2')",
+    )
+    .run();
+  const run = await f.start({ examId: exam.id });
+  const room = await f.read(`/learning/exam-runs/${run.id}`);
+  assert.equal(room.deadlineAt, first.closes_at);
+  assert.equal(room.delivery, "online");
+  assert.deepEqual(
+    room.questions.map((q: any) => q.id).sort(),
+    frozen.map((q: any) => q.id).sort(),
+  );
+  assert.ok(
+    room.questions.every(
+      (q: any) =>
+        q.correctIndex === undefined &&
+        q.explanation === undefined &&
+        q.text !== "Changed after launch",
+    ),
+  );
+  f.advance(600000);
+  const peer = await f.post(
+    "/classrooms/class-demo/exam-runs",
+    { examId: exam.id, requestId: randomUUID() },
+    f.peer,
+  );
+  const peerRoom = await f.read(`/learning/exam-runs/${peer.id}`, f.peer);
+  assert.equal(peerRoom.deadlineAt, room.deadlineAt);
+  assert.deepEqual(
+    peerRoom.questions.map((q: any) => q.id).sort(),
+    room.questions.map((q: any) => q.id).sort(),
+  );
+  assert.deepEqual(
+    (await f.read(`/learning/exam-runs/${run.id}`)).questions,
+    room.questions,
+  );
+  await f.post(open, {}, f.teacher);
+  assert.deepEqual(
+    f.db.prepare("SELECT * FROM exam_definitions WHERE id=?").get(exam.id),
+    first,
+  );
+  assert.equal(
+    (
+      await f.request(
+        `/learning/exams/${exam.id}/state`,
+        { enabled: true },
+        f.teacher,
+      )
+    ).status,
+    409,
+  );
+  f.advance(35 * 60000);
+  const submitted = await f.read(`/learning/exam-runs/${run.id}`);
+  assert.equal(submitted.status, "submitted");
+  assert.equal(submitted.reason, "deadline");
+  assert.ok(submitted.results);
+  assert.deepEqual((await f.read("/learning/exam-notices")).notices, []);
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT COUNT(*) AS n FROM learning_tickets WHERE used_by IS NOT NULL",
+      )
+      .get()!.n,
+    0,
+  );
+});
+
+test("online launch rolls back when the selected bank changed, validates settings and can be closed during preparation", async (t) => {
+  const f = await fixture(t);
+  f.db
+    .prepare(
+      "UPDATE questions SET lesson='Bài đã chọn' WHERE chapter_id='chapter-1'",
+    )
+    .run();
+  const body = {
+    title: "Online chọn bài",
+    delivery: "online",
+    chapterIds: ["chapter-1"],
+    questionCount: 3,
+    lessonKeys: ["chapter-1::Bài đã chọn"],
+    preparationMinutes: 3,
+    durationMinutes: 10,
+  };
+  for (const overrides of [
+    { preparationMinutes: -1 },
+    { preparationMinutes: 61 },
+    { durationMinutes: 0 },
+    { durationMinutes: 181 },
+    { durationMinutes: 1.5 },
+  ]) {
+    assert.equal(
+      (
+        await f.request(
+          "/classrooms/class-demo/exams",
+          { ...body, ...overrides },
+          f.teacher,
+        )
+      ).status,
+      400,
+    );
+  }
+  const exam = await f.post("/classrooms/class-demo/exams", body, f.teacher);
+  f.db.prepare("UPDATE questions SET active=0 WHERE id='question-1'").run();
+  assert.equal(
+    (await f.request(`/learning/exams/${exam.id}/open`, {}, f.teacher)).status,
+    409,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT started_at FROM online_exam_sessions WHERE exam_id=?")
+      .get(exam.id)!.started_at,
+    null,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT enabled FROM exam_definitions WHERE id=?")
+      .get(exam.id)!.enabled,
+    0,
+  );
+  assert.deepEqual((await f.read("/learning/exam-notices")).notices, []);
+  f.db.prepare("UPDATE questions SET active=1 WHERE id='question-1'").run();
+  await f.post(`/learning/exams/${exam.id}/open`, {}, f.teacher);
+  await f.post(
+    `/learning/exams/${exam.id}/state`,
+    { enabled: false },
+    f.teacher,
+  );
+  await f.post(`/learning/exams/${exam.id}/open`, {}, f.teacher);
+  assert.deepEqual((await f.read("/learning/exam-notices")).notices, []);
+  assert.equal(
+    f.db
+      .prepare("SELECT enabled FROM exam_definitions WHERE id=?")
+      .get(exam.id)!.enabled,
+    0,
+  );
+});
+
+test("online uploaded paper stays private, can start immediately, and teacher close collects and releases all runs", async (t) => {
+  const f = await fixture(t);
+  const body = {
+    title: "Online đề riêng",
+    delivery: "online",
+    preparationMinutes: 0,
+    durationMinutes: 30,
+    chapterIds: ["chapter-1", "chapter-2"],
+    source: "upload",
+    requestId: randomUUID(),
+    questions: ["chapter-1", "chapter-2"].map((chapterId) => ({
+      chapterId,
+      question: {
+        text: `Câu riêng ${chapterId}`,
+        lesson: "Bài riêng",
+        choices: ["A", "B", "C", "D"],
+        correctIndex: 1,
+        explanation: "Riêng tư",
+      },
+    })),
+  };
+  const exam = await f.post("/classrooms/class-demo/exams", body, f.teacher);
+  await f.post(`/learning/exams/${exam.id}/open`, {}, f.teacher);
+  const a = await f.start({ examId: exam.id });
+  const b = await f.post(
+    "/classrooms/class-demo/exam-runs",
+    { examId: exam.id, requestId: randomUUID() },
+    f.peer,
+  );
+  const room = await f.read(`/learning/exam-runs/${a.id}`);
+  assert.equal(room.deadlineAt, f.now() + 30 * 60000);
+  for (const q of room.questions)
+    assert.equal(
+      f.db.prepare("SELECT active FROM questions WHERE id=?").get(q.id)!.active,
+      0,
+    );
+  await f.post(`/learning/exam-runs/${a.id}/submit`, {});
+  assert.deepEqual((await f.read("/learning/exam-notices")).notices, []);
+  assert.equal(
+    (await f.read(`/learning/exam-runs/${a.id}`)).results,
+    undefined,
+  );
+  await f.post(
+    `/learning/exams/${exam.id}/state`,
+    { enabled: false },
+    f.teacher,
+  );
+  assert.equal(
+    (await f.read(`/learning/exam-runs/${b.id}`, f.peer)).reason,
+    "teacher",
+  );
+  assert.ok((await f.read(`/learning/exam-runs/${a.id}`)).results);
+});
+
 test("practice and review conceal answers after wrong submissions, retries and reload, including legacy saved feedback", async (t) => {
   const f = await fixture(t);
   const wrong = await f.attempt(1);
@@ -148,18 +406,16 @@ test("practice and review conceal answers after wrong submissions, retries and r
   assert.equal(feedback.explanation, wrong.explanation);
   assert.deepEqual(await f.post(`${path}/answer`, body), feedback);
   // Existing sessions may contain answers saved before concealment was introduced.
-  f.db
-    .prepare("UPDATE review_sessions SET answers=? WHERE id=?")
-    .run(
-      JSON.stringify({
-        [q.id]: {
-          ...feedback,
-          correctIndex: correct,
-          explanation: "LEGACY ANSWER MUST STAY PRIVATE",
-        },
-      }),
-      review.id,
-    );
+  f.db.prepare("UPDATE review_sessions SET answers=? WHERE id=?").run(
+    JSON.stringify({
+      [q.id]: {
+        ...feedback,
+        correctIndex: correct,
+        explanation: "LEGACY ANSWER MUST STAY PRIVATE",
+      },
+    }),
+    review.id,
+  );
   assert.deepEqual((await f.read(path)).answers[q.id], feedback);
   assert.deepEqual(await f.post(`${path}/answer`, body), feedback);
   await f.post(`${path}/next`, { index: 1 });

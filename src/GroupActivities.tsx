@@ -19,6 +19,7 @@ import {
 import { api, errorMessage } from "./api";
 import { Avatar } from "./Avatars";
 import { Empty, Modal, SectionTitle } from "./components";
+import { GroupDiscussion } from "./GroupDiscussion";
 import type { Classroom, User } from "./types";
 import type {
   ActivityFile,
@@ -144,6 +145,9 @@ export function GroupActivities({
   );
   const submitted =
     detail?.groups.filter((group) => group.submissions.length).length ?? 0;
+  const ownGroup = detail?.groups.find((group) =>
+    group.members.some((member) => member.id === user.id),
+  );
   const visibleGroups =
     detail?.groups.filter(
       (group) =>
@@ -384,7 +388,7 @@ export function GroupActivities({
               <strong>
                 {teacher
                   ? `${submitted}/${detail.groupCount}`
-                  : detail.groups[0]?.submissions.length
+                  : ownGroup?.submissions.length
                     ? "Đã nộp"
                     : "Chưa nộp"}
               </strong>
@@ -402,6 +406,13 @@ export function GroupActivities({
               )}
             </div>
           </section>
+          <div className="info-panel" role="status">
+            {detail.discussionOpen
+              ? "Đã mở đọc chéo và phản biện. Xem sản phẩm của các nhóm, gửi câu hỏi hoặc góp ý; nhóm phụ trách trả lời trong phần trao đổi."
+              : detail.canDiscuss
+                ? "Đọc chéo và phản biện sẽ mở khi đã gia hạn ít nhất một lần và hết hạn nộp mới."
+                : "Đọc chéo và phản biện đang chờ cập nhật server Railway."}
+          </div>
           <div className="group-detail-layout">
             <section className="card group-requirements">
               <h3 className="group-panel-title">
@@ -445,14 +456,16 @@ export function GroupActivities({
             <div className="group-products-panel">
               <SectionTitle
                 title={
-                  teacher
+                  teacher || detail.discussionOpen
                     ? `Danh sách ${detail.groupCount} nhóm`
                     : "Nhóm của bạn"
                 }
                 description={
-                  teacher
-                    ? "Nhóm được chia ngẫu nhiên và giữ cố định. Mỗi nhóm có một đại diện nộp bài."
-                    : "Cùng chuẩn bị sản phẩm; đại diện nộp bài cho cả nhóm trước hạn."
+                  detail.discussionOpen
+                    ? "Cùng đọc sản phẩm và trao đổi sau thời gian nộp bài. Nhóm của bạn được đánh dấu riêng."
+                    : teacher
+                      ? "Nhóm được chia ngẫu nhiên và giữ cố định. Mỗi nhóm có một đại diện nộp bài."
+                      : "Cùng chuẩn bị sản phẩm; đại diện nộp bài cho cả nhóm trước hạn."
                 }
               />
               {teacher && (
@@ -491,7 +504,10 @@ export function GroupActivities({
                   >
                     <div className="group-section-head">
                       <div>
-                        <h3>Nhóm {group.number}</h3>
+                        <h3>
+                          Nhóm {group.number}
+                          {group.id === ownGroup?.id && " · Nhóm của bạn"}
+                        </h3>
                         <small>
                           {group.members.filter((m) => m.active).length} thành
                           viên trong lớp
@@ -548,7 +564,7 @@ export function GroupActivities({
                           thêm.
                         </p>
                       )
-                    ) : (
+                    ) : group.id === ownGroup?.id ? (
                       <p className="subtle-note">
                         Đại diện{" "}
                         {
@@ -558,7 +574,7 @@ export function GroupActivities({
                         }{" "}
                         sẽ nộp sản phẩm cho nhóm.
                       </p>
-                    )}
+                    ) : null}
                     <h4 className="group-products-title">
                       Sản phẩm đã nộp <span>{group.submissions.length}</span>
                     </h4>
@@ -602,6 +618,13 @@ export function GroupActivities({
                         )}
                       </article>
                     ))}
+                    {detail.discussionOpen && group.submissions.length > 0 && (
+                      <GroupDiscussion
+                        activity={detail}
+                        group={group}
+                        user={user}
+                      />
+                    )}
                   </section>
                 ))}
                 {!!detail.groups.length && !visibleGroups.length && (

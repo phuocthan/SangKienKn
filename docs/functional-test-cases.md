@@ -1,5 +1,15 @@
 # Ca kiểm thử chức năng GreenEdu
 
+## Kiểm tra online X phút chờ / Y phút làm — 12/10/2026
+
+- ONLINE-SCHEDULE: tạo bản chuẩn bị không thông báo/hết hạn; bấm bắt đầu chốt T+X/T+X+Y, trước giờ không vào được, vào muộn cùng hạn, hết giờ tự thu. X0–60/Y1–180, sai kiểu/ngoài khoảng bị chặn.
+- ONLINE-PAPER: nhiều chương/bài, một tập câu chung; snapshot chọn tại bắt đầu, sửa bank sau đó không đổi đề, reload giữ hoán vị. File riêng không phát hành luyện tập, không lộ đáp án đang thi.
+- ONLINE-ATOMIC: tạo retry không lặp; bank thiếu sau chuẩn bị rollback cả giờ/trạng thái/đề; gửi bắt đầu lại không kéo giờ/lấy đề mới. Đóng trong chuẩn bị hủy yêu cầu, không mở lại; đóng lúc thi thu bài/công bố.
+- ONLINE-NOTICE: chỉ học sinh/thành viên đúng lớp nhận metadata; không câu/đáp án/email. Banner trên Trang chủ đếm chờ/khóa nút, đăng nhập/reload nhận lại, nộp/đóng/hết giờ bỏ. Vào từ banner chọn đúng lớp kể cả danh sách lớp cache cũ.
+- ONLINE-COMPAT: thiếu capability khóa tạo/bắt đầu, không gửi payload online sang API cũ. Migration thêm bảng/cột và reopen giữ thời điểm/selection/snapshot, không mất dữ liệu cũ.
+
+Backend trong server/learning.test.ts và learning-db.test.ts; E2E e2e/online-exams.spec.ts desktop/mobile, hồi quy e2e/learning.spec.ts. Test dùng SQLite riêng, không Railway. Nghiệp vụ [online-exams.md](online-exams.md).
+
 ## Ca mới: quản lý/xóa câu hỏi hàng loạt — 11/10/2026
 
 - BANK-DELETE-ACCESS: chỉ chủ lớp; chưa đăng nhập/học sinh/giáo viên khác bị chặn, payload sai/rỗng/quá 5000 bị từ chối.

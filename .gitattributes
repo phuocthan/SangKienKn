@@ -1,0 +1,7 @@
+# Preserve generated document and image bytes on every platform.
+*.pdf binary
+*.pptx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary

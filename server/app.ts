@@ -36,6 +36,7 @@ import {
   LessonError,
 } from "./lesson-catalog.js";
 import { loginEmail } from "../shared/login-email.js";
+import { registerFeedbackRoutes } from "./feedback.js";
 
 export type Row = Record<string, any>;
 export type AppRequest = Request & { user?: Row; tokenHash?: string };
@@ -652,7 +653,21 @@ export function createApp(
           a.studentName.localeCompare(b.studentName, "vi") ||
           a.studentId.localeCompare(b.studentId),
       );
-    res.json({ trees, members });
+    const teacher = db
+      .prepare(
+        `SELECT u.name,a.avatar_id AS avatarId
+      FROM classrooms c JOIN users u ON u.id=c.teacher_id
+      LEFT JOIN user_avatars a ON a.user_id=u.id WHERE c.id=?`,
+      )
+      .get(classId) as Row;
+    res.json({
+      trees,
+      members,
+      teacher: {
+        name: String(teacher.name),
+        avatarId: teacher.avatarId ?? null,
+      },
+    });
   });
 
   app.get("/api/classrooms/:id/leaderboard", (req: AppRequest, res) => {
@@ -1417,6 +1432,7 @@ export function createApp(
     student,
     classroom,
   });
+  registerFeedbackRoutes(app, db, { now, text, fail, teacher, student, classroom });
   app.use("/api", (_req, _res, next) =>
     next(new ApiError(404, "Không tìm thấy chức năng.")),
   );

@@ -41,17 +41,24 @@ export function Learning({
   classroom,
   user,
   onReview,
+  onCorrections,
   onSettingsChanged,
+  entryRunId,
+  onExamExit,
 }: {
   classroom: Classroom;
   user: User;
   onReview: (id: string, chapter: Chapter) => void;
+  onCorrections: (chapterId: string) => void;
   onSettingsChanged?: () => void;
+  entryRunId?: string;
+  onExamExit?: () => void;
 }) {
   const teacher = user.role === "teacher";
   const hash = new URLSearchParams(location.hash.slice(1));
   const [runId, setRunId] = useState(
-    hash.get("learning") === classroom.id ? (hash.get("exam") ?? "") : "",
+    entryRunId ||
+      (hash.get("learning") === classroom.id ? (hash.get("exam") ?? "") : ""),
   );
   const [data, setData] = useState<LearningOverview | null>(null);
   const [error, setError] = useState("");
@@ -65,7 +72,14 @@ export function Learning({
   const [starts, setStarts] = useState(localDate(Date.now()));
   const [closes, setCloses] = useState(localDate(Date.now() + 3600000));
   const [tabLimit, setTabLimit] = useState(4);
-  const [creating, setCreating] = useState<"blueprint" | "exam">("blueprint");
+  const [creating, setCreating] = useState<"blueprint" | "exam" | "online">(
+    "blueprint",
+  );
+  const isExam = creating !== "blueprint";
+  const isOnline = creating === "online";
+  const [durationMinutes, setDurationMinutes] = useState(20);
+  const [preparationMinutes, setPreparationMinutes] = useState(3);
+  const formRef = useRef<HTMLFormElement>(null);
   const [examSource, setExamSource] = useState<"bank" | "upload">("bank");
   const [manualOpen, setManualOpen] = useState(true);
   const [lessonMode, setLessonMode] = useState<"all" | "selected">("all");
@@ -93,6 +107,9 @@ export function Learning({
     const timer = setInterval(() => void refresh(), 15000);
     return () => clearInterval(timer);
   }, [refresh]);
+  useEffect(() => {
+    if (entryRunId) setRunId(entryRunId);
+  }, [entryRunId]);
   async function act(action: () => Promise<unknown>, message = "") {
     if (busy) return;
     setBusy(true);
@@ -138,9 +155,7 @@ export function Learning({
       Object.entries(weights).filter(
         ([key]) =>
           selected.some((id) => key.startsWith(`${id}::`)) &&
-          (creating !== "exam" ||
-            lessonMode !== "selected" ||
-            lessonKeys.includes(key)),
+          (!isExam || lessonMode !== "selected" || lessonKeys.includes(key)),
       ),
     );
     const body = {
@@ -148,13 +163,16 @@ export function Learning({
       chapterIds: selected,
       questionCount: count,
       weights: chosenWeights,
-      ...(creating === "exam"
+      ...(isExam
         ? {
             startsAt: new Date(starts).getTime(),
             closesAt: new Date(closes).getTime(),
             tabLimit,
             source: examSource,
             manualOpen,
+            ...(isOnline
+              ? { delivery: "online", durationMinutes, preparationMinutes }
+              : {}),
             ...(examSource === "upload"
               ? { questions: uploaded }
               : lessonMode === "selected"
@@ -171,18 +189,20 @@ export function Learning({
     await act(
       async () => {
         await api(
-          `/classrooms/${classroom.id}/${creating === "exam" ? "exams" : "blueprints"}`,
+          `/classrooms/${classroom.id}/${isExam ? "exams" : "blueprints"}`,
           {
             ...body,
-            ...(creating === "exam" ? { requestId: requestKey(intent) } : {}),
+            ...(isExam ? { requestId: requestKey(intent) } : {}),
           },
         );
         startKeys.current.delete(intent);
       },
-      creating === "exam"
-        ? manualOpen
-          ? "Đã tạo kiểm tra. Chọn Mở kiểm tra ngay khi sẵn sàng."
-          : "Đã tạo lịch kiểm tra cho lớp."
+      isExam
+        ? isOnline
+          ? "Đã chuẩn bị kiểm tra online. Bấm Bắt đầu kiểm tra để chốt đề và thông báo cho lớp."
+          : manualOpen
+            ? "Đã tạo kiểm tra. Chọn Mở kiểm tra ngay khi sẵn sàng."
+            : "Đã tạo lịch kiểm tra cho lớp."
         : "Đã lưu ma trận ôn tập.",
     );
   }
@@ -194,6 +214,7 @@ export function Learning({
         user={user}
         onClose={() => {
           setRunId("");
+          onExamExit?.();
           location.hash = new URLSearchParams({
             learning: classroom.id,
           }).toString();
@@ -213,6 +234,21 @@ export function Learning({
               : "Theo dõi điều kiện từng chương, tiếp tục ôn tập và làm bài kiểm tra."}
           </p>
         </div>
+        {teacher && (
+          <button
+            className="button primary small"
+            disabled={busy || !data?.onlineExams}
+            onClick={() => {
+              setCreating("online");
+              formRef.current?.scrollIntoView({
+                block: "start",
+                behavior: "smooth",
+              });
+            }}
+          >
+            Tạo kiểm tra online
+          </button>
+        )}
         <button
           className="button secondary small"
           onClick={() => void refresh()}
@@ -373,7 +409,20 @@ export function Learning({
                       ) : missing.length > 0 ? (
                         <ul className="learning-requirements">
                           {missing.map((reason) => (
-                            <li key={reason}>{reason}</li>
+                            <li key={reason}>
+                              {reason}
+                              {ch.openCorrections > 0 &&
+                                reason.includes("câu cần sửa") && (
+                                  <button
+                                    type="button"
+                                    className="button outline small learning-notebook-shortcut"
+                                    aria-label={`Mở sổ tay · ${ch.title}`}
+                                    onClick={() => onCorrections(ch.id)}
+                                  >
+                                    <BookOpen size={16} /> Mở sổ tay
+                                  </button>
+                                )}
+                            </li>
                           ))}
                         </ul>
                       ) : null}
@@ -385,7 +434,6 @@ export function Learning({
                             Cấp {ch.level} · {STUDENT_LEVEL_NAMES[ch.level - 1]}
                           </strong>
                         </div>
-                        <span>{duration(ch.seconds)}</span>
                       </div>
                       <button
                         className="button primary"
@@ -433,6 +481,7 @@ export function Learning({
                   ))}
                 </div>
                 <form
+                  ref={formRef}
                   className="learning-form"
                   onSubmit={(e) => void create(e)}
                 >
@@ -447,12 +496,26 @@ export function Learning({
                     >
                       <option value="blueprint">Ma trận ôn tập</option>
                       <option value="exam">Thi chính thức</option>
+                      <option value="online">Kiểm tra online cả lớp</option>
                     </select>
                   </label>
                   {creating === "exam" && !data.examCreation && (
                     <p className="muted">
                       Tạo đề theo bài, tải đề và mở kiểm tra đang chờ cập nhật
                       server.
+                    </p>
+                  )}
+                  {isOnline && !data.onlineExams && (
+                    <p className="muted">
+                      Kiểm tra online và thông báo cho lớp đang chờ cập nhật
+                      server Railway.
+                    </p>
+                  )}
+                  {isOnline && (
+                    <p className="learning-notice">
+                      Chuẩn bị đề, đặt thời gian chờ và làm bài rồi bấm Bắt đầu
+                      kiểm tra. Cả lớp cùng một bộ câu, thứ tự câu được trộn
+                      riêng cho từng học sinh.
                     </p>
                   )}
                   <label>
@@ -487,7 +550,7 @@ export function Learning({
                       ))}
                     </div>
                   </fieldset>
-                  {creating === "exam" && (
+                  {isExam && (
                     <label>
                       Nguồn đề
                       <select
@@ -504,7 +567,7 @@ export function Learning({
                       </select>
                     </label>
                   )}
-                  {creating === "exam" && examSource === "upload" ? (
+                  {isExam && examSource === "upload" ? (
                     <ExamUpload
                       chapters={classroom.chapters.filter((ch) =>
                         selected.includes(ch.id),
@@ -515,7 +578,7 @@ export function Learning({
                     />
                   ) : (
                     <>
-                      {creating === "exam" && (
+                      {isExam && (
                         <fieldset>
                           <legend>Bài trong đề</legend>
                           <label>
@@ -615,42 +678,75 @@ export function Learning({
                       </details>
                     </>
                   )}
-                  {creating === "exam" && (
+                  {isExam && (
                     <div className="learning-settings">
-                      <label>
-                        Cách mở kiểm tra
-                        <select
-                          value={manualOpen ? "manual" : "scheduled"}
-                          onChange={(e) =>
-                            setManualOpen(e.target.value === "manual")
-                          }
-                        >
-                          <option value="manual">
-                            Giáo viên bấm mở khi sẵn sàng
-                          </option>
-                          <option value="scheduled">
-                            Theo lịch, khi các chương đã được cho phép
-                          </option>
-                        </select>
-                      </label>
-                      <label>
-                        Mở bài thi
-                        <input
-                          type="datetime-local"
-                          required
-                          value={starts}
-                          onChange={(e) => setStarts(e.target.value)}
-                        />
-                      </label>
-                      <label>
-                        Đóng khung thi
-                        <input
-                          type="datetime-local"
-                          required
-                          value={closes}
-                          onChange={(e) => setCloses(e.target.value)}
-                        />
-                      </label>
+                      {isOnline ? (
+                        <>
+                          <label>
+                            Thời gian chuẩn bị (phút)
+                            <input
+                              type="number"
+                              min={0}
+                              max={60}
+                              required
+                              value={preparationMinutes}
+                              onChange={(e) =>
+                                setPreparationMinutes(Number(e.target.value))
+                              }
+                            />
+                          </label>
+                          <label>
+                            Thời gian làm bài (phút)
+                            <input
+                              type="number"
+                              min={1}
+                              max={180}
+                              required
+                              value={durationMinutes}
+                              onChange={(e) =>
+                                setDurationMinutes(Number(e.target.value))
+                              }
+                            />
+                          </label>
+                        </>
+                      ) : (
+                        <>
+                          <label>
+                            Cách mở kiểm tra
+                            <select
+                              value={manualOpen ? "manual" : "scheduled"}
+                              onChange={(e) =>
+                                setManualOpen(e.target.value === "manual")
+                              }
+                            >
+                              <option value="manual">
+                                Giáo viên bấm mở khi sẵn sàng
+                              </option>
+                              <option value="scheduled">
+                                Theo lịch, khi các chương đã được cho phép
+                              </option>
+                            </select>
+                          </label>
+                          <label>
+                            Mở bài thi
+                            <input
+                              type="datetime-local"
+                              required
+                              value={starts}
+                              onChange={(e) => setStarts(e.target.value)}
+                            />
+                          </label>
+                          <label>
+                            Đóng khung thi
+                            <input
+                              type="datetime-local"
+                              required
+                              value={closes}
+                              onChange={(e) => setCloses(e.target.value)}
+                            />
+                          </label>
+                        </>
+                      )}
                       <label>
                         Tự nộp ở lần rời tab
                         <input
@@ -662,9 +758,14 @@ export function Learning({
                           onChange={(e) => setTabLimit(Number(e.target.value))}
                         />
                       </label>
-                      <p>
-                        Cả lớp dùng cùng tập câu, đảo thứ tự. Mỗi học sinh có
-                        tối đa 20 phút, kết thúc sớm hơn nếu khung thi đóng.
+                      <p
+                        className={
+                          isOnline ? "online-exam-timing-note" : undefined
+                        }
+                      >
+                        {isOnline
+                          ? "Bấm Bắt đầu kiểm tra để thông báo cho lớp. Hết thời gian chuẩn bị mới mở đề; thời gian làm bài bắt đầu từ lúc mở đề. Cả lớp cùng hạn nộp, vào muộn không được cộng thêm giờ."
+                          : "Cả lớp dùng cùng tập câu, đảo thứ tự. Mỗi học sinh có tối đa 20 phút, kết thúc sớm hơn nếu khung thi đóng."}
                       </p>
                     </div>
                   )}
@@ -673,9 +774,10 @@ export function Learning({
                     disabled={
                       busy ||
                       uploadBusy ||
-                      (creating === "exam" && !data.examCreation) ||
+                      (isExam && !data.examCreation) ||
+                      (isOnline && !data.onlineExams) ||
                       !selected.length ||
-                      (creating === "exam" &&
+                      (isExam &&
                         (examSource === "upload"
                           ? !uploaded.length ||
                             uploaded.some(
@@ -687,7 +789,9 @@ export function Learning({
                             )))
                     }
                   >
-                    Lưu {creating === "exam" ? "lịch kiểm tra" : "ma trận"}
+                    {isOnline
+                      ? "Chuẩn bị kiểm tra online"
+                      : `Lưu ${isExam ? "lịch kiểm tra" : "ma trận"}`}
                   </button>
                 </form>
               </>
@@ -853,16 +957,26 @@ export function Learning({
                       <p>
                         {ex.questionCount} câu · Tự nộp ở lần rời tab{" "}
                         {ex.tabLimit}
+                        {ex.delivery === "online" &&
+                          ` · Chờ ${ex.preparationMinutes} phút · Làm bài ${ex.durationMinutes} phút · Online cả lớp`}
                       </p>
                       <small>
-                        {date(ex.startsAt)} → {date(ex.closesAt)} ·{" "}
-                        {!ex.enabled
-                          ? "Đã đóng"
-                          : Date.now() < ex.startsAt
-                            ? "Chưa mở"
-                            : Date.now() >= ex.closesAt
-                              ? "Đã hết giờ"
-                              : "Đang mở"}
+                        {ex.delivery === "online" && ex.startedAt == null ? (
+                          "Chờ giáo viên bắt đầu"
+                        ) : (
+                          <>
+                            {date(ex.startsAt)} → {date(ex.closesAt)} ·{" "}
+                            {!ex.enabled
+                              ? "Đã đóng"
+                              : Date.now() < ex.startsAt
+                                ? ex.delivery === "online"
+                                  ? "Đang chờ bắt đầu"
+                                  : "Chưa mở"
+                                : Date.now() >= ex.closesAt
+                                  ? "Đã hết giờ"
+                                  : "Đang mở"}
+                          </>
+                        )}
                       </small>
                       {!!ex.blockedChapters?.length && (
                         <p>
@@ -878,21 +992,33 @@ export function Learning({
                           className="button primary small"
                           disabled={
                             busy ||
-                            ex.closesAt <= Date.now() ||
+                            (ex.delivery === "online"
+                              ? ex.startedAt != null || !data.onlineExams
+                              : ex.closesAt <= Date.now()) ||
                             !data.examCreation
                           }
                           onClick={() =>
                             void act(
                               () => api(`/learning/exams/${ex.id}/open`, {}),
-                              "Đã mở kiểm tra và cho phép các chương trong đề. Học sinh có thể vào làm ngay.",
+                              ex.delivery === "online"
+                                ? `Đã gửi thông báo cho lớp. Kiểm tra sẽ mở sau ${ex.preparationMinutes} phút, thời gian làm bài ${ex.durationMinutes} phút.`
+                                : "Đã mở kiểm tra và cho phép các chương trong đề. Học sinh có thể vào làm ngay.",
                             )
                           }
                         >
-                          Mở kiểm tra ngay
+                          {ex.delivery === "online"
+                            ? ex.startedAt == null
+                              ? "Bắt đầu kiểm tra"
+                              : "Đã gửi thông báo"
+                            : "Mở kiểm tra ngay"}
                         </button>
                         <button
                           className="button secondary small"
-                          disabled={busy || ex.closesAt <= Date.now()}
+                          disabled={
+                            busy ||
+                            ex.closesAt <= Date.now() ||
+                            (ex.delivery === "online" && !ex.enabled)
+                          }
                           onClick={() =>
                             void act(
                               () =>
@@ -903,7 +1029,11 @@ export function Learning({
                             )
                           }
                         >
-                          {ex.enabled ? "Đóng bài thi" : "Mở lại"}
+                          {ex.enabled
+                            ? "Đóng bài thi"
+                            : ex.delivery === "online"
+                              ? "Đã đóng"
+                              : "Mở lại"}
                         </button>
                       </div>
                     ) : (

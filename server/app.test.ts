@@ -674,6 +674,9 @@ test("community is visible only to class members and owner; it exposes no creden
   const student = await f.login("student"),
     teacher = await f.login("teacher");
   f.db
+    .prepare("INSERT INTO user_avatars(user_id,avatar_id) VALUES(?,?)")
+    .run("teacher-demo", "teacher-1");
+  f.db
     .prepare("INSERT INTO classrooms VALUES (?,?,?,?,?)")
     .run("other-class", "Other", "Math", "10", "teacher-demo");
   f.db
@@ -757,6 +760,14 @@ test("community is visible only to class members and owner; it exposes no creden
   assert.equal(empty.data.activeStudents, 0);
   assert.deepEqual(empty.data.effort, []);
   assert.deepEqual(empty.data.repairs, []);
+  const teacherInfo = (
+    await f.request("/classrooms/class-demo/garden", undefined, student)
+  ).data.teacher;
+  assert.deepEqual(teacherInfo, {
+    name: f.db.prepare("SELECT name FROM users WHERE id=?").get("teacher-demo")!
+      .name,
+    avatarId: "teacher-1",
+  });
   f.db
     .prepare("INSERT INTO progress VALUES (?,?,?)")
     .run("student-demo", "chapter-1", 14400);

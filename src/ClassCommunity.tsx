@@ -20,15 +20,18 @@ export function ClassCommunity({
   page,
   revision,
   userId,
+  teacherAvatarId,
 }: {
   classroom: Classroom;
   page: "garden" | "leaderboard";
   revision: number;
   userId: string;
+  teacherAvatarId?: string | null;
 }) {
   const [data, setData] = useState<{
     trees: ClassTree[];
     members?: ClassGardenMember[];
+    teacher?: { name: string; avatarId: string | null };
     board: ClassLeaderboard;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,14 +42,21 @@ export function ClassCommunity({
     setLoading(true);
     setError("");
     Promise.all([
-      api<{ trees: ClassTree[]; members?: ClassGardenMember[] }>(
-        `/classrooms/${classroom.id}/garden`,
-      ),
+      api<{
+        trees: ClassTree[];
+        members?: ClassGardenMember[];
+        teacher?: { name: string; avatarId: string | null };
+      }>(`/classrooms/${classroom.id}/garden`),
       api<ClassLeaderboard>(`/classrooms/${classroom.id}/leaderboard`),
     ])
       .then(([garden, board]) => {
         if (alive)
-          setData({ trees: garden.trees, members: garden.members, board });
+          setData({
+            trees: garden.trees,
+            members: garden.members,
+            teacher: garden.teacher,
+            board,
+          });
       })
       .catch((e) => {
         if (alive) setError(errorMessage(e));
@@ -128,6 +138,12 @@ export function ClassCommunity({
               userId={userId}
               subject={classroom.subject}
               classroomName={classroom.name}
+              teacherName={data.teacher?.name ?? classroom.teacherName}
+              teacherAvatarId={
+                teacherAvatarId !== undefined
+                  ? teacherAvatarId
+                  : data.teacher?.avatarId
+              }
             />
           ) : (
             <>

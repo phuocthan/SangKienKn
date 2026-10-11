@@ -81,15 +81,13 @@ test("teacher selects individual lessons or uploads a private exam and manually 
   await form.getByLabel("Nguồn đề").selectOption("upload");
   const uploadTitle = `Đề riêng ${info.project.name} ${Date.now()}`;
   await form.getByLabel("Tên bộ câu").fill(uploadTitle);
-  await form
-    .getByLabel("File đề (.docx hoặc .csv)")
-    .setInputFiles({
-      name: "de.csv",
-      mimeType: "text/csv",
-      buffer: Buffer.from(
-        "Bài học,Câu hỏi,A,B,C,D,Đáp án,Lời giải\nBài tải riêng,Câu riêng không phát hành,A,B,C,D,C,Chọn C\n",
-      ),
-    });
+  await form.getByLabel("File đề (.docx hoặc .csv)").setInputFiles({
+    name: "de.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(
+      "Bài học,Câu hỏi,A,B,C,D,Đáp án,Lời giải\nBài tải riêng,Câu riêng không phát hành,A,B,C,D,C,Chọn C\n",
+    ),
+  });
   await expect(form).toContainText("1 câu đã chọn / tối đa 100");
   await form.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
   await expect(page.getByRole("status")).toContainText("Đã tạo kiểm tra");
@@ -314,10 +312,70 @@ test("student reviews semester, resumes exact question and repairs without revea
     "true",
   );
   await page.getByRole("button", { name: "Kết thúc phiên" }).click();
+  // Errors in both chapters make the notebook shortcut's scope observable.
+  for (const chapterId of ["learning-ch1", "learning-ch2"])
+    expect(
+      (
+        await page.request.post("/api/attempts", {
+          data: {
+            questionId: `${chapterId}-q1`,
+            selected: 1,
+            mode: "practice",
+            requestId: crypto.randomUUID(),
+          },
+        })
+      ).ok(),
+    ).toBeTruthy();
+  const corrections = await (await page.request.get("/api/corrections")).json();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Ôn tập & kiểm tra" })
+    .click();
+  // The API setup happens after the learning view mounts on ending the review.
+  await page.getByRole("button", { name: "Làm mới", exact: true }).click();
+  await expect(page.locator(".hunt-current-level > span")).toHaveCount(0);
+  await expect(page.locator(".hunt-current-level").first()).toContainText(
+    "Cấp độ hiện tại",
+  );
+  await expect(
+    page.getByRole("button", { name: "Mở sổ tay · Chương ôn II", exact: true }),
+  ).toBeVisible();
+  await noOverflow(page);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    path: info.outputPath("notebook-shortcut.png"),
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Mở sổ tay · Chương ôn I", exact: true })
+    .click();
+  const filter = page.getByLabel("Chương cần sửa");
+  await expect(filter).toHaveValue("learning-ch1");
+  for (const chapterId of ["learning-ch1", "learning-ch2", ""]) {
+    await filter.selectOption(chapterId);
+    const expected = corrections.filter(
+      (q: { chapterId: string }) => !chapterId || q.chapterId === chapterId,
+    );
+    await expect(page.locator(".correction-card")).toHaveCount(expected.length);
+    for (const q of expected)
+      await expect(
+        page.locator(".correction-card").filter({ hasText: q.text }),
+      ).toHaveCount(1);
+  }
+  await noOverflow(page);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    path: info.outputPath("notebook-filter.png"),
+    fullPage: true,
+  });
+  // The sidebar still opens the full notebook rather than retaining a shortcut filter.
+  await filter.selectOption("learning-ch2");
   await page
     .getByRole("navigation")
     .getByRole("button", { name: "Sổ tay sửa sai" })
     .click();
+  await expect(filter).toHaveValue("");
+  await filter.selectOption("learning-ch1");
   await page.locator(".correction-card").first().getByRole("button").click();
   await page.locator(".choices .choice").nth(1).click();
   await page.getByRole("button", { name: "Kiểm tra đáp án" }).click();

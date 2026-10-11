@@ -4,6 +4,7 @@ import { createHash, randomInt, randomUUID } from "node:crypto";
 import multer from "multer";
 import type { AppRequest, Row } from "./app.js";
 import { requirementWordText, validateActivityFile } from "./activity-files.js";
+import { groupDiscussionOpen } from "./group-discussion.js";
 import type {
   ActivityFile,
   ActivityGroup,
@@ -132,7 +133,8 @@ export function registerGroupRoutes(
         .get(room.teacher_id) as Row
     ).name;
     const groupRows =
-      req.user!.role === "teacher"
+      req.user!.role === "teacher" ||
+      groupDiscussionOpen(db, row as { id: string; deadline_at: number }, now())
         ? (db
             .prepare(
               "SELECT * FROM activity_groups WHERE activity_id = ? ORDER BY number",
@@ -182,6 +184,16 @@ export function registerGroupRoutes(
       )
       .all(row.id) as Row[];
     return {
+      canDiscuss: true,
+      discussionOpen: groupDiscussionOpen(
+        db,
+        row as { id: string; deadline_at: number },
+        now(),
+      ),
+      myGroupId:
+        req.user!.role === "student"
+          ? (myGroup(req, row.id)?.id ?? null)
+          : null,
       id: row.id,
       title: row.title,
       classroomId: row.classroom_id,
@@ -570,11 +582,16 @@ export function registerGroupRoutes(
       )
       .get(String(req.params.id)) as Row | undefined;
     if (!file) fail(404, "Không tìm thấy file.");
-    activity(req, file.activity_id);
+    const row = activity(req, file.activity_id);
     if (
       file.kind === "submission" &&
       req.user!.role === "student" &&
-      myGroup(req, file.activity_id)?.id !== file.group_id
+      myGroup(req, file.activity_id)?.id !== file.group_id &&
+      !groupDiscussionOpen(
+        db,
+        row as { id: string; deadline_at: number },
+        now(),
+      )
     )
       fail(403, "Bạn chỉ được tải sản phẩm của nhóm mình.");
     const content = (
@@ -586,4 +603,117 @@ export function registerGroupRoutes(
     res.setHeader("Content-Security-Policy", "sandbox; default-src 'none'");
     res.send(Buffer.from(content));
   });
+  function discussion(req: AppRequest) {
+    const row = activity(req);
+    if (
+      !groupDiscussionOpen(
+        db,
+        row as { id: string; deadline_at: number },
+        now(),
+      )
+    )
+      fail(
+        409,
+        "Phản biện mở sau khi giáo viên gia hạn ít nhất một lần và hết hạn nộp mới.",
+      );
+    const group = db
+      .prepare("SELECT * FROM activity_groups WHERE id=? AND activity_id=?")
+      .get(String(req.params.groupId), row.id) as Row | undefined;
+    if (!group) fail(404, "Không tìm thấy nhóm trong hoạt động.");
+    return { row, group };
+  }
+  function posts(groupId: string) {
+    return db
+      .prepare(
+        `SELECT p.id,p.parent_id AS parentId,p.author_id AS authorId,
+      u.name AS authorName,u.role AS authorRole,p.author_group_number AS authorGroupNumber,
+      p.kind,p.body,p.created_at AS createdAt,s.version AS submissionVersion
+      FROM group_discussion_posts p JOIN users u ON u.id=p.author_id
+      JOIN group_submissions s ON s.id=p.submission_id WHERE p.group_id=? ORDER BY p.created_at,p.rowid`,
+      )
+      .all(groupId);
+  }
+  app.get(
+    "/api/group-activities/:id/groups/:groupId/discussion",
+    (req: AppRequest, res) => {
+      const { group } = discussion(req);
+      res.json({ posts: posts(group.id) });
+    },
+  );
+  app.post(
+    "/api/group-activities/:id/groups/:groupId/discussion",
+    (req: AppRequest, res) => {
+      const { row, group } = discussion(req);
+      const own =
+        req.user!.role === "student" ? myGroup(req, row.id) : undefined;
+      if (req.user!.role !== "teacher" && !own)
+        fail(403, "Bạn chưa thuộc nhóm nào của hoạt động này.");
+      const body = text(req.body?.body, "Nội dung trao đổi", 5000);
+      const requestId = text(req.body?.requestId, "Mã gửi trao đổi", 100);
+      const parentId =
+        req.body?.parentId == null
+          ? null
+          : text(req.body.parentId, "Câu hỏi cần phản biện", 100);
+      const kind = parentId ? "reply" : req.body?.kind;
+      if (!parentId && !["question", "comment"].includes(kind))
+        fail(400, "Loại trao đổi không hợp lệ.");
+      const parent = parentId
+        ? (db
+            .prepare(
+              "SELECT * FROM group_discussion_posts WHERE id=? AND group_id=? AND parent_id IS NULL",
+            )
+            .get(parentId, group.id) as Row | undefined)
+        : undefined;
+      if (parentId && !parent)
+        fail(404, "Không tìm thấy ý kiến/câu hỏi trong nhóm này.");
+      if (
+        req.user!.role !== "teacher" &&
+        (parentId ? own!.id !== group.id : own!.id === group.id)
+      )
+        fail(
+          403,
+          parentId
+            ? "Chỉ nhóm phụ trách được phản biện câu hỏi này."
+            : "Hãy đặt câu hỏi hoặc góp ý cho sản phẩm của nhóm khác.",
+        );
+      const old = db
+        .prepare(
+          "SELECT * FROM group_discussion_posts WHERE author_id=? AND request_id=?",
+        )
+        .get(req.user!.id, requestId) as Row | undefined;
+      if (old) {
+        if (
+          old.group_id !== group.id ||
+          old.parent_id !== parentId ||
+          old.kind !== kind ||
+          old.body !== body
+        )
+          fail(409, "Mã gửi đã được dùng cho trao đổi khác.");
+        return res.json({ posts: posts(group.id) });
+      }
+      const submission = parent
+        ? { id: parent.submission_id }
+        : db
+            .prepare(
+              "SELECT id FROM group_submissions WHERE group_id=? ORDER BY version DESC LIMIT 1",
+            )
+            .get(group.id);
+      if (!submission) fail(409, "Nhóm chưa nộp sản phẩm để đọc và phản biện.");
+      db.prepare(
+        "INSERT INTO group_discussion_posts VALUES(?,?,?,?,?,?,?,?,?,?)",
+      ).run(
+        randomUUID(),
+        group.id,
+        parentId,
+        submission.id,
+        req.user!.id,
+        own?.number ?? null,
+        kind,
+        body,
+        now(),
+        requestId,
+      );
+      res.status(201).json({ posts: posts(group.id) });
+    },
+  );
 }

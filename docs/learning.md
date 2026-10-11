@@ -2,6 +2,8 @@
 
 Cập nhật 11/10/2026. Kế hoạch và phạm vi: [learning-implementation-plan.md](learning-implementation-plan.md). Thiết kế: [app-design.md](app-design.md).
 
+**Bổ sung 12/10/2026:** có chế độ **Kiểm tra online cả lớp**. Giáo viên chuẩn bị nguồn/ngân hàng/nhiều chương-bài, cài X phút chờ và Y phút làm bài. Bấm bắt đầu chốt đề chung và thông báo trong ứng dụng, giờ thi thật T+X, hạn chung T+X+Y. Câu đảo riêng mỗi học sinh/giữ qua reload, vào muộn không được cộng giờ. Chi tiết và trạng thái triển khai tại [online-exams.md](online-exams.md); thời lượng20 phút phía dưới chỉ còn áp dụng Săn điểm/thi theo lịch cũ.
+
 Rà soát quy định vi phạm/xử lý học sinh: [violations-audit.md](violations-audit.md). Cơ chế chính đã có, nhưng đã tái hiện lỗi 4 lần rời tab khi offline vẫn nhận đáp án chọn sau ngưỡng; chỉ theo dõi hidden, chưa mất focus khi trang visible; AI sai lặp lại chưa có. Ca idle mobile mô phỏng chưa đạt, cần kiểm tra thiết bị thật. Đây là kết quả audit, chưa sửa runtime/triển khai các khoảng trống đó.
 
 **Thay đổi mới nhất:** giáo viên đặt thời gian mỗi cấp theo lớp/môn tại Ôn tập & kiểm tra, mặc định 60 phút. Nếu đặt m phút, Cây Non/cấp 3 cần 2m phút trong chương, vé cấp 3/4/5 ở 2m/3m/4m, điểm Kết Trái ở 4m. Các mốc 2/3/4 giờ trong tài liệu phía dưới là mặc định 60 phút. Tỷ lệ đúng 70%, sửa sai, quyền mở chương, thời gian thi 20 phút và điểm thi không đổi. Khi đổi mốc giữ progress, vé/điểm lịch sử; không tự cấp trùng. Chi tiết [student-levels.md](student-levels.md).
@@ -46,7 +48,7 @@ Vé cấp theo thời gian đã ghi nhận, tối đa 3/chương, không cấp l
 
 ## Phòng thi
 
-Mỗi lượt tối đa 20 phút từ giờ server. Thi chính thức kết thúc sớm hơn nếu khung thi đóng; không yêu cầu vé hoặc điều kiện tự học. Cả lớp có cùng tập câu, thứ tự trộn theo lượt. Mỗi học sinh có một lượt/bài chính thức và chỉ một bài đang làm trên toàn tài khoản.
+Săn điểm/thi theo lịch: mỗi lượt tối đa20 phút từ giờ server, kết thúc sớm hơn nếu khung thi đóng. **Kiểm tra online cả lớp**: Y phút từ giờ mở chung sau thời gian chuẩn bị X, học sinh vào muộn dùng phần còn lại. Thi chính thức không yêu cầu vé hoặc điều kiện tự học. Cả lớp có cùng tập câu, thứ tự trộn theo lượt. Mỗi học sinh có một lượt/bài chính thức và chỉ một bài đang làm trên toàn tài khoản.
 
 Đáp án tự lưu có phiên bản, không trả đáp án đúng khi đang làm. Tải lại URL phòng thi tiếp tục cùng lượt. Khi mất mạng, thay đổi chưa gửi lưu trên trình duyệt hiện tại và tự thử lại khi kết nối trở lại; các đáp án chưa tới server trước hạn không được chấm. Đồng hồ thiết bị không quyết định thời hạn. Server tự thu bài ngay cả khi trình duyệt đóng, hoặc thu các lượt hết hạn lúc server khởi động lại.
 

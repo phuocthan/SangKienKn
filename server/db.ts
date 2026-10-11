@@ -6,6 +6,8 @@ import { ensureLearningSchema } from "./learning-db.js";
 import { ensureWelcomeSchema } from "./welcome-email.js";
 import { ensureLessonSchema } from "./lesson-catalog.js";
 import { ensureLevelSettingsSchema } from "./level-settings.js";
+import { ensureFeedbackSchema } from "./feedback.js";
+import { ensureGroupDiscussionSchema } from "./group-discussion.js";
 
 export function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -186,6 +188,8 @@ export function openDatabase(path: string) {
   ensureLevelSettingsSchema(db);
   ensureLessonSchema(db);
   ensureWelcomeSchema(db);
+  ensureFeedbackSchema(db);
+  ensureGroupDiscussionSchema(db);
   return db;
 }
 

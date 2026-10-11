@@ -129,6 +129,173 @@ function multipart(
   return form;
 }
 
+test("peer reading and threaded rebuttals open exactly after an extended deadline, enforce group ownership and close on further extension", async (t) => {
+  const f = await fixture(t),
+    teacher = await f.login("teacher-demo");
+  const created = await f.request(
+    "/classrooms/class-demo/group-activities",
+    creation(),
+    teacher,
+  );
+  const activity: GroupActivity = created.data,
+    path = `/group-activities/${activity.id}`;
+  const target = activity.groups[0],
+    otherGroup = activity.groups[1];
+  const owner = await f.login(target.representativeId),
+    peer = await f.login(otherGroup.representativeId);
+  await f.request(
+    `${path}/submissions`,
+    multipart({ requestId: randomUUID() }, "product", "sản phẩm.pdf", pdf),
+    owner,
+  );
+  const snapshot = (await f.request(path, undefined, teacher))
+    .data as GroupActivity;
+  const file = snapshot.groups[0].submissions[0].file!;
+  const discussion = `${path}/groups/${target.id}/discussion`;
+  const question = {
+    kind: "question",
+    body: "Nhóm giải thích cách đo nhé?",
+    requestId: randomUUID(),
+  };
+  assert.equal((await f.request(discussion, question, peer)).status, 409);
+  f.advance(60000);
+  assert.equal(
+    (await f.request(path, undefined, peer)).data.discussionOpen,
+    false,
+  );
+  assert.equal(
+    (await f.raw(`/group-files/${file.id}`, undefined, peer)).status,
+    403,
+  );
+  const firstExtension = await f.request(
+    `${path}/deadline`,
+    {
+      expectedDeadlineAt: 1060000,
+      deadlineAt: 1080000,
+      reason: "Thêm thời gian",
+    },
+    teacher,
+  );
+  assert.equal(firstExtension.status, 200);
+  f.advance(19999);
+  assert.equal((await f.request(discussion, question, peer)).status, 409);
+  f.advance(1);
+  const visible = (await f.request(path, undefined, peer))
+    .data as GroupActivity;
+  assert.equal(visible.discussionOpen, true);
+  assert.equal(visible.groups.length, 2);
+  assert.equal(visible.myGroupId, otherGroup.id);
+  assert.equal(
+    (await f.raw(`/group-files/${file.id}`, undefined, peer)).status,
+    200,
+  );
+  assert.equal(
+    (await f.request(`${path}/submissions`, linkSubmission(), owner)).status,
+    410,
+  );
+  assert.equal((await f.request(discussion, question, owner)).status, 403);
+  assert.equal(
+    (await f.request(discussion, { ...question, body: " " }, peer)).status,
+    400,
+  );
+  assert.equal(
+    (await f.request(discussion, { ...question, kind: "reply" }, peer)).status,
+    400,
+  );
+  const root = await f.request(discussion, question, peer);
+  assert.equal(root.status, 201);
+  assert.equal(root.data.posts.length, 1);
+  const rootId = root.data.posts[0].id;
+  assert.equal(
+    (await f.request(discussion, question, peer)).data.posts.length,
+    1,
+  );
+  assert.equal(
+    (await f.request(discussion, { ...question, body: "Khác" }, peer)).status,
+    409,
+  );
+  const reply = {
+    parentId: rootId,
+    body: "Nhóm dùng thước và đo ba lần.",
+    requestId: randomUUID(),
+  };
+  assert.equal((await f.request(discussion, reply, peer)).status, 403);
+  const answer = await f.request(discussion, reply, owner);
+  assert.equal(answer.status, 201);
+  assert.equal(answer.data.posts.length, 2);
+  assert.equal(answer.data.posts[1].parentId, rootId);
+  assert.equal(answer.data.posts[1].submissionVersion, 1);
+  assert.equal(
+    (await f.request(discussion, reply, owner)).data.posts.length,
+    2,
+  );
+  assert.equal(
+    (
+      await f.request(
+        `${path}/groups/${otherGroup.id}/discussion`,
+        { ...reply, requestId: randomUUID() },
+        peer,
+      )
+    ).status,
+    404,
+  );
+  assert.equal(
+    (
+      await f.request(
+        discussion,
+        {
+          ...reply,
+          parentId: answer.data.posts[1].id,
+          requestId: randomUUID(),
+        },
+        owner,
+      )
+    ).status,
+    404,
+  );
+  assert.equal(
+    (
+      await f.request(
+        discussion,
+        {
+          body: "Các nhóm chú ý ghi đơn vị.",
+          kind: "comment",
+          requestId: randomUUID(),
+        },
+        teacher,
+      )
+    ).status,
+    201,
+  );
+  f.db
+    .prepare(
+      "DELETE FROM memberships WHERE classroom_id='class-demo' AND student_id=?",
+    )
+    .run(otherGroup.representativeId);
+  assert.equal((await f.request(discussion, undefined, peer)).status, 403);
+  assert.equal(
+    (await f.raw(`/group-files/${file.id}`, undefined, peer)).status,
+    403,
+  );
+  const extended = await f.request(
+    `${path}/deadline`,
+    { expectedDeadlineAt: 1080000, deadlineAt: 1100000 },
+    teacher,
+  );
+  assert.equal(extended.data.discussionOpen, false);
+  assert.equal((await f.request(discussion, undefined, owner)).status, 409);
+  assert.equal(
+    f.db.prepare("SELECT COUNT(*) AS n FROM group_discussion_posts").get()!.n,
+    3,
+  );
+  f.advance(20000);
+  assert.equal(
+    (await f.request(discussion, undefined, owner)).data.posts.length,
+    3,
+  );
+  assert.equal(f.db.prepare("PRAGMA foreign_key_check").all().length, 0);
+});
+
 test("group creation is balanced, complete, stable and idempotent; validates count, requirements and deadline", async (t) => {
   const f = await fixture(t),
     teacher = await f.login("teacher-demo");
@@ -837,6 +1004,19 @@ test("group snapshot, Word, products and extensions persist through server resta
     { deadlineAt: 1070000, expectedDeadlineAt: activity.deadlineAt },
     teacher,
   );
+  f.advance(70000);
+  const peer = await f.login(activity.groups[1].representativeId);
+  const discussionPath = `/group-activities/${activity.id}/groups/${activity.groups[0].id}/discussion`;
+  const discussionBefore = await f.request(
+    discussionPath,
+    {
+      kind: "question",
+      body: "Sản phẩm hoạt động thế nào?",
+      requestId: randomUUID(),
+    },
+    peer,
+  );
+  assert.equal(discussionBefore.status, 201);
   const before = (
     await f.request(`/group-activities/${activity.id}`, undefined, teacher)
   ).data;
@@ -845,6 +1025,10 @@ test("group snapshot, Word, products and extensions persist through server resta
     await f.request(`/group-activities/${activity.id}`, undefined, teacher)
   ).data;
   assert.deepEqual(after, before);
+  assert.deepEqual(
+    (await f.request(discussionPath, undefined, peer)).data,
+    discussionBefore.data,
+  );
   assert.deepEqual(
     Buffer.from(
       await (

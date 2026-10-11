@@ -30,6 +30,10 @@ export type LearningChapter = {
   missing: string[];
 };
 export type ExamDefinition = {
+  delivery?: "online" | "scheduled";
+  durationMinutes?: number;
+  preparationMinutes?: number;
+  startedAt?: number | null;
   id: string;
   title: string;
   startsAt: number;
@@ -40,6 +44,7 @@ export type ExamDefinition = {
   blockedChapters: { id: string; title: string }[];
 };
 export type ExamRun = {
+  delivery?: "online" | "scheduled";
   id: string;
   title: string;
   kind: "hunt" | "official";
@@ -70,6 +75,7 @@ export type LearningReward = {
   createdAt: number;
 };
 export type LearningOverview = {
+  onlineExams?: boolean;
   levelMinutes?: number;
   canConfigureLevels?: boolean;
   examCreation?: boolean;
@@ -100,4 +106,19 @@ export type LearningOverview = {
     questionCount: number;
   }[];
   rewards: LearningReward[];
+};
+
+export type ExamNotice = {
+  id: string;
+  classroomId: string;
+  classroomName: string;
+  subject: string;
+  teacherName: string;
+  title: string;
+  startsAt: number;
+  closesAt: number;
+  durationMinutes: number;
+  preparationMinutes: number;
+  questionCount: number;
+  runId: string | null;
 };
