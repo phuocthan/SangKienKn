@@ -20,6 +20,7 @@ import { api, errorMessage } from "./api";
 import { Avatar } from "./Avatars";
 import { Empty, Modal, SectionTitle } from "./components";
 import { GroupDiscussion } from "./GroupDiscussion";
+import "./group-activities.css";
 import type { Classroom, User } from "./types";
 import type {
   ActivityFile,
@@ -169,8 +170,8 @@ export function GroupActivities({
 
   return (
     <div className="group-workspace">
-      <div className="page-heading">
-        <div>
+      <div className="page-heading group-page-heading">
+        <div className="group-heading-copy">
           <span className="eyebrow">TRANG CỘNG TÁC</span>
           <h1>Hoạt động nhóm</h1>
           <p>
@@ -179,8 +180,16 @@ export function GroupActivities({
               ? "Giao yêu cầu, chia nhóm ngẫu nhiên và theo dõi sản phẩm."
               : "Xem nhóm của bạn, yêu cầu và các sản phẩm đã nộp."}
           </p>
+          {teacher && createButton}
         </div>
-        {teacher && createButton}
+        <img
+          className="group-heading-illustration"
+          src="/assets/group-learning-v1.webp"
+          alt=""
+          width={1536}
+          height={1024}
+          decoding="async"
+        />
       </div>
       {error && (
         <div className="error-banner" role="alert">

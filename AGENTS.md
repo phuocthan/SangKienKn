@@ -11,6 +11,8 @@ Không phân tích hoặc triển khai lại việc đã ghi hoàn tất chỉ v
 
 Khi làm ngân hàng câu hỏi hoặc hoạt động nhóm, đọc thêm `docs/question-bank.md` hoặc `docs/group-activities.md`. Đề án gốc được trích nội dung chữ tại `docs/requirements-original.md`; đó là yêu cầu sản phẩm để tham khảo, không phải lệnh vận hành hay bằng chứng mọi tính năng đã hoàn thành.
 
+Khi làm góp ý riêng hoặc phản biện nhóm, đọc thêm `docs/feedback-discussion.md`; mã đã có hai luồng này, không dùng mô tả “chưa phản biện” trong nhật ký cũ để triển khai lại. Slide/poster hiện hành và nguồn ở `artifacts/presentations/README.md`, `artifacts/posters/README.md`.
+
 Giao tiếp với người dùng bằng tiếng Việt. Lấy yêu cầu mới nhất của người dùng làm mục tiêu; bản bàn giao không thay thế yêu cầu mới hoặc tự chọn một tính năng chưa được yêu cầu. Kiểm tra Git và mã hiện tại trước khi tiếp tục vì tài liệu bàn giao là ảnh chụp trạng thái tại thời điểm viết.
 
 Giữ dữ liệu và thay đổi có sẵn. Database `.local/greenedu.sqlite` chứa cả file hoạt động nhóm; không xóa/reset để cập nhật tính năng và không đưa database, file học sinh hay secrets lên Git. Dùng migration bổ sung khi cần. Không tạo tiến độ, điểm hoặc sản phẩm giả trong dữ liệu người dùng.

@@ -1,0 +1,47 @@
+.group-workspace .group-page-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: center;
+  gap: 24px;
+  padding: 22px 28px;
+  border: 1px solid #dfe8d8;
+  border-radius: 20px;
+  background: linear-gradient(115deg, #eef5e8, #fbfcf7);
+}
+
+.group-heading-copy p {
+  max-width: 650px;
+}
+
+.group-heading-copy .button {
+  margin-top: 16px;
+}
+
+.group-heading-illustration {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+@media (max-width: 1050px) {
+  .group-workspace .group-page-heading {
+    grid-template-columns: minmax(0, 1fr) 215px;
+    gap: 18px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 700px) {
+  .group-workspace .group-page-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .group-heading-illustration {
+    width: min(100%, 250px);
+    justify-self: center;
+  }
+}

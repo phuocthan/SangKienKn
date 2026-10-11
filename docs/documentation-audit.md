@@ -1,5 +1,13 @@
 # Rà soát tài liệu và bối cảnh GreenEdu
 
+## Đồng bộ hiện trạng và chuẩn bị commit — 12/10/2026
+
+Đối chiếu HEAD `72a7e3b`, thay đổi hiện có và mã góp ý/phản biện. Bảng tra cứu `project-status.md` được cập nhật12/10, bổ sung tài liệu [feedback-discussion.md](feedback-discussion.md), sửa mô tả cũ “chưa phản biện” trong đặc tả nhóm và bảng phần còn thiếu. README/AGENTS/thiết kế/bàn giao liên kết tới chức năng và poster/slide hiện hành. Giữ nhật ký cũ làm lịch sử, không tạo kết quả kiểm thử hay trạng thái deployment mới từ việc đọc mã.
+
+Đợt này không thay backend, không đọc/ghi database Railway và không chạy lại kiểm thử backend/E2E toàn hệ thống. Minh họa frontend và slide đã có bằng chứng kiểm tra ở [session-handoff.md](session-handoff.md); kết quả thuộc đợt hoàn thiện ngay trước commit. Mục rà soát11/10 bên dưới là lịch sử.
+
+Kiểm tra mới trước commit: 28 file Markdown (AGENTS, README, docs và README các artifact), 269 liên kết local đều có đích; `git diff --check` đạt. Kiểm tra liên kết chỉ xác nhận file tồn tại, không xác minh anchor hoặc website ngoài.
+
 Ngày 11/10/2026. Phạm vi: **21 Markdown lõi** gồm AGENTS.md, README.md và 19 tài liệu docs đã có, cùng liên kết tới artifact/mẫu/mã. Đối chiếu trực tiếp các mô tả thay đổi gần đây với shared/student-levels, server/app/learning/level-settings/lesson-catalog, src/Practice/Learning/StudentGarden/ClassCommunity/main và CSS. Đây là **kiểm tra tài liệu**, không phải chạy lại toàn bộ chức năng hoặc nghiệm thu Railway.
 
 ## Những chỗ đã sửa

@@ -4,6 +4,8 @@ Web app tiếng Việt giúp học sinh luyện tập, sửa sai và nuôi cây 
 
 Mở session Codex mới: đọc `AGENTS.md`, [bản bàn giao](docs/session-handoff.md), [tiến độ](docs/project-status.md) và [thiết kế chính](docs/app-design.md). Dùng phần hiện hành trước lịch sử; không làm lại việc đã hoàn tất hoặc báo kết quả test cũ thành mới. Nội dung chữ đề án Word gốc tại [requirements-original.md](docs/requirements-original.md); các khoảng trống ôn/thi đã kiểm tra tại [violations-audit.md](docs/violations-audit.md).
 
+Tài liệu bổ sung hiện hành: [góp ý riêng và phản biện nhóm](docs/feedback-discussion.md), [kiểm tra online X/Y](docs/online-exams.md), [poster học sinh](artifacts/posters/README.md) và [slide GreenEdu có animation](artifacts/presentations/README.md). Chức năng có trong mã không đồng nghĩa đã triển khai Railway; bảng trạng thái và giới hạn kiểm thử nằm trong tài liệu tiến độ/bàn giao.
+
 ## Chạy local trên Windows
 
 **Mặc định từ 11/10/2026:** chạy `npm run local`, mở **[http://localhost:5173](http://localhost:5173)** để sửa/test giao diện nhanh; API và database dùng trực tiếp **Railway**. Thao tác ghi dữ liệu sẽ ghi database thật Railway. Xem [hướng dẫn chạy local với Railway](docs/dev-railway.md). Phần bên dưới dành cho bản demo độc lập với database local.

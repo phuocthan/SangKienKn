@@ -1,5 +1,17 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Cách nắm trạng thái hiện tại — cập nhật 12/10/2026
+
+Đọc bảng tra cứu hiện hành bên dưới và các mục 12/10 trước nhật ký cũ. HEAD trước đợt gom tài liệu/commit là `72a7e3b`; các phân hệ online exam/góp ý/phản biện đã có trong commit đó. Đợt này bổ sung minh họa Hoạt động nhóm, slide rework có animation và đồng bộ tài liệu, không triển khai lại các chức năng đã có.
+
+Frontend mặc định local5173/HMR, API/database Railway. Tài liệu phân biệt mã hiện có, kết quả kiểm thử theo đợt và deployment; không xác nhận production bằng việc đọc checkout. Kiểm tra gần nhất của đợt minh họa: TypeScript/build riêng và 4 tổ hợp trình duyệt giả lập; PowerPoint: 9 slide/60 hiệu ứng, render tĩnh và dữ liệu animation/QR đã kiểm tra, chưa playback tương tác. Database, dữ liệu học sinh, secrets và file kiểm thử riêng không đưa vào commit.
+
+## Minh họa trang Hoạt động nhóm và slide rework — 12/10/2026
+
+Đã thêm ảnh người dùng gửi vào banner đầu trang Hoạt động nhóm, desktop cạnh chữ/mobile bên dưới; WebP giữ alpha, CSS riêng và nút tạo giữ hành vi. TypeScript/build riêng và4 tổ hợp kiểm tra trình duyệt với dữ liệu giả lập GET-only đạt, đã xem ảnh, không tràn ngang. Frontend5173/HMR chạy lại bằng `npm run local`, chưa push/deploy/ghi Railway.
+
+Đã hoàn tất slide rework9trang ít chữ/hình lớn,60 animation PowerPoint gốc và9 chuyển trang, giữ bản mẫu ban đầu. Đã mở lại bản lưu kiểm tra hiệu ứng, xem9ảnh PowerPoint, kiểm tra cấu trúc/font/import/hash/QR; chưa playback tương tác. Xem [bộ slide và minh họa](../artifacts/presentations/README.md). Chi tiết đợt này trong [session-handoff.md](session-handoff.md).
+
 ## Slide giới thiệu GreenEdu theo mẫu 2026 — 12/10/2026
 
 Đã tạo PowerPoint9slide, dùng trực tiếp nền/nhận diện/kiểu chữ của mẫu người dùng, nội dung GreenEdu và tác giả Nguyễn Thị Thanh Phương. Có ảnh giao diện kiểm thử chú thích rõ, logo trường, QR/link Railway và ghi chú nguồn; chữ chỉnh sửa được. Không tạo số liệu tác động giáo dục khi chưa có đo trước/sau; gia sư AI vẫn là kế hoạch. Đã xem9slide của bản cuối mở lại bằng Artifact Tool, kiểm tra package/layout/font/bullets và giải mã QR đạt; chưa render bằng PowerPoint trực tiếp. Xem [bộ slide và nguồn](../artifacts/presentations/README.md). Công việc tài liệu không thay runtime/dữ liệu hoặc deploy.
@@ -38,7 +50,7 @@ Theo yêu cầu người dùng đã xóa hai lớp10A1/Vật Lý và dữ liệu
 
 Kiểm tra mới **112/112 backend, 10/10 E2E desktop/mobile**, TypeScript/build riêng đạt. Frontend local5173/HMR đã cập nhật; **chưa deploy/push Railway**, API xóa nhiều câu cần triển khai mới có hiệu lực trên dữ liệu thật. Không thực hiện thao tác xóa production.
 
-## Bản tra cứu hiện hành cho session mới — 11/10/2026
+## Bản tra cứu hiện hành cho session mới — 12/10/2026
 
 Đọc phần này trước các ghi chép theo đợt bên dưới. **Mã checkout, bản đang phục vụ Railway và kết quả test là ba trạng thái riêng.** Ghi chép test/deploy cũ không xác nhận tình trạng đang chạy; kiểm tra Git/mã và capability khi tiếp tục. Yêu cầu mới của người dùng chọn việc tiếp theo, không tự triển khai lại toàn bộ đề án. Tổng rà soát tài liệu tại [documentation-audit.md](documentation-audit.md).
 
@@ -52,8 +64,11 @@ Kiểm tra mới **112/112 backend, 10/10 E2E desktop/mobile**, TypeScript/build
 | Ôn/kiểm tra | Đúng mới mở lời giải; Săn điểm cần cấp3/70% mọi lượt/sổ tay sạch/vé/quyền giáo viên. Thi chính thức mở từ bank hoặc Word/CSV, một/nhiều chương/bài, không cần điều kiện tự học. Các công cụ backend mới chưa deploy | [learning.md](learning.md) |
 | Kiểm tra online | Giáo viên phát yêu cầu, chờ X phút rồi làm Y phút; thông báo trong app, đề chung/đảo câu riêng/hạn chung. Đã có mã và test, chưa deploy Railway | [online-exams.md](online-exams.md) |
 | Vi phạm | Audit đã có, không sửa runtime. Còn lỗi nhận đáp án sau ngưỡng offline, thiếu focus/nhật ký/AI; idle mobile cần QA thật. Mặc định lần4 tự nộp, không tự thêm kỷ luật tài khoản | [violations-audit.md](violations-audit.md) |
-| Ngân hàng và PPCT | Railway đã nhập4chương/26bài+1mục bổ sung Vật lý11, chưa nhập câu thật. Thêm/xóa bài dạng archive và topic/trộn theo chủ đề đã có mã, còn chờ backend; Word50câu đã tạo, chưa nhập production | [question-bank.md](question-bank.md), [physics-11-curriculum-2026-2027.md](physics-11-curriculum-2026-2027.md) |
-| Nhóm và avatar | Nhóm giao/chia/đại diện/nộp/gia hạn/lịch sử đã có; chưa phản biện/chấm/thưởng nhóm. Avatar40ID/quyền vai trò/upload3MB; popup mới ở frontend local | [group-activities.md](group-activities.md), [user-avatars.md](user-avatars.md) |
+| Ngân hàng và PPCT | PPCT Vật lý11 gồm4chương/26bài chính thức và mục bổ sung; lần ghi nhận Railway12/10 có105 bản ghi câu hỏi, không suy thành105 câu hiện hành. Thêm/xóa archive/topic/trộn chủ đề đã có mã, cần đối chiếu backend; Word50câu đã tạo, chưa xác nhận nhập production | [question-bank.md](question-bank.md), [physics-11-curriculum-2026-2027.md](physics-11-curriculum-2026-2027.md) |
+| Hoạt động nhóm | Giao/chia/đại diện/nộp/gia hạn/lịch sử; mã đã có phản biện sau gia hạn và hết hạn mới. Banner minh họa mới ở frontend. Chấm/thưởng nhóm chưa có; backend phản biện Railway chưa xác minh trong đợt này | [group-activities.md](group-activities.md), [feedback-discussion.md](feedback-discussion.md), [app-design.md](app-design.md) |
+| Góp ý với giáo viên | Chủ đề riêng học sinh/giáo viên, trả lời, đóng/mở lại, tìm/lọc và retry không trùng đã có mã; không ẩn danh/không gửi email ngoài, Railway chưa xác minh trong đợt này | [feedback-discussion.md](feedback-discussion.md) |
+| Avatar |40ID/quyền vai trò/upload3MB, popup đổi ảnh và mật khẩu. Danh sách thành viên/avatar giáo viên cần API tương ứng | [user-avatars.md](user-avatars.md), [app-design.md](app-design.md) |
+| Tài liệu giới thiệu | Poster học sinh QR lớn/logo trường, Word50câu và hai bản PowerPoint; bản rework9slide/60 hiệu ứng là hiện hành | [poster](../artifacts/posters/README.md), [slide](../artifacts/presentations/README.md), [question-bank.md](question-bank.md) |
 | Nguồn và kiểm thử | Đề án là nguồn sản phẩm; kế hoạch/audit trước triển khai là lịch sử. Ca kiểm thử và bằng chứng theo từng đợt, không cộng số lượt hoặc báo lại thành test mới | [requirements-original.md](requirements-original.md), [mvp.md](mvp.md), [learning-implementation-plan.md](learning-implementation-plan.md), [levels-review-assessment.md](levels-review-assessment.md), [functional-test-cases.md](functional-test-cases.md) |
 
 Các trạng thái Railway trong bảng dựa trên lần triển khai/kiểm tra đã ghi ở [session-handoff.md](session-handoff.md), không phải gọi lại production trong đợt kiểm tra tài liệu. Còn nghiệm thu lớp thật/tải/vận hành và các khoảng trống audit; không ghi là hoàn thành toàn bộ.
@@ -204,7 +219,8 @@ Triển khai offline3002 ngày10/10 là lịch sử. Mặc định hiện hành 
 | Vé và kiểm tra 20 phút             | Vé mốc3/4/5, quyền giáo viên, server deadline, autosave/khôi phục/thu/chấm và cảnh báo tab trong mã | Khắc phục offline/ngưỡng tab, focus/nhật ký, QA idle mobile theo audit; nghiệm thu lớp thật      |
 | Săn điểm và thi chính thức         | Tối đa 3 lượt/chương, lịch lớp/cùng bộ câu đảo thứ tự, giáo viên đóng/thu bài, báo cáo             | Điều chỉnh/kết luận điểm sau sự cố theo quy trình trường                                     |
 | Green Points/đổi thưởng            | Sổ thưởng cây/thi cấp một lần, duyệt/từ chối và lịch sử                                            | Danh mục quà và quy trình đổi thưởng                                                         |
-| Hoạt động nhóm                     | Đã có tạo hoạt động, yêu cầu Word, chia nhóm, đại diện, nộp file/link, deadline và gia hạn         | Phản biện chéo, chấm điểm/điểm thưởng và điều chỉnh thành viên sau khi chốt nhóm             |
+| Hoạt động nhóm                     | Đã có tạo hoạt động, yêu cầu Word, chia nhóm, đại diện, nộp file/link, deadline/gia hạn và phản biện sau hạn gia hạn | Chấm điểm/điểm thưởng, điều chỉnh thành viên sau khi chốt; nghiệm thu backend phản biện Railway |
+| Góp ý riêng                        | Học sinh gửi chủ đề cho giáo viên lớp, trả lời/đóng/mở lại và lịch sử trong mã | Nghiệm thu vận hành và xác minh deployment Railway |
 | Trợ lý AI                          | Chưa triển khai                                                                                    | Kích hoạt sau nhiều lần sai, gợi ý từng bước, bài tương tự, nhà cung cấp và cấu hình sử dụng |
 | Vận hành chính thức                | Railway HTTPS đã có; backup/đối chiếu ở các đợt đã ghi, chưa nghiệm thu vận hành quy mô trường      | Đồng bộ mã/deployment, quy trình khôi phục, giám sát và kiểm thử tải                          |
 
@@ -213,7 +229,7 @@ Triển khai offline3002 ngày10/10 là lịch sử. Mặc định hiện hành 
 Phạm vi cấp độ/ôn tập/kiểm tra được triển khai theo [kế hoạch](learning-implementation-plan.md), quy tắc tại [learning.md](learning.md).
 
 1. Khi người dùng yêu cầu sửa, tiếp tục từ gap offline/focus/nhật ký và QA mobile ở violations-audit.md; sau đó nghiệm thu ôn/thi lớp thật/tải/quy trình sự cố. Không mặc định audit đã sửa.
-2. Bổ sung phản biện chéo, chấm và điểm thưởng hoạt động nhóm; hiện chỉ có giao/chia/nộp/gia hạn.
+2. Nghiệm thu phản biện nhóm hiện có sau khi triển khai backend phù hợp; chấm và điểm thưởng nhóm vẫn là phần tiếp theo, chỉ thực hiện khi được yêu cầu.
 3. Đổi quà Green Points, nhập tài liệu tùy ý và AI là các phần riêng tiếp theo.
 4. Railway HTTPS đã có; còn nghiệm thu backup/khôi phục, giám sát và vận hành trường học khi được yêu cầu.
 

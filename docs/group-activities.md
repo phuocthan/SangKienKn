@@ -33,8 +33,12 @@ Trang cập nhật dữ liệu mỗi 20 giây và khi quay lại cửa sổ. H�
 
 ## Quyền truy cập và lưu trữ
 
-Giáo viên chỉ quản lý hoạt động và tải sản phẩm trong lớp mình sở hữu. Học sinh phải là thành viên hiện tại của lớp; chỉ xem danh sách và sản phẩm của nhóm mình. Yêu cầu Word dành cho cả lớp. Không có URL file công khai: mỗi lần tải đều kiểm tra session và quyền lớp/nhóm, trả file dạng tải xuống.
+Giáo viên chỉ quản lý hoạt động và tải sản phẩm trong lớp mình sở hữu. Học sinh phải là thành viên hiện tại của lớp; trong giai đoạn nộp chỉ xem danh sách và sản phẩm của nhóm mình. Khi phản biện mở, học sinh xem các nhóm và sản phẩm trong cùng hoạt động. Yêu cầu Word dành cho cả lớp. Không có URL file công khai: mỗi lần tải đều kiểm tra session và quyền lớp/nhóm/giai đoạn, trả file dạng tải xuống.
 
 Hoạt động, thành viên, lịch sử, file gốc và sản phẩm nằm trong SQLite ở `DATABASE_PATH` (mặc định `.local/greenedu.sqlite`). Các bảng được thêm tự động khi khởi động bản mới; không xóa lớp, câu hỏi hoặc tiến độ cũ. Không đưa database hoặc file học sinh lên Git. Sao lưu/khôi phục database phải bao gồm file BLOB; dùng SQLite backup phù hợp hoặc dừng server trước khi sao chép database. Đây là lưu trữ cho MVP một instance; chưa có hạn ngạch tổng dung lượng hay quản lý xóa file.
 
-Phạm vi đợt này: tạo hoạt động, đọc yêu cầu Word, chia ngẫu nhiên, đại diện, nộp sản phẩm, hạn nộp, gia hạn và lịch sử. **Phản biện chéo, chấm điểm và điểm thưởng nhóm trong đề án chưa triển khai.**
+## Trao đổi và phản biện — cập nhật 12/10/2026
+
+Mã hiện tại đã bổ sung **Trao đổi & phản biện**. Điều kiện mở: giáo viên đã gia hạn ít nhất một lần và hạn hiện tại đã hết. Nhóm khác đặt câu hỏi/góp ý cho sản phẩm, nhóm sở hữu trả lời; giáo viên điều phối. Trao đổi gắn với phiên bản sản phẩm và kiểm tra quyền ở máy chủ. Xem [góp ý và phản biện](feedback-discussion.md) để nắm đầy đủ quy tắc và tương thích backend cũ.
+
+Chấm điểm, điểm thưởng nhóm và điều chỉnh thành viên sau khi chốt nhóm vẫn chưa triển khai. Có mã phản biện không đồng nghĩa Railway đã cập nhật backend; trạng thái từng đợt ở [project-status.md](project-status.md) và [session-handoff.md](session-handoff.md).

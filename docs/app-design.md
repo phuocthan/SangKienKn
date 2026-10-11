@@ -135,7 +135,15 @@ Bảng trên là hệ token trước khi áp dụng CSS khu vườn. `garden.css
 
 ### Hoạt động nhóm
 
+Phần đầu trang dùng minh họa ba học sinh thảo luận do người dùng cung cấp, asset `public/assets/group-learning-v1.webp`, nền xanh kem nhẹ. Desktop đặt hình bên phải tiêu đề/mô tả/nút Tạo hoạt động, điện thoại đặt hình dưới phần chữ. Ảnh trang trí có alt rỗng, giữ tỷ lệ/alpha; CSS riêng `src/group-activities.css`, không đổi các trang khác. Áp dụng cho giáo viên/học sinh, cả danh sách và chi tiết hoạt động.
+
 Danh sách có thẻ tổng quan, tìm tên/lọc đang nhận bài–đã hết hạn và tiến độ đã nộp. Trang chi tiết đặt hạn/trạng thái ở đầu, yêu cầu/file Word và danh sách nhóm trong hai khu; điện thoại xếp dọc. Giáo viên lọc Tất cả/Chưa nộp/Đã nộp, đổi đại diện và xem lịch sử ngay trong thẻ nhóm. Học sinh xem nhóm mình, form nộp chỉ hiện cho đại diện trước hạn. Trạng thái dùng cả màu và chữ; nghiệp vụ tại [group-activities.md](group-activities.md).
+
+Sau gia hạn ít nhất một lần và hết hạn mới, học sinh xem các nhóm/sản phẩm trong cùng hoạt động; nút **Trao đổi & phản biện** mở dialog câu hỏi/góp ý và phản hồi gắn phiên bản sản phẩm. Nhóm khác đặt ý kiến, nhóm sở hữu trả lời, giáo viên điều phối. Backend cũ thiếu capability không bật luồng mới. Quy tắc chi tiết ở [feedback-discussion.md](feedback-discussion.md).
+
+### Góp ý riêng với giáo viên
+
+Học sinh có **Góp ý với giáo viên**, giáo viên có **Quản lý góp ý** theo lớp. Danh sách tìm/lọc bên cạnh nội dung trao đổi, điện thoại xếp dọc; có người gửi/thời điểm và Chờ phản hồi/Đã phản hồi/Đã xử lý. Giáo viên đóng/mở lại chủ đề; composer giữ nội dung khi lỗi, khóa gửi trong lúc xử lý và dùng mã retry. Không thể hiện đây là góp ý ẩn danh hoặc email ngoài hệ thống. Nghiệp vụ tại [feedback-discussion.md](feedback-discussion.md).
 
 ## Ảnh trường logo và minh họa
 

@@ -1,5 +1,19 @@
 # Bàn giao session GreenEdu
 
+## Gom tài liệu hiện hành và commit theo yêu cầu — 12/10/2026
+
+Người dùng yêu cầu cập nhật đầy đủ tài liệu để session sau nắm dự án và commit mọi thay đổi liên quan. Đã đối chiếu Git/mã hiện tại (HEAD trước đợt này `72a7e3b`), đồng bộ bảng tra cứu12/10, README/AGENTS/thiết kế/đặc tả nhóm/báo cáo tài liệu. Bổ sung `docs/feedback-discussion.md`: góp ý riêng học sinh/giáo viên và phản biện sau gia hạn ít nhất một lần rồi hết hạn hiện tại đã có trong mã; không còn ghi chung là chưa triển khai. Chấm/thưởng nhóm, AI và gap offline/focus/nhật ký vẫn giữ là phần còn lại. Backend mới trên Railway chưa được xác minh trong đợt tài liệu.
+
+Phạm vi commit: banner minh họa nhóm/asset WebP/CSS, PowerPoint rework/3 minh họa nguồn/prompt và các tài liệu liên quan. Không đưa `.local`, database, file học sinh hay secrets vào Git. Các kiểm tra frontend/slide của đợt ngay trước được ghi riêng bên dưới; không báo lại thành kiểm thử mới của đợt gom tài liệu. Không deploy Railway trong công việc này.
+
+Kiểm tra tài liệu mới trước commit: 28 Markdown/269 liên kết local có đích, `git diff --check` đạt. Commit dùng nhánh `main`; chưa thực hiện push remote. Sau khi cần đưa lên remote, phải phân biệt bước push với deploy/kiểm tra Railway.
+
+## Minh họa Hoạt động nhóm và slide rework — 12/10/2026
+
+Theo yêu cầu mới, thêm ảnh người dùng đính kèm vào đầu trang **Hoạt động nhóm** của cả giáo viên/học sinh. File PNG gốc1536×1024/2,22MB được tối ưu WebP giữ alpha/tỷ lệ tại `public/assets/group-learning-v1.webp` (284188bytes). Desktop hình bên phải, mobile dưới chữ; nút Tạo hoạt động chuyển vào phần chữ, giữ hành vi. TSX và CSS riêng `src/group-activities.css`, không đổi API/DB. TypeScript/build riêng `.local/group-illustration-build` đạt; kiểm tra trình duyệt4 tổ hợp giáo viên/học sinh×desktop1440/mobile390 bằng API giả lập GET-only đạt: ảnh tải, không tràn ngang, nút tạo mở modal cho giáo viên và không xuất hiện cho học sinh. Đã xem ảnh desktop/mobile tại `.local/group-illustration-preview/`. Không ghi dữ liệu Railway/khởi động API local. `npm run local` đã mở lại frontend5173/HMR, API/database Railway; chưa push/deploy.
+
+Bộ slide rework cũng đã hoàn tất tại `artifacts/presentations/GreenEdu-Thanh-Phuong-Animation-2026.pptx`:9slide ít chữ/hình lớn,60 hiệu ứng gốc Fade/Fly In/Zoom/Wipe và9 chuyển slide. Bố cục Artifact Tool, animation lưu trực tiếp PowerPoint16.0 trên bản sao ẩn, không tác động tài liệu đang mở. Đã mở lại bản lưu kiểm tra60 hiệu ứng, xem ảnh9slide xuất PowerPoint, sửa logo/link trên nền tối, finalizer package/layout/font/import đạt, hash bản cuối khớp bản native và QR đúngRailway. Chưa kiểm tra playback tương tác trực tiếp; không coi render tĩnh là nghiệm thu từng khung animation. Lượt trước dừng vì auto-review hết hạn mức; sau yêu cầu tiếp tục đã chạy lại thành công, không còn chặn. Bản mẫu cũ giữ nguyên. Nguồn/prompt và hướng dẫn ở [README slide](../artifacts/presentations/README.md), file riêng `.local/greenedu-slides/v2/`. Giữ phân biệt gia sư AI dự kiến/số liệu tác động chưa có.
+
 ## Slide giới thiệu dự án theo mẫu 2026 — 12/10/2026
 
 Đã đọc trực tiếp `C:/Users/thant/Desktop/SangkienKN/Mẫu Slide 2026.pptx` và tạo bộ **9 slide** tại `artifacts/presentations/GreenEdu-Nguyen-Thi-Thanh-Phuong-2026.pptx`. Giữ khổ20×11,25inch, bố cục/nhận diện/font của mẫu; thay nội dung hướng dẫn bằng GreenEdu. Tác giả: **Nguyễn Thị Thanh Phương, giáo viên Vật lý, THPT Nguyễn Khuyến**, email do người dùng cung cấp. Có logo trường, ảnh giao diện thử nghiệm có chú thích, bộ câu hỏi50câu/10chủ đề và QR/link Railway. Văn bản chỉnh sửa được, ghi chú nguồn/phạm vi trong speaker notes.
