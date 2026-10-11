@@ -15,6 +15,7 @@ import {
 } from "./learning.js";
 import { findAvatar, avatarCollectionsFor } from "../shared/avatars.js";
 import { registerAvatarUploads } from "./avatar-uploads.js";
+import { studentLevel } from "../shared/student-levels.js";
 
 export type Row = Record<string, any>;
 export type AppRequest = Request & { user?: Row; tokenHash?: string };
@@ -440,6 +441,18 @@ export function createApp(
         subject: c.subject,
         grade: c.grade,
         teacherName: c.teacherName,
+        studentLevel:
+          req.user!.role === "student"
+            ? studentLevel(
+                Number(
+                  db
+                    .prepare(
+                  "SELECT COALESCE(SUM(CAST(p.seconds AS INTEGER)),0) AS seconds FROM progress p JOIN chapters ch ON ch.id=p.chapter_id WHERE p.student_id=? AND ch.classroom_id=?",
+                    )
+                    .get(req.user!.id, c.id)!.seconds,
+                ),
+              )
+            : null,
         studentCount: (
           db
             .prepare(
@@ -478,13 +491,44 @@ export function createApp(
       subject = text(req.body?.subject, "Môn học", 80),
       grade = text(req.body?.grade, "Khối lớp", 20);
     const id = randomUUID();
-    db.prepare("INSERT INTO classrooms VALUES (?,?,?,?,?)").run(
-      id,
-      name,
-      subject,
-      grade,
-      req.user!.id,
-    );
+    const key = (value: string) =>
+      value
+        .normalize("NFC")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLocaleLowerCase("vi");
+    // Keep existing classes intact; serialize the check/insert across DB writers.
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const existing = db
+        .prepare(
+          "SELECT name,subject,grade FROM classrooms WHERE teacher_id = ?",
+        )
+        .all(req.user!.id);
+      if (
+        existing.some(
+          (c) =>
+            key(String(c.name)) === key(name) &&
+            key(String(c.subject)) === key(subject) &&
+            key(String(c.grade)) === key(grade),
+        )
+      )
+        fail(
+          409,
+          "Lớp học đã tồn tại với cùng tên, môn học và khối. Hãy chọn lớp có sẵn.",
+        );
+      db.prepare("INSERT INTO classrooms VALUES (?,?,?,?,?)").run(
+        id,
+        name,
+        subject,
+        grade,
+        req.user!.id,
+      );
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
     res.status(201).json({ id });
   });
   app.post("/api/classrooms/:id/chapters", (req: AppRequest, res) => {
@@ -544,6 +588,7 @@ export function createApp(
       id: String(r.id),
       name: String(r.name),
       seconds: Number(r.seconds),
+      studentLevel: studentLevel(Number(r.seconds)),
       bloomedTrees: Number(r.bloomedTrees),
       resolvedCorrections: Number(r.resolvedCorrections),
     }));
@@ -607,6 +652,9 @@ export function createApp(
         email: String(u.email),
         avatarId: u.avatarId ?? null,
         seconds: summaries.reduce((n, s) => n + s.seconds, 0),
+        studentLevel: studentLevel(
+          summaries.reduce((n, s) => n + s.seconds, 0),
+        ),
         total: summaries.reduce((n, s) => n + s.total, 0),
         correct: summaries.reduce((n, s) => n + s.correct, 0),
         openCorrections: summaries.reduce((n, s) => n + s.openCorrections, 0),

@@ -34,13 +34,13 @@ test("teacher and student quick access uses database defaults and survives reloa
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
   await student.click();
   await expect(
-    page.getByRole("heading", { name: "Chào Hà Linh, cùng chăm vườn nhé!" }),
+    page.getByRole("heading", { name: "Chào Hà Linh, hôm nay mình học gì?" }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Lớp học của tôi", exact: true }),
   ).toHaveCount(0);
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Chào Hà Linh, cùng chăm vườn nhé!" }),
+    page.getByRole("heading", { name: "Chào Hà Linh, hôm nay mình học gì?" }),
   ).toBeVisible();
 });

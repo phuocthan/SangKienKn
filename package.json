@@ -9,7 +9,12 @@
   "scripts": {
     "check:node": "node scripts/check-node.mjs",
     "predev": "npm run check:node",
-    "dev": "concurrently -k -n api,web \"tsx watch server/index.ts\" \"vite --host 0.0.0.0\"",
+    "dev": "vite --mode railway --host 127.0.0.1",
+    "predev:offline": "npm run check:node",
+    "dev:offline": "concurrently -k -n api,web \"tsx watch server/index.ts\" \"vite --host 127.0.0.1\"",
+    "local": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local.ps1",
+    "preview:design": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File design-preview/start.ps1",
+    "preview:design:build": "vite build --config design-preview/vite.config.mjs",
     "prebuild": "npm run check:node",
     "build": "tsc --noEmit && vite build",
     "prestart": "npm run check:node",

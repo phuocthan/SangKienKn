@@ -765,7 +765,15 @@ test("community is visible only to class members and owner; it exposes no creden
     "rank",
     "resolvedCorrections",
     "seconds",
+    "studentLevel",
   ]);
+  assert.deepEqual(board.effort[0].studentLevel, {
+    level: 5,
+    name: "Kết Trái",
+    seconds: 14400,
+    progressPercent: 100,
+    remainingSeconds: 0,
+  });
   const tree = (
     await f.request("/classrooms/class-demo/garden", undefined, student)
   ).data.trees[0];

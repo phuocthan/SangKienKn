@@ -7,7 +7,20 @@
   color: #243b30;
   background: #f7f8f4;
   font-synthesis: none;
-  font-size: 14px;
+  font-size: 15px;
+  --text-body: 15px;
+  --text-label: 14px;
+  --text-caption: 13px;
+  --text-input: 16px;
+  --text-brand: 10px;
+  --text-card: 18px;
+  --text-section: 22px;
+  --text-title: 28px;
+  --text-question: 20px;
+  --text-hero: 30px;
+  --text-display: 36px;
+  --text-metric: 30px;
+  --text-score: 40px;
   --green: #236748;
   --deep: #174b35;
   --muted: #667168;
@@ -20,6 +33,7 @@
 }
 body {
   margin: 0;
+  line-height: 1.6;
   min-height: 100vh;
   background: #f7f8f4;
 }
@@ -78,29 +92,30 @@ p {
 h1,
 h2,
 h3 {
-  letter-spacing: -0.035em;
+  letter-spacing: -0.025em;
 }
 h1 {
-  font-size: 29px;
+  font-size: var(--text-title);
   line-height: 1.4;
   font-weight: 700;
 }
 h2 {
-  font-size: 21px;
+  font-size: var(--text-section);
   line-height: 1.5;
 }
 h3 {
-  font-size: 16px;
+  font-size: var(--text-card);
   line-height: 1.6;
 }
 p {
-  line-height: 1.8;
+  line-height: 1.7;
   color: var(--muted);
 }
 svg {
   flex-shrink: 0;
 }
 small {
+  font-size: var(--text-caption);
   line-height: 1.6;
 }
 hr {
@@ -164,7 +179,7 @@ hr {
   background: var(--soft);
   border-radius: 8px;
   padding: 6px 10px;
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 .group-requirements,
 .group-roster {
@@ -249,7 +264,7 @@ form label {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--text-label);
   font-weight: 600;
   margin-bottom: 20px;
 }
@@ -304,15 +319,15 @@ label small {
 }
 .logo small {
   display: block;
-  white-space: nowrap;
-  font-size: 6px;
-  letter-spacing: 1px;
+  white-space: normal;
+  font-size: var(--text-brand);
+  letter-spacing: 0.3px;
   font-weight: 600;
   margin-top: 2px;
   color: #658568;
 }
 .eyebrow {
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 700;
   letter-spacing: 1.5px;
   line-height: 1.8;
@@ -327,7 +342,7 @@ label small {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  font-size: 12px;
+  font-size: var(--text-label);
   font-weight: 600;
   transition:
     background 0.15s,
@@ -355,7 +370,7 @@ label small {
 .small {
   min-height: 36px;
   padding: 8px 12px;
-  font-size: 11px;
+  font-size: var(--text-label);
 }
 .full {
   width: 100%;
@@ -366,7 +381,7 @@ label small {
   padding: 7px 0;
   color: var(--green);
   font-weight: 600;
-  font-size: 11px;
+  font-size: var(--text-label);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -396,7 +411,7 @@ label small {
   background: #eaf3e7;
   border: 1px solid #dce9d7;
   color: #497349;
-  font-size: 10px;
+  font-size: var(--text-label);
   border-radius: 7px;
   display: inline-flex;
   align-items: center;
@@ -424,7 +439,7 @@ label small {
   background: #fff0ec;
   border: 1px solid #f4d3c8;
   color: #a14c3b;
-  font-size: 12px;
+  font-size: var(--text-body);
   line-height: 1.8;
   margin: 12px 0;
   overflow-wrap: anywhere;
@@ -467,7 +482,7 @@ label small {
   margin-bottom: 43px;
 }
 .workspace-label {
-  font-size: 9px;
+  font-size: var(--text-label);
   font-weight: 600;
   letter-spacing: 1.4px;
   color: #98a197;
@@ -490,7 +505,7 @@ label small {
   width: 100%;
   text-align: left;
   color: #7d857c;
-  font-size: 11px;
+  font-size: var(--text-label);
   font-weight: 500;
   position: relative;
   min-height: 44px;
@@ -521,7 +536,7 @@ label small {
   border-radius: 5px;
   min-width: 18px;
   text-align: center;
-  font-size: 9px;
+  font-size: var(--text-caption);
   padding: 3px;
 }
 .sidebar-bottom {
@@ -541,18 +556,18 @@ label small {
   margin-bottom: 11px;
 }
 .sidebar-note strong {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #657d47;
 }
 .sidebar-note p {
-  font-size: 10px;
+  font-size: var(--text-body);
   line-height: 1.9;
   margin: 7px 0 0;
   color: #98a086;
 }
 .sidebar-version {
   display: block;
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 1.8px;
   color: #aab0a4;
   margin: 21px 12px 0;
@@ -572,7 +587,7 @@ label small {
   gap: 15px;
 }
 .breadcrumb {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #949d92;
   display: flex;
   align-items: center;
@@ -602,7 +617,7 @@ label small {
   border: 0;
   background: none;
   padding: 0;
-  font-size: 10px;
+  font-size: var(--text-input);
   width: auto;
   max-width: 180px;
   cursor: pointer;
@@ -614,12 +629,12 @@ label small {
 }
 .profile strong {
   display: block;
-  font-size: 10px;
+  font-size: var(--text-label);
   font-weight: 600;
 }
 .profile small {
   display: block;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #8c978b;
   margin-top: 4px;
 }
@@ -670,7 +685,7 @@ label small {
 .avatar-preview p {
   margin: 5px 0 0;
   color: #718174;
-  font-size: 13px;
+  font-size: var(--text-body);
 }
 .avatar.avatar-preview-art {
   width: 88px;
@@ -688,7 +703,7 @@ label small {
 }
 .avatar-upload .subtle-note {
   margin-top: 10px;
-  font-size: 12px;
+  font-size: var(--text-caption);
   line-height: 1.7;
 }
 .avatar-filters button {
@@ -698,7 +713,7 @@ label small {
   background: #fbfcf8;
   color: #385340;
   font: inherit;
-  font-size: 12px;
+  font-size: var(--text-label);
   cursor: pointer;
 }
 .avatar-filters button[aria-pressed="true"] {
@@ -714,12 +729,12 @@ label small {
   margin-bottom: 24px;
 }
 .avatar-collection h3 {
-  font-size: 16px;
+  font-size: var(--text-card);
   margin-bottom: 12px;
 }
 .avatar-collection h3 > span {
   color: #718174;
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-weight: 400;
   margin-left: 6px;
 }
@@ -744,7 +759,7 @@ label small {
   font: inherit;
 }
 .avatar-choice > span:last-of-type {
-  font-size: 12px;
+  font-size: var(--text-caption);
   line-height: 1.5;
 }
 .avatar-choice:hover {
@@ -788,7 +803,7 @@ label small {
     height: 56px;
   }
   .avatar-choice > span:last-of-type {
-    font-size: 11px;
+    font-size: var(--text-caption);
   }
 }
 .main-content {
@@ -808,7 +823,7 @@ label small {
   margin: 8px 0 9px;
 }
 .page-heading p {
-  font-size: 11px;
+  font-size: var(--text-body);
   margin-bottom: 0;
   color: #889082;
 }
@@ -823,7 +838,7 @@ label small {
   gap: 12px;
   margin-top: 38px;
   padding: 22px 0;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #99a191;
 }
 .page-footer span:first-child {
@@ -845,7 +860,7 @@ label small {
   border: 1px solid #cdddbe;
   box-shadow: 0 8px 30px #203b2d1c;
   border-radius: 11px;
-  font-size: 12px;
+  font-size: var(--text-body);
   max-width: calc(100vw - 40px);
 }
 .garden-hero {
@@ -866,7 +881,7 @@ label small {
   padding: 30px 32px;
 }
 .hero-pill {
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 1px;
   background: #fbfcf480;
   border-color: #dbe5cc;
@@ -874,21 +889,21 @@ label small {
   margin-bottom: 13px;
 }
 .hero-copy h2 {
-  font-size: 28px;
+  font-size: var(--text-hero);
   line-height: 1.55;
   font-weight: 600;
   color: #344b2f;
   margin: 0 0 10px;
 }
 .hero-copy p {
-  font-size: 10px;
+  font-size: var(--text-body);
   line-height: 1.9;
   max-width: 375px;
   color: #829271;
   margin-bottom: 19px;
 }
 .hero-copy .button {
-  font-size: 11px;
+  font-size: var(--text-label);
   min-height: 41px;
   background: #567746;
   border-radius: 9px;
@@ -954,7 +969,7 @@ label small {
   position: absolute;
   bottom: 14px;
   left: 38%;
-  font-size: 8px;
+  font-size: var(--text-caption);
   color: #8d9c75;
   letter-spacing: 0.6px;
   z-index: 4;
@@ -1003,7 +1018,7 @@ label small {
   color: #b68476;
 }
 .stat-label {
-  font-size: 10px;
+  font-size: var(--text-label);
   font-weight: 500;
   color: #87917e;
   grid-column: 1;
@@ -1011,7 +1026,7 @@ label small {
   align-self: center;
 }
 .stat-card > strong {
-  font-size: 24px;
+  font-size: var(--text-metric);
   line-height: 1.6;
   letter-spacing: -1px;
   grid-column: 1;
@@ -1020,7 +1035,7 @@ label small {
   margin-top: 9px;
 }
 .stat-card > small {
-  font-size: 8px;
+  font-size: var(--text-caption);
   grid-column: 1/3;
   margin-top: 7px;
   color: #9ba291;
@@ -1033,11 +1048,11 @@ label small {
   margin: 29px 0 18px;
 }
 .section-title h2 {
-  font-size: 18px;
+  font-size: var(--text-section);
   margin: 0 0 5px;
 }
 .section-title p {
-  font-size: 10px;
+  font-size: var(--text-body);
   margin: 0;
   color: #90988a;
 }
@@ -1057,7 +1072,7 @@ label small {
 .community-banner p {
   margin: 0;
   color: #5b7352;
-  font-size: 12px;
+  font-size: var(--text-body);
 }
 .class-tree-grid {
   display: grid;
@@ -1080,16 +1095,16 @@ label small {
   padding: 20px;
 }
 .class-tree-copy h2 {
-  font-size: 16px;
+  font-size: var(--text-section);
   margin: 12px 0 6px;
   overflow-wrap: anywhere;
 }
 .class-tree-copy h2 small {
-  font-size: 11px;
+  font-size: var(--text-caption);
   font-weight: 400;
 }
 .class-tree-copy p {
-  font-size: 12px;
+  font-size: var(--text-body);
   margin-bottom: 0;
   overflow-wrap: anywhere;
 }
@@ -1101,7 +1116,7 @@ label small {
   border-top: 0;
   font-weight: 600;
   color: #435a39;
-  font-size: 11px;
+  font-size: var(--text-caption);
 }
 .community-ranking tbody tr:last-child th {
   border-bottom: 0;
@@ -1114,7 +1129,7 @@ label small {
 }
 .community-you {
   margin-left: 8px;
-  font-size: 9px;
+  font-size: var(--text-caption);
 }
 .community-rank {
   display: inline-grid;
@@ -1191,7 +1206,7 @@ label small {
   top: 13px;
   z-index: 2;
   background: #ffffffb3;
-  font-size: 8px;
+  font-size: var(--text-caption);
   color: #6b835d;
   border-color: #e6ebde;
   padding: 5px 8px;
@@ -1200,19 +1215,19 @@ label small {
   padding: 21px;
 }
 .chapter-body .eyebrow {
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 1.6px;
   color: #9aa58c;
 }
 .chapter-body h3 {
   margin: 6px 0 12px;
-  font-size: 14px;
+  font-size: var(--text-card);
   letter-spacing: -0.2px;
 }
 .chapter-meta {
   display: flex;
   gap: 17px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #8e9985;
   margin-bottom: 17px;
 }
@@ -1238,17 +1253,17 @@ label small {
   display: flex;
   justify-content: space-between;
   margin: 8px 0 18px;
-  font-size: 8px;
+  font-size: var(--text-caption);
   color: #94a083;
 }
 .chapter-progress strong {
-  font-size: 8px;
+  font-size: var(--text-caption);
   font-weight: 500;
   color: #789562;
 }
 .chapter-body .button {
   min-height: 38px;
-  font-size: 10px;
+  font-size: var(--text-label);
   border-color: #dce6d4;
   background: #f9fcf6;
 }
@@ -1270,17 +1285,17 @@ label small {
   display: flex;
 }
 .gentle-reminder strong {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: #7d785c;
 }
 .gentle-reminder p {
-  font-size: 9px;
+  font-size: var(--text-body);
   margin: 5px 0 0;
   color: #a39d83;
 }
 .gentle-reminder .text-button {
   margin-left: auto;
-  font-size: 10px;
+  font-size: var(--text-label);
   color: #88845f;
 }
 .info-panel {
@@ -1293,12 +1308,12 @@ label small {
   border-radius: 13px;
   color: #6a8754;
   margin: 23px 0;
-  font-size: 12px;
+  font-size: var(--text-body);
   line-height: 1.8;
 }
 .info-panel p {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--text-body);
   color: #728666;
 }
 .empty {
@@ -1320,11 +1335,11 @@ label small {
   margin-bottom: 20px;
 }
 .empty h3 {
-  font-size: 18px;
+  font-size: var(--text-card);
   margin: 0 0 10px;
 }
 .empty p {
-  font-size: 12px;
+  font-size: var(--text-body);
   max-width: 470px;
   margin: 0 auto 20px;
 }
@@ -1345,11 +1360,11 @@ label small {
   margin-bottom: 17px;
 }
 .quick-actions h3 {
-  font-size: 14px;
+  font-size: var(--text-card);
   margin-bottom: 7px;
 }
 .quick-actions p {
-  font-size: 10px;
+  font-size: var(--text-body);
   margin: 0;
 }
 .quick-actions > button > svg {
@@ -1386,21 +1401,21 @@ label small {
 }
 .class-card h3 {
   margin: 0 0 4px;
-  font-size: 18px;
+  font-size: var(--text-card);
 }
 .class-card p {
-  font-size: 11px;
+  font-size: var(--text-body);
   margin-bottom: 13px;
 }
 .class-card > span:not(.class-icon):not(.pill) {
-  font-size: 10px;
+  font-size: var(--text-label);
   color: #8c9983;
 }
 .class-card .pill {
   position: absolute;
   right: 17px;
   top: 18px;
-  font-size: 8px;
+  font-size: var(--text-label);
 }
 .chapter-list {
   display: flex;
@@ -1421,15 +1436,15 @@ label small {
   height: 41px;
   display: grid;
   place-items: center;
-  font-size: 12px;
+  font-size: var(--text-caption);
   flex-shrink: 0;
 }
 .chapter-row h3 {
-  font-size: 13px;
+  font-size: var(--text-card);
   margin: 0;
 }
 .chapter-row p {
-  font-size: 10px;
+  font-size: var(--text-body);
   margin: 4px 0 0;
 }
 .chapter-row .text-button {
@@ -1450,7 +1465,7 @@ label small {
   border: 0;
   background: #f6f8f2;
   padding: 10px 13px;
-  font-size: 11px;
+  font-size: var(--text-input);
 }
 .table-scroll {
   overflow-x: auto;
@@ -1459,14 +1474,14 @@ table {
   width: 100%;
   border-collapse: collapse;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: var(--text-body);
   text-align: left;
 }
 th {
   background: #f7f9f3;
   color: #8a9680;
   font-weight: 500;
-  font-size: 10px;
+  font-size: var(--text-caption);
   padding: 14px 18px;
   border-top: 1px solid #edf0e5;
   border-bottom: 1px solid #edf0e5;
@@ -1486,18 +1501,18 @@ tr:last-child td {
 }
 .student-cell strong {
   display: block;
-  font-size: 10px;
+  font-size: var(--text-label);
   color: #435a39;
   font-weight: 600;
 }
 .student-cell small {
   display: block;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #99a18f;
   margin-top: 3px;
 }
 .subtle-note {
-  font-size: 10px;
+  font-size: var(--text-caption);
   margin: 13px 4px;
 }
 .filter-bar {
@@ -1515,12 +1530,12 @@ tr:last-child td {
   display: flex;
   align-items: center;
   gap: 15px;
-  font-size: 11px;
+  font-size: var(--text-label);
   color: #89957d;
 }
 .filter-bar select {
   width: auto;
-  font-size: 11px;
+  font-size: var(--text-input);
   min-width: 240px;
   padding: 10px;
 }
@@ -1545,7 +1560,7 @@ tr:last-child td {
   display: flex;
   gap: 8px;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--text-label);
 }
 .question-toolbar input {
   width: auto;
@@ -1588,7 +1603,7 @@ tr:last-child td {
 }
 .import-preview p,
 .import-preview li {
-  font-size: 12px;
+  font-size: var(--text-body);
   line-height: 1.8;
 }
 .bank-question {
@@ -1609,7 +1624,7 @@ tr:last-child td {
   display: flex;
   gap: 10px;
   align-items: center;
-  font-size: 11px;
+  font-size: var(--text-body);
   color: #7a8870;
 }
 .bank-choices > div > span {
@@ -1631,11 +1646,11 @@ tr:last-child td {
   background: #f9faf6;
 }
 .bank-explanation strong {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #80946e;
 }
 .bank-explanation p {
-  font-size: 11px;
+  font-size: var(--text-body);
   margin: 5px 0 0;
 }
 .correction-list {
@@ -1653,14 +1668,14 @@ tr:last-child td {
   flex: 1;
 }
 .correction-card .eyebrow {
-  font-size: 8px;
+  font-size: var(--text-caption);
 }
 .correction-card h3 {
   margin: 6px 0 11px;
-  font-size: 13px;
+  font-size: var(--text-card);
 }
 .correction-card .pill {
-  font-size: 8px;
+  font-size: var(--text-label);
 }
 .progress-table {
   padding: 0 25px;
@@ -1686,14 +1701,14 @@ tr:last-child td {
   flex: 1;
 }
 .progress-details strong {
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-weight: 600;
 }
 .progress-details .progress-track {
   margin: 12px 0 8px;
 }
 .progress-details small {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #919e83;
 }
 .practice-layout {
@@ -1715,16 +1730,16 @@ tr:last-child td {
   justify-content: space-between;
   align-items: center;
   gap: 15px;
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: #91a185;
   margin-bottom: 18px;
 }
 .question-meta .eyebrow {
-  font-size: 9px;
+  font-size: var(--text-caption);
 }
 .question-card h2 {
   margin: 30px 0 26px;
-  font-size: 22px;
+  font-size: var(--text-question);
   line-height: 1.8;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -1744,7 +1759,7 @@ tr:last-child td {
   text-align: left;
   gap: 15px;
   color: #667959;
-  font-size: 13px;
+  font-size: var(--text-body);
   min-height: 60px;
 }
 .choice > span:nth-child(2) {
@@ -1769,7 +1784,7 @@ tr:last-child td {
   border-radius: 8px;
   background: #f4f6ef;
   color: #829574;
-  font-size: 11px;
+  font-size: var(--text-caption);
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -1811,16 +1826,16 @@ tr:last-child td {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 .explanation p {
   margin: 10px 0 3px;
   color: inherit;
-  font-size: 12px;
+  font-size: var(--text-body);
   white-space: pre-wrap;
 }
 .explanation small {
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .question-footer {
   display: flex;
@@ -1830,7 +1845,7 @@ tr:last-child td {
   margin-top: 28px;
 }
 .question-footer > span {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #95a387;
 }
 .question-footer > span > span {
@@ -1842,7 +1857,7 @@ tr:last-child td {
   justify-content: center;
   align-items: center;
   gap: 8px;
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #9caa8f;
   margin: 20px 0;
 }
@@ -1856,7 +1871,7 @@ tr:last-child td {
   border: 1px solid #ebdcb9;
   color: #a38a57;
   margin-bottom: 20px;
-  font-size: 11px;
+  font-size: var(--text-caption);
 }
 .idle-banner > span {
   flex: 1;
@@ -1884,16 +1899,16 @@ tr:last-child td {
   margin: 12px 0;
 }
 .completion p {
-  font-size: 12px;
+  font-size: var(--text-body);
 }
 .score {
-  font-size: 54px;
+  font-size: var(--text-score);
   color: #678a4d;
   font-weight: 600;
   margin: 25px 0;
 }
 .score span {
-  font-size: 15px;
+  font-size: var(--text-caption);
   color: #9ba68d;
   font-weight: 400;
 }
@@ -1929,15 +1944,15 @@ tr:last-child td {
 }
 .modal-head h2 {
   margin: 0;
-  font-size: 21px;
+  font-size: var(--text-section);
 }
 .modal input,
 .modal textarea,
 .modal select {
-  font-size: 12px;
+  font-size: var(--text-input);
 }
 .form-intro {
-  font-size: 12px;
+  font-size: var(--text-body);
   margin-bottom: 23px;
 }
 .form-grid {
@@ -1955,7 +1970,7 @@ tr:last-child td {
   padding: 28px;
 }
 .settings-card > h2 {
-  font-size: 17px;
+  font-size: var(--text-section);
 }
 .account-info {
   display: flex;
@@ -1964,7 +1979,7 @@ tr:last-child td {
   padding: 12px 0;
 }
 .account-info p {
-  font-size: 11px;
+  font-size: var(--text-body);
   margin: 5px 0 7px;
 }
 .password-form {
@@ -1972,7 +1987,7 @@ tr:last-child td {
   margin-top: 24px;
 }
 .password-form input {
-  font-size: 12px;
+  font-size: var(--text-input);
 }
 .password-screen {
   max-width: 640px;
@@ -1986,11 +2001,11 @@ tr:last-child td {
   padding: 32px;
 }
 .password-screen h1 {
-  font-size: 25px;
+  font-size: var(--text-title);
   margin: 12px 0;
 }
 .password-screen p {
-  font-size: 12px;
+  font-size: var(--text-body);
 }
 .boot {
   min-height: 100vh;
@@ -2002,7 +2017,7 @@ tr:last-child td {
   padding: 25px;
 }
 .boot p {
-  font-size: 12px;
+  font-size: var(--text-body);
 }
 .login-page {
   position: relative;
@@ -2031,10 +2046,10 @@ tr:last-child td {
 }
 .login-story-content .eyebrow {
   color: #759164;
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .login-story-content h1 {
-  font-size: 48px;
+  font-size: var(--text-display);
   line-height: 1.5;
   color: #3e5c36;
   font-weight: 600;
@@ -2042,7 +2057,7 @@ tr:last-child td {
   letter-spacing: -2px;
 }
 .login-story-content p {
-  font-size: 13px;
+  font-size: var(--text-body);
   line-height: 2;
   color: #8c9d7c;
 }
@@ -2090,11 +2105,11 @@ tr:last-child td {
   align-items: center;
   gap: 8px;
   margin-top: 20px;
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #8ba071;
 }
 .login-copyright {
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 2px;
   color: #a1b091;
 }
@@ -2112,17 +2127,17 @@ tr:last-child td {
   margin: auto;
 }
 .login-form-wrap > .pill {
-  font-size: 10px;
+  font-size: var(--text-label);
   color: #77935c;
   background: #f2f6e9;
 }
 .login-form-wrap h2 {
-  font-size: 28px;
+  font-size: var(--text-title);
   margin: 20px 0 9px;
   font-weight: 600;
 }
 .login-form-wrap > p {
-  font-size: 12px;
+  font-size: var(--text-body);
   margin-bottom: 30px;
 }
 .login-form-wrap form {
@@ -2135,7 +2150,7 @@ tr:last-child td {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 10px !important;
+  font-size: var(--text-caption) !important;
   margin: 20px 0 30px !important;
   color: #919c88;
 }
@@ -2146,11 +2161,11 @@ tr:last-child td {
   background: #f7faf1;
 }
 .demo-box > strong {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: #6e865b;
 }
 .demo-box p {
-  font-size: 10px;
+  font-size: var(--text-body);
   margin: 8px 0 13px;
 }
 .demo-box > div {
@@ -2158,12 +2173,12 @@ tr:last-child td {
   gap: 10px;
 }
 .demo-box .button {
-  font-size: 10px;
+  font-size: var(--text-label);
   flex: 1;
   background: #ffffffbf;
 }
 .login-bottom {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #a1ab96;
   margin-top: 35px;
 }
@@ -2195,13 +2210,13 @@ tr:last-child td {
     font-size: 25px;
   }
   .logo small {
-    font-size: 6px;
+    font-size: var(--text-brand);
   }
   .workspace-label {
-    font-size: 8px;
+    font-size: var(--text-label);
   }
   .nav-item {
-    font-size: 10px;
+    font-size: var(--text-label);
     gap: 9px;
   }
   .nav-item.active:before {
@@ -2218,7 +2233,7 @@ tr:last-child td {
     padding: 0 25px;
   }
   .breadcrumb {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .profile > div {
     display: none;
@@ -2231,7 +2246,7 @@ tr:last-child td {
     width: 58%;
   }
   .hero-copy h2 {
-    font-size: 25px;
+    font-size: var(--text-hero);
   }
   .hero-garden {
     width: 45%;
@@ -2253,7 +2268,7 @@ tr:last-child td {
   }
   .chapter-meta {
     gap: 10px;
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .stats-grid {
     gap: 12px;
@@ -2266,13 +2281,13 @@ tr:last-child td {
     height: 31px;
   }
   .stat-label {
-    font-size: 9px;
+    font-size: var(--text-label);
   }
   .stat-card > strong {
-    font-size: 21px;
+    font-size: var(--text-metric);
   }
   .login-story-content h1 {
-    font-size: 40px;
+    font-size: var(--text-display);
   }
   .login-story {
     padding: 30px;
@@ -2300,12 +2315,12 @@ tr:last-child td {
     border-radius: 10px;
   }
   .sidebar .logo small {
-    font-size: 5px;
+    font-size: var(--text-brand);
     letter-spacing: 1px;
   }
   .nav-item {
     padding: 12px 9px;
-    font-size: 9px;
+    font-size: var(--text-label);
     gap: 8px;
   }
   .nav-item svg {
@@ -2313,7 +2328,7 @@ tr:last-child td {
   }
   .workspace-label {
     padding-left: 9px;
-    font-size: 7px;
+    font-size: var(--text-label);
     letter-spacing: 1px;
   }
   .nav-item.active:before {
@@ -2323,10 +2338,10 @@ tr:last-child td {
     padding: 14px 10px;
   }
   .sidebar-note strong {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .sidebar-note p {
-    font-size: 9px;
+    font-size: var(--text-body);
   }
   .main-shell {
     margin-left: 180px;
@@ -2350,16 +2365,16 @@ tr:last-child td {
     display: block;
   }
   .page-heading h1 {
-    font-size: 25px;
+    font-size: var(--text-title);
   }
   .page-heading p {
-    font-size: 10px;
+    font-size: var(--text-body);
   }
   .hero-copy h2 {
-    font-size: 23px;
+    font-size: var(--text-hero);
   }
   .hero-copy p {
-    font-size: 9px;
+    font-size: var(--text-body);
   }
   .hero-garden > .tree-art:first-of-type {
     display: none;
@@ -2382,10 +2397,10 @@ tr:last-child td {
     padding: 18px;
   }
   .stat-label {
-    font-size: 11px;
+    font-size: var(--text-label);
   }
   .stat-card > small {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .chapter-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2426,7 +2441,7 @@ tr:last-child td {
     gap: 6px;
   }
   .section-title .small {
-    font-size: 9px;
+    font-size: var(--text-label);
     padding: 8px;
   }
   .filter-bar select {
@@ -2462,7 +2477,7 @@ tr:last-child td {
     display: none;
   }
   .login-story-content h1 {
-    font-size: 32px;
+    font-size: var(--text-display);
     letter-spacing: -1px;
   }
   .login-art > .tree-art:nth-child(2) {
@@ -2482,7 +2497,7 @@ tr:last-child td {
     padding: 30px;
   }
   .login-form-wrap h2 {
-    font-size: 24px;
+    font-size: var(--text-title);
   }
 }
 @media (max-width: 700px) {
@@ -2506,7 +2521,7 @@ tr:last-child td {
     max-width: 180px;
   }
   .sidebar > .logo small {
-    font-size: 5px;
+    font-size: var(--text-brand);
   }
   .workspace-label,
   .sidebar-note,
@@ -2520,7 +2535,7 @@ tr:last-child td {
     padding-bottom: 8px;
   }
   .nav-item {
-    font-size: 9px;
+    font-size: var(--text-label);
     white-space: nowrap;
     flex-direction: column;
     gap: 6px;
@@ -2544,7 +2559,7 @@ tr:last-child td {
     position: absolute;
     top: 2px;
     right: 7px;
-    font-size: 7px;
+    font-size: var(--text-caption);
     padding: 1px;
     min-width: 13px;
   }
@@ -2575,10 +2590,10 @@ tr:last-child td {
     border-bottom: 0;
   }
   .profile strong {
-    font-size: 9px;
+    font-size: var(--text-label);
   }
   .profile small {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .profile {
     gap: 7px;
@@ -2593,7 +2608,7 @@ tr:last-child td {
     gap: 6px;
   }
   .class-switch select {
-    font-size: 9px;
+    font-size: var(--text-input);
     max-width: 140px;
   }
   .main-content {
@@ -2606,16 +2621,16 @@ tr:last-child td {
     gap: 13px;
   }
   .page-heading h1 {
-    font-size: 24px;
+    font-size: var(--text-title);
     line-height: 1.5;
     margin: 7px 0 8px;
   }
   .page-heading p {
-    font-size: 10px;
+    font-size: var(--text-body);
     line-height: 1.8;
   }
   .page-heading .eyebrow {
-    font-size: 8px;
+    font-size: var(--text-caption);
     letter-spacing: 1.2px;
   }
   .garden-hero {
@@ -2628,11 +2643,11 @@ tr:last-child td {
     padding: 23px 23px 170px;
   }
   .hero-copy h2 {
-    font-size: 24px;
+    font-size: var(--text-hero);
     line-height: 1.45;
   }
   .hero-copy p {
-    font-size: 10px;
+    font-size: var(--text-body);
     width: 95%;
     max-width: 360px;
     margin-bottom: 15px;
@@ -2641,7 +2656,7 @@ tr:last-child td {
     margin-bottom: 10px;
   }
   .hero-copy .button {
-    font-size: 10px;
+    font-size: var(--text-label);
   }
   .hero-garden {
     height: 170px;
@@ -2692,13 +2707,13 @@ tr:last-child td {
     min-height: 122px;
   }
   .stat-label {
-    font-size: 9px;
+    font-size: var(--text-label);
   }
   .stat-card > strong {
-    font-size: 22px;
+    font-size: var(--text-metric);
   }
   .stat-card > small {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .stat-icon {
     width: 28px;
@@ -2715,13 +2730,13 @@ tr:last-child td {
     flex-wrap: wrap;
   }
   .section-title h2 {
-    font-size: 17px;
+    font-size: var(--text-section);
   }
   .section-title p {
-    font-size: 9px;
+    font-size: var(--text-body);
   }
   .section-title > .text-button {
-    font-size: 9px;
+    font-size: var(--text-label);
     margin-left: auto;
   }
   .chapter-grid {
@@ -2736,7 +2751,7 @@ tr:last-child td {
     width: 128px;
   }
   .chapter-level {
-    font-size: 7px;
+    font-size: var(--text-caption);
     left: 8px;
     top: 9px;
     padding: 4px 6px;
@@ -2745,10 +2760,10 @@ tr:last-child td {
     padding: 13px 12px;
   }
   .chapter-body .eyebrow {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .chapter-body h3 {
-    font-size: 11px;
+    font-size: var(--text-card);
     min-height: 34px;
     margin-bottom: 8px;
   }
@@ -2756,18 +2771,18 @@ tr:last-child td {
     gap: 6px;
     flex-direction: column;
     margin-bottom: 13px;
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .chapter-meta svg {
     width: 11px;
     height: 11px;
   }
   .chapter-progress {
-    font-size: 7px;
+    font-size: var(--text-caption);
     margin-bottom: 12px;
   }
   .chapter-body .button {
-    font-size: 8px;
+    font-size: var(--text-label);
     padding: 9px 5px;
     gap: 5px;
     min-height: 34px;
@@ -2780,17 +2795,17 @@ tr:last-child td {
     gap: 10px;
   }
   .gentle-reminder strong {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .gentle-reminder p {
-    font-size: 8px;
+    font-size: var(--text-body);
   }
   .gentle-reminder > span {
     padding: 8px;
   }
   .gentle-reminder .text-button {
     margin-left: 44px;
-    font-size: 9px;
+    font-size: var(--text-label);
   }
   .teacher-hero {
     min-height: 340px;
@@ -2814,13 +2829,13 @@ tr:last-child td {
     padding: 17px 13px;
   }
   .class-card h3 {
-    font-size: 15px;
+    font-size: var(--text-card);
   }
   .class-card p {
-    font-size: 10px;
+    font-size: var(--text-body);
   }
   .class-card > span:not(.class-icon):not(.pill) {
-    font-size: 9px;
+    font-size: var(--text-label);
   }
   .class-card .pill {
     position: static;
@@ -2836,10 +2851,10 @@ tr:last-child td {
     flex-wrap: wrap;
   }
   .chapter-row h3 {
-    font-size: 11px;
+    font-size: var(--text-card);
   }
   .chapter-row .text-button {
-    font-size: 9px;
+    font-size: var(--text-label);
     margin-left: 53px;
   }
   .search-input {
@@ -2853,7 +2868,7 @@ tr:last-child td {
     align-items: flex-start;
     width: 100%;
     gap: 7px;
-    font-size: 10px;
+    font-size: var(--text-label);
   }
   .filter-bar select {
     width: 100%;
@@ -2863,19 +2878,19 @@ tr:last-child td {
     padding: 19px;
   }
   .bank-question h3 {
-    font-size: 13px;
+    font-size: var(--text-card);
   }
   .bank-choices > div {
-    font-size: 10px;
+    font-size: var(--text-body);
   }
   .bank-explanation p {
-    font-size: 10px;
+    font-size: var(--text-body);
   }
   .correction-card {
     padding: 17px;
   }
   .correction-card h3 {
-    font-size: 12px;
+    font-size: var(--text-card);
   }
   .correction-card > .button {
     margin-left: 53px;
@@ -2891,13 +2906,13 @@ tr:last-child td {
     height: 57px;
   }
   .progress-row .pill {
-    font-size: 8px;
+    font-size: var(--text-label);
   }
   .progress-details strong {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .progress-details small {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .question-card {
     padding: 21px 17px;
@@ -2906,20 +2921,20 @@ tr:last-child td {
     align-items: flex-start;
   }
   .question-meta .eyebrow {
-    font-size: 8px;
+    font-size: var(--text-caption);
     max-width: 75%;
   }
   .question-meta > span:last-child {
-    font-size: 9px;
+    font-size: var(--text-caption);
     white-space: nowrap;
   }
   .question-card h2 {
-    font-size: 18px;
+    font-size: var(--text-question);
     margin: 23px 0;
   }
   .choice {
     padding: 13px 12px;
-    font-size: 12px;
+    font-size: var(--text-body);
     gap: 11px;
   }
   .choice-letter {
@@ -2933,17 +2948,17 @@ tr:last-child td {
     padding: 15px;
   }
   .explanation > div {
-    font-size: 11px;
+    font-size: var(--text-caption);
     align-items: flex-start;
   }
   .explanation p {
-    font-size: 11px;
+    font-size: var(--text-body);
   }
   .practice-top > .pill {
-    font-size: 8px;
+    font-size: var(--text-label);
   }
   .practice-top > .text-button {
-    font-size: 10px;
+    font-size: var(--text-label);
   }
   .idle-banner {
     flex-wrap: wrap;
@@ -2951,13 +2966,13 @@ tr:last-child td {
   }
   .idle-banner > span {
     min-width: 80%;
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .idle-banner > .button {
     margin-left: 32px;
   }
   .practice-note {
-    font-size: 8px;
+    font-size: var(--text-caption);
     line-height: 1.7;
     align-items: flex-start;
   }
@@ -2965,13 +2980,13 @@ tr:last-child td {
     padding: 35px 18px;
   }
   .completion h1 {
-    font-size: 23px;
+    font-size: var(--text-title);
   }
   .completion p {
-    font-size: 11px;
+    font-size: var(--text-body);
   }
   .page-footer {
-    font-size: 8px;
+    font-size: var(--text-caption);
     margin-top: 28px;
     padding: 20px 0;
   }
@@ -2979,7 +2994,7 @@ tr:last-child td {
     padding: 23px;
   }
   .settings-card h2 {
-    font-size: 16px;
+    font-size: var(--text-section);
   }
   .modal-backdrop {
     padding: 15px;
@@ -2989,10 +3004,10 @@ tr:last-child td {
     max-height: 92dvh;
   }
   .modal h2 {
-    font-size: 19px;
+    font-size: var(--text-section);
   }
   .modal label {
-    font-size: 11px;
+    font-size: var(--text-label);
   }
   .modal .form-grid {
     gap: 12px;
@@ -3015,17 +3030,17 @@ tr:last-child td {
     margin: 0;
   }
   .login-story-content .eyebrow {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .login-story-content h1 {
-    font-size: 30px;
+    font-size: var(--text-display);
     line-height: 1.5;
     margin: 12px 0 8px;
     position: relative;
     z-index: 2;
   }
   .login-story-content p {
-    font-size: 10px;
+    font-size: var(--text-body);
     line-height: 1.8;
     position: relative;
     z-index: 2;
@@ -3067,18 +3082,18 @@ tr:last-child td {
     max-width: 420px;
   }
   .login-form-wrap h2 {
-    font-size: 25px;
+    font-size: var(--text-title);
     margin-top: 15px;
   }
   .login-form-wrap > p {
-    font-size: 11px;
+    font-size: var(--text-body);
     margin-bottom: 23px;
   }
   .login-form-wrap form {
     margin-top: 25px;
   }
   .login-bottom {
-    font-size: 8px;
+    font-size: var(--text-caption);
     margin-top: 28px;
   }
   .demo-box {
@@ -3088,10 +3103,10 @@ tr:last-child td {
     font-size: 25px;
   }
   .login-story .logo small {
-    font-size: 6px;
+    font-size: var(--text-brand);
   }
   .password-form label {
-    font-size: 12px;
+    font-size: var(--text-label);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -3102,7 +3117,7 @@ tr:last-child td {
 }
 
 .lesson-select {
-  font-size: 10px;
+  font-size: var(--text-input);
   padding: 9px;
   margin-bottom: 10px;
   background: #fcfdf9;
@@ -3122,16 +3137,16 @@ tr:last-child td {
 .progress-details small,
 .student-cell strong,
 th {
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 .student-cell small {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .hero-copy p,
 .progress-details strong,
 table {
-  font-size: 13px;
+  font-size: var(--text-body);
 }
 .main-shell,
 .main-content,
@@ -3147,7 +3162,7 @@ table {
   overflow-y: auto;
 }
 .nav-item {
-  font-size: 13px;
+  font-size: var(--text-label);
 }
 .page-heading p,
 .section-title p,
@@ -3156,11 +3171,11 @@ table {
 .profile strong,
 .button,
 .text-button {
-  font-size: 13px;
+  font-size: var(--text-label);
 }
 .profile small,
 .subtle-note {
-  font-size: 12px;
+  font-size: var(--text-caption);
 }
 .page-heading p,
 .subtle-note,
@@ -3190,17 +3205,17 @@ table {
   gap: 7px;
 }
 .workspace-stat > span {
-  font-size: 12px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .workspace-stat > strong {
-  font-size: 30px;
+  font-size: var(--text-metric);
   letter-spacing: -0.04em;
   color: var(--deep);
 }
 .workspace-stat > small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-caption);
 }
 .workspace-filters {
   display: flex;
@@ -3225,13 +3240,13 @@ table {
   padding: 24px;
 }
 .accounts-card table {
-  font-size: 13px;
+  font-size: var(--text-body);
 }
 .account-role {
   padding: 5px 10px;
   border-radius: 7px;
   background: #edf4eb;
-  font-size: 12px;
+  font-size: var(--text-label);
   color: #256344;
   white-space: nowrap;
 }
@@ -3280,11 +3295,11 @@ table {
   align-items: center;
 }
 .group-activity-card h2 {
-  font-size: 19px;
+  font-size: var(--text-section);
   margin: 22px 0 16px;
 }
 .group-activity-card p {
-  font-size: 12px;
+  font-size: var(--text-body);
   margin-bottom: 12px;
 }
 .group-status {
@@ -3325,7 +3340,7 @@ table {
   border-top: 1px solid var(--border);
   padding-top: 17px;
   margin-top: auto;
-  font-size: 12px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .group-activity-card .group-progress {
@@ -3346,7 +3361,7 @@ table {
 }
 .group-detail-summary h2 {
   margin: 7px 0 14px;
-  font-size: 24px;
+  font-size: var(--text-section);
   overflow-wrap: anywhere;
 }
 .group-deadline-block {
@@ -3360,14 +3375,14 @@ table {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 12px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .group-deadline-block > strong {
-  font-size: 15px;
+  font-size: var(--text-caption);
 }
 .group-deadline-block > small {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .group-deadline-block .button {
@@ -3380,11 +3395,11 @@ table {
   gap: 6px;
 }
 .group-completion > strong {
-  font-size: 27px;
+  font-size: var(--text-metric);
   color: var(--green);
 }
 .group-completion > span {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .group-detail-layout {
@@ -3405,7 +3420,7 @@ table {
 }
 .group-instructions,
 .group-word-text {
-  font-size: 13px;
+  font-size: var(--text-body);
 }
 .group-word-text {
   max-height: 360px;
@@ -3430,7 +3445,7 @@ table {
   border-radius: 9px;
   padding: 10px 12px;
   min-height: 42px;
-  font-size: 12px;
+  font-size: var(--text-label);
 }
 .group-tabs > button.active {
   background: #eaf3e7;
@@ -3455,16 +3470,16 @@ table {
 }
 .group-roster .group-section-head h3 {
   margin-bottom: 3px;
-  font-size: 18px;
+  font-size: var(--text-card);
 }
 .group-roster .group-section-head small {
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .group-members li {
   align-items: center;
   justify-content: flex-start;
-  font-size: 12px;
+  font-size: var(--text-body);
   gap: 9px;
 }
 .group-members li > span:nth-child(2) {
@@ -3479,30 +3494,30 @@ table {
   border-radius: 50%;
   background: #eff3e9;
   color: #54704b;
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 600;
 }
 .group-members small {
-  font-size: 10px;
+  font-size: var(--text-body);
   border-radius: 5px;
   background: #eaf3e7;
   padding: 3px 6px;
 }
 .group-roster .group-representative select {
-  font-size: 12px;
+  font-size: var(--text-input);
 }
 .group-products-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: var(--text-caption);
 }
 .group-products-title > span {
   border-radius: 50%;
   background: #f0f3ed;
   padding: 3px 8px;
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .group-no-product {
@@ -3514,13 +3529,13 @@ table {
 }
 .group-no-product p {
   margin: 9px 0 4px;
-  font-size: 12px;
+  font-size: var(--text-body);
 }
 .group-no-product small {
-  font-size: 11px;
+  font-size: var(--text-caption);
 }
 .group-submission {
-  font-size: 12px;
+  font-size: var(--text-body);
   border: 1px solid #e5e9e1;
 }
 .group-submission:first-of-type {
@@ -3529,7 +3544,7 @@ table {
 }
 .group-submission .group-file,
 .group-product-link {
-  font-size: 12px;
+  font-size: var(--text-body);
 }
 .group-file > span {
   min-width: 0;
@@ -3593,7 +3608,7 @@ table {
     min-width: 0;
     padding: 0;
     border: 0;
-    font-size: 12px;
+    font-size: var(--text-body);
   }
   .accounts-card td:first-child,
   .accounts-card td:last-child {
@@ -3602,7 +3617,7 @@ table {
   .accounts-card td[data-label]::before {
     content: attr(data-label);
     display: block;
-    font-size: 11px;
+    font-size: var(--text-label);
     color: var(--muted);
     margin-bottom: 6px;
   }
@@ -3613,14 +3628,14 @@ table {
     overflow-y: visible;
   }
   .sidebar nav .nav-item {
-    font-size: 11px;
+    font-size: var(--text-label);
   }
   .page-heading p,
   .section-title p,
   .button,
   .text-button,
   .class-switch select {
-    font-size: 12px;
+    font-size: var(--text-input);
   }
   .workspace-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3630,10 +3645,10 @@ table {
     padding: 16px;
   }
   .workspace-stat > strong {
-    font-size: 25px;
+    font-size: var(--text-metric);
   }
   .workspace-stat > span {
-    font-size: 11px;
+    font-size: var(--text-caption);
   }
   .workspace-filters {
     gap: 9px;
@@ -3650,7 +3665,7 @@ table {
     gap: 22px;
   }
   .group-detail-summary h2 {
-    font-size: 21px;
+    font-size: var(--text-section);
   }
   .group-deadline-block {
     border: 0;
@@ -3673,13 +3688,13 @@ table {
     text-align: left;
   }
   .modal label {
-    font-size: 13px;
+    font-size: var(--text-label);
   }
   .modal input,
   .modal select,
   .modal textarea,
   .password-form input {
-    font-size: 16px;
+    font-size: var(--text-input);
   }
 }
 @media (max-width: 420px) {
@@ -3690,14 +3705,14 @@ table {
     padding: 20px;
   }
   .chapter-body h3 {
-    font-size: 16px;
+    font-size: var(--text-card);
     min-height: 0;
   }
   .chapter-body .eyebrow {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .chapter-body .button {
-    font-size: 13px;
+    font-size: var(--text-label);
     min-height: 44px;
   }
   .chapter-meta {
@@ -3708,7 +3723,7 @@ table {
 }
 @media (max-width: 700px) {
   .lesson-select {
-    font-size: 12px;
+    font-size: var(--text-input);
     padding: 8px 5px;
   }
   .filter-bar {

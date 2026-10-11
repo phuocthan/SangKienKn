@@ -6,7 +6,31 @@ Tài liệu tra cứu duy nhất về hình thức giao diện, cập nhật 11/
 
 Giao diện tiếng Việt theo chủ đề khu vườn kiến thức, màu xanh rừng, nền sáng, thẻ dễ đọc và các thao tác rõ ràng. Font **Be Vietnam Pro** được phục vụ nội bộ, các trọng lượng 400/500/600/700/800. Không phụ thuộc tải font từ dịch vụ ngoài. Icon dùng Lucide; cây cấp độ dùng SVG theo dữ liệu thực tế.
 
-Các biến chính trong `src/design.css`: xanh `#216b4a`, xanh đậm `#164b35`, chữ phụ `#65746c`, viền `#e1e9e2`, nền phụ `#eef6ef`, nền trang `#f5f8f4`, chữ `#203b2d`, bán kính chuẩn 20 px. CSS chức năng/responsive tại `src/styles.css`; CSS hoàn thiện diện mạo tại `src/design.css`, nạp sau CSS gốc trong `src/main.tsx`.
+Thiết kế khu vườn ấm áp đã được người dùng duyệt qua ảnh và yêu cầu áp dụng ngày 11/10/2026. Các biến hiện tại trong `src/garden.css`: xanh `#315d3e`, xanh đậm `#153f2c`, chữ phụ `#596d60`, viền `#e2e6d8`, nền phụ `#eef3e4`, nền kem `#faf9f3`, chữ `#203f2c`, bán kính chuẩn 22 px. CSS chức năng/responsive tại `src/styles.css`; lớp diện mạo cũ tại `src/design.css`, cấp học sinh tại `src/student-level.css`; `src/garden.css` được nạp cuối trong `src/main.tsx` để áp dụng thiết kế đã duyệt cho app thật.
+
+### Thiết kế đã duyệt và áp dụng — 11/10/2026
+
+Sidebar xanh rừng bo 24 px, nền kem với ảnh trường mờ, thẻ trắng ấm viền nhẹ, nút xanh và nút phụ có viền cùng chiều cao tối thiểu 44–46 px. Đồng bộ biểu mẫu, bảng, modal và màn hình đăng nhập cho Học sinh/Giáo viên/Admin. Logo trường vẫn dùng nguồn gốc riêng; cây từ sách dùng ảnh `knowledge-garden-v1.webp` đã có. Giữ trạng thái focus, lỗi/đúng/sai, disabled và điều hướng hiện tại.
+
+Trang chủ học sinh có hero và mục tiêu kế tiếp ở hai cột, ba thống kê dữ liệu thực, thẻ chương gọn với số chương/cây/tiến độ/chọn bài/nút luyện tập, cuối trang là hành trình năm cấp và sổ tay. `GardenGoal.tsx` suy ra mục tiêu lên cấp từ thời gian lớp/môn hiện tại; không sử dụng số liệu giả 10/15 phút theo ngày trong mockup vì API chưa cung cấp dữ liệu theo ngày. Số cây ra hoa chuyển sang thẻ mục tiêu. Không đổi quy tắc cây theo chương hoặc cấp học sinh, không lấy tên các cấp minh họa thay nghiệp vụ hiện có.
+
+Ở màn hình 701–1200 px hero và mục tiêu xếp dọc; điện thoại dùng điều hướng ngang, các khối một cột, giữ chữ nội dung 15 px/nhãn 14 px/chú thích 13 px/ô nhập 16 px. Tiêu đề hero học sinh 26–34 px desktop và 27 px điện thoại; số liệu 26 px (23 px tablet). Hỗ trợ `prefers-reduced-motion`. Bản prototype 5180 vẫn riêng; giao diện thật ở frontend local 5173 dùng API/database Railway.
+
+### Thứ bậc chữ — 11/10/2026
+
+Dùng các biến `--text-*` tại `src/styles.css` thay cho cỡ chữ riêng lẻ ở mỗi trang/breakpoint. Nội dung **15 px**, nhãn/nút **14 px**, chú thích **13 px**, trường nhập/chọn **16 px**. Điện thoại giữ nguyên các cỡ chữ này; chỉ thu gọn tiêu đề. Dòng tên trường trong logo là chữ thương hiệu 10 px.
+
+| Vai trò | Desktop | Điện thoại ≤700 px |
+| --- | --- | --- |
+| Tiêu đề trang/đăng nhập | 28 px | 24 px |
+| Tiêu đề mục | 22 px | 20 px |
+| Tiêu đề thẻ | 18 px | 18 px |
+| Câu hỏi luyện tập/thi | 20 px | 20 px |
+| Tiêu đề khối giới thiệu | 30 px | 26 px |
+| Tiêu đề giới thiệu đăng nhập | 36 px | 30 px |
+| Số liệu thống kê | 30 px | 30 px |
+
+Nội dung dùng giãn dòng khoảng 1,7, chú thích/nhãn khoảng 1,5–1,6; tiêu đề bớt ép khoảng cách ký tự. Giới hạn chiều dài mô tả, cho tiêu đề/thao tác xuống hàng khi thiếu chỗ. Thẻ thống kê đặt số liệu trên hàng riêng; bộ lọc đặt nhãn phía trên trường chọn và tự xuống hàng. Chữ phụ của bảng/chương/thống kê dùng màu đậm hơn `#586b60`. Quy tắc áp dụng cả ôn/thi và thẻ cấp độ; không thu chú thích xuống 8–11 px trên mobile.
 
 ## Bố cục và thành phần
 
@@ -28,6 +52,14 @@ Logo trường riêng vẫn hiển thị cạnh tên GreenEdu ở đăng nhập 
 Minh họa cây/mầm từ sách: `public/assets/knowledge-garden-v1.webp` khoảng 277 KB; ảnh gốc `.png` cùng tên. Prompt `output/imagegen/knowledge-garden-v1-prompt.txt`. `GardenIllustration` dùng ở đăng nhập, tổng quan và banner Admin; không thay cây cấp độ SVG vì cây đó phản ánh tiến độ.
 
 ## Avatar
+
+### Icon cấp học sinh theo lớp/môn — 11/10/2026
+
+Bộ năm icon SVG riêng theo tên mới người dùng chọn: **Mầm → Chồi → Cây Non → Đơm Hoa → Kết Trái**, triển khai tại `src/StudentLevel.tsx`, CSS tại `src/student-level.css`. Mầm là hạt nảy mầm, Chồi có hai lá nhỏ, Cây Non có thân/tán nhỏ, Đơm Hoa có hoa hồng nhạt/nhụy vàng trên tán, Kết Trái có quả vàng cam và lá nhỏ trên tán lớn. Dùng nền tròn xanh nhạt, nét xanh rừng, thân màu đất, cùng hệ màu ứng dụng. SVG có nhãn đọc được “Cấp N · tên cấp”; không phụ thuộc ảnh tải ngoài. Bộ Mầm/Chồi/Lá/Cây/Đại thụ trước đây là lịch sử, đã thay tên/hình cho cấp 3–5.
+
+Huy hiệu nhỏ nằm cạnh thông tin học sinh trên thanh tài khoản, trong danh sách lớp và xếp hạng. Thẻ cấp độ ở trang học sinh/Tài khoản cho thấy icon lớn, tên lớp/môn, năm bước, mốc giờ và tiến độ tới cấp tiếp theo. Bước hiện tại có viền/nền và `aria-current`; thanh tiến độ có nhãn/giá trị. Điện thoại ≤600 px chia năm bước thành ba cột/hai hàng, giữ chữ 13 px và hiển thị đủ cả năm mốc. Cấp độ đổi theo lớp/môn được chọn; avatar cá nhân vẫn hiển thị cùng huy hiệu.
+
+Quy tắc thời gian và phân tách lớp/môn tại [student-levels.md](student-levels.md). Ảnh kiểm tra `.local/ui-<desktop|mobile>-student-level-<1..5>.png`.
 
 Bộ 40 avatar chibi gồm 16 giáo viên, 8 học sinh và 16 thiên nhiên. Ảnh atlas: `public/assets/avatars-teachers-v1.png`, `avatars-students-v1.png`, `avatars-nature-v1.png`. Prompt tại `output/imagegen/avatars-v1-prompts.txt` và `avatars-nature-v1-prompt.txt`; danh mục tại `shared/avatars.ts`, hiển thị tại `src/Avatars.tsx`.
 

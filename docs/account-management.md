@@ -56,6 +56,8 @@ Danh sách có tìm theo tên/email, lọc vai trò, số lớp học sinh tham 
 
 ## Giáo viên tạo hoặc thêm học sinh
 
+Khi tạo lớp, cùng giáo viên/tên lớp/môn/khối đã có sẽ báo trùng và hướng dẫn chọn lớp có sẵn; so sánh không phân biệt hoa/thường, khoảng trắng dư hoặc cách biểu diễn Unicode. Môn khác hoặc giáo viên khác được phép có lớp cùng tên. Các lớp đã có không bị tự gộp/xóa. Gửi lại sau khi lưu nhưng mất phản hồi cũng không tạo thêm lớp.
+
 Ở **Lớp học của tôi → Thêm học sinh** (hoặc lối tắt tại Tổng quan):
 
 - **Tạo tài khoản học sinh:** nhập họ tên, email, mật khẩu tạm. App tạo tài khoản và thêm ngay vào lớp đang chọn.

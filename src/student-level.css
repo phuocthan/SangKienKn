@@ -1,0 +1,138 @@
+.student-level-icon {
+  display: block;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+}
+.student-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px 3px 3px;
+  border-radius: 999px;
+  color: #216b4a;
+  background: #eef6ef;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.student-level-badge .student-level-icon {
+  width: 28px;
+  height: 28px;
+}
+.student-level-badge.compact {
+  padding: 0;
+  background: transparent;
+  font-size: var(--text-caption);
+}
+.student-level-badge.compact .student-level-icon {
+  width: 24px;
+  height: 24px;
+}
+.student-level-card {
+  padding: 24px;
+  margin: 20px 0;
+}
+.student-level-overview {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.student-level-overview > .student-level-icon {
+  width: 88px;
+  height: 88px;
+}
+.student-level-copy {
+  min-width: 0;
+}
+.student-level-copy h2 {
+  margin: 5px 0;
+  color: #164b35;
+}
+.student-level-copy p {
+  margin: 0 0 5px;
+  overflow-wrap: anywhere;
+}
+.student-level-copy small,
+.student-level-next small {
+  color: #65746c;
+}
+.student-level-journey {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow-x: auto;
+  padding-bottom: 8px;
+  gap: 8px;
+  margin: 22px 0 16px;
+}
+.student-level-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  color: #65746c;
+  font-size: var(--text-caption);
+  text-align: center;
+}
+.student-level-step.current {
+  background: #eef6ef;
+  border-color: #b9d3bd;
+  color: #164b35;
+  font-weight: 700;
+}
+.student-level-step.earned {
+  color: #216b4a;
+}
+.student-level-step small {
+  font-weight: 400;
+  font-size: var(--text-caption);
+}
+.student-level-next p {
+  margin: 10px 0 5px;
+  font-size: var(--text-body);
+}
+.profile .student-level-badge {
+  display: flex;
+  margin-top: 3px;
+}
+.student-cell .student-level-badge {
+  margin-top: 4px;
+}
+@media (max-width: 600px) {
+  .student-level-card {
+    padding: 16px;
+  }
+  .student-level-overview {
+    gap: 12px;
+  }
+  .student-level-overview > .student-level-icon {
+    width: 66px;
+    height: 66px;
+  }
+  .student-level-copy h2 {
+    font-size: var(--text-section);
+  }
+  .student-level-journey {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .student-level-step {
+    font-size: var(--text-caption);
+    padding: 8px 2px;
+  }
+  .student-level-step .student-level-icon {
+    width: 38px;
+    height: 38px;
+  }
+  .profile .student-level-badge {
+    font-size: var(--text-caption);
+    gap: 3px;
+  }
+  .profile .student-level-badge .student-level-icon {
+    width: 20px;
+    height: 20px;
+  }
+}

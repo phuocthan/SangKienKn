@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Clock3, Flower2, RefreshCw, Users } from "lucide-react";
 import { api, duration, errorMessage } from "./api";
 import { Empty, SectionTitle, Tree } from "./components";
+import { StudentLevelBadge } from "./StudentLevel";
 import type {
   ClassLeaderboard,
   Classroom,
@@ -239,6 +240,9 @@ function Ranking({
                 {member.id === userId && (
                   <span className="pill community-you">Bạn</span>
                 )}
+                <div>
+                  <StudentLevelBadge seconds={member.seconds} compact />
+                </div>
               </th>
               <td>
                 {kind === "effort"

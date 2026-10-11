@@ -6,7 +6,7 @@ Mở session Codex mới: đọc [bản bàn giao](docs/session-handoff.md), [ti
 
 ## Chạy local trên Windows
 
-Bản đang triển khai trên máy này ở **[http://localhost:3002](http://localhost:3002)**. Dùng `npm run deploy:status` để xem địa chỉ bản đang chạy. Cổng 3001 hiện là server demo cũ; các chức năng Admin mới cần backend tại cổng 3002. Phần bên dưới hướng dẫn khởi động một bản demo mới.
+**Mặc định từ 11/10/2026:** chạy `npm run local`, mở **[http://localhost:5173](http://localhost:5173)** để sửa/test giao diện nhanh; API và database dùng trực tiếp **Railway**. Thao tác ghi dữ liệu sẽ ghi database thật Railway. Xem [hướng dẫn chạy local với Railway](docs/dev-railway.md). Phần bên dưới dành cho bản demo độc lập với database local.
 
 Cài Git và Node.js **24 trở lên** (app sử dụng `node:sqlite`, không cần cài SQLite riêng). Nếu đã có repository trên máy, mở PowerShell trong thư mục `SangKienKn` và cập nhật:
 
@@ -48,23 +48,25 @@ Sau khi đổi Node, chạy lại `npm ci`, `npm run build`, `npm run demo`. Kh�
 
 ## Chạy để phát triển
 
-Để build và cập nhật bản chạy local bằng một lệnh, dùng **`npm run deploy`**. Xem [hướng dẫn deploy nhanh](docs/deploy-local.md) cho lệnh xem trạng thái/dừng, sao lưu database và cách gọi từ chat.
+Chạy **`npm run dev`** để sửa frontend với API/database Railway; hoặc **`npm run local`** để chạy trong nền. Không cần build lại mỗi lượt. Sửa backend cần triển khai Railway riêng để có hiệu lực. Xem [dev-railway.md](docs/dev-railway.md).
+
+Khi cần cả frontend/backend local cho kiểm thử độc lập, dùng `npm run dev:offline` như dưới đây. Để build và chạy bản SQLite local cũ, dùng `npm run deploy`; xem [deploy-local.md](docs/deploy-local.md).
 
 Trên Windows PowerShell:
 
 ```powershell
 $env:SEED_DEMO = "1"
-npm run dev
+npm run dev:offline
 ```
 
 Trên macOS/Linux:
 
 ```bash
 npm ci
-SEED_DEMO=1 npm run dev
+SEED_DEMO=1 npm run dev:offline
 ```
 
-Giao diện ở **http://localhost:5173**, API ở cổng **3001**. Vite chuyển các yêu cầu `/api` đến backend.
+Trong chế độ offline này, giao diện ở **http://localhost:5173**, API ở cổng **3001**. Vite chuyển các yêu cầu `/api` đến backend local; không chạy đồng thời với frontend dùng Railway trên cùng cổng.
 
 ## Tài khoản dùng thử
 

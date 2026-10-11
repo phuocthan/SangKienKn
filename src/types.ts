@@ -1,3 +1,5 @@
+import type { StudentLevel } from "../shared/student-levels";
+
 export type User = {
   id: string;
   name: string;
@@ -19,6 +21,7 @@ export type Chapter = {
   openCorrections: number;
 };
 export type Classroom = {
+  studentLevel?: StudentLevel | null;
   id: string;
   name: string;
   subject: string;
@@ -48,6 +51,7 @@ export type Result = {
   resolved: boolean;
 };
 export type Student = {
+  studentLevel?: StudentLevel;
   avatarId?: string | null;
   id: string;
   name: string;
@@ -66,6 +70,7 @@ export type ClassTree = {
   chapterTitle: string;
 };
 export type CommunityMember = {
+  studentLevel?: StudentLevel;
   id: string;
   name: string;
   seconds: number;

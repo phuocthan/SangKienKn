@@ -54,5 +54,44 @@ db.prepare(
 db.prepare(
   "INSERT INTO attempts VALUES('learning-seed','learning-student','learning-ch1-q1',0,1,'practice',0)",
 ).run();
+// Separate level-icon fixtures: five classroom/subject totals, never live data.
+db.prepare("INSERT INTO users VALUES (?,?,?,?,?,0)").run(
+  "levels-student",
+  "levels@greenedu.test",
+  "Học sinh cấp độ",
+  hashPassword("LevelsTest123!"),
+  "student",
+);
+for (const [index, subject] of [
+  "Sinh học",
+  "Toán",
+  "Vật lý",
+  "Hóa học",
+  "Ngữ văn",
+].entries()) {
+  const classId = `levels-class-${index + 1}`;
+  const chapterId = `${classId}-chapter`;
+  db.prepare("INSERT INTO classrooms VALUES (?,?,?,?,?)").run(
+    classId,
+    "Lớp 10A2",
+    subject,
+    "10",
+    "teacher-demo",
+  );
+  db.prepare("INSERT INTO memberships VALUES (?,?)").run(
+    classId,
+    "levels-student",
+  );
+  db.prepare("INSERT INTO chapters VALUES (?,?,?)").run(
+    chapterId,
+    classId,
+    "Chương 1",
+  );
+  db.prepare("INSERT INTO progress VALUES (?,?,?)").run(
+    "levels-student",
+    chapterId,
+    index * 3600,
+  );
+}
 db.close();
 await import("../server/index.js");

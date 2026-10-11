@@ -42,7 +42,7 @@
 }
 .learning-chapter dl {
   width: 100%;
-  font-size: 13px;
+  font-size: var(--text-caption);
 }
 .learning-chapter dl div {
   display: flex;
@@ -56,7 +56,7 @@
   white-space: nowrap;
 }
 .learning-chapter p {
-  font-size: 13px;
+  font-size: var(--text-body);
   line-height: 1.7;
   flex: 1;
 }
@@ -71,7 +71,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 20px;
+  font-size: var(--text-section);
 }
 .learning-section p {
   line-height: 1.7;
@@ -88,7 +88,7 @@
 .learning-chapter-settings label {
   display: grid;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--text-label);
   font-weight: 600;
   min-width: 0;
 }
@@ -135,7 +135,7 @@
   background: #f4f7f0;
   border-radius: 10px;
   padding: 10px;
-  font-size: 13px;
+  font-size: var(--text-label);
 }
 .learning-options input[type="checkbox"] {
   width: 17px;
@@ -182,10 +182,10 @@
   padding: 20px;
 }
 .exam-map h2 {
-  font-size: 16px;
+  font-size: var(--text-section);
 }
 .exam-map p {
-  font-size: 12px;
+  font-size: var(--text-body);
   line-height: 1.7;
   color: var(--muted);
 }
@@ -215,7 +215,7 @@
   justify-content: flex-end;
 }
 .exam-footer p {
-  font-size: 13px;
+  font-size: var(--text-body);
   line-height: 1.7;
   color: var(--muted);
 }
@@ -254,7 +254,7 @@
     align-self: flex-start;
   }
   .exam-room h1 {
-    font-size: 26px;
+    font-size: var(--text-title);
   }
   .learning-actions .button {
     white-space: normal;

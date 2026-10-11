@@ -43,6 +43,8 @@ import { ClassCommunity } from "./ClassCommunity";
 import { GroupActivities } from "./GroupActivities";
 import { AdminWorkspace } from "./Accounts";
 import { Avatar, AvatarPicker } from "./Avatars";
+import { StudentLevelBadge, StudentLevelCard } from "./StudentLevel";
+import { GardenGoal } from "./GardenGoal";
 import { QuestionBank } from "./QuestionBank";
 import { QuestionFields } from "./QuestionFields";
 import type { Chapter, Classroom, Question, Student, User } from "./types";
@@ -406,6 +408,13 @@ export default function App() {
               <div>
                 <strong>{user.name}</strong>
                 <small>{isTeacher ? "Giáo viên" : "Học sinh"}</small>
+                {!isTeacher && current && (
+                  <StudentLevelBadge
+                    seconds={totalSeconds}
+                    scope={`${current.name} · ${current.subject}`}
+                    compact
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -474,6 +483,9 @@ export default function App() {
                   }}
                 />
               </div>
+              {!isTeacher && current && (
+                <StudentLevelCard classroom={current} />
+              )}
             </>
           ) : loadingClasses ? (
             <div className="loading-panel">Đang tải lớp học…</div>
@@ -519,37 +531,51 @@ export default function App() {
                     onEditor={setEditor}
                   />
                 ) : (
-                  <>
+                  <div className="student-home">
                     <PageHeading
                       eyebrow="HỌC MỘT CHÚT · LỚN MỘT CHÚT"
-                      title={`Chào ${user.name.split(" ").slice(-2).join(" ")}, cùng chăm vườn nhé!`}
-                      text="Mỗi câu hỏi là một hạt mầm. Mỗi lần sửa sai là một bước trưởng thành."
+                      title={`Chào ${user.name.split(" ").slice(-2).join(" ")}, hôm nay mình học gì?`}
+                      text="Khu vườn nhỏ đang lớn lên từ những cố gắng của bạn."
                     />
-                    <div className="garden-hero">
-                      <div className="hero-copy">
-                        <span className="pill hero-pill">
-                          <Leaf size={14} />
-                          KHU VƯỜN KIẾN THỨC
-                        </span>
-                        <h2>
-                          Gieo nỗ lực hôm nay,
-                          <br />
-                          gặt kiến thức ngày mai.
-                        </h2>
-                        <p>
-                          {totalSeconds
-                            ? `Bạn đã dành ${duration(totalSeconds)} để chăm khu vườn ${current.subject}. Tiếp tục hành trình của mình nhé.`
-                            : "Khu vườn đang chờ những hạt mầm đầu tiên. Bắt đầu một bài luyện tập để thấy mình tiến bộ mỗi ngày."}
-                        </p>
-                        <button
-                          className="button primary"
-                          onClick={() => navigate("practice")}
-                        >
-                          Bắt đầu luyện tập
-                          <ArrowRight size={18} />
-                        </button>
+                    <div className="garden-welcome-grid">
+                      <div className="garden-hero">
+                        <div className="hero-copy">
+                          <span className="pill hero-pill">
+                            <Leaf size={14} />
+                            KHU VƯỜN KIẾN THỨC
+                          </span>
+                          <h2>
+                            Gieo nỗ lực hôm nay,
+                            <br />
+                            đón tri thức ngày mai.
+                          </h2>
+                          <p>
+                            {totalSeconds
+                              ? `Bạn đã dành ${duration(totalSeconds)} để chăm khu vườn ${current.subject}. Tiếp tục hành trình của mình nhé.`
+                              : "Khu vườn đang chờ những hạt mầm đầu tiên. Bắt đầu một bài luyện tập để thấy mình tiến bộ mỗi ngày."}
+                          </p>
+                          <div className="garden-hero-actions">
+                            <button
+                              className="button primary"
+                              onClick={() => navigate("practice")}
+                            >
+                              Tiếp tục luyện tập
+                              <ArrowRight size={18} />
+                            </button>
+                            <button
+                              className="button outline"
+                              onClick={() => navigate("progress")}
+                            >
+                              <TrendingUp size={17} /> Xem hành trình
+                            </button>
+                          </div>
+                        </div>
+                        <GardenIllustration className="hero-illustration" />
                       </div>
-                      <GardenIllustration className="hero-illustration" />
+                      <GardenGoal
+                        classroom={current}
+                        onPractice={() => navigate("practice")}
+                      />
                     </div>
                     <StudentStats classroom={current} />
                     <SectionTitle
@@ -567,23 +593,26 @@ export default function App() {
                         setStudy({ chapter: ch, mode: "practice", lesson })
                       }
                     />
-                    <div className="gentle-reminder">
-                      <span>
-                        <CircleHelp size={23} />
-                      </span>
-                      <div>
-                        <strong>Sai một câu, hiểu thêm một điều.</strong>
-                        <p>
-                          {openCorrections
-                            ? `Bạn có ${openCorrections} câu cần ôn lại trong sổ tay. Cùng biến lỗi sai thành kiến thức nhé.`
-                            : "Các câu chưa đúng sẽ được lưu vào sổ tay để bạn có thể quay lại và làm tốt hơn."}
-                        </p>
+                    <div className="garden-journey-grid">
+                      <StudentLevelCard classroom={current} />
+                      <div className="gentle-reminder">
+                        <span>
+                          <CircleHelp size={23} />
+                        </span>
+                        <div>
+                          <strong>Sai một câu, hiểu thêm một điều.</strong>
+                          <p>
+                            {openCorrections
+                              ? `Bạn có ${openCorrections} câu cần ôn lại trong sổ tay. Cùng biến lỗi sai thành kiến thức nhé.`
+                              : "Các câu chưa đúng sẽ được lưu vào sổ tay để bạn có thể quay lại và làm tốt hơn."}
+                          </p>
+                        </div>
+                        <LinkButton onClick={() => navigate("corrections")}>
+                          Mở sổ tay
+                        </LinkButton>
                       </div>
-                      <LinkButton onClick={() => navigate("corrections")}>
-                        Mở sổ tay
-                      </LinkButton>
                     </div>
-                  </>
+                  </div>
                 ))}
               {page === "learning" && (
                 <Learning
@@ -994,9 +1023,7 @@ function Login({
             Gieo tri thức, gặt tương lai
           </div>
         </div>
-        <span className="login-copyright">
-          GREENEDU · TRANG HỌC TẬP XANH
-        </span>
+        <span className="login-copyright">GREENEDU · TRANG HỌC TẬP XANH</span>
       </section>
       <section className="login-form-side">
         <div className="login-form-wrap">
@@ -1136,7 +1163,7 @@ function StudentStats({ classroom }: { classroom: Classroom }) {
     correct = classroom.chapters.reduce((n, c) => n + c.correct, 0),
     open = classroom.chapters.reduce((n, c) => n + c.openCorrections, 0);
   return (
-    <div className="stats-grid">
+    <div className="stats-grid student-stats">
       <Stat
         icon={<Clock3 size={21} />}
         label="Thời gian học"
@@ -1160,13 +1187,6 @@ function StudentStats({ classroom }: { classroom: Classroom }) {
         value={String(open)}
         note="Mỗi lỗi sai là một cơ hội"
         color="amber"
-      />
-      <Stat
-        icon={<Flower2 size={21} />}
-        label="Cây đã ra hoa"
-        value={String(classroom.chapters.filter((c) => c.level === 5).length)}
-        note={`Trong ${classroom.chapters.length} chương học`}
-        color="rose"
       />
     </div>
   );
@@ -1215,6 +1235,9 @@ function ChapterGrid({
       {classroom.chapters.map((ch, i) => (
         <article className="chapter-card card" key={ch.id}>
           <div className={`chapter-art art-${i % 3}`}>
+            <span className="garden-chapter-number" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
             <span className="pill chapter-level">
               Cấp {ch.level} · {stages[ch.level - 1]}
             </span>
@@ -1637,6 +1660,11 @@ function Roster({
                         <div>
                           <strong>{s.name}</strong>
                           <small>{s.email}</small>
+                          <StudentLevelBadge
+                            seconds={s.seconds}
+                            scope={`${classroom.name} · ${classroom.subject}`}
+                            compact
+                          />
                         </div>
                       </div>
                     </td>

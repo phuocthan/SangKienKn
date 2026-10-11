@@ -348,6 +348,355 @@ test("admin reset revokes sessions and forces password change, while teachers ca
   );
 });
 
+test("class creation rejects normalized duplicates and concurrent repeats but allows other subjects/owners", async (t) => {
+  const f = await fixture(t);
+  const input = { name: "Lớp 11A2", subject: "Vật lý", grade: "11" };
+  const created = await f.request("/classrooms", input, f.teacher);
+  assert.equal(created.status, 201);
+  const repeats = await Promise.all([
+    f.request("/classrooms", input, f.teacher),
+    f.request(
+      "/classrooms",
+      {
+        name: "  lớp   11a2  ",
+        subject: " VẬT   LÝ ".normalize("NFD"),
+        grade: " 11 ",
+      },
+      f.teacher,
+    ),
+  ]);
+  assert.deepEqual(
+    repeats.map((r) => r.status),
+    [409, 409],
+  );
+  assert.match(repeats[0].data.error, /đã tồn tại/);
+  assert.equal(
+    (await f.request("/classrooms", { ...input, subject: "Toán" }, f.teacher))
+      .status,
+    201,
+  );
+  const concurrent = await Promise.all(
+    Array.from({ length: 4 }, () =>
+      f.request("/classrooms", { ...input, name: "Lớp 12A3" }, f.teacher),
+    ),
+  );
+  assert.deepEqual(
+    concurrent.map((r) => r.status).sort(),
+    [201, 409, 409, 409],
+  );
+  f.db
+    .prepare("INSERT INTO users VALUES (?,?,?,?,?,0)")
+    .run(
+      "other-teacher",
+      "other@example.test",
+      "GV khác",
+      hashPassword("OtherPass123!"),
+      "teacher",
+    );
+  const other = (
+    await f.request("/auth/login", {
+      email: "other@example.test",
+      password: "OtherPass123!",
+    })
+  ).cookie;
+  assert.equal((await f.request("/classrooms", input, other)).status, 201);
+  assert.equal(
+    (await f.request("/classrooms", undefined, other)).data.length,
+    1,
+  );
+  assert.deepEqual(f.db.prepare("PRAGMA foreign_key_check").all(), []);
+});
+
+test("class validation and role checks leave no partial class rows", async (t) => {
+  const f = await fixture(t);
+  const before = f.db.prepare("SELECT COUNT(*) AS n FROM classrooms").get()!.n;
+  const valid = { name: "Lớp 10A2", subject: "Toán", grade: "10" };
+  for (const body of [
+    {},
+    { ...valid, name: "   " },
+    { ...valid, subject: "" },
+    { ...valid, grade: " " },
+    { ...valid, name: "x".repeat(81) },
+    { ...valid, subject: 123 },
+    { ...valid, grade: "x".repeat(21) },
+  ])
+    assert.equal((await f.request("/classrooms", body, f.teacher)).status, 400);
+  assert.equal((await f.request("/classrooms", valid)).status, 401);
+  assert.equal((await f.request("/classrooms", valid, f.student)).status, 403);
+  assert.equal((await f.request("/classrooms", valid, f.admin)).status, 403);
+  assert.equal(
+    f.db.prepare("SELECT COUNT(*) AS n FROM classrooms").get()!.n,
+    before,
+  );
+});
+
+test("admin concurrent account creation normalizes email and never overwrites an existing role/password", async (t) => {
+  const f = await fixture(t);
+  const input = {
+    name: "Học sinh cùng tên",
+    email: " Repeat@Example.Test ",
+    password: "TempPass123!",
+    role: "student",
+    classroomId: "class-demo",
+  };
+  const results = await Promise.all(
+    Array.from({ length: 4 }, () => f.request("/accounts", input, f.admin)),
+  );
+  assert.deepEqual(results.map((r) => r.status).sort(), [201, 409, 409, 409]);
+  const user = f.db
+    .prepare("SELECT * FROM users WHERE email=?")
+    .get("repeat@example.test")!;
+  const originalPassword = user.password;
+  assert.equal(user.role, "student");
+  assert.ok(verifyPassword(input.password, String(originalPassword)));
+  assert.equal(
+    (
+      await f.request(
+        "/accounts",
+        {
+          ...input,
+          email: "repeat@example.test",
+          role: "teacher",
+          classroomId: "",
+          password: "Replacement123!",
+        },
+        f.admin,
+      )
+    ).status,
+    409,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT password FROM users WHERE id=?")
+      .get(user.id as string)!.password,
+    originalPassword,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT COUNT(*) AS n FROM memberships WHERE student_id=?")
+      .get(user.id as string)!.n,
+    1,
+  );
+  // A shared display name is legitimate; email is the account identity.
+  assert.equal(
+    (
+      await f.request(
+        "/accounts",
+        { ...input, email: "distinct@example.test" },
+        f.admin,
+      )
+    ).status,
+    201,
+  );
+});
+
+test("teacher concurrent student creation and existing enrollment create one account/membership only", async (t) => {
+  const f = await fixture(t);
+  const input = {
+    name: "HS mới",
+    email: " Student@Example.Test ",
+    password: "TempPass123!",
+    role: "admin",
+  };
+  const results = await Promise.all(
+    Array.from({ length: 4 }, () =>
+      f.request("/classrooms/class-demo/students", input, f.teacher),
+    ),
+  );
+  assert.deepEqual(results.map((r) => r.status).sort(), [201, 409, 409, 409]);
+  const user = f.db
+    .prepare("SELECT * FROM users WHERE email=?")
+    .get("student@example.test")!;
+  assert.equal(user.role, "student");
+  f.db
+    .prepare("INSERT INTO progress VALUES (?,?,?)")
+    .run(user.id as string, "chapter-1", 1234);
+  const c = await f.request(
+    "/classrooms",
+    { name: "Lớp thứ hai", subject: "Toán", grade: "10" },
+    f.teacher,
+  );
+  const memberships = await Promise.all(
+    Array.from({ length: 4 }, () =>
+      f.request(
+        `/classrooms/${c.data.id}/memberships`,
+        { email: input.email },
+        f.teacher,
+      ),
+    ),
+  );
+  assert.deepEqual(
+    memberships.map((r) => r.status).sort(),
+    [201, 409, 409, 409],
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT COUNT(*) AS n FROM users WHERE email=?")
+      .get("student@example.test")!.n,
+    1,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT COUNT(*) AS n FROM memberships WHERE student_id=?")
+      .get(user.id as string)!.n,
+    2,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT password FROM users WHERE id=?")
+      .get(user.id as string)!.password,
+    user.password,
+  );
+  const roster = await f.request(
+    `/classrooms/${c.data.id}/students`,
+    undefined,
+    f.teacher,
+  );
+  assert.equal(roster.data.length, 1);
+  assert.equal(roster.data[0].seconds, 0);
+  assert.equal(roster.data[0].total, 0);
+  assert.equal("password" in roster.data[0], false);
+  const originalRoster = await f.request(
+    "/classrooms/class-demo/students",
+    undefined,
+    f.teacher,
+  );
+  assert.equal(
+    originalRoster.data.find((s: { id: string }) => s.id === user.id).seconds,
+    1234,
+  );
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT seconds FROM progress WHERE student_id=? AND chapter_id='chapter-1'",
+      )
+      .get(user.id as string)!.seconds,
+    1234,
+  );
+});
+
+test("invalid student/account input and unauthorized creation leave users and memberships unchanged", async (t) => {
+  const f = await fixture(t);
+  const before = () => [
+    f.db.prepare("SELECT COUNT(*) AS n FROM users").get()!.n,
+    f.db.prepare("SELECT COUNT(*) AS n FROM memberships").get()!.n,
+  ];
+  const counts = before();
+  const input = {
+    name: "HS",
+    email: "valid@example.test",
+    password: "TempPass123!",
+    role: "student",
+  };
+  for (const body of [
+    { ...input, name: " " },
+    { ...input, email: "bad" },
+    { ...input, password: "short" },
+    { ...input, password: "x".repeat(129) },
+  ]) {
+    assert.equal((await f.request("/accounts", body, f.admin)).status, 400);
+    assert.equal(
+      (await f.request("/classrooms/class-demo/students", body, f.teacher))
+        .status,
+      400,
+    );
+  }
+  assert.equal(
+    (
+      await f.request(
+        "/accounts",
+        { ...input, classroomId: "missing" },
+        f.admin,
+      )
+    ).status,
+    400,
+  );
+  assert.equal(
+    (await f.request("/classrooms/missing/students", input, f.teacher)).status,
+    404,
+  );
+  assert.equal(
+    (await f.request("/classrooms/class-demo/students", input, f.student))
+      .status,
+    403,
+  );
+  assert.equal(
+    (await f.request("/classrooms/class-demo/students", input)).status,
+    401,
+  );
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/memberships",
+        { email: "giaovien@greenedu.demo" },
+        f.teacher,
+      )
+    ).status,
+    404,
+  );
+  assert.deepEqual(before(), counts);
+  assert.deepEqual(f.db.prepare("PRAGMA foreign_key_check").all(), []);
+});
+
+test("shared student password recovery requires admin and preserves both class memberships and progress", async (t) => {
+  const f = await fixture(t);
+  f.db
+    .prepare("INSERT INTO users VALUES (?,?,?,?,?,0)")
+    .run(
+      "other-teacher",
+      "other@example.test",
+      "GV khác",
+      hashPassword("OtherPass123!"),
+      "teacher",
+    );
+  f.db
+    .prepare("INSERT INTO classrooms VALUES (?,?,?,?,?)")
+    .run("other-class", "Lớp khác", "Toán", "10", "other-teacher");
+  f.db
+    .prepare("INSERT INTO memberships VALUES (?,?)")
+    .run("other-class", "student-demo");
+  f.db
+    .prepare("INSERT INTO progress VALUES (?,?,?)")
+    .run("student-demo", "chapter-1", 3600);
+  const reset = { password: "ResetPass123!" };
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/students/student-demo/password",
+        reset,
+        f.teacher,
+      )
+    ).status,
+    403,
+  );
+  assert.equal((await f.request("/auth/me", undefined, f.student)).status, 200);
+  assert.equal(
+    (await f.request("/accounts/student-demo/password", reset, f.admin)).status,
+    200,
+  );
+  assert.equal((await f.request("/auth/me", undefined, f.student)).status, 401);
+  const login = await f.request("/auth/login", {
+    email: "hocsinh@greenedu.demo",
+    password: reset.password,
+  });
+  assert.equal(login.status, 200);
+  assert.equal(login.data.mustChange, true);
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT COUNT(*) AS n FROM memberships WHERE student_id='student-demo'",
+      )
+      .get()!.n,
+    2,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT seconds FROM progress WHERE student_id='student-demo'")
+      .get()!.seconds,
+    3600,
+  );
+});
+
 test("legacy role migration retains sessions, learning and group foreign keys across restarts", (t) => {
   const dir = mkdtempSync(join(tmpdir(), "greenedu-accounts-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));

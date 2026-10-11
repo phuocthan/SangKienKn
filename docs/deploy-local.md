@@ -1,12 +1,14 @@
 # Triển khai nhanh GreenEdu trên Windows
 
+**Thay đổi mặc định ngày 11/10/2026:** từ giờ chạy frontend local bằng `npm run local`/`npm run dev`, API/database dùng Railway; xem [dev-railway.md](dev-railway.md). Không tự chạy lệnh deploy local dưới đây sau mỗi thay đổi. Tài liệu này vẫn dùng khi cần bản API + SQLite local độc lập.
+
 Tại thư mục dự án, chạy:
 
 ```powershell
 npm run deploy
 ```
 
-Hoặc nhắn trong chat đang làm việc với repository: **“deploy GreenEdu”**. Agent sẽ chạy cùng lệnh theo `AGENTS.md`. Theo lựa chọn ngày 11/10/2026, agent cũng tự deploy sau mỗi yêu cầu thay đổi ứng dụng đã hoàn thành và kiểm thử phù hợp đạt, không hỏi lại. Các bước chỉnh sửa/kiểm thử của cùng yêu cầu được gộp thành một lần deploy ở cuối. Có thể yêu cầu “chưa deploy”, “chỉ sửa/kiểm tra” hoặc “dừng server” để áp dụng cách khác cho lần đó.
+Hoặc nhắn **“deploy local offline”** trong chat. Quy tắc tự deploy local sau mỗi thay đổi từng được chọn trước đây đã được thay bằng chế độ frontend local/API Railway tại [dev-railway.md](dev-railway.md). Yêu cầu deploy cần xác định đích theo bối cảnh hiện tại; script này chỉ triển khai bản local độc lập.
 
 Lệnh kiểm tra Node.js 24+, cài dependencies theo lockfile khi cần, kiểm tra TypeScript và build vào thư mục tạm. Khi build thành công, script sao lưu SQLite bằng API backup (bao gồm dữ liệu WAL đã commit), dừng server do script quản lý, thay bản build và khởi động server trong nền. Chỉ báo thành công sau khi `/api/health` đạt. Mở địa chỉ được script thông báo; dùng `npm run deploy:status` để xem lại.
 
@@ -20,17 +22,17 @@ Dependencies đã đúng phiên bản trong lockfile sẽ được dùng lại �
 
 ## Các lệnh thường dùng
 
-| Lệnh                           | Tác dụng                                                                      |
-| ------------------------------ | ----------------------------------------------------------------------------- |
-| `npm run deploy`               | Build và chạy/cập nhật ứng dụng local                                         |
-| `npm run deploy:status`        | Kiểm tra server do script quản lý                                             |
-| `npm run deploy:stop`          | Dừng server do script quản lý                                                 |
-| `npm run deploy:build`         | Chỉ build, không khởi động/dừng server                                        |
-| `npm run deploy -- -Port 3002` | Deploy ở cổng khác                                                            |
-| `npm run deploy -- -Demo`      | Bật tài khoản/dữ liệu demo khi bạn cần                                        |
-| `npm run deploy -- -QuickLogin` | Bật hai nút vào nhanh tài khoản giáo viên/học sinh có sẵn, chỉ trên máy local |
-| `npm run deploy -- -NoQuickLogin` | Tắt đăng nhập nhanh, dùng lại biểu mẫu email/mật khẩu |
-| `npm run deploy -- -Pull`      | Pull fast-forward trước khi deploy; yêu cầu Git không có thay đổi chưa commit |
+| Lệnh                              | Tác dụng                                                                      |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| `npm run deploy`                  | Build và chạy/cập nhật ứng dụng local                                         |
+| `npm run deploy:status`           | Kiểm tra server do script quản lý                                             |
+| `npm run deploy:stop`             | Dừng server do script quản lý                                                 |
+| `npm run deploy:build`            | Chỉ build, không khởi động/dừng server                                        |
+| `npm run deploy -- -Port 3002`    | Deploy ở cổng khác                                                            |
+| `npm run deploy -- -Demo`         | Bật tài khoản/dữ liệu demo khi bạn cần                                        |
+| `npm run deploy -- -QuickLogin`   | Bật hai nút vào nhanh tài khoản giáo viên/học sinh có sẵn, chỉ trên máy local |
+| `npm run deploy -- -NoQuickLogin` | Tắt đăng nhập nhanh, dùng lại biểu mẫu email/mật khẩu                         |
+| `npm run deploy -- -Pull`         | Pull fast-forward trước khi deploy; yêu cầu Git không có thay đổi chưa commit |
 
 Chọn database riêng khi cần:
 
