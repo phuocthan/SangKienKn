@@ -17,7 +17,12 @@ export type ActivityGroup = {
   id: string;
   number: number;
   representativeId: string;
-  members: { id: string; name: string; active: boolean }[];
+  members: {
+    id: string;
+    name: string;
+    active: boolean;
+    avatarId?: string | null;
+  }[];
   submissions: GroupSubmission[];
 };
 export type GroupActivitySummary = {

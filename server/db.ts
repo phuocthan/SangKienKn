@@ -2,6 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { ensureLearningSchema } from "./learning-db.js";
 
 export function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -23,7 +24,7 @@ export function openDatabase(path: string) {
     PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, name TEXT NOT NULL,
-      password TEXT NOT NULL, role TEXT NOT NULL CHECK(role IN ('teacher','student')),
+      password TEXT NOT NULL, role TEXT NOT NULL CHECK(role IN ('admin','teacher','student')),
       must_change INTEGER NOT NULL DEFAULT 0
     );
     CREATE TABLE IF NOT EXISTS sessions (
@@ -105,7 +106,46 @@ export function openDatabase(path: string) {
     CREATE INDEX IF NOT EXISTS activities_classroom ON group_activities(classroom_id,created_at);
     CREATE INDEX IF NOT EXISTS activity_files_lookup ON activity_files(activity_id,group_id);
   `);
+  // Rebuild only the role constraint, retaining IDs referenced by every other table.
+  const usersSchema = String(
+    db.prepare("SELECT sql FROM sqlite_schema WHERE name = 'users'").get()?.sql,
+  );
+  if (!usersSchema.includes("'admin'")) {
+    db.exec("PRAGMA foreign_keys = OFF; BEGIN IMMEDIATE;");
+    try {
+      db.exec(`CREATE TABLE users_updated (
+        id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, name TEXT NOT NULL,
+        password TEXT NOT NULL, role TEXT NOT NULL CHECK(role IN ('admin','teacher','student')),
+        must_change INTEGER NOT NULL DEFAULT 0
+      );
+      INSERT INTO users_updated SELECT id,email,name,password,role,must_change FROM users;
+      DROP TABLE users;
+      ALTER TABLE users_updated RENAME TO users;`);
+      if (db.prepare("PRAGMA foreign_key_check").all().length)
+        throw new Error(
+          "Không thể cập nhật tài khoản: liên kết dữ liệu không hợp lệ.",
+        );
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      db.close();
+      throw error;
+    }
+    db.exec("PRAGMA foreign_keys = ON");
+  }
   // Additive migration for the initial MVP database; keep answers and progress.
+  db.exec(`CREATE TABLE IF NOT EXISTS user_avatars (
+    user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    avatar_id TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS avatar_uploads (
+    id TEXT PRIMARY KEY,
+    user_id TEXT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    mime TEXT NOT NULL, data BLOB NOT NULL
+  );`);
+  // Reset student choices made before teacher avatars were restricted by role.
+  db.exec(`DELETE FROM user_avatars WHERE avatar_id LIKE 'teacher-%'
+    AND user_id IN (SELECT id FROM users WHERE role='student');`);
   if (
     !db
       .prepare("PRAGMA table_info(questions)")
@@ -138,6 +178,7 @@ export function openDatabase(path: string) {
       teacher_id TEXT NOT NULL REFERENCES users(id), fingerprint TEXT NOT NULL,
       question_ids TEXT NOT NULL
     );`);
+  ensureLearningSchema(db);
   return db;
 }
 

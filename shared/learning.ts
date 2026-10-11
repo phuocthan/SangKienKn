@@ -1,0 +1,97 @@
+export type LearningQuestion = {
+  id: string;
+  chapterId: string;
+  chapterTitle: string;
+  text: string;
+  choices: string[];
+  lesson: string;
+};
+export type MatrixRow = {
+  key: string;
+  chapterId: string;
+  chapterTitle: string;
+  lesson: string;
+  available: number;
+};
+export type LearningChapter = {
+  id: string;
+  title: string;
+  semester: string;
+  accuracyBasis: "all" | "latest";
+  seconds: number;
+  level: number;
+  accuracy: number;
+  answered: number;
+  openCorrections: number;
+  tickets: { granted: number; used: number; remaining: number };
+  eligible: boolean;
+  missing: string[];
+};
+export type ExamDefinition = {
+  id: string;
+  title: string;
+  startsAt: number;
+  closesAt: number;
+  tabLimit: number;
+  enabled: boolean;
+  questionCount: number;
+};
+export type ExamRun = {
+  id: string;
+  title: string;
+  kind: "hunt" | "official";
+  status: "active" | "submitted";
+  startedAt: number;
+  deadlineAt: number;
+  serverNow: number;
+  warnings: number;
+  tabLimit: number;
+  questions: LearningQuestion[];
+  answers: Record<string, number>;
+  score: number | null;
+  reason: string | null;
+  results?: {
+    questionId: string;
+    correct: boolean;
+    correctIndex: number;
+    explanation: string;
+  }[];
+  revision: number;
+};
+export type LearningReward = {
+  id: string;
+  studentName: string;
+  label: string;
+  points: number;
+  status: "pending" | "approved" | "rejected";
+  createdAt: number;
+};
+export type LearningOverview = {
+  chapters: LearningChapter[];
+  matrix: MatrixRow[];
+  blueprints: {
+    id: string;
+    title: string;
+    chapterIds: string[];
+    questionCount: number;
+    weights: Record<string, number>;
+  }[];
+  exams: ExamDefinition[];
+  runs: {
+    id: string;
+    title: string;
+    kind: string;
+    studentName: string;
+    status: string;
+    score: number | null;
+    deadlineAt: number;
+    warnings: number;
+  }[];
+  reviews: {
+    id: string;
+    title: string;
+    currentIndex: number;
+    questionCount: number;
+  }[];
+  rewards: LearningReward[];
+};

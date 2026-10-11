@@ -5,7 +5,10 @@ import type { GroupActivity } from "../shared/group-activities";
 
 async function teacherLogin(page: Page) {
   await page.goto("/");
-  await page.getByRole("button", { name: "Giáo viên", exact: true }).click();
+  await page
+    .getByLabel("Email", { exact: true })
+    .fill("giaovien@greenedu.demo");
+  await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
 }
@@ -75,14 +78,12 @@ test("teacher creates a Word group activity, changes representative; student upl
       ),
     }),
   );
-  await dialog
-    .getByLabel("File yêu cầu Word")
-    .setInputFiles({
-      name: "Yêu cầu nhóm.docx",
-      mimeType:
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      buffer: requirement,
-    });
+  await dialog.getByLabel("File yêu cầu Word").setInputFiles({
+    name: "Yêu cầu nhóm.docx",
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    buffer: requirement,
+  });
   await dialog.getByLabel("Số nhóm").fill("2");
   await dialog.getByRole("button", { name: "Tạo và chia nhóm" }).click();
   await expect(dialog).toHaveCount(0);
@@ -131,13 +132,11 @@ test("teacher creates a Word group activity, changes representative; student upl
       student.getByRole("button", { name: "Nộp bài nhóm" }),
     ).toBeVisible();
     const product = Buffer.from("%PDF-1.7\nSản phẩm nhóm\n%%EOF");
-    await student
-      .getByLabel("File sản phẩm")
-      .setInputFiles({
-        name: "Mô hình xanh.pdf",
-        mimeType: "application/pdf",
-        buffer: product,
-      });
+    await student.getByLabel("File sản phẩm").setInputFiles({
+      name: "Mô hình xanh.pdf",
+      mimeType: "application/pdf",
+      buffer: product,
+    });
     await student.getByLabel("Ghi chú").fill("Bản đầu tiên");
     await student.route(
       `**/api/group-activities/${activityId}/submissions`,

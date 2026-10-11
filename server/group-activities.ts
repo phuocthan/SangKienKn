@@ -142,7 +142,7 @@ export function registerGroupRoutes(
     const groups = groupRows.map((group): ActivityGroup => {
       const members = db
         .prepare(
-          "SELECT u.id,u.name,EXISTS(SELECT 1 FROM memberships m WHERE m.classroom_id = ? AND m.student_id = u.id) AS active FROM activity_group_members gm JOIN users u ON u.id = gm.student_id WHERE gm.group_id = ? ORDER BY u.name,u.id",
+          "SELECT u.id,u.name,a.avatar_id AS avatarId,EXISTS(SELECT 1 FROM memberships m WHERE m.classroom_id = ? AND m.student_id = u.id) AS active FROM activity_group_members gm JOIN users u ON u.id = gm.student_id LEFT JOIN user_avatars a ON a.user_id = u.id WHERE gm.group_id = ? ORDER BY u.name,u.id",
         )
         .all(row.classroom_id, group.id) as Row[];
       const rows = db
@@ -157,6 +157,7 @@ export function registerGroupRoutes(
         members: members.map((member) => ({
           id: member.id,
           name: member.name,
+          avatarId: member.avatarId ?? null,
           active: !!member.active,
         })),
         submissions: rows.map((entry): GroupSubmission => ({

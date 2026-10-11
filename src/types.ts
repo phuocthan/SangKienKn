@@ -2,8 +2,10 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  role: "teacher" | "student";
+  role: "admin" | "teacher" | "student";
   mustChange: boolean;
+  avatarId?: string | null;
+  uploadedAvatarId?: string | null;
 };
 export type Chapter = {
   id: string;
@@ -41,11 +43,12 @@ export type Question = {
 };
 export type Result = {
   correct: boolean;
-  correctIndex: number;
+  correctIndex?: number;
   explanation: string;
   resolved: boolean;
 };
 export type Student = {
+  avatarId?: string | null;
   id: string;
   name: string;
   email: string;

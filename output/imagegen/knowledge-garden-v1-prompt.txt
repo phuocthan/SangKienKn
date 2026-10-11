@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: production illustration for the GreenEdu learning dashboard hero, displayed beside HTML text.
+Primary request: a beautiful knowledge garden symbolizing patient learning and growth for a Vietnamese secondary-school educational app.
+Subject: a small open book forming the base of a miniature garden, one flourishing leafy tree with a few warm peach flowers, a young sapling, subtle moss and tiny botanical details. No people.
+Style/medium: refined tactile 3D clay and paper illustration, editorial quality, elegant and inviting rather than toy-like; carefully balanced simple silhouette.
+Composition/framing: landscape composition, complete isolated scene centered with generous clear margins on all sides; readable at 360 pixels wide.
+Lighting/mood: soft warm daylight, calm and hopeful, gentle ambient shadows.
+Color palette: forest green, sage, cream paper, muted terracotta, tiny warm yellow accents.
+Constraints: genuinely transparent background; no text, letters, logos, numbers, interface elements or watermark. No rectangular backdrop, no school building.

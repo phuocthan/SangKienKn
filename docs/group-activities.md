@@ -1,5 +1,11 @@
 # Hoạt động nhóm
 
+## Giao diện theo dõi
+
+Danh sách có số hoạt động, số đang nhận bài, số nhóm/hoạt động đã nộp; tìm theo tên và lọc đang nhận bài/đã hết hạn. Thẻ giáo viên hiển thị tiến độ nhóm đã nộp. Mở hoạt động để xem hạn và trạng thái ở đầu trang, yêu cầu/file Word ở một khu riêng, thành viên và sản phẩm ở khu còn lại. Điện thoại xếp các khu theo chiều dọc.
+
+Giáo viên lọc **Tất cả / Chưa nộp / Đã nộp**, đổi đại diện và xem lịch sử sản phẩm ngay trong thẻ nhóm. Học sinh chỉ xem nhóm của mình; form nộp chỉ hiện cho đại diện trước hạn. Trạng thái dùng màu cùng chữ để phân biệt đang nhận bài, hết hạn, đã nộp và chưa nộp.
+
 ## Giáo viên giao hoạt động
 
 1. Chọn lớp ở đầu ứng dụng, mở **Hoạt động nhóm → Tạo hoạt động**. Lớp cần có học sinh; nếu chưa có, thêm học sinh ở **Lớp học của tôi**.

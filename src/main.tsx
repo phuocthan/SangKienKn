@@ -7,6 +7,7 @@ import "@fontsource/be-vietnam-pro/600.css";
 import "@fontsource/be-vietnam-pro/700.css";
 import "@fontsource/be-vietnam-pro/800.css";
 import "./styles.css";
+import "./design.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

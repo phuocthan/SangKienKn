@@ -19,6 +19,7 @@ export function Practice({
   mode,
   questionId,
   lesson,
+  reviewId,
   onFinish,
   onProgress,
 }: {
@@ -26,6 +27,7 @@ export function Practice({
   mode: "practice" | "correction";
   questionId?: string;
   lesson?: string;
+  reviewId?: string;
   onFinish: () => void;
   onProgress: () => void;
 }) {
@@ -57,6 +59,43 @@ export function Practice({
     const query = new URLSearchParams();
     if (lesson) query.set("lesson", lesson);
     if (mode === "correction") query.set("mode", "correction");
+    if (reviewId) {
+      api<{
+        questions: Question[];
+        currentIndex: number;
+        completed: boolean;
+        answers: Record<string, Result & { selected: number }>;
+      }>(`/learning/reviews/${reviewId}`)
+        .then((r) => {
+          if (!alive) return;
+          setQuestions(r.questions);
+          setIndex(r.currentIndex);
+          setDone(r.completed);
+          setScore(Object.values(r.answers).filter((a) => a.correct).length);
+          const answer = r.answers[r.questions[r.currentIndex]?.id];
+          setResult(answer ?? null);
+          const draft = Number(
+            localStorage.getItem(
+              `greenedu-review:${reviewId}:${r.questions[r.currentIndex]?.id}`,
+            ) ?? -1,
+          );
+          setSelected(
+            answer?.selected ??
+              (Number.isInteger(draft) && draft >= 0 && draft < 4
+                ? draft
+                : null),
+          );
+        })
+        .catch((e) => {
+          if (alive) setError(errorMessage(e));
+        })
+        .finally(() => {
+          if (alive) setLoading(false);
+        });
+      return () => {
+        alive = false;
+      };
+    }
     api<Question[]>(
       `/chapters/${chapter.id}/questions${query.size ? `?${query}` : ""}`,
     )
@@ -79,9 +118,10 @@ export function Practice({
     return () => {
       alive = false;
     };
-  }, [chapter.id, mode, questionId, lesson, retryKey]);
+  }, [chapter.id, mode, questionId, lesson, reviewId, retryKey]);
 
   const canStudy = !loading && questions.length > 0 && !done;
+  const studyChapterId = questions[index]?.chapterId ?? chapter.id;
   useEffect(() => {
     if (!canStudy) return;
     let sessionId: string | undefined,
@@ -124,7 +164,7 @@ export function Practice({
         setWarning(null);
       }
     }
-    api<{ sessionId: string }>("/study/start", { chapterId: chapter.id })
+    api<{ sessionId: string }>("/study/start", { chapterId: studyChapterId })
       .then((s) => {
         if (disposed) {
           void api("/study/stop", { sessionId: s.sessionId }).catch(() => {});
@@ -163,7 +203,7 @@ export function Practice({
       if (sessionId) void api("/study/stop", { sessionId }).catch(() => {});
       onProgressRef.current();
     };
-  }, [chapter.id, canStudy]);
+  }, [studyChapterId, canStudy]);
 
   function resume() {
     lastInteraction.current = Date.now();
@@ -177,13 +217,20 @@ export function Practice({
     setBusy(true);
     setError("");
     try {
-      const r = await api<Result>("/attempts", {
-        questionId: questions[index].id,
-        selected,
-        mode,
-        requestId: requestId.current,
-      });
+      const r = await api<Result>(
+        reviewId ? `/learning/reviews/${reviewId}/answer` : "/attempts",
+        {
+          questionId: questions[index].id,
+          selected,
+          mode,
+          requestId: requestId.current,
+        },
+      );
       setResult(r);
+      if (reviewId)
+        localStorage.removeItem(
+          `greenedu-review:${reviewId}:${questions[index].id}`,
+        );
       if (r.correct) setScore((s) => s + 1);
       onProgress();
     } catch (e) {
@@ -192,7 +239,25 @@ export function Practice({
       setBusy(false);
     }
   }
-  function next() {
+  async function next() {
+    if (busy) return;
+    if (mode === "correction" && result && !result.correct) {
+      setResult(null);
+      setSelected(null);
+      requestId.current = crypto.randomUUID();
+      return;
+    }
+    if (reviewId) {
+      setBusy(true);
+      try {
+        await api(`/learning/reviews/${reviewId}/next`, { index: index + 1 });
+      } catch (e) {
+        setError(errorMessage(e));
+        return;
+      } finally {
+        setBusy(false);
+      }
+    }
     if (index === questions.length - 1) {
       setDone(true);
       onProgress();
@@ -302,7 +367,8 @@ export function Practice({
         <div className="question-meta">
           <span className="eyebrow">
             {mode === "correction" ? "SỔ TAY SỬA SAI" : "LUYỆN TẬP"} ·{" "}
-            {chapter.title}
+            {(q as Question & { chapterTitle?: string }).chapterTitle ??
+              chapter.title}
           </span>
           <span>
             Câu {index + 1}/{questions.length}
@@ -319,6 +385,11 @@ export function Practice({
               disabled={!!result || busy || paused}
               onClick={() => {
                 setSelected(i);
+                if (reviewId)
+                  localStorage.setItem(
+                    `greenedu-review:${reviewId}:${q.id}`,
+                    String(i),
+                  );
                 requestId.current = crypto.randomUUID();
               }}
               className={`choice ${selected === i ? "selected" : ""} ${result && i === result.correctIndex ? "correct-choice" : ""} ${result && selected === i && !result.correct ? "wrong-choice" : ""}`}
@@ -367,8 +438,16 @@ export function Practice({
             <SproutMark /> Hiểu thêm một chút, cây lớn thêm một chút.
           </span>
           {result ? (
-            <button className="button primary" onClick={next}>
-              {index === questions.length - 1 ? "Xem kết quả" : "Câu tiếp theo"}
+            <button
+              className="button primary"
+              disabled={busy}
+              onClick={() => void next()}
+            >
+              {mode === "correction" && !result.correct
+                ? "Tự làm lại"
+                : index === questions.length - 1
+                  ? "Xem kết quả"
+                  : "Câu tiếp theo"}
               <ArrowRight size={17} />
             </button>
           ) : (

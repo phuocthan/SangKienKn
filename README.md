@@ -4,6 +4,8 @@ Web app tiếng Việt giúp học sinh luyện tập, sửa sai và nuôi cây 
 
 ## Chạy local trên Windows
 
+Bản đang triển khai trên máy này ở **[http://localhost:3002](http://localhost:3002)**. Dùng `npm run deploy:status` để xem địa chỉ bản đang chạy. Cổng 3001 hiện là server demo cũ; các chức năng Admin mới cần backend tại cổng 3002. Phần bên dưới hướng dẫn khởi động một bản demo mới.
+
 Cài Git và Node.js **24 trở lên** (app sử dụng `node:sqlite`, không cần cài SQLite riêng). Nếu đã có repository trên máy, mở PowerShell trong thư mục `SangKienKn` và cập nhật:
 
 ```powershell
@@ -44,6 +46,8 @@ Sau khi đổi Node, chạy lại `npm ci`, `npm run build`, `npm run demo`. Kh�
 
 ## Chạy để phát triển
 
+Để build và cập nhật bản chạy local bằng một lệnh, dùng **`npm run deploy`**. Xem [hướng dẫn deploy nhanh](docs/deploy-local.md) cho lệnh xem trạng thái/dừng, sao lưu database và cách gọi từ chat.
+
 Trên Windows PowerShell:
 
 ```powershell
@@ -61,6 +65,8 @@ SEED_DEMO=1 npm run dev
 Giao diện ở **http://localhost:5173**, API ở cổng **3001**. Vite chuyển các yêu cầu `/api` đến backend.
 
 ## Tài khoản dùng thử
+
+**Quản trị tài khoản:** Admin tạo giáo viên/học sinh trong giao diện; giáo viên tạo học sinh hoặc thêm tài khoản có sẵn vào lớp. Tạo Admin đầu tiên bằng `npm run create:admin`; xem [hướng dẫn quản lý tài khoản](docs/account-management.md) cho cách nhập thông tin và quy tắc mật khẩu tạm.
 
 Tài khoản mẫu, chỉ dùng cho dữ liệu thử:
 
@@ -141,7 +147,11 @@ Ngân hàng câu hỏi đã có sửa bằng phiên bản mới, ẩn/hiện l�
 
 **Hoạt động nhóm** đã có cho giáo viên và học sinh: giao yêu cầu bằng văn bản/Word `.docx`, chia nhóm ngẫu nhiên cân bằng, chọn đại diện, nộp Word/PDF/PowerPoint hoặc link Canva, khóa nộp theo hạn máy chủ và giáo viên gia hạn. Mỗi lần nộp có lịch sử; file lưu trong cùng database, được kiểm tra quyền lớp/nhóm khi tải. Xem [hướng dẫn hoạt động nhóm](docs/group-activities.md).
 
-Chưa có: học kỳ, ma trận/trộn đề, vé kiểm tra, thi 20 phút/thi chính thức, Green Points, đổi thưởng, phản biện/chấm điểm nhóm, AI, tự tách đề Word có bố cục bất kỳ/PDF, nhập `.xlsx`, quản lý nhiều lớp cho cùng một học sinh và xuất Excel `.xlsx`. Không xóa câu hỏi đã có lịch sử; dùng chức năng ẩn.
+Đã bổ sung **Ôn tập & kiểm tra**: học kỳ/ma trận/trộn đề, phiên ôn lưu để tiếp tục, vé mốc cây 3/4/5, thi 20 phút theo server, tự lưu/khôi phục/thu bài, Săn điểm và thi chính thức theo lịch lớp, duyệt điểm cây/thi và xuất Excel. Tỷ lệ 70% mặc định tính mọi lượt luyện tập và sửa sai; tự nộp ở lần rời tab thứ 4. Xem [hướng dẫn ôn thi](docs/learning.md) và [kế hoạch triển khai](docs/learning-implementation-plan.md).
+
+Toàn bộ thiết kế giao diện, ảnh nền/logo, màu/font, minh họa/avatar và lịch sử tập trung tại [tài liệu thiết kế](docs/app-design.md).
+
+Chưa có: đổi quà Green Points, phản biện/chấm điểm và thưởng nhóm, AI, tự tách đề Word có bố cục bất kỳ/PDF, nhập `.xlsx`. Không xóa câu hỏi đã có lịch sử; dùng chức năng ẩn.
 
 Trước khi dùng dữ liệu học sinh thật: triển khai HTTPS cùng nguồn, tắt và tách dữ liệu demo, sao lưu database, thiết lập quyền truy cập và chính sách dữ liệu, vận hành tài khoản giáo viên, và đánh giá tải. Thi chính thức cần đặc tả riêng về đề, lưu đáp án, mất mạng, điểm và quy trình xử lý sự cố.
 

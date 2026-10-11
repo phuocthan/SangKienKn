@@ -1,0 +1,11 @@
+Generated with the built-in image_gen tool. Used as a CSS sprite atlas without altering the generated image.
+
+Use case: stylized-concept.
+Asset type: ONE square 4x4 sprite atlas for GreenEdu profile avatar UI.
+Create a square 1024x1024 image containing EXACTLY 4 columns and 4 rows of equally sized square tiles. Tiles edge to edge, zero gutters and zero outer margins, uniform warm pale ivory background. Each tile contains ONE distinct cute chibi plant mascot with a friendly face, expressive round eyes, soft cheek blush, tiny arms and feet where appropriate. Botanical character, not a human holding a plant. All visible leaves, crowns, roots, pots and flowers inside their own tile with at least 10% safe padding. Equally centered and scaled; character occupies about 75% of its tile. Warm educational hand-drawn anime sticker illustration, polished clear colored outlines, natural green pastel palette, charming and readable at small circular avatar sizes. Exact grid alignment essential for CSS sprites.
+Strict tile order left to right, top to bottom:
+Row 1: smiling golden seed nestled in small soil mound; two-leaf green baby sprout with cute face on round stem; three-leaf playful young shoot waving; cheerful pale green unfurling leaf bud.
+Row 2: smiling heart-shaped green leaf; friendly maple leaf with warm green orange tint; delighted glossy monstera leaf; gentle bamboo shoot with two narrow leaves.
+Row 3: small happy seedling in terracotta pot; cheerful mini bush shaped like a rounded cloud; chibi young broadleaf tree with face on trunk; friendly large round-canopy tree guardian.
+Row 4: tiny blooming tree with pink flowers; joyful sunflower with petal face and two leaves; cute succulent rosette in small pot; smiling oak seed acorn with tiny green sprout on top.
+No labels, letters, text, numbers, borders, watermark or decorative objects crossing tile boundaries. Avoid oversized props, cropped leaves, dark backgrounds. All sixteen mascots distinctly recognizable.

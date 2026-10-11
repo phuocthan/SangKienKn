@@ -1,0 +1,7 @@
+Use case: precise-object-edit
+Asset type: revised school background for GreenEdu, based on the supplied approved school courtyard image.
+Input image: the existing school image is the edit target. Preserve it closely.
+Primary request: REMOVE ONLY the floating diamond school logo in the upper sky, reconstruct that area naturally with matching blue sky and clouds. Enlarge the existing school title by approximately 30 percent, using the reclaimed logo space.
+Text verbatim: "TRƯỜNG THPT NGUYỄN KHUYẾN"
+Typography: single line of elegant uppercase navy serif text, correct Vietnamese diacritics, uniform font size approximately 42 pixels relative to this 1672 pixel wide image, larger than the original. Position high in the clear upper-right sky, centered across x=.46 to .95, with ample margins. No logo anywhere in the background.
+Invariants: keep the red poinciana tree and blossoms, the exact two separate yellow classroom wings in V arrangement with open gap, the ONE Vietnamese flag and flagpole in the current location left of center, paving, greenery, lighting, perspective, colors and photorealistic illustration style. Keep the same landscape 16:9 aspect ratio and composition. No gate, no people, no interface elements, no new objects or watermarks. Change only the floating logo removal and title size/position; do not redesign the school.

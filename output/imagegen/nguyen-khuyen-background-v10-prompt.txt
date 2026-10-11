@@ -1,0 +1,7 @@
+Use case: precise-object-edit
+Asset type: GreenEdu approved school background, refined title placement.
+Input images: IMAGE 1 is the full-resolution edit target. IMAGE 2 is ONLY a positioning reference screenshot; the red arrow indicates the clear sky ABOVE the current school title. Ignore all UI, framing and the red arrow itself.
+Primary request: MOVE the existing navy title in IMAGE 1 vertically upward by about 90 pixels at the 1672x941 source size. Its new bounding box should be approximately y=35 to 100 pixels (top 4% to 10.6% of image height), in the clear upper-right sky, as indicated in IMAGE 2. Keep its existing horizontal alignment, font size, weight, serif style, navy color and one-line layout.
+Exact text verbatim: "TRƯỜNG THPT NGUYỄN KHUYẾN". Preserve all Vietnamese accents exactly.
+Erase the old title location seamlessly with matching blue sky and natural clouds. Only ONE school title must appear. No logo anywhere in the background. Keep comfortable top and right margins; don't crop any letters or overlap the tree canopy.
+Invariants: same exact school scene, buildings, two separate yellow wings in V arrangement, open gap, red poinciana blossoms, ONE Vietnamese flagpole in its existing position, trees, paving, lighting, perspective and colors. Same landscape 16:9 aspect ratio. No red arrows, annotations, interface, people, new objects or watermarks. Change only the title's vertical placement.

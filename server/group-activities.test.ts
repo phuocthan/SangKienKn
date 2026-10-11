@@ -815,9 +815,10 @@ test("product validation accepts Office and PDF or HTTP links; rejects executabl
 
 test("group snapshot, Word, products and extensions persist through server restart without altering existing classes and questions", async (t) => {
   const directory = mkdtempSync(join(tmpdir(), "greenedu-groups-"));
-  t.after(() => rmSync(directory, { recursive: true, force: true }));
   const f = await fixture(t, join(directory, "app.sqlite")),
     teacher = await f.login("teacher-demo");
+  // Windows cannot remove SQLite files before the fixture closes the database.
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
   const created = await f.request(
     "/classrooms/class-demo/group-activities",
     multipart(creation(), "requirement", "a.docx", requirement),

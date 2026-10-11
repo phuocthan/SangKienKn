@@ -1,0 +1,14 @@
+# Avatar tài khoản — chức năng và lưu trữ
+
+Cập nhật 11/10/2026. Toàn bộ thiết kế, hình ảnh, prompt, bộ sưu tập và cách hiển thị tập trung tại [app-design.md](app-design.md).
+
+Học sinh và giáo viên chọn/lưu avatar trong Tài khoản. Giáo viên có 40 ID trong danh mục; học sinh dùng 24 ID dành cho học sinh/thiên nhiên, không được dùng 16 ID giáo viên. Avatar không thay đổi vai trò. Có thể dùng ảnh cá nhân hoặc khôi phục chữ viết tắt.
+
+Upload nhận JPG/PNG/WebP tối đa **3 MB (3 × 1024 × 1024 byte)** và 4096 × 4096 px. Mỗi tài khoản lưu một ảnh, tải ảnh mới thay bản trước. API kiểm tra kích thước/chữ ký và lưu atomically. Không nhận URL ảnh tùy ý hoặc ID ảnh thuộc tài khoản khác.
+
+- POST /api/auth/avatar: cập nhật lựa chọn của người đang đăng nhập, kiểm tra quyền theo vai trò; học sinh gửi ID giáo viên bị từ chối 403.
+- POST /api/auth/avatar/upload: multipart một trường avatar; tài khoản mật khẩu tạm phải đổi mật khẩu trước.
+- GET /api/avatars/:id: chỉ chủ ảnh, Admin và tài khoản có lớp chung được xem.
+- user_avatars lưu lựa chọn; avatar_uploads lưu BLOB ảnh nên backup SQLite bao gồm cả ảnh. Migration giữ dữ liệu học tập; lựa chọn giáo viên cũ của học sinh được đưa về mặc định theo quy tắc vai trò.
+
+Đã deploy local. API kiểm tra đủ 40 ID, quyền sở hữu, upload đúng 3 MB/chặn vượt 1 byte, giữ dữ liệu sau mở lại SQLite; E2E kiểm tra chọn/lưu/tải lại/upload/khôi phục trên desktop/mobile. Dữ liệu kiểm thử tách khỏi database chính.

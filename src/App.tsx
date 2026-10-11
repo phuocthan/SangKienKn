@@ -30,6 +30,7 @@ import {
 import { api, ApiError, duration, errorMessage } from "./api";
 import {
   Empty,
+  GardenIllustration,
   LinkButton,
   Logo,
   Modal,
@@ -37,8 +38,11 @@ import {
   Tree,
 } from "./components";
 import { Practice } from "./Practice";
+import { Learning } from "./Learning";
 import { ClassCommunity } from "./ClassCommunity";
 import { GroupActivities } from "./GroupActivities";
+import { AdminWorkspace } from "./Accounts";
+import { Avatar, AvatarPicker } from "./Avatars";
 import { QuestionBank } from "./QuestionBank";
 import { QuestionFields } from "./QuestionFields";
 import type { Chapter, Classroom, Question, Student, User } from "./types";
@@ -46,6 +50,7 @@ import type { Chapter, Classroom, Question, Student, User } from "./types";
 type Page =
   | "home"
   | "practice"
+  | "learning"
   | "corrections"
   | "classes"
   | "groups"
@@ -59,19 +64,27 @@ type Study = {
   mode: "practice" | "correction";
   questionId?: string;
   lesson?: string;
+  reviewId?: string;
 };
 type Editor =
   "class" | "chapter" | "student" | "question" | { student: Student } | null;
 const stages = ["Hạt mầm", "Nảy mầm", "Cây non", "Trưởng thành", "Ra hoa"];
+type QuickAccount = { role: "teacher" | "student"; name: string };
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [booting, setBooting] = useState(true);
   const [demo, setDemo] = useState(false);
+  const [quickLogin, setQuickLogin] = useState(false);
+  const [quickAccounts, setQuickAccounts] = useState<QuickAccount[]>([]);
   const [startupError, setStartupError] = useState("");
   const [classes, setClasses] = useState<Classroom[]>([]);
-  const [classId, setClassId] = useState("");
-  const [page, setPage] = useState<Page>("home");
+  const [classId, setClassId] = useState(
+    new URLSearchParams(location.hash.slice(1)).get("learning") ?? "",
+  );
+  const [page, setPage] = useState<Page>(
+    location.hash.includes("learning=") ? "learning" : "home",
+  );
   const [study, setStudy] = useState<Study | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -88,8 +101,14 @@ export default function App() {
     setBooting(true);
     setStartupError("");
     try {
-      const health = await api<{ demo: boolean }>("/health");
+      const health = await api<{
+        demo: boolean;
+        quickLogin?: boolean;
+        quickAccounts?: QuickAccount[];
+      }>("/health");
       setDemo(health.demo);
+      setQuickLogin(!!health.quickLogin);
+      setQuickAccounts(health.quickAccounts ?? []);
       try {
         setUser(await api<User>("/auth/me"));
       } catch (e) {
@@ -115,7 +134,7 @@ export default function App() {
     return () => window.removeEventListener("session-expired", expired);
   }, []);
   const reload = useCallback(async () => {
-    if (!user || user.mustChange) return;
+    if (!user || user.mustChange || user.role === "admin") return;
     try {
       const rows = await api<Classroom[]>("/classrooms");
       setClasses(rows);
@@ -180,7 +199,10 @@ export default function App() {
       );
       setQuestionChapter(result.id);
     } else if (editor === "student" && current) {
-      await api(`/classrooms/${current.id}/students`, data);
+      await api(
+        `/classrooms/${current.id}/${data.accountMode === "existing" ? "memberships" : "students"}`,
+        data,
+      );
     } else if (editor === "question" && current) {
       await api(`/chapters/${data.chapterId}/questions`, {
         text: data.text,
@@ -221,7 +243,16 @@ export default function App() {
         </button>
       </div>
     );
-  if (!user) return <Login demo={demo} onLogin={login} notice={notice} />;
+  if (!user)
+    return (
+      <Login
+        demo={demo}
+        quickLogin={quickLogin}
+        quickAccounts={quickAccounts}
+        onLogin={login}
+        notice={notice}
+      />
+    );
   if (user.mustChange)
     return (
       <div className="password-screen">
@@ -229,7 +260,7 @@ export default function App() {
         <div className="card">
           <span className="eyebrow">BẢO VỆ TÀI KHOẢN CỦA BẠN</span>
           <h1>Đặt mật khẩu của riêng bạn</h1>
-          <p>Đổi mật khẩu tạm do giáo viên cung cấp trước khi bắt đầu học.</p>
+          <p>Đổi mật khẩu tạm được cung cấp trước khi sử dụng GreenEdu.</p>
           <PasswordForm onUpdate={setUser} />
           <button className="text-button" onClick={() => void logout()}>
             Đăng xuất
@@ -237,12 +268,22 @@ export default function App() {
         </div>
       </div>
     );
+  if (user.role === "admin")
+    return (
+      <AdminWorkspace
+        user={user}
+        onLogout={logout}
+        passwordForm={<PasswordForm onUpdate={setUser} />}
+        error={error}
+      />
+    );
   const nav: { id: Page; label: string; icon: typeof Leaf }[] = isTeacher
     ? [
         { id: "home", label: "Tổng quan", icon: LayoutDashboard },
         { id: "classes", label: "Lớp học của tôi", icon: Users },
         { id: "groups", label: "Hoạt động nhóm", icon: Users },
         { id: "questions", label: "Ngân hàng câu hỏi", icon: BookOpen },
+        { id: "learning", label: "Ôn tập & kiểm tra", icon: Clock3 },
         { id: "progress", label: "Tiến độ học tập", icon: TrendingUp },
         { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
         { id: "leaderboard", label: "Xếp hạng chăm chỉ", icon: Trophy },
@@ -250,6 +291,7 @@ export default function App() {
     : [
         { id: "home", label: "Khu vườn của tôi", icon: Sprout },
         { id: "practice", label: "Luyện tập", icon: BookOpen },
+        { id: "learning", label: "Ôn tập & kiểm tra", icon: Clock3 },
         { id: "groups", label: "Hoạt động nhóm", icon: Users },
         { id: "corrections", label: "Sổ tay sửa sai", icon: CheckCircle2 },
         { id: "progress", label: "Hành trình của tôi", icon: TrendingUp },
@@ -259,6 +301,7 @@ export default function App() {
   const pageNames: Record<Page, string> = {
     home: isTeacher ? "Tổng quan" : "Khu vườn của tôi",
     practice: "Luyện tập",
+    learning: "Ôn tập & kiểm tra",
     corrections: "Sổ tay sửa sai",
     classes: "Lớp học của tôi",
     groups: "Hoạt động nhóm",
@@ -277,15 +320,16 @@ export default function App() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <Logo />
+        <Logo school />
         <div className="workspace-label">
-          {isTeacher ? "KHÔNG GIAN GIÁO VIÊN" : "KHÔNG GIAN HỌC TẬP"}
+          {isTeacher ? "TRANG GIÁO VIÊN" : "TRANG HỌC TẬP"}
         </div>
         <nav aria-label="Điều hướng chính">
           {nav.map((item) => (
             <button
               key={item.id}
               className={`nav-item ${page === item.id ? "active" : ""}`}
+              aria-current={page === item.id ? "page" : undefined}
               onClick={() => navigate(item.id)}
             >
               <item.icon size={20} />
@@ -310,6 +354,7 @@ export default function App() {
           </div>
           <button
             className={`nav-item ${page === "settings" ? "active" : ""}`}
+            aria-current={page === "settings" ? "page" : undefined}
             onClick={() => navigate("settings")}
           >
             <Settings size={19} />
@@ -325,7 +370,7 @@ export default function App() {
       <div className="main-shell">
         <header className="topbar">
           <div className="breadcrumb">
-            Không gian {isTeacher ? "giáo viên" : "học tập"}
+            Trang {isTeacher ? "giáo viên" : "học tập"}
             <span>/</span>
             <strong>{pageNames[page]}</strong>
           </div>
@@ -351,7 +396,13 @@ export default function App() {
               </label>
             )}
             <div className="profile">
-              <span className="avatar">{initials(user.name)}</span>
+              <button
+                className="profile-avatar-button"
+                aria-label="Đổi avatar"
+                onClick={() => navigate("settings")}
+              >
+                <Avatar name={user.name} avatarId={user.avatarId} />
+              </button>
               <div>
                 <strong>{user.name}</strong>
                 <small>{isTeacher ? "Giáo viên" : "Học sinh"}</small>
@@ -381,7 +432,7 @@ export default function App() {
           )}
           {study ? (
             <Practice
-              key={`${study.chapter.id}-${study.mode}-${study.questionId ?? ""}-${study.lesson ?? ""}`}
+              key={`${study.chapter.id}-${study.mode}-${study.questionId ?? ""}-${study.lesson ?? ""}-${study.reviewId ?? ""}`}
               {...study}
               onProgress={refresh}
               onFinish={() => {
@@ -399,7 +450,11 @@ export default function App() {
               <div className="card settings-card">
                 <h2>Thông tin tài khoản</h2>
                 <div className="account-info">
-                  <span className="avatar large">{initials(user.name)}</span>
+                  <Avatar
+                    name={user.name}
+                    avatarId={user.avatarId}
+                    className="large"
+                  />
                   <div>
                     <strong>{user.name}</strong>
                     <p>{user.email}</p>
@@ -408,6 +463,8 @@ export default function App() {
                     </span>
                   </div>
                 </div>
+                <hr />
+                <AvatarPicker user={user} onUpdate={setUser} />
                 <hr />
                 <h2>Đổi mật khẩu</h2>
                 <PasswordForm
@@ -492,16 +549,7 @@ export default function App() {
                           <ArrowRight size={18} />
                         </button>
                       </div>
-                      <div className="hero-garden" aria-hidden="true">
-                        <span className="garden-sun" />
-                        <span className="garden-ground" />
-                        <Tree level={2} decorative />
-                        <Tree level={5} decorative />
-                        <Tree level={3} decorative />
-                        <span className="garden-caption">
-                          Lớn lên cùng tri thức
-                        </span>
-                      </div>
+                      <GardenIllustration className="hero-illustration" />
                     </div>
                     <StudentStats classroom={current} />
                     <SectionTitle
@@ -537,6 +585,16 @@ export default function App() {
                     </div>
                   </>
                 ))}
+              {page === "learning" && (
+                <Learning
+                  key={current.id}
+                  classroom={current}
+                  user={user}
+                  onReview={(reviewId, chapter) =>
+                    setStudy({ chapter, mode: "practice", reviewId })
+                  }
+                />
+              )}
               {page === "practice" && (
                 <>
                   <PageHeading
@@ -815,7 +873,7 @@ export default function App() {
             </span>
             <span>
               {demo
-                ? "Không gian trải nghiệm · Dữ liệu mẫu"
+                ? "Trang trải nghiệm · Dữ liệu mẫu"
                 : "Mỗi ngày, một bước tiến"}
             </span>
           </footer>
@@ -848,14 +906,6 @@ export default function App() {
   );
 }
 
-function initials(name: string) {
-  return name
-    .split(" ")
-    .slice(-2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-}
 function PageHeading({
   eyebrow,
   title,
@@ -880,10 +930,14 @@ function PageHeading({
 }
 function Login({
   demo,
+  quickLogin,
+  quickAccounts,
   onLogin,
   notice,
 }: {
   demo: boolean;
+  quickLogin: boolean;
+  quickAccounts: QuickAccount[];
   onLogin: (user: User) => void;
   notice: string;
 }) {
@@ -891,12 +945,27 @@ function Login({
     [password, setPassword] = useState(""),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  async function enterDefault(role: QuickAccount["role"]) {
+    setBusy(true);
+    setError("");
+    try {
+      onLogin(await api<User>("/auth/quick-login", { role }));
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
   async function login(event: FormEvent) {
     event.preventDefault();
     setBusy(true);
     setError("");
     try {
-      onLogin(await api<User>("/auth/login", { email, password }));
+      const enteredEmail = email.trim();
+      const loginEmail = enteredEmail.includes("@")
+        ? enteredEmail
+        : `${enteredEmail}@greenedu.demo`;
+      onLogin(await api<User>("/auth/login", { email: loginEmail, password }));
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -906,7 +975,7 @@ function Login({
   return (
     <div className="login-page">
       <section className="login-story">
-        <Logo />
+        <Logo school />
         <div className="login-story-content">
           <span className="eyebrow">MỖI NỖ LỰC LÀ MỘT HẠT MẦM</span>
           <h1>
@@ -919,18 +988,14 @@ function Login({
             <br />
             Và để thấy mình tốt hơn mỗi ngày.
           </p>
-          <div className="login-art">
-            <Tree level={2} decorative />
-            <Tree level={5} decorative />
-            <Tree level={3} decorative />
-          </div>
+          <GardenIllustration className="login-illustration" />
           <div className="story-caption">
             <Leaf size={17} />
             Gieo tri thức, gặt tương lai
           </div>
         </div>
         <span className="login-copyright">
-          GREENEDU · KHÔNG GIAN HỌC TẬP XANH
+          GREENEDU · TRANG HỌC TẬP XANH
         </span>
       </section>
       <section className="login-form-side">
@@ -951,13 +1016,20 @@ function Login({
               Email
               <input
                 required
-                type="email"
+                type="text"
+                inputMode="email"
                 autoComplete="username"
-                placeholder="Email do giáo viên cung cấp"
+                autoCapitalize="none"
+                spellCheck={false}
+                aria-describedby="login-email-hint"
+                placeholder="Tên tài khoản hoặc email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </label>
+            <p id="login-email-hint" className="login-email-hint">
+              Nếu chưa có @, tự thêm @greenedu.demo khi đăng nhập.
+            </p>
             <label>
               Mật khẩu
               <input
@@ -985,7 +1057,40 @@ function Login({
             <ShieldCheck size={16} />
             Quên mật khẩu? Nhờ giáo viên cấp lại mật khẩu tạm.
           </p>
-          {demo && (
+          {quickLogin && (
+            <div className="quick-login-box">
+              <strong>Vào nhanh khu vườn</strong>
+              <p>Chọn tài khoản mặc định để tiếp tục.</p>
+              <div className="quick-login-options">
+                {(["teacher", "student"] as const).map((role) => {
+                  const account = quickAccounts.find((a) => a.role === role);
+                  const label = role === "teacher" ? "Giáo viên" : "Học sinh";
+                  return (
+                    <button
+                      className="quick-login-option"
+                      type="button"
+                      key={role}
+                      aria-label={`Vào nhanh ${label}`}
+                      disabled={busy || !account}
+                      onClick={() => void enterDefault(role)}
+                    >
+                      {role === "teacher" ? (
+                        <Users size={21} />
+                      ) : (
+                        <Sprout size={21} />
+                      )}
+                      <span>
+                        <strong>{label}</strong>
+                        <small>{account?.name ?? "Chưa có tài khoản"}</small>
+                      </span>
+                      <ArrowRight size={17} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {demo && !quickLogin && (
             <div className="demo-box">
               <strong>Khám phá bản MVP</strong>
               <p>Chọn vai trò để điền tài khoản mẫu, sau đó đăng nhập.</p>
@@ -1157,7 +1262,7 @@ function ChapterGrid({
                   }))
                 }
               >
-                <option value="">Ôn toàn chương</option>
+                <option value="">Luyện tập toàn chương</option>
                 {ch.lessons.map((l) => (
                   <option key={l.title} value={l.title}>
                     {l.title} · {l.questionCount} câu
@@ -1220,7 +1325,7 @@ function TeacherHome({
         <div className="hero-copy">
           <span className="pill hero-pill">
             <Users size={14} />
-            KHÔNG GIAN GIÁO VIÊN
+            TRANG GIÁO VIÊN
           </span>
           <h2>
             Bài học tốt bắt đầu
@@ -1239,9 +1344,7 @@ function TeacherHome({
             <ArrowRight size={18} />
           </button>
         </div>
-        <div className="teacher-hero-art" aria-hidden="true">
-          <Tree level={5} decorative />
-        </div>
+        <GardenIllustration className="hero-illustration" />
       </div>
       {error && (
         <div className="error-banner" role="alert">
@@ -1530,7 +1633,7 @@ function Roster({
                   <tr key={s.id}>
                     <td>
                       <div className="student-cell">
-                        <span className="avatar">{initials(s.name)}</span>
+                        <Avatar name={s.name} avatarId={s.avatarId} />
                         <div>
                           <strong>{s.name}</strong>
                           <small>{s.email}</small>
@@ -1678,6 +1781,7 @@ function EditorForm({
   chapterId: string;
   onSave: (e: FormEvent<HTMLFormElement>) => Promise<void>;
 }) {
+  const [accountMode, setAccountMode] = useState("new");
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -1748,18 +1852,34 @@ function EditorForm({
       )}
       {editor === "student" && (
         <>
-          <p className="form-intro">
-            Học sinh sẽ được yêu cầu đổi mật khẩu tạm ở lần đăng nhập đầu tiên.
-          </p>
           <label>
-            Họ tên
-            <input
-              name="name"
-              required
-              maxLength={100}
-              placeholder="Họ và tên học sinh"
-            />
+            Loại tài khoản
+            <select
+              aria-label="Loại tài khoản"
+              name="accountMode"
+              value={accountMode}
+              onChange={(e) => setAccountMode(e.target.value)}
+            >
+              <option value="new">Tạo tài khoản học sinh</option>
+              <option value="existing">Tài khoản có sẵn</option>
+            </select>
           </label>
+          <p className="form-intro">
+            {accountMode === "new"
+              ? "Tạo tài khoản và thêm vào lớp. Học sinh cần đổi mật khẩu tạm ở lần đăng nhập đầu tiên."
+              : "Nhập email tài khoản học sinh do Admin hoặc giáo viên đã tạo để thêm vào lớp này."}
+          </p>
+          {accountMode === "new" && (
+            <label>
+              Họ tên
+              <input
+                name="name"
+                required
+                maxLength={100}
+                placeholder="Họ và tên học sinh"
+              />
+            </label>
+          )}
           <label>
             Email
             <input
@@ -1770,19 +1890,21 @@ function EditorForm({
               placeholder="Email đăng nhập của học sinh"
             />
           </label>
-          <label>
-            Mật khẩu tạm
-            <input
-              name="password"
-              aria-label="Mật khẩu tạm"
-              required
-              type="password"
-              minLength={8}
-              maxLength={128}
-              autoComplete="new-password"
-            />
-            <small>Cung cấp riêng cho học sinh, tối thiểu 8 ký tự.</small>
-          </label>
+          {accountMode === "new" && (
+            <label>
+              Mật khẩu tạm
+              <input
+                name="password"
+                aria-label="Mật khẩu tạm"
+                required
+                type="password"
+                minLength={8}
+                maxLength={128}
+                autoComplete="new-password"
+              />
+              <small>Cung cấp riêng cho học sinh, tối thiểu 8 ký tự.</small>
+            </label>
+          )}
         </>
       )}
       {typeof editor === "object" && (

@@ -127,7 +127,12 @@ test("teacher downloads and imports a real Word template with preview, format sw
 
 async function demoLogin(page: Page, role: "Học sinh" | "Giáo viên") {
   await page.goto("/");
-  await page.getByRole("button", { name: role, exact: true }).click();
+  await page
+    .getByLabel("Email", { exact: true })
+    .fill(
+      role === "Giáo viên" ? "giaovien@greenedu.demo" : "hocsinh@greenedu.demo",
+    );
+  await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(
     page.getByRole("navigation", { name: "Điều hướng chính" }),

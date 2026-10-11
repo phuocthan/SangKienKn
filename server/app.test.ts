@@ -272,8 +272,8 @@ test("wrong answer → notebook → correct repair; retries are idempotent and p
     0,
   );
   const classroom = (await f.request("/classrooms", undefined, cookie)).data[0];
-  assert.equal(classroom.chapters[0].total, 2);
-  assert.equal(classroom.chapters[0].correct, 1);
+  assert.equal(classroom.chapters[0].total, 4); // Includes failed and successful repair.
+  assert.equal(classroom.chapters[0].correct, 2);
   // A new wrong practice answer reopens the same correction, without duplicates.
   await f.request("/attempts", { ...body, requestId: randomUUID() }, cookie);
   assert.equal(
@@ -1004,8 +1004,8 @@ test("question edits keep original answers and notebook; old retry works but new
   );
   const summary = (await f.request("/classrooms", undefined, student)).data[0]
     .chapters[0];
-  assert.equal(summary.total, 2);
-  assert.equal(summary.correct, 1);
+  assert.equal(summary.total, 3); // Original wrong + repair + new revision practice.
+  assert.equal(summary.correct, 2);
   assert.equal(summary.questionCount, 3);
   assert.equal(
     (await f.request(`/questions/${before.id}/edit`, update, teacher)).status,

@@ -1,16 +1,41 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { X, Leaf, Sprout, ArrowRight } from "lucide-react";
 
-export function Logo() {
+export function Logo({ school = false }: { school?: boolean }) {
   return (
-    <div className="logo">
-      <span className="logo-mark">
-        <Sprout size={27} />
+    <div className={`logo ${school ? "school-logo" : ""}`}>
+      <span className={school ? "school-crest" : "logo-mark"}>
+        {school ? (
+          <img
+            src="/assets/nguyen-khuyen-background.png"
+            alt="Logo Trường THPT Nguyễn Khuyến"
+            width={1672}
+            height={941}
+          />
+        ) : (
+          <Sprout size={27} />
+        )}
       </span>
       <span>
         green<span className="logo-light">edu</span>
-        <small>GIEO TRI THỨC, GẶT TƯƠNG LAI</small>
+        <small>
+          {school ? "THPT NGUYỄN KHUYẾN" : "GIEO TRI THỨC, GẶT TƯƠNG LAI"}
+        </small>
       </span>
+    </div>
+  );
+}
+
+export function GardenIllustration({ className = "" }: { className?: string }) {
+  return (
+    <div className={`knowledge-illustration ${className}`} aria-hidden="true">
+      <img
+        src="/assets/knowledge-garden-v1.webp"
+        alt=""
+        width={1536}
+        height={1024}
+        decoding="async"
+      />
     </div>
   );
 }

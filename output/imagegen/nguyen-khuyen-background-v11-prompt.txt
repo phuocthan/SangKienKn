@@ -1,0 +1,8 @@
+Use case: precise-object-edit
+Asset type: final GreenEdu school background.
+Edit target: provided school courtyard image.
+Primary request: Make the navy school title visibly LARGER (about 20-25% larger than this version) and move it HIGHER again, close to the top in the clear right-hand sky.
+Exact text verbatim: "TRƯỜNG THPT NGUYỄN KHUYẾN"
+Target placement at 1672x941 size: all ink including Vietnamese accent marks lies between y=22 and y=90 pixels, leaving at least 22 pixels clear top margin. Single-line title spans roughly x=730 to x=1600, with at least 65 pixels right margin. Use large bold elegant navy serif lettering, keep every Vietnamese accent perfect. Size about 57-60px, visibly bigger than the current 45-48px title. Reclaim the empty sky above the current text; do not leave it at its current height.
+Erase the old text location seamlessly with matching sky/clouds. Only one school title. No school crest/logo in the background.
+Preserve exactly the rest of the scene: the two separate yellow classroom wings with open V gap, red poinciana blossoms and tree, ONE Vietnamese flag and flagpole in current position, all greenery, paving, perspective, colors and sunlight. Landscape 16:9. No gate, no people, no interface, no annotations or watermark. Change only the title size and placement.

@@ -23,7 +23,7 @@ Kiểm chứng luồng giáo viên tạo lớp và câu hỏi → học sinh luy
 2. API danh sách câu hỏi không gửi đáp án/lời giải cho học sinh. Sau khi nộp một câu trả lời luyện tập, phản hồi có đáp án và lời giải.
 3. Bất kỳ lượt trả lời sai nào đều tạo hoặc mở lại mục sửa sai, không tạo mục trùng.
 4. Chỉ lượt đúng ở chế độ sửa sai mới đánh dấu đã khắc phục. Lượt đúng ở luyện tập không xóa mục sửa sai.
-5. Tỷ lệ đúng MVP = số lượt luyện tập đúng / tổng lượt luyện tập. Chưa dùng chỉ số này để mở khóa thi.
+5. Tỷ lệ đúng hiện tính mọi lượt luyện tập và sửa sai. Săn điểm mặc định cần >=70%, đủ thời gian, hết câu sai trong chương và còn vé; chi tiết ở [ôn tập và kiểm tra](learning.md).
 6. Dashboard không tạo dữ liệu thành tích giả. Chưa làm bài thì tỷ lệ đúng hiển thị “—”.
 7. Học sinh mới hoặc vừa được cấp lại mật khẩu phải đổi mật khẩu trước khi vào lớp. Cấp lại mật khẩu thu hồi toàn bộ session của học sinh.
 8. CSV có BOM UTF-8 và xử lý ký tự bắt đầu công thức để tránh thực thi công thức khi mở bằng bảng tính.
@@ -47,4 +47,4 @@ Kiểm chứng luồng giáo viên tạo lớp và câu hỏi → học sinh luy
 
 ## Các quyết định dành cho giai đoạn thi
 
-Chốt cách tính tỷ lệ đúng 70%, thời điểm cấp/dùng vé, ngưỡng chuyển tab, trần điểm cộng, quyền phê duyệt, xử lý mất mạng và mở đáp án. Không tự chuyển Green Points thành điểm môn học.
+Đã triển khai quy tắc trong [ôn tập và kiểm tra](learning.md): mọi lượt luyện tập/sửa sai, vé tại cấp 3/4/5, lần rời tab thứ 4 tự nộp và giáo viên duyệt thưởng. Không tự chuyển điểm thưởng thành điểm học bạ. Đổi quà, chấm/thưởng nhóm và AI là giai đoạn tiếp theo. Toàn bộ thiết kế giao diện tra cứu riêng ở [app-design.md](app-design.md).

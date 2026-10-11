@@ -8,18 +8,18 @@ import { createHash, randomUUID, randomBytes } from "node:crypto";
 import { hashPassword, verifyPassword } from "./db.js";
 import { questionInput, type QuestionInput } from "../shared/questions.js";
 import { isGroupUploadPath, registerGroupRoutes } from "./group-activities.js";
+import {
+  grantLearningMilestones,
+  learningAnswersLocked,
+  registerLearningRoutes,
+} from "./learning.js";
+import { findAvatar, avatarCollectionsFor } from "../shared/avatars.js";
+import { registerAvatarUploads } from "./avatar-uploads.js";
 
 export type Row = Record<string, any>;
 export type AppRequest = Request & { user?: Row; tokenHash?: string };
 const tokenHash = (token: string) =>
   createHash("sha256").update(token).digest("hex");
-const publicUser = (u: Row) => ({
-  id: u.id,
-  email: u.email,
-  name: u.name,
-  role: u.role,
-  mustChange: !!u.must_change,
-});
 export const treeLevel = (seconds: number) =>
   Math.min(5, Math.floor(seconds / 3600) + 1);
 
@@ -47,9 +47,28 @@ function password(value: unknown) {
 
 export function createApp(
   db: DatabaseSync,
-  options: { now?: () => number; production?: boolean; demo?: boolean } = {},
+  options: {
+    now?: () => number;
+    production?: boolean;
+    demo?: boolean;
+    quickLogin?: boolean;
+  } = {},
 ) {
   const now = options.now ?? Date.now;
+  const publicUser = (u: Row) => ({
+    id: u.id,
+    email: u.email,
+    name: u.name,
+    role: u.role,
+    mustChange: !!u.must_change,
+    uploadedAvatarId:
+      db.prepare("SELECT id FROM avatar_uploads WHERE user_id=?").get(u.id)
+        ?.id ?? null,
+    avatarId:
+      db
+        .prepare("SELECT avatar_id FROM user_avatars WHERE user_id = ?")
+        .get(u.id)?.avatar_id ?? null,
+  });
   const app = express();
   app.disable("x-powered-by");
   app.use((_req, res, next) => {
@@ -70,7 +89,7 @@ export function createApp(
         !req.is("application/json") &&
         !(
           req.method === "POST" &&
-          isGroupUploadPath(req.path) &&
+          (isGroupUploadPath(req.path) || req.path === "/auth/avatar/upload") &&
           req.is("multipart/form-data")
         )
       )
@@ -95,9 +114,31 @@ export function createApp(
     }
     next();
   });
-  app.get("/api/health", (_req, res) => {
+  function allowQuickLogin(req: Request) {
+    const loopback = (value: string | undefined) =>
+      ["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(value ?? "");
+    return (
+      !!options.quickLogin &&
+      !options.production &&
+      loopback(req.ip) &&
+      ["localhost", "127.0.0.1", "[::1]", "::1"].includes(req.hostname)
+    );
+  }
+  function defaultAccount(role: "teacher" | "student") {
+    return db
+      .prepare("SELECT * FROM users WHERE role = ? ORDER BY rowid LIMIT 1")
+      .get(role) as Row | undefined;
+  }
+  app.get("/api/health", (req, res) => {
     db.prepare("SELECT 1").get();
-    res.json({ ok: true, demo: !!options.demo });
+    const quickLogin = allowQuickLogin(req);
+    const quickAccounts = quickLogin
+      ? (["teacher", "student"] as const).flatMap((role) => {
+          const user = defaultAccount(role);
+          return user ? [{ role, name: user.name }] : [];
+        })
+      : [];
+    res.json({ ok: true, demo: !!options.demo, quickLogin, quickAccounts });
   });
 
   const cookieOptions = {
@@ -107,6 +148,32 @@ export function createApp(
     path: "/",
     maxAge: 7 * 86400000,
   };
+  function issueSession(user: Row, res: Response) {
+    const token = randomBytes(32).toString("hex");
+    db.prepare("DELETE FROM sessions WHERE expires_at < ?").run(now());
+    db.prepare("INSERT INTO sessions VALUES (?,?,?)").run(
+      tokenHash(token),
+      user.id,
+      now() + 7 * 86400000,
+    );
+    res.cookie("greenedu_session", token, cookieOptions).json(publicUser(user));
+  }
+  app.post("/api/auth/quick-login", (req, res) => {
+    if (!allowQuickLogin(req))
+      fail(404, "Đăng nhập nhanh chưa được bật tại địa chỉ này.");
+    const role = req.body?.role;
+    if (role !== "teacher" && role !== "student")
+      fail(400, "Chọn tài khoản giáo viên hoặc học sinh.");
+    const user = defaultAccount(role);
+    if (!user)
+      fail(
+        404,
+        role === "teacher"
+          ? "Chưa có tài khoản giáo viên trong database."
+          : "Chưa có tài khoản học sinh trong database.",
+      );
+    issueSession(user, res);
+  });
   const loginAttempts = new Map<string, { count: number; until: number }>();
   app.post("/api/auth/login", (req, res) => {
     const email = text(req.body?.email, "Email", 254).toLowerCase();
@@ -130,14 +197,7 @@ export function createApp(
       fail(401, "Email hoặc mật khẩu chưa đúng.");
     }
     loginAttempts.delete(key);
-    const token = randomBytes(32).toString("hex");
-    db.prepare("DELETE FROM sessions WHERE expires_at < ?").run(now());
-    db.prepare("INSERT INTO sessions VALUES (?,?,?)").run(
-      tokenHash(token),
-      user.id,
-      now() + 7 * 86400000,
-    );
-    res.cookie("greenedu_session", token, cookieOptions).json(publicUser(user));
+    issueSession(user, res);
   });
   app.use("/api", (req: AppRequest, _res, next) => {
     const token = req.headers.cookie
@@ -167,6 +227,37 @@ export function createApp(
   app.get("/api/auth/me", (req: AppRequest, res) =>
     res.json(publicUser(req.user!)),
   );
+  app.post("/api/auth/avatar", (req: AppRequest, res) => {
+    const avatarId = req.body?.avatarId;
+    const avatar = findAvatar(avatarId);
+    if (
+      avatar &&
+      !avatarCollectionsFor(req.user!.role).includes(avatar.collection)
+    )
+      fail(403, "Học sinh không được chọn avatar giáo viên.");
+    if (
+      avatarId !== null &&
+      !avatar &&
+      !(
+        typeof avatarId === "string" &&
+        db
+          .prepare("SELECT 1 FROM avatar_uploads WHERE id=? AND user_id=?")
+          .get(avatarId, req.user!.id)
+      )
+    )
+      fail(400, "Vui lòng chọn avatar trong bộ sưu tập.");
+    if (avatarId === null) {
+      db.prepare("DELETE FROM user_avatars WHERE user_id = ?").run(
+        req.user!.id,
+      );
+    } else {
+      db.prepare(
+        "INSERT INTO user_avatars (user_id,avatar_id) VALUES (?,?) ON CONFLICT(user_id) DO UPDATE SET avatar_id = excluded.avatar_id",
+      ).run(req.user!.id, avatarId);
+    }
+    res.json(publicUser(req.user!));
+  });
+  registerAvatarUploads(app, db, publicUser, fail);
   app.post("/api/auth/logout", (req: AppRequest, res) => {
     db.prepare("DELETE FROM sessions WHERE token_hash = ?").run(req.tokenHash!);
     db.prepare("DELETE FROM study_sessions WHERE student_id = ?").run(
@@ -199,6 +290,88 @@ export function createApp(
     if (req.user!.role !== "student")
       fail(403, "Chỉ học sinh được thực hiện thao tác này.");
   }
+  function admin(req: AppRequest) {
+    if (req.user!.role !== "admin")
+      fail(403, "Chỉ Admin được quản lý tài khoản toàn trường.");
+  }
+  app.get("/api/accounts", (req: AppRequest, res) => {
+    admin(req);
+    res.json(
+      db
+        .prepare(
+          `SELECT u.id,u.name,u.email,u.role,u.must_change,
+      (SELECT COUNT(*) FROM memberships m WHERE m.student_id = u.id) AS classCount
+      FROM users u ORDER BY u.rowid DESC`,
+        )
+        .all()
+        .map((u) => ({ ...publicUser(u), classCount: u.classCount })),
+    );
+  });
+  app.get("/api/accounts/classrooms", (req: AppRequest, res) => {
+    admin(req);
+    res.json(
+      db
+        .prepare(
+          `SELECT c.id,c.name,c.subject,u.name AS teacherName
+      FROM classrooms c JOIN users u ON u.id = c.teacher_id ORDER BY c.name`,
+        )
+        .all(),
+    );
+  });
+  app.post("/api/accounts", (req: AppRequest, res) => {
+    admin(req);
+    const role = req.body?.role;
+    if (!["teacher", "student"].includes(role))
+      fail(400, "Chọn vai trò giáo viên hoặc học sinh.");
+    const email = text(req.body?.email, "Email", 254).toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      fail(400, "Email không hợp lệ.");
+    const name = text(req.body?.name, "Họ tên", 100),
+      pw = password(req.body?.password);
+    if (db.prepare("SELECT id FROM users WHERE email = ?").get(email))
+      fail(409, "Email đã tồn tại. Hãy dùng email khác.");
+    const classId = req.body?.classroomId;
+    if (
+      classId &&
+      (role !== "student" ||
+        typeof classId !== "string" ||
+        !db.prepare("SELECT id FROM classrooms WHERE id = ?").get(classId))
+    )
+      fail(400, "Lớp học không hợp lệ; chỉ học sinh được thêm vào lớp.");
+    const id = randomUUID();
+    db.exec("BEGIN");
+    try {
+      db.prepare("INSERT INTO users VALUES (?,?,?,?,?,1)").run(
+        id,
+        email,
+        name,
+        hashPassword(pw),
+        role,
+      );
+      if (classId)
+        db.prepare("INSERT INTO memberships VALUES (?,?)").run(classId, id);
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+    res.status(201).json({ id, name, email, role, mustChange: true });
+  });
+  app.post("/api/accounts/:id/password", (req: AppRequest, res) => {
+    admin(req);
+    const id = String(req.params.id);
+    const target = db.prepare("SELECT role FROM users WHERE id = ?").get(id);
+    if (!target) fail(404, "Không tìm thấy tài khoản.");
+    if (target.role === "admin")
+      fail(403, "Admin đổi mật khẩu cá nhân trong phần Tài khoản.");
+    const pw = password(req.body?.password);
+    db.prepare(
+      "UPDATE users SET password = ?, must_change = 1 WHERE id = ?",
+    ).run(hashPassword(pw), id);
+    db.prepare("DELETE FROM sessions WHERE user_id = ?").run(id);
+    db.prepare("DELETE FROM study_sessions WHERE student_id = ?").run(id);
+    res.json({ ok: true });
+  });
   function classroom(req: AppRequest, id: string) {
     const row = db.prepare("SELECT * FROM classrooms WHERE id = ?").get(id) as
       Row | undefined;
@@ -236,7 +409,7 @@ export function createApp(
     );
     const a = db
       .prepare(
-        `SELECT COUNT(*) AS total, COALESCE(SUM(a.correct),0) AS correct FROM attempts a JOIN questions q ON q.id = a.question_id WHERE q.chapter_id = ? AND a.student_id = ? AND a.mode = 'practice'`,
+        `SELECT COUNT(*) AS total, COALESCE(SUM(a.correct),0) AS correct FROM attempts a JOIN questions q ON q.id = a.question_id WHERE q.chapter_id = ? AND a.student_id = ?`,
       )
       .get(chapterId, userId) as Row;
     const c = db
@@ -420,7 +593,7 @@ export function createApp(
     return (
       db
         .prepare(
-          "SELECT u.id,u.name,u.email FROM users u JOIN memberships m ON m.student_id = u.id WHERE m.classroom_id = ? ORDER BY u.name",
+          "SELECT u.id,u.name,u.email,a.avatar_id AS avatarId FROM users u JOIN memberships m ON m.student_id = u.id LEFT JOIN user_avatars a ON a.user_id = u.id WHERE m.classroom_id = ? ORDER BY u.name",
         )
         .all(classId) as Row[]
     ).map((u) => {
@@ -432,6 +605,7 @@ export function createApp(
         id: String(u.id),
         name: String(u.name),
         email: String(u.email),
+        avatarId: u.avatarId ?? null,
         seconds: summaries.reduce((n, s) => n + s.seconds, 0),
         total: summaries.reduce((n, s) => n + s.total, 0),
         correct: summaries.reduce((n, s) => n + s.correct, 0),
@@ -456,7 +630,7 @@ export function createApp(
     if (db.prepare("SELECT id FROM users WHERE email = ?").get(email))
       fail(
         409,
-        "Email đã tồn tại. MVP chỉ hỗ trợ tạo tài khoản mới; không tự thêm tài khoản của lớp khác.",
+        "Email đã tồn tại. Chọn ‘Tài khoản có sẵn’ để thêm học sinh vào lớp.",
       );
     const id = randomUUID();
     db.exec("BEGIN");
@@ -475,6 +649,26 @@ export function createApp(
       throw error;
     }
     res.status(201).json({ id });
+  });
+  app.post("/api/classrooms/:id/memberships", (req: AppRequest, res) => {
+    teacher(req);
+    const c = classroom(req, String(req.params.id));
+    const email = text(req.body?.email, "Email", 254).toLowerCase();
+    const target = db
+      .prepare("SELECT id,role FROM users WHERE email = ?")
+      .get(email);
+    if (!target || target.role !== "student")
+      fail(404, "Không tìm thấy tài khoản học sinh với email này.");
+    if (
+      db
+        .prepare(
+          "SELECT 1 FROM memberships WHERE classroom_id = ? AND student_id = ?",
+        )
+        .get(c.id, target.id)
+    )
+      fail(409, "Học sinh đã có trong lớp.");
+    db.prepare("INSERT INTO memberships VALUES (?,?)").run(c.id, target.id);
+    res.status(201).json({ id: target.id });
   });
   app.post(
     "/api/classrooms/:id/students/:studentId/password",
@@ -775,6 +969,8 @@ export function createApp(
   });
   app.post("/api/attempts", (req: AppRequest, res) => {
     student(req);
+    if (learningAnswersLocked(db, req.user!.id, now()))
+      fail(409, "Chờ khung thi đóng để luyện tập hoặc sửa sai.");
     const questionId = text(req.body?.questionId, "Câu hỏi"),
       id = text(req.body?.requestId, "Mã lượt làm", 100);
     const q = db
@@ -845,8 +1041,9 @@ export function createApp(
     }
     res.json({
       correct: selected === q.correct_index,
-      correctIndex: q.correct_index,
-      explanation: q.explanation,
+      ...(mode === "correction" && selected !== q.correct_index
+        ? { explanation: "Hãy xem lại kiến thức và tự làm lại câu này." }
+        : { correctIndex: q.correct_index, explanation: q.explanation }),
       resolved: mode === "correction" && selected === q.correct_index,
     });
   });
@@ -869,6 +1066,8 @@ export function createApp(
   });
   app.post("/api/study/start", (req: AppRequest, res) => {
     student(req);
+    if (learningAnswersLocked(db, req.user!.id, now()))
+      fail(409, "Thời gian thi không tính vào thời gian chăm cây.");
     const id = text(req.body?.chapterId, "Chương");
     chapter(req, id);
     const sessionId = randomUUID();
@@ -909,6 +1108,7 @@ export function createApp(
       Number(req.body.active),
       s.id,
     );
+    grantLearningMilestones(db, req.user!.id, now());
     res.json(summary(s.chapter_id, req.user!.id));
   });
   app.post("/api/study/stop", (req: AppRequest, res) => {
@@ -934,7 +1134,16 @@ export function createApp(
         "DELETE FROM study_sessions WHERE id = ? AND student_id = ?",
       ).run(id, req.user!.id);
     }
+    grantLearningMilestones(db, req.user!.id, now());
     res.json({ ok: true });
+  });
+  registerLearningRoutes(app, db, {
+    now,
+    text,
+    fail,
+    teacher,
+    student,
+    classroom,
   });
   registerGroupRoutes(app, db, {
     now,
