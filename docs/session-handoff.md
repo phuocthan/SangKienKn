@@ -1,5 +1,17 @@
 # Bàn giao session GreenEdu
 
+## Đưa bản portrait lên Git theo yêu cầu
+
+Sau khi hoàn tất chỉnh giao diện và kiểm thử bên dưới, người dùng yêu cầu **Pushgit remote**. Đợt Git đưa CSS portrait, import CSS, viewport safe area, E2E và ba tài liệu cập nhật vào commit để push `origin/main`. Không đưa database, ảnh kiểm thử hoặc `.local` lên Git. Đối chiếu remote trước push, giữ các commit đã có và không force push. Trạng thái “chưa push” của đợt sửa giao diện bên dưới là lịch sử; xem Git để biết commit hiện hành. Railway đã có cấu hình tự nhận main theo bàn giao trước, nhưng kết quả deploy/runtime Railway chưa được xác minh trong đợt Git này.
+
+## Header neo trên, menu neo dưới khi portrait
+
+Yêu cầu mới của người dùng: khi portrait, luôn neo tên tài khoản/lớp trên header và chuyển thanh navigation đang ở phía trên xuống dưới. Đã thêm `src/portrait-navigation.css`, nạp cuối sau garden.css: portrait ≤1100 px, header sticky/account hiển thị đầy đủ, selector lớp giữ thao tác, dock fixed dưới/cuộn ngang toàn bộ menu và Tài khoản/Góp ý/Đăng xuất. ≤420 px header hai hàng; nội dung chừa 88px + safe area +24px dưới dock. Landscape/desktop giữ sidebar cũ; index.html có viewport-fit=cover. Áp dụng chung giáo viên/học sinh/Admin (Admin không có bộ chọn lớp).
+
+Thay đổi chỉ frontend, không khởi động frontend/API production, không ghi Railway, không push/deploy. Bản trên cloud được build riêng `.local/portrait-navigation-build` để kiểm tra; chưa phải bản frontend trên máy Windows hoặc bản đang phục vụ Railway. Chi tiết giao diện tại [app-design.md](app-design.md), test trong `e2e/portrait-navigation.spec.ts`.
+
+Kiểm tra mới: TypeScript/Vite build riêng và `git diff --check` đạt. **22/22 E2E** trong portrait-navigation/account-popups/workflow đạt trên Chromium desktop/mobile: ba vai trò, viewport portrait320/390/768/1024, cuộn thật/header luôn thấy tên và lớp, nút cuối trang không bị dock che, đổi lớp, cuộn tới menu cuối/Tài khoản/Đăng xuất, modal nằm trên dock, xoay landscape844 và desktop1440 khôi phục sidebar; các luồng Word/CSV/luyện tập/sổ tay/tài khoản/cộng đồng cũ vẫn đạt. Database riêng `.local/e2e-*.sqlite`, không Railway. Đã xem ảnh390px giáo viên/học sinh tại `.local/portrait-navigation-{desktop,mobile}-{role}.png`. Lượt đầu hai ca dừng vì locator avatar khớp cả header và trang Tài khoản; giới hạn locator vào header rồi chạy lại đạt, không phải lỗi ứng dụng. Chưa QA Safari/bàn phím trên thiết bị thật.
+
 ## Gom tài liệu hiện hành và commit theo yêu cầu — 12/10/2026
 
 Người dùng yêu cầu cập nhật đầy đủ tài liệu để session sau nắm dự án và commit mọi thay đổi liên quan. Đã đối chiếu Git/mã hiện tại (HEAD trước đợt này `72a7e3b`), đồng bộ bảng tra cứu12/10, README/AGENTS/thiết kế/đặc tả nhóm/báo cáo tài liệu. Bổ sung `docs/feedback-discussion.md`: góp ý riêng học sinh/giáo viên và phản biện sau gia hạn ít nhất một lần rồi hết hạn hiện tại đã có trong mã; không còn ghi chung là chưa triển khai. Chấm/thưởng nhóm, AI và gap offline/focus/nhật ký vẫn giữ là phần còn lại. Backend mới trên Railway chưa được xác minh trong đợt tài liệu.

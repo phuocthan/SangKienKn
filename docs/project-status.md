@@ -1,5 +1,10 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Bố cục portrait: tài khoản/lớp ở trên, menu ở dưới
+
+Đã chỉnh frontend theo yêu cầu mới: header luôn neo tên tài khoản/avatar/lớp ở đầu khi cuộn, thanh điều hướng fixed ở đáy và cuộn ngang; nội dung chừa khoảng để không bị che. Áp dụng portrait ≤1100px, cả giáo viên/học sinh/Admin; landscape và desktop giữ sidebar. CSS riêng nạp sau theme, có safe area. Build/TypeScript và 22/22 E2E đạt bằng database riêng. Theo yêu cầu tiếp theo, đưa bản này vào commit để push `origin/main`; không thay backend/dữ liệu và chưa xác minh kết quả deploy Railway. Chi tiết/bằng chứng trong [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).
+
+
 ## Cách nắm trạng thái hiện tại — cập nhật 12/10/2026
 
 Đọc bảng tra cứu hiện hành bên dưới và các mục 12/10 trước nhật ký cũ. HEAD trước đợt gom tài liệu/commit là `72a7e3b`; các phân hệ online exam/góp ý/phản biện đã có trong commit đó. Đợt này bổ sung minh họa Hoạt động nhóm, slide rework có animation và đồng bộ tài liệu, không triển khai lại các chức năng đã có.

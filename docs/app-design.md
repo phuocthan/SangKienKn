@@ -1,5 +1,13 @@
 # Thiết kế giao diện GreenEdu
 
+## Header và menu đáy ở portrait
+
+Theo yêu cầu mới, điện thoại/tablet **portrait, rộng tối đa 1100 px** dùng header sticky ở đầu trang để luôn thấy **tên tài khoản/avatar và bộ chọn lớp/môn** khi cuộn. Tên tài khoản không bị ẩn theo breakpoint; màn hình ≤420 px xếp tài khoản rồi lớp thành hai hàng để không ép tên. Breadcrumb không nằm trong header portrait.
+
+Menu chuyển xuống **đáy màn hình**, cố định thành một dải cuộn ngang có icon và nhãn. Giữ đầy đủ các mục điều hướng, góp ý, Tài khoản và Đăng xuất; ẩn logo/lời nhắc ở sidebar portrait để dock gọn. Nội dung có khoảng đệm dưới bằng chiều cao dock và safe area để thao tác cuối trang không bị che; header/dock có nền kem và viền nhẹ. Modal vẫn nằm trên cả header/menu. Hỗ trợ safe area trên thiết bị có tai thỏ/thanh home, `viewport-fit=cover`.
+
+Landscape và desktop giữ bố cục sidebar hiện có. CSS riêng `src/portrait-navigation.css` nạp sau `garden.css`, không đổi API/database hay quy tắc nghiệp vụ. Quyết định này thay mô tả menu trên cùng ở điện thoại trong các ghi chú cũ.
+
 ## Buổi kiểm tra online, chờ X phút/làm Y phút — 12/10/2026
 
 Trang giáo viên **Ôn tập & kiểm tra** có nút **Tạo kiểm tra online** dẫn tới form bộ câu, thêm lựa chọn **Kiểm tra online cả lớp**. Dùng lại nguồn ngân hàng/Word–CSV, checkbox nhiều chương và bài. Form online thay lịch mở/đóng bằng hai input riêng **Thời gian chuẩn bị (phút)** X và **Thời gian làm bài (phút)** Y, giữ ngưỡng rời tab. Có hướng dẫn chung giờ thi và nút **Chuẩn bị kiểm tra online**; danh sách buổi có **Bắt đầu kiểm tra**, sau gửi yêu cầu khóa nút thành **Đã gửi thông báo**, có **Đóng bài thi**. Trạng thái chờ bắt đầu/đang mở/hết giờ và X/Y hiển thị riêng.
