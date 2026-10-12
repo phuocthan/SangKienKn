@@ -214,6 +214,79 @@
   pointer-events: none;
 }
 
+.garden-note-content {
+  height: 168px;
+  animation: garden-note-appear 300ms ease-out;
+}
+
+.garden-note .note-leaf {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.garden-note-pause {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #57765f;
+  cursor: pointer;
+  opacity: 0.65;
+}
+
+.garden-note-pause:hover,
+.garden-note-pause:focus-visible,
+.garden-note-pause[aria-pressed="true"] {
+  background: #dcebdd;
+  opacity: 1;
+}
+
+.garden-note-pause:focus-visible {
+  outline: 2px solid #537c45;
+  outline-offset: 2px;
+}
+
+.sidebar .garden-note-pause svg {
+  color: inherit;
+}
+
+@keyframes garden-note-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .garden-note-content {
+    animation: none;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1200px) {
+  .garden-note-content {
+    height: 194px;
+  }
+
+  .sidebar .garden-note strong {
+    font-size: 14px;
+  }
+
+  .sidebar .garden-note p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
 .garden-welcome-grid .student-welcome-hero .hero-copy h2 {
   font-size: clamp(21px, 1.65vw, 26px);
   line-height: 1.4;

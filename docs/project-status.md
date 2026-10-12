@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Lời nhắn sidebar đa dạng và tự đổi — 12/10/2026
+
+Đã thêm16 lời nhắn và8 minh họa khu rừng/học tập trong ô sidebar; câu chữ/icon/hình đổi đồng bộ mỗi10 giây. Có nút tạm dừng, pause khi hover/focus/tab nền và fade nhẹ (tắt khi reduced-motion). Giữ chiều cao ô, sidebar hẹp không đè hình; menu/icon gốc và panel xanh không đổi.
+
+TypeScript/build và **14/14 E2E mới** garden-note/warm-journey/portrait-navigation trên checkout chuẩn bị push đạt (DB/server riêng3331), gồm giáo viên/học sinh, chu kỳ10 giây/quay vòng16 câu8 hình, dừng/tiếp tục/hover/tab nền, sidebar900px/reduced-motion và layout desktop/mobile. Đã xem contact sheet16 câu. HMR5173 phục vụ mã mới200; API/DB Railway không ghi thử. Push riêng frontend/test/ba phần tài liệu theo yêu cầu đã chốt; kết quả push tại session-handoff. Runtime Railway chưa xác minh.
+
 ## Panel xanh và icon bám đường cong — 12/10/2026
 
 Đã thực hiện góp ý mới: trả panel/nền minh họa/nút về xanh; cam-vàng chỉ nhấn tên chương và tiến độ; lời nhắc thời gian vàng nhạt, nghiêng, opacity 85%. Năm icon cấp độ bám đường lượn cả chiều ngang/dọc, current xanh; desktop/mobile không tràn ngang và giữ dữ liệu cấp độc lập. Menu/icon gốc và header giữ như đợt trước.

@@ -56,6 +56,7 @@ import {
 } from "./StudentLevel";
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { GardenGoal } from "./GardenGoal";
+import { GardenNote } from "./GardenNote";
 import { QuestionBank } from "./QuestionBank";
 import { QuestionFields } from "./QuestionFields";
 import type { Chapter, Classroom, Question, Student, User } from "./types";
@@ -387,25 +388,7 @@ export default function App() {
           onNavigate={navigate}
         />
         <div className="sidebar-bottom">
-          <div className="sidebar-note">
-            <span className="note-leaf">
-              <Leaf size={19} />
-            </span>
-            <strong>Mỗi ngày, một chút xanh</strong>
-            <p>
-              {isTeacher
-                ? "Cùng học sinh gieo những hạt mầm tri thức."
-                : "Không cần đi thật nhanh. Chỉ cần tiếp tục lớn lên."}
-            </p>
-            <img
-              className="sidebar-note-art"
-              src="/assets/garden-note-friends.svg"
-              alt=""
-              width={120}
-              height={88}
-              aria-hidden="true"
-            />
-          </div>
+          <GardenNote isTeacher={isTeacher} />
           <button
             className={`nav-item ${page === "feedback" ? "active" : ""}`}
             aria-current={page === "feedback" ? "page" : undefined}

@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: lời nhắn khu rừng tự đổi mỗi 10 giây — 12/10/2026
+
+Ô lời nhắn ở sidebar giáo viên/học sinh dùng GardenNote: 16 tiêu đề/lời nhắn ngắn về tò mò, đọc sách, kiên trì, sửa sai, chia sẻ và nghỉ ngơi; 8 minh họa vector nhỏ ghép theo nội dung (cáo/chậu cây, cú/sách, đom đóm, rùa/ba lô, nhím/nấm, sóc/hạt, thỏ/tưới hoa, gấu/sách). Icon nhỏ đổi theo chủ đề sách/la bàn/nắng/bóng đèn/lá/hoa/chim; không gắn mầm vào icon menu hay toàn ứng dụng.
+
+Câu chữ, icon và minh họa đổi cùng nhau mỗi 10 giây, hết16 câu quay vòng; câu đầu giữ lời nhắn riêng cho giáo viên. Rê chuột/focus trong ô hoặc tab chạy nền thì tạm dừng, khi quay lại chờ đủ10 giây mới đổi tiếp; nút dừng/tiếp tục có aria-pressed giữ lựa chọn qua điều hướng trang. Timer và listener được dọn khi unmount. Ô giữ nền mint/chữ nghiêng/kích thước ổn định, hình riêng ở góc dưới; chuyển mờ300ms, reduced-motion bỏ hiệu ứng. Portrait vẫn ẩn ô theo layout cũ. Không lưu/tạo dữ liệu hay gọi API mới.
+
 ## Hiện hành: panel xanh, nhấn chương/tiến độ và cây bám đường — 12/10/2026
 
 Góp ý mới thay màu cam/vàng phủ rộng của đợt trước: panel dùng lại gradient xanh/viền xanh, kể cả thẻ chương thứ hai và nền minh họa chương; nút luyện tập/tiếp tục và trạng thái cấp hiện tại trở về xanh. Bỏ biến thể frame theo thứ tự/icon và màu riêng luân phiên nhóm online. Giữ màu trạng thái nghiệp vụ đúng/sai/cảnh báo. Cam→vàng chỉ nhấn tên chương dạng pill và thanh/đường tiến độ; lời nhắc còn thời gian nền vàng nhạt #fff6dd, chữ nghiêng với font-synthesis: style và opacity 0.85.

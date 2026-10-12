@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Lời nhắn sidebar16 câu/8 minh họa — 12/10/2026
+
+Theo ảnh ô lời nhắn, đã thêm GardenNote dùng chung cho giáo viên/học sinh:16 lời nhắn ngắn và8 hình SVG (cáo/cú/đom đóm/rùa/nhím/sóc/thỏ/gấu), cùng icon outline theo chủ đề. Giữ nền mint/chữ nghiêng/hình ở góc dưới; đổi đồng bộ mỗi10 giây và quay vòng, giữ chiều cao ô để menu không nhảy. Hover/focus/tab nền tạm dừng; nút dừng/tiếp tục giữ qua điều hướng, timer/listener cleanup. Fade300ms, reduced-motion tắt. Portrait vẫn ẩn note, menu9 mục/icon gốc/panel xanh không đổi; không sửa nghiệp vụ/API/database.
+
+**Kiểm tra mới trên đúng checkout push** .local/forest-push-checkout: TypeScript/Vite build .local/warm-journey-push-build và **14/14 E2E** garden-note/warm-journey/portrait-navigation đạt với server/SQLite riêng3331. Clock điều khiển kiểm tra9 giây chưa đổi/10 giây đổi, đủ16 câu8 hình/quay vòng, hover/nút pause/đổi trang/tab nền; đo chữ không đè hình/ô không đổi chiều cao, sidebar900px/reduced-motion, desktop/mobile và ba vai trò navigation. Đã xem contact sheet16 câu, minh họa/chữ rõ. Frontend HMR5173 đang chạy, nguồn GardenNote.tsx200; không ghi dữ liệu thật Railway.
+
+Chuẩn bị push riêng GardenNote/App/CSS/test mới và ba phần tài liệu; giữ nguyên14 file công việc song song theo manifest .local/garden-note-preserved.json. Kết quả push thực tế ghi sau hoàn thành; Railway deployment/runtime chưa xác minh. Các lời nhắn một câu cố định phía dưới là lịch sử.
+
 ## Trả panel xanh và đưa icon lên đường lượn — 12/10/2026
 
 Yêu cầu mới nhất đã hoàn tất: bỏ màu cam/vàng phủ panel và CTA, trả frame chung/nền art chương/nút về xanh; chỉ giữ nhấn tên chương và progress cam→vàng. Lời nhắc còn thời gian dùng nền #fff6dd, chữ nghiêng, font-synthesis: style, opacity 0.85. ChapterLevelTimeline thêm wrapper roadmap; rail SVG và icon năm cấp dùng chung hình học, icon xen kẽ cao/thấp bám đúng điểm trên đường, current vòng/nhãn xanh, check/khóa giữ nguyên. Menu phẳng/icon Lucide/header trước giữ nguyên. Không đổi API/database/cách tính cấp/clip phần tô.
