@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Đáp án chọn sai đỏ nhạt, đúng xanh — 12/10/2026
+
+Đã sửa kết quả thi: bổ sung wrong-choice cho đáp án chọn sai sau công bố, thay nền/viền/outline/ô A-B-C-D sang đỏ nhạt; đáp án đúng xanh. Palette sai áp dụng chung luyện/ôn/sửa sai. Không đổi nghiệp vụ hoặc tiết lộ đáp án trước công bố.
+
+TypeScript/Vite build và **6/6 E2E mới** ba luồng learning desktop/mobile đạt trên checkout push/server SQLite riêng3331: luyện sai không lộ lời giải, ôn/sửa sai/tiếp tục, thi lưu offline/nộp/chờ công bố/đóng thi. Assertion kiểm tra chọn đúng/chọn sai/câu bỏ trống, nền/viền/outline/ô chữ đỏ và nền đúng xanh; đã xem ảnh kết quả. Push riêng UI/test/ba phần tài liệu, giữ backend/nhóm online đang làm. Kết quả push ở session-handoff; runtime Railway chưa xác minh.
+
 ## Lời nhắn sidebar đa dạng và tự đổi — 12/10/2026
 
 Đã thêm16 lời nhắn và8 minh họa khu rừng/học tập trong ô sidebar; câu chữ/icon/hình đổi đồng bộ mỗi10 giây. Có nút tạm dừng, pause khi hover/focus/tab nền và fade nhẹ (tắt khi reduced-motion). Giữ chiều cao ô, sidebar hẹp không đè hình; menu/icon gốc và panel xanh không đổi.

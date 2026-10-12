@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Đáp án chọn sai đỏ nhạt, đúng xanh — 12/10/2026
+
+Theo ảnh kết quả thi, đã sửa ExamRoom thiếu wrong-choice: lấy kết quả câu hiện tại một lần và gắn class sai cho lựa chọn của học sinh khi câu đã có kết quả sai. Đáp án đúng giữ correct-choice xanh; khi chờ công bố không gắn trạng thái đúng/sai, câu bỏ trống không có lựa chọn sai. styles.css đổi palette wrong-choice chung nền #fff0f0, viền/outline #dda2a2, chữ #9b3f46, ô chữ #c55c66/chữ trắng; thay outline xanh do selected. Dùng chung luyện/ôn/sửa sai/Săn điểm/kết quả thi, không sửa API/điểm/thời điểm công bố.
+
+**Kiểm tra mới đúng checkout push** .local/forest-push-checkout: TypeScript/Vite build .local/warm-journey-push-build và **6/6 E2E** chọn ba luồng learning desktop/mobile đạt trên server/SQLite riêng3331 (practice clock/wrong no-solution; semester/resume/notebook repair; official exam/offline autosave/close/export). Assertion mới xác nhận đáp án chọn đúng/chọn sai/câu bỏ trống/chờ công bố và CSS nền/viền/outline/ô chữ đỏ/đúng xanh. Đã xem ảnh exam-result desktop/mobile. Không ghi thử Railway/database chính, không dùng kết quả cũ thay lượt này.
+
+Learning.tsx có công việc ôn-thi song song: chỉ sửa các dòng result/class trong root và checkout remote, không copy toàn file root để push. Push riêng Learning/styles/test và ba phần tài liệu;14 file công việc song song (Learning gồm chỉnh UI đã chốt) được lưu hash tại .local/answer-colors-preserved.json để bảo toàn sau đồng bộ HEAD/index. Kết quả push thực tế ghi sau hoàn thành; Railway deployment/runtime chưa xác minh.
+
 ## Lời nhắn sidebar16 câu/8 minh họa — 12/10/2026
 
 Theo ảnh ô lời nhắn, đã thêm GardenNote dùng chung cho giáo viên/học sinh:16 lời nhắn ngắn và8 hình SVG (cáo/cú/đom đóm/rùa/nhím/sóc/thỏ/gấu), cùng icon outline theo chủ đề. Giữ nền mint/chữ nghiêng/hình ở góc dưới; đổi đồng bộ mỗi10 giây và quay vòng, giữ chiều cao ô để menu không nhảy. Hover/focus/tab nền tạm dừng; nút dừng/tiếp tục giữ qua điều hướng, timer/listener cleanup. Fade300ms, reduced-motion tắt. Portrait vẫn ẩn note, menu9 mục/icon gốc/panel xanh không đổi; không sửa nghiệp vụ/API/database.

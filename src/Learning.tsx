@@ -1567,6 +1567,9 @@ function ExamRoom({
     );
   const seconds = Math.max(0, Math.ceil((run.deadlineAt - now) / 1000));
   const q = run.questions[index];
+  const questionResult = run.results?.find(
+    (result) => result.questionId === q.id,
+  );
   return (
     <div className="exam-room">
       <div className="learning-heading">
@@ -1633,7 +1636,7 @@ function ExamRoom({
             {q.choices.map((choice, i) => (
               <button
                 key={i}
-                className={`choice ${answers[q.id] === i ? "selected" : ""} ${run.results?.find((r) => r.questionId === q.id)?.correctIndex === i ? "correct-choice" : ""}`}
+                className={`choice ${answers[q.id] === i ? "selected" : ""} ${questionResult?.correctIndex === i ? "correct-choice" : ""} ${questionResult && answers[q.id] === i && !questionResult.correct ? "wrong-choice" : ""}`}
                 aria-pressed={answers[q.id] === i}
                 disabled={!active || teacher || submitting || seconds === 0}
                 onClick={() => choose(q.id, i)}
@@ -1645,14 +1648,8 @@ function ExamRoom({
           </div>
           {run.results && (
             <div className="explanation" role="status">
-              <strong>
-                {run.results.find((r) => r.questionId === q.id)?.correct
-                  ? "Đúng"
-                  : "Cần ôn lại"}
-              </strong>
-              <p>
-                {run.results.find((r) => r.questionId === q.id)?.explanation}
-              </p>
+              <strong>{questionResult?.correct ? "Đúng" : "Cần ôn lại"}</strong>
+              <p>{questionResult?.explanation}</p>
             </div>
           )}
           <div className="learning-actions">

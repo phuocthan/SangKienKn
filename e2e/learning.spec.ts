@@ -182,6 +182,14 @@ test("practice clock advances, pauses while hidden or offline, and wrong answers
   await page.locator(".choices .choice").nth(1).click();
   await page.getByRole("button", { name: "Kiểm tra đáp án" }).click();
   await expect(page.locator(".wrong-choice")).toHaveCount(1);
+  await expect(page.locator(".wrong-choice")).toHaveCSS(
+    "background-color",
+    "rgb(255, 240, 240)",
+  );
+  await expect(page.locator(".wrong-choice .choice-letter")).toHaveCSS(
+    "background-color",
+    "rgb(197, 92, 102)",
+  );
   await expect(page.locator(".correct-choice")).toHaveCount(0);
   await expect(page.locator(".explanation")).not.toContainText(
     "Phương án A là đáp án đúng",
@@ -538,6 +546,9 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
     await expect(student.locator(".exam-room .learning-notice")).toContainText(
       "Chờ khung thi đóng",
     );
+    await expect(student.locator(".correct-choice, .wrong-choice")).toHaveCount(
+      0,
+    );
     const row = page
       .locator(".learning-row")
       .filter({ has: page.getByText(title, { exact: true }) })
@@ -546,6 +557,39 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
     await expect(student.locator(".explanation")).toBeVisible({
       timeout: 10000,
     });
+    await student
+      .getByRole("button", { name: "Đến câu 1", exact: true })
+      .click();
+    await expect(
+      student.locator(".choice.selected.correct-choice"),
+    ).toHaveCount(1);
+    await expect(student.locator(".wrong-choice")).toHaveCount(0);
+    await student
+      .getByRole("button", { name: "Đến câu 3", exact: true })
+      .click();
+    await expect(student.locator(".correct-choice")).toHaveCount(1);
+    await expect(
+      student.locator(".wrong-choice, .choice.selected"),
+    ).toHaveCount(0);
+    await student
+      .getByRole("button", { name: "Đến câu 2", exact: true })
+      .click();
+    const wrong = student.locator(".choice.selected.wrong-choice");
+    await expect(wrong).toHaveCount(1);
+    await expect(wrong).toHaveCSS("background-color", "rgb(255, 240, 240)");
+    await expect(wrong).toHaveCSS("border-top-color", "rgb(221, 162, 162)");
+    await expect(wrong).toHaveCSS(
+      "box-shadow",
+      "rgb(221, 162, 162) 0px 0px 0px 1px",
+    );
+    await expect(wrong.locator(".choice-letter")).toHaveCSS(
+      "background-color",
+      "rgb(197, 92, 102)",
+    );
+    await expect(student.locator(".correct-choice")).toHaveCSS(
+      "background-color",
+      "rgb(239, 248, 232)",
+    );
     await noOverflow(student);
     await student.screenshot({
       path: info.outputPath("exam-result.png"),

@@ -45,7 +45,8 @@ body {
   pointer-events: none;
   background:
     linear-gradient(#f7f8f499, #f7f8f499),
-    url("/assets/nguyen-khuyen-background-v11.png") center top / 100% auto no-repeat;
+    url("/assets/nguyen-khuyen-background-v11.png") center top / 100% auto
+      no-repeat;
   filter: blur(1px);
 }
 button,
@@ -1810,12 +1811,14 @@ tr:last-child td {
   color: #4f7540;
 }
 .choice.wrong-choice {
-  background: #fcf1ea;
-  border-color: #d5a188;
-  color: #a0745f;
+  background: #fff0f0;
+  border-color: #dda2a2;
+  color: #9b3f46;
+  box-shadow: 0 0 0 1px #dda2a2;
 }
 .choice.wrong-choice .choice-letter {
-  background: #ca9173;
+  background: #c55c66;
+  color: #fff;
 }
 .explanation {
   margin-top: 23px;

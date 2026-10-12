@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: phân biệt đáp án sai/đúng — 12/10/2026
+
+Sau khi kết quả được công bố, đáp án học sinh chọn sai dùng nền đỏ nhạt #fff0f0, viền/outline #dda2a2, chữ đỏ #9b3f46 và ô chữ A/B/C/D đỏ #c55c66/chữ trắng. Đáp án đúng giữ màu xanh hiện có. ExamRoom gắn wrong-choice khi có kết quả cho câu đó, câu trả lời đã chọn và kết quả sai; không giữ viền xanh từ selected. CSS dùng chung cho luyện tập/ôn tập/sửa sai và kết quả Săn điểm/thi chính thức, kể cả màn hình xem bài dùng cùng ExamRoom.
+
+Không có kết quả công bố thì không gắn trạng thái đúng/sai; câu chưa trả lời không đánh dấu là lựa chọn sai. Giữ nguyên đáp án/điểm/quy tắc công bố và API. Trạng thái answered của danh sách số câu vẫn thể hiện đã trả lời như trước.
+
 ## Hiện hành: lời nhắn khu rừng tự đổi mỗi 10 giây — 12/10/2026
 
 Ô lời nhắn ở sidebar giáo viên/học sinh dùng GardenNote: 16 tiêu đề/lời nhắn ngắn về tò mò, đọc sách, kiên trì, sửa sai, chia sẻ và nghỉ ngơi; 8 minh họa vector nhỏ ghép theo nội dung (cáo/chậu cây, cú/sách, đom đóm, rùa/ba lô, nhím/nấm, sóc/hạt, thỏ/tưới hoa, gấu/sách). Icon nhỏ đổi theo chủ đề sách/la bàn/nắng/bóng đèn/lá/hoa/chim; không gắn mầm vào icon menu hay toàn ứng dụng.
