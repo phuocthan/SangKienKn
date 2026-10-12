@@ -1,5 +1,15 @@
 # Bàn giao session GreenEdu
 
+## Đăng nhập theo ảnh: tiêu đề trước, form nâng lên, Quên mật khẩu — 12/10/2026
+
+Yêu cầu mới đã hoàn tất: Login đưa h1 trước slogan, h2 form trước badge; xóa hai dòng intro Một nơi để học…/Và để thấy mình… được đánh dấu. Thêm login.css nạp cuối trong main.tsx, chỉ scope login: desktop dùng cùng mốc đầu cho tiêu đề/frame (không margin:auto), mobile bỏ min-height290px/gap dư và căn cạnh trái22px. Giữ mô tả Đăng nhập để tiếp tục…/asset/copyright và luồng auth hiện có.
+
+Thay forgot-hint bằng nút Quên mật khẩu, type=button/aria-haspopup=dialog. Modal dùng component hiện có, thông báo đúng **Liên hệ với giáo viên chủ nhiệm, hoặc admin để cấp lại**; Đã hiểu/Đóng/Escape, focus restore, fields giữ nguyên. Không thêm reset API/email/quyền production, không gọi auth khi chỉ mở/đóng popup.
+
+**Kiểm tra mới đúng checkout push** .local/forest-push-checkout: TypeScript/Vite build .local/warm-journey-push-build và **8/8 E2E** login-layout/account-popups desktop/mobile đạt trên server/SQLite riêng3331. Hai ca login-layout kiểm tra4 viewport320/390/768/1440 mỗi project, h1/h2 trên chữ nhỏ, đoạn xóa không còn, đầu frame khớp desktop/cạnh trái và gap mobile/không tràn. Popup đúng nội dung, Escape/Đã hiểu/focus và fields giữ nguyên, không request ghi trước đăng nhập, sau đó đăng nhập fixture thành công. Health chỉ được stub demo/quickLogin=false trong test để xem layout production; không sửa capability thật. Đã xem ảnh390/1440 và modal, không chạy test trên Railway/database chính.
+
+Push riêng App/main/login.css/test và ba phần tài liệu;14 file công việc song song bảo toàn theo manifest .local/login-layout-preserved.json. Kết quả push thực tế ghi sau hoàn thành; runtime Railway chưa xác minh.
+
 ## Bỏ breadcrumb và nâng cụm tiêu đề trên mọi trang — 12/10/2026
 
 Theo ảnh Xếp hạng, đã mở rộng cách đặt tiêu đề lên đầu từ Home sang tất cả trang giáo viên/học sinh. WorkspaceFrame/WorkspaceHeadingSlot/WorkspaceHeading mới dùng React context/portal: một cụm tiêu đề + chữ nhỏ + mô tả + thao tác ở header desktop, trở lại nội dung trên compact/portrait; không nhân đôi heading. Bỏ breadcrumb/pageNames/homeHeading và CSS Home ẩn/hiện hai bản. Header account/lớp/menu portrait giữ; wrap tại900px, minh họa nhóm gọn ở desktop. PageHeading/App, cộng đồng, nhóm, góp ý (h1), Learning/ExamRoom, thanh Practice đều dùng chung; modal và thẻ hoàn thành giữ nội dung riêng. Không thay backend/API/data; Admin không thuộc yêu cầu và giữ giao diện riêng.

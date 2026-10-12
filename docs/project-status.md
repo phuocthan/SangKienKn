@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Đăng nhập gọn và nút Quên mật khẩu — 12/10/2026
+
+Đã đưa chữ lớn lên trước slogan/badge, bỏ mô tả intro được đánh dấu, kéo form lên/căn với tiêu đề trên desktop và cùng cạnh trái trên mobile. Thêm nút Quên mật khẩu mở đúng thông báo liên hệ giáo viên chủ nhiệm hoặc admin theo yêu cầu; đóng bằng nút/Escape, giữ dữ liệu đang nhập và không gửi API reset.
+
+TypeScript/Vite build và **8/8 E2E mới** login-layout/account-popups desktop/mobile đạt trên checkout push/DB riêng3331; kiểm tra320/390/768/1440, thứ tự chữ/vị trí/không tràn, modal/nội dung/focus/không submit/giữ fields và đăng nhập thật fixture. Đã xem ảnh desktop/mobile/modal. Push riêng frontend/test/ba phần tài liệu theo yêu cầu đã chốt, giữ công việc backend/nhóm online. Kết quả push ở session-handoff; runtime Railway chưa xác minh.
+
 ## Tiêu đề đầu trang chung, bỏ breadcrumb giáo viên/học sinh — 12/10/2026
 
 Đã bỏ dòng breadcrumb trên toàn workspace giáo viên/học sinh; cụm tiêu đề/chữ nhỏ/mô tả và thao tác được đưa lên đầu header desktop. Dùng một WorkspaceHeading/slot, portrait trả về nội dung dưới thanh account/lớp sticky; không nhân đôi h1 khi xoay. Bao phủ lớp/ngân hàng/nhóm/góp ý/vườn/xếp hạng/tài khoản/ôn-thi/online/phiên học; Admin giữ riêng. Không đổi API hay dữ liệu.

@@ -13,6 +13,7 @@ import "./garden.css";
 import "./portrait-navigation.css";
 import "./forest-theme.css";
 import "./learning-journey.css";
+import "./login.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

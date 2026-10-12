@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: đăng nhập gọn, tiêu đề lớn trước và Quên mật khẩu — 12/10/2026
+
+Theo ảnh đăng nhập: đặt “Kiến thức lớn lên. Bạn cũng vậy.” trước dòng nhỏ “MỖI NỖ LỰC LÀ MỘT HẠT MẦM”; bỏ đoạn “Một nơi để học, để thử, để sửa sai. Và để thấy mình tốt hơn mỗi ngày.”. Trong form, h2 “Mở khu vườn của bạn” trước badge Chào mừng trở lại; giữ mô tả đăng nhập. login.css nạp cuối và scoped theo login: desktop đầu khung nhập căn với đầu tiêu đề chính, không còn margin:auto đẩy khung xuống; mobile bỏ min-height dư và giảm gap, cạnh trái form khớp tiêu đề. Giữ minh họa desktop, mobile vẫn ẩn như cũ.
+
+Thay lời nhắc cấp lại tĩnh dưới nút đăng nhập bằng nút “Quên mật khẩu” (type=button, aria-haspopup=dialog). Bấm mở Modal với đúng nội dung: **Liên hệ với giáo viên chủ nhiệm, hoặc admin để cấp lại**. Có Đã hiểu/Đóng/Escape, focus trở về nút khi đóng, email/mật khẩu đang nhập giữ nguyên. Chỉ thông báo hướng dẫn liên hệ, không gửi yêu cầu reset hoặc sửa backend/auth/quyền đăng nhập.
+
 ## Hiện hành: bỏ breadcrumb, đưa tiêu đề lên đầu tất cả trang — 12/10/2026
 
 Yêu cầu mới mở rộng từ Tổng quan sang **mọi trang giáo viên/học sinh**: bỏ hẳn dòng Trang giáo viên/học tập / tên trang; đưa cụm tiêu đề, slogan/chữ nhỏ, mô tả và nút thao tác lên vị trí đầu trang. WorkspaceFrame cung cấp slot ở header; WorkspaceHeading đặt cùng một cụm vào slot bằng React portal trên desktop/landscape, trả về nội dung trên compact/portrait. Không render hai bản tiêu đề. Header tài khoản/lớp vẫn bên phải; màn hình hẹp tự xuống hàng. Portrait giữ account/lớp sticky trên, tiêu đề ngay dưới, menu đáy/safe area như cũ; xoay không đổi trang hay nhân đôi h1.

@@ -1080,6 +1080,8 @@ function Login({
     [password, setPassword] = useState(""),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  const [passwordHelp, setPasswordHelp] = useState(false);
+  const closePasswordHelp = useCallback(() => setPasswordHelp(false), []);
   async function enterDefault(role: QuickAccount["role"]) {
     setBusy(true);
     setError("");
@@ -1110,17 +1112,12 @@ function Login({
       <section className="login-story">
         <Logo school />
         <div className="login-story-content">
-          <span className="eyebrow">MỖI NỖ LỰC LÀ MỘT HẠT MẦM</span>
           <h1>
             Kiến thức lớn lên.
             <br />
             Bạn cũng vậy.
           </h1>
-          <p>
-            Một nơi để học, để thử, để sửa sai.
-            <br />
-            Và để thấy mình tốt hơn mỗi ngày.
-          </p>
+          <span className="eyebrow">MỖI NỖ LỰC LÀ MỘT HẠT MẦM</span>
           <GardenIllustration className="login-illustration" />
           <div className="story-caption">
             <Leaf size={17} />
@@ -1131,11 +1128,11 @@ function Login({
       </section>
       <section className="login-form-side">
         <div className="login-form-wrap">
+          <h2>Mở khu vườn của bạn</h2>
           <span className="pill">
             <Sprout size={15} />
             Chào mừng trở lại
           </span>
-          <h2>Mở khu vườn của bạn</h2>
           <p>Đăng nhập để tiếp tục hành trình học tập.</p>
           {notice && (
             <div className="info-panel" role="status">
@@ -1180,10 +1177,15 @@ function Login({
               <ArrowRight size={18} />
             </button>
           </form>
-          <p className="forgot-hint">
+          <button
+            type="button"
+            className="text-button login-forgot"
+            aria-haspopup="dialog"
+            onClick={() => setPasswordHelp(true)}
+          >
             <ShieldCheck size={16} />
-            Liên hệ giáo viên chủ nhiệm để cấp lại.
-          </p>
+            Quên mật khẩu
+          </button>
           {quickLogin && (
             <div className="quick-login-box">
               <strong>Vào nhanh khu vườn</strong>
@@ -1254,6 +1256,22 @@ function Login({
           Học theo nhịp của bạn. Tiến bộ theo cách của bạn.
         </span>
       </section>
+      {passwordHelp && (
+        <Modal
+          title="Quên mật khẩu"
+          onClose={closePasswordHelp}
+          className="login-password-help"
+        >
+          <p>Liên hệ với giáo viên chủ nhiệm, hoặc admin để cấp lại</p>
+          <button
+            type="button"
+            className="button primary full"
+            onClick={closePasswordHelp}
+          >
+            Đã hiểu
+          </button>
+        </Modal>
+      )}
     </div>
   );
 }

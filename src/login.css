@@ -1,0 +1,118 @@
+/* Login title order and alignment from the latest visual feedback. */
+.login-page {
+  --login-content-top: clamp(112px, 14vh, 152px);
+}
+
+.login-story {
+  padding-top: var(--login-content-top);
+}
+
+.login-story > .logo {
+  position: absolute;
+  top: 32px;
+  left: 48px;
+}
+
+.login-story-content {
+  margin: 0;
+  padding: 0;
+}
+
+.login-story-content h1 {
+  margin: 0 0 10px;
+}
+
+.login-story-content > .eyebrow {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.login-copyright {
+  position: absolute;
+  left: 48px;
+  bottom: 24px;
+}
+
+.login-form-side {
+  justify-content: flex-start;
+  padding: var(--login-content-top) 40px 32px;
+}
+
+.login-form-wrap {
+  margin: 0;
+}
+
+.login-form-wrap h2 {
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.login-form-wrap > p {
+  margin: 10px 0 22px;
+}
+
+.login-forgot {
+  margin-top: 16px;
+  min-height: 44px;
+  gap: 8px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.login-bottom {
+  margin-top: 24px;
+  padding-top: 0;
+}
+
+.login-password-help {
+  max-width: 420px;
+}
+
+.login-password-help > p {
+  margin: 8px 0 24px;
+  line-height: 1.7;
+  color: #355840;
+}
+
+@media (min-width: 701px) and (max-width: 1200px) {
+  .login-story > .logo,
+  .login-copyright {
+    left: 30px;
+  }
+
+  .login-form-side {
+    padding-inline: 24px;
+  }
+}
+
+@media (max-width: 700px) {
+  .login-story {
+    min-height: 0;
+    padding: 24px 22px 8px;
+  }
+
+  .login-story > .logo {
+    position: relative;
+    top: auto;
+    left: auto;
+  }
+
+  .login-story-content {
+    padding: 20px 0 0;
+  }
+
+  .login-story-content h1 {
+    font-size: clamp(28px, 8vw, 34px);
+    line-height: 1.35;
+    margin: 0 0 8px;
+  }
+
+  .login-form-side {
+    padding: 12px 22px 24px;
+  }
+
+  .login-form-wrap {
+    max-width: 440px;
+  }
+}
