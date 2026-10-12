@@ -1,3 +1,4 @@
+import { WorkspaceHeading } from "./WorkspaceHeading";
 import { useEffect, useState } from "react";
 import { Clock3, Flower2, RefreshCw, Users } from "lucide-react";
 import { api, duration, errorMessage } from "./api";
@@ -71,7 +72,7 @@ export function ClassCommunity({
 
   return (
     <>
-      <div className="page-heading">
+      <WorkspaceHeading className="page-heading">
         <div>
           <h1>
             {page === "garden" ? "Khu vườn của lớp" : "Xếp hạng chăm chỉ"}
@@ -91,7 +92,7 @@ export function ClassCommunity({
           <RefreshCw size={16} />
           Cập nhật
         </button>
-      </div>
+      </WorkspaceHeading>
       {error ? (
         <div className="error-banner" role="alert">
           {error}

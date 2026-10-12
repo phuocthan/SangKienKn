@@ -292,6 +292,70 @@
   line-height: 1.4;
 }
 
+.workspace-heading-slot {
+  min-width: 0;
+}
+
+@media (min-width: 1101px), (min-width: 701px) and (orientation: landscape) {
+  .workspace-topbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    padding-block: 22px 12px;
+    min-height: 0;
+  }
+
+  .workspace-heading-slot {
+    flex: 1 1 420px;
+  }
+
+  .workspace-heading-slot:empty {
+    display: none;
+  }
+
+  .workspace-heading-slot
+    > :is(.page-heading, .learning-heading, .practice-top) {
+    width: 100%;
+    margin: 0;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+  }
+
+  .workspace-heading-slot
+    > :is(.page-heading, .learning-heading)
+    > div:first-child {
+    flex: 1 1 280px;
+    min-width: 0;
+  }
+
+  .workspace-heading-slot h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .workspace-topbar .topbar-right {
+    margin-left: auto;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .workspace-heading-slot .group-page-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 140px;
+  }
+
+  .workspace-heading-slot .group-heading-illustration {
+    width: 140px;
+  }
+}
+
+@media (max-width: 700px), (max-width: 1100px) and (orientation: portrait) {
+  .workspace-heading-slot {
+    display: none;
+  }
+}
+
 .student-welcome-hero h2 br {
   display: none;
 }
@@ -320,40 +384,5 @@
 
   .garden-welcome-grid .student-welcome-hero .hero-copy {
     padding: 22px 20px;
-  }
-}
-
-.home-content-heading {
-  display: none;
-}
-
-@media (min-width: 1101px), (min-width: 701px) and (orientation: landscape) {
-  .home-heading-topbar {
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 12px 24px;
-    padding-block: 22px 12px;
-    min-height: 0;
-  }
-
-  .home-heading-topbar > .page-heading {
-    flex: 1 1 360px;
-    min-width: 0;
-    margin: 0;
-  }
-
-  .home-heading-topbar .topbar-right {
-    margin-left: auto;
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 700px), (max-width: 1100px) and (orientation: portrait) {
-  .home-heading-topbar > .page-heading {
-    display: none;
-  }
-
-  .home-content-heading {
-    display: flex;
   }
 }

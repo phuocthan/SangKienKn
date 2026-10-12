@@ -13,7 +13,8 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { api, ApiError, errorMessage } from "./api";
-import { Empty, Modal, SectionTitle } from "./components";
+import { Empty, Modal } from "./components";
+import { WorkspaceHeading } from "./WorkspaceHeading";
 import { MessageComposer, conversationDate } from "./Conversation";
 import type { Classroom, User } from "./types";
 import type { FeedbackStatus, FeedbackThread } from "../shared/feedback";
@@ -107,32 +108,32 @@ export function Feedback({
   }
   return (
     <div className="feedback-page">
-      <SectionTitle
-        title={teacher ? "Quản lý góp ý" : "Góp ý với giáo viên"}
-        description={
-          teacher
-            ? "Lắng nghe học sinh, phản hồi và theo dõi việc xử lý theo từng lớp."
-            : `Gửi ý kiến riêng đến ${classroom.teacherName}. Chỉ bạn và giáo viên phụ trách lớp đọc được.`
-        }
-        action={
-          <div className="button-group">
-            <button className="button outline" onClick={() => void reload()}>
-              <RefreshCw size={16} />
-              Cập nhật
+      <WorkspaceHeading>
+        <div>
+          <h1>{teacher ? "Quản lý góp ý" : "Góp ý với giáo viên"}</h1>
+          <p>
+            {teacher
+              ? "Lắng nghe học sinh, phản hồi và theo dõi việc xử lý theo từng lớp."
+              : `Gửi ý kiến riêng đến ${classroom.teacherName}. Chỉ bạn và giáo viên phụ trách lớp đọc được.`}
+          </p>
+        </div>
+        <div className="button-group">
+          <button className="button outline" onClick={() => void reload()}>
+            <RefreshCw size={16} />
+            Cập nhật
+          </button>
+          {!teacher && (
+            <button
+              className="button primary"
+              disabled={loading || unavailable}
+              onClick={() => setCreating(true)}
+            >
+              <Plus size={16} />
+              Viết góp ý
             </button>
-            {!teacher && (
-              <button
-                className="button primary"
-                disabled={loading || unavailable}
-                onClick={() => setCreating(true)}
-              >
-                <Plus size={16} />
-                Viết góp ý
-              </button>
-            )}
-          </div>
-        }
-      />
+          )}
+        </div>
+      </WorkspaceHeading>
       {unavailable ? (
         <div className="info-panel" role="status">
           Chức năng Góp ý đang chờ cập nhật server Railway.

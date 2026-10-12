@@ -173,10 +173,12 @@ test("uploaded online exam notifies and opens a saved room; reload keeps questio
     });
     await notice.getByRole("button", { name: "Vào làm kiểm tra" }).click();
     await expect(student.locator(".exam-room")).toBeVisible();
-    await expect(student.locator(".exam-room h1")).toHaveText(title);
-    await expect(student.locator(".exam-room .pill")).toHaveText(
-      /24:\d{2}|25:00/,
-    );
+    await expect(student.getByRole("heading", { level: 1 })).toHaveText(title);
+    await expect(
+      student.locator(
+        ".workspace-heading-slot .learning-heading .pill, .exam-room .learning-heading .pill",
+      ),
+    ).toHaveText(/24:\d{2}|25:00/);
     await expect(student.locator(".exam-notices")).toHaveCount(0);
     const path = student.url();
     const firstText = await student

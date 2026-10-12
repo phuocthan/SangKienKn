@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Bỏ breadcrumb và nâng cụm tiêu đề trên mọi trang — 12/10/2026
+
+Theo ảnh Xếp hạng, đã mở rộng cách đặt tiêu đề lên đầu từ Home sang tất cả trang giáo viên/học sinh. WorkspaceFrame/WorkspaceHeadingSlot/WorkspaceHeading mới dùng React context/portal: một cụm tiêu đề + chữ nhỏ + mô tả + thao tác ở header desktop, trở lại nội dung trên compact/portrait; không nhân đôi heading. Bỏ breadcrumb/pageNames/homeHeading và CSS Home ẩn/hiện hai bản. Header account/lớp/menu portrait giữ; wrap tại900px, minh họa nhóm gọn ở desktop. PageHeading/App, cộng đồng, nhóm, góp ý (h1), Learning/ExamRoom, thanh Practice đều dùng chung; modal và thẻ hoàn thành giữ nội dung riêng. Không thay backend/API/data; Admin không thuộc yêu cầu và giữ giao diện riêng.
+
+**Kiểm tra mới đúng checkout push** .local/forest-push-checkout: TypeScript/Vite build .local/warm-journey-push-build đạt; **4/4 workspace-headings** kiểm tra88 tổ hợp11 trang×2 vai trò×4 viewport1440/900/390/768 và xoay đạt (không breadcrumb, chỉ1 h1, desktop heading trong header ở y≤40, mobile heading trong main, không tràn). Rà regression **24/26 đạt lượt đầu** account/portrait/warm-journey/learning/online/groups/feedback;2 góp ý thất bại vì test cũ đếm cả nút pause note và mong mục đầu là Góp ý. Đổi selector sang các button.nav-item trực tiếp, không bỏ assertion menu; **2/2 góp ý chạy lại đạt**. Tổng30 ca tương ứng đã xác nhận, không nói26/26 một lượt. Test trang mới từng được ngắt để sửa helper chỉ điều hướng9 mục chính, các utility góp ý/tài khoản dùng nút hiện hành. Không đổi hành vi sản phẩm để né lỗi.
+
+Tất cả trên server/SQLite riêng3331; không ghi Railway/database chính. Đã xem ảnh Xếp hạng học sinh desktop/mobile và Nhóm giáo viên, tiêu đề nâng đúng/controls rõ. Local5173/HMR vẫn chạy/API Railway. Learning và online-exams.spec.ts có task song song: chỉ áp dụng import/wrapper heading và selector tiêu đề/đồng hồ trên cả root/checkout remote, không copy toàn file mixed.14 file song song được bảo toàn theo manifest .local/workspace-heading-preserved.json. Push riêng UI/test/ba phần tài liệu; kết quả push thực tế ghi sau hoàn thành, runtime Railway chưa xác minh.
+
 ## Đáp án chọn sai đỏ nhạt, đúng xanh — 12/10/2026
 
 Theo ảnh kết quả thi, đã sửa ExamRoom thiếu wrong-choice: lấy kết quả câu hiện tại một lần và gắn class sai cho lựa chọn của học sinh khi câu đã có kết quả sai. Đáp án đúng giữ correct-choice xanh; khi chờ công bố không gắn trạng thái đúng/sai, câu bỏ trống không có lựa chọn sai. styles.css đổi palette wrong-choice chung nền #fff0f0, viền/outline #dda2a2, chữ #9b3f46, ô chữ #c55c66/chữ trắng; thay outline xanh do selected. Dùng chung luyện/ôn/sửa sai/Săn điểm/kết quả thi, không sửa API/điểm/thời điểm công bố.

@@ -15,6 +15,7 @@ import {
   Ticket,
 } from "lucide-react";
 import { api, ApiError, duration, errorMessage } from "./api";
+import { WorkspaceHeading } from "./WorkspaceHeading";
 import { StudentLevelIcon } from "./StudentLevel";
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { ExamUpload, type UploadedExamQuestion } from "./ExamUpload";
@@ -259,7 +260,7 @@ export function Learning({
     );
   return (
     <div className="learning-workspace">
-      <div className="learning-heading">
+      <WorkspaceHeading className="learning-heading">
         <div>
           <h1>
             {onlinePage
@@ -294,7 +295,7 @@ export function Learning({
         >
           <RefreshCw size={16} /> Làm mới
         </button>
-      </div>
+      </WorkspaceHeading>
       {error && (
         <div className="error-banner" role="alert">
           {error}
@@ -1572,7 +1573,7 @@ function ExamRoom({
   );
   return (
     <div className="exam-room">
-      <div className="learning-heading">
+      <WorkspaceHeading className="learning-heading">
         <div>
           <span className="eyebrow">
             {run.kind === "hunt" ? "SĂN ĐIỂM" : "THI CHÍNH THỨC"}
@@ -1590,7 +1591,7 @@ function ExamRoom({
                 )}:${(seconds % 60).toString().padStart(2, "0")}`
             : "Đã nộp"}
         </span>
-      </div>
+      </WorkspaceHeading>
       {error && (
         <div className="error-banner" role="alert">
           {error}

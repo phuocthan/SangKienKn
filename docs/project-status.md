@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Tiêu đề đầu trang chung, bỏ breadcrumb giáo viên/học sinh — 12/10/2026
+
+Đã bỏ dòng breadcrumb trên toàn workspace giáo viên/học sinh; cụm tiêu đề/chữ nhỏ/mô tả và thao tác được đưa lên đầu header desktop. Dùng một WorkspaceHeading/slot, portrait trả về nội dung dưới thanh account/lớp sticky; không nhân đôi h1 khi xoay. Bao phủ lớp/ngân hàng/nhóm/góp ý/vườn/xếp hạng/tài khoản/ôn-thi/online/phiên học; Admin giữ riêng. Không đổi API hay dữ liệu.
+
+TypeScript/Vite build đạt. **4 E2E mới kiểm tra88 tổ hợp trang×vai trò×viewport** (11 trang mỗi vai trò,1440/900/390/768) và xoay đạt; **26 luồng regression liên quan đã xác nhận đạt**, gồm24 đạt lượt đầu và2 góp ý đạt khi chạy lại sau sửa selector menu tiện ích bắt nhầm nút pause note từ đợt trước. Bằng chứng từng lượt ở session-handoff; không ghi thử Railway. Đã xem ảnh desktop/mobile; push riêng UI/test/ba phần tài liệu, giữ task backend/nhóm online. Runtime Railway chưa xác minh.
+
 ## Đáp án chọn sai đỏ nhạt, đúng xanh — 12/10/2026
 
 Đã sửa kết quả thi: bổ sung wrong-choice cho đáp án chọn sai sau công bố, thay nền/viền/outline/ô A-B-C-D sang đỏ nhạt; đáp án đúng xanh. Palette sai áp dụng chung luyện/ôn/sửa sai. Không đổi nghiệp vụ hoặc tiết lộ đáp án trước công bố.

@@ -1,3 +1,4 @@
+import { WorkspaceHeading } from "./WorkspaceHeading";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
@@ -379,7 +380,7 @@ export function Practice({
   const q = questions[index];
   return (
     <div className="practice-layout">
-      <div className="practice-top">
+      <WorkspaceHeading className="practice-top">
         <button className="text-button" onClick={onFinish}>
           <ArrowLeft size={16} />
           Kết thúc phiên
@@ -405,7 +406,7 @@ export function Practice({
             </small>
           )}
         </div>
-      </div>
+      </WorkspaceHeading>
       {sessionError && (
         <div className="error-banner" role="alert">
           {sessionError} Hãy kết thúc phiên rồi mở lại nếu phiên đã hết hiệu

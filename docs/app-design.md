@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: bỏ breadcrumb, đưa tiêu đề lên đầu tất cả trang — 12/10/2026
+
+Yêu cầu mới mở rộng từ Tổng quan sang **mọi trang giáo viên/học sinh**: bỏ hẳn dòng Trang giáo viên/học tập / tên trang; đưa cụm tiêu đề, slogan/chữ nhỏ, mô tả và nút thao tác lên vị trí đầu trang. WorkspaceFrame cung cấp slot ở header; WorkspaceHeading đặt cùng một cụm vào slot bằng React portal trên desktop/landscape, trả về nội dung trên compact/portrait. Không render hai bản tiêu đề. Header tài khoản/lớp vẫn bên phải; màn hình hẹp tự xuống hàng. Portrait giữ account/lớp sticky trên, tiêu đề ngay dưới, menu đáy/safe area như cũ; xoay không đổi trang hay nhân đôi h1.
+
+Áp dụng PageHeading chung, ClassCommunity, GroupActivities, Feedback, Learning/ExamRoom và thanh điều khiển phiên Practice; giữ callback/state/nút tạo/cập nhật/thời gian. Góp ý dùng h1 thống nhất. Minh họa nhóm thu gọn tại header desktop, portrait giữ khối gốc; tiêu đề modal và nội dung thẻ kết thúc phiên giữ trong chính thẻ/modal. Admin giữ giao diện quản trị riêng. Quyết định giữ breadcrumb trang nghiệp vụ và cách nhân đôi tiêu đề Home phía dưới là lịch sử đã thay.
+
 ## Hiện hành: phân biệt đáp án sai/đúng — 12/10/2026
 
 Sau khi kết quả được công bố, đáp án học sinh chọn sai dùng nền đỏ nhạt #fff0f0, viền/outline #dda2a2, chữ đỏ #9b3f46 và ô chữ A/B/C/D đỏ #c55c66/chữ trắng. Đáp án đúng giữ màu xanh hiện có. ExamRoom gắn wrong-choice khi có kết quả cho câu đó, câu trả lời đã chọn và kết quả sai; không giữ viền xanh từ selected. CSS dùng chung cho luyện tập/ôn tập/sửa sai và kết quả Săn điểm/thi chính thức, kể cả màn hình xem bài dùng cùng ExamRoom.

@@ -1,3 +1,4 @@
+import { WorkspaceHeading } from "./WorkspaceHeading";
 import {
   useCallback,
   useEffect,
@@ -170,7 +171,7 @@ export function GroupActivities({
 
   return (
     <div className="group-workspace">
-      <div className="page-heading group-page-heading">
+      <WorkspaceHeading className="page-heading group-page-heading">
         <div className="group-heading-copy">
           <h1>Hoạt động nhóm</h1>
           <span className="eyebrow">TRANG CỘNG TÁC</span>
@@ -190,7 +191,7 @@ export function GroupActivities({
           height={1024}
           decoding="async"
         />
-      </div>
+      </WorkspaceHeading>
       {error && (
         <div className="error-banner" role="alert">
           {error}

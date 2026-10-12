@@ -57,6 +57,11 @@ import {
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { GardenGoal } from "./GardenGoal";
 import { GardenNote } from "./GardenNote";
+import {
+  WorkspaceHeading,
+  WorkspaceFrame,
+  WorkspaceHeadingSlot,
+} from "./WorkspaceHeading";
 import { QuestionBank } from "./QuestionBank";
 import { QuestionFields } from "./QuestionFields";
 import type { Chapter, Classroom, Question, Student, User } from "./types";
@@ -335,41 +340,12 @@ export default function App() {
         { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
         { id: "leaderboard", label: "Xếp hạng chăm chỉ", icon: Trophy },
       ];
-  const pageNames: Record<Page, string> = {
-    home: isTeacher ? "Tổng quan" : "Khu vườn của tôi",
-    practice: "Luyện tập",
-    learning: "Ôn tập & kiểm tra",
-    "online-exams": isTeacher ? "Quản lý kiểm tra online" : "Kiểm tra online",
-    corrections: "Sổ tay sửa sai",
-    classes: "Lớp học của tôi",
-    groups: "Hoạt động nhóm",
-    questions: "Ngân hàng câu hỏi",
-    progress: isTeacher ? "Tiến độ học tập" : "Hành trình của tôi",
-    settings: "Tài khoản",
-    garden: "Khu vườn của lớp",
-    leaderboard: "Xếp hạng chăm chỉ",
-    feedback: isTeacher ? "Quản lý góp ý" : "Góp ý",
-  };
   const totalSeconds =
     current?.chapters.reduce((n, c) => n + c.seconds, 0) ?? 0;
   const openCorrections = classes.reduce(
     (n, c) => n + c.chapters.reduce((a, ch) => a + ch.openCorrections, 0),
     0,
   );
-  const homeHeading =
-    page === "home" && current && !study
-      ? {
-          eyebrow: isTeacher
-            ? "CÙNG HỌC SINH GIEO NHỮNG MẦM XANH"
-            : "HỌC MỘT CHÚT · LỚN MỘT CHÚT",
-          title: isTeacher
-            ? "Một lớp học, nhiều cơ hội lớn lên."
-            : `Chào ${user.name.split(" ").slice(-2).join(" ")}, hôm nay mình học gì?`,
-          text: isTeacher
-            ? `${current.name} · ${current.subject} · Giáo viên ${current.teacherName}`
-            : "Khu vườn nhỏ đang lớn lên từ những cố gắng của bạn.",
-        }
-      : null;
 
   return (
     <div className="app-shell">
@@ -413,10 +389,8 @@ export default function App() {
           <span className="sidebar-version">GREENEDU · MVP 0.1</span>
         </div>
       </aside>
-      <div className="main-shell">
-        <header
-          className={`topbar ${homeHeading ? "home-heading-topbar" : ""}`}
-        >
+      <WorkspaceFrame>
+        <header className="topbar workspace-topbar">
           <PortraitActions
             page={page}
             feedbackLabel={isTeacher ? "Quản lý góp ý" : "Góp ý"}
@@ -424,15 +398,7 @@ export default function App() {
             onAccount={() => navigate("settings")}
             onLogout={() => void logout()}
           />
-          {homeHeading ? (
-            <PageHeading {...homeHeading} />
-          ) : (
-            <div className="breadcrumb">
-              Trang {isTeacher ? "giáo viên" : "học tập"}
-              <span>/</span>
-              <strong>{pageNames[page]}</strong>
-            </div>
-          )}
+          <WorkspaceHeadingSlot />
           <div className="topbar-right">
             {current && (
               <label className="class-switch">
@@ -636,7 +602,6 @@ export default function App() {
                 ) : (
                   <div className="student-home">
                     <PageHeading
-                      className="home-content-heading"
                       eyebrow="HỌC MỘT CHÚT · LỚN MỘT CHÚT"
                       title={`Chào ${user.name.split(" ").slice(-2).join(" ")}, hôm nay mình học gì?`}
                       text="Khu vườn nhỏ đang lớn lên từ những cố gắng của bạn."
@@ -1025,7 +990,7 @@ export default function App() {
             </span>
           </footer>
         </main>
-      </div>
+      </WorkspaceFrame>
       {accountDialog && (
         <Modal
           title={accountDialog === "avatar" ? "Đổi avatar" : "Đổi mật khẩu"}
@@ -1088,14 +1053,14 @@ function PageHeading({
   className?: string;
 }) {
   return (
-    <div className={`page-heading ${className}`}>
+    <WorkspaceHeading className={`page-heading ${className}`}>
       <div>
         <h1>{title}</h1>
         <span className="eyebrow">{eyebrow}</span>
         <p>{text}</p>
       </div>
       {action}
-    </div>
+    </WorkspaceHeading>
   );
 }
 function Login({
@@ -1519,7 +1484,6 @@ function TeacherHome({
   return (
     <>
       <PageHeading
-        className="home-content-heading"
         eyebrow="CÙNG HỌC SINH GIEO NHỮNG MẦM XANH"
         title="Một lớp học, nhiều cơ hội lớn lên."
         text={`${classroom.name} · ${classroom.subject} · Giáo viên ${classroom.teacherName}`}

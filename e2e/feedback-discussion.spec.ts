@@ -22,7 +22,9 @@ test("private student feedback reaches the teacher, who replies, resolves and re
 }, info) => {
   await login(page, "hocsinh@greenedu.nk");
   const footer = page.locator(".sidebar-bottom");
-  const labels = await footer.locator("button").allTextContents();
+  const labels = await footer
+    .locator(":scope > button.nav-item")
+    .allTextContents();
   expect(labels[0]).toContain("Góp ý");
   expect(labels[1]).toContain("Tài khoản");
   await page.getByRole("button", { name: "Góp ý", exact: true }).click();
