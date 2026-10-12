@@ -30,6 +30,22 @@ for (const role of ["teacher", "student"] as const) {
     await expect(page.locator(".sidebar-note-art")).toBeVisible();
     if (role === "student") {
       const chapter = page.locator(".chapter-card").first();
+      await expect(chapter.locator(".button")).toHaveCSS(
+        "background-color",
+        "rgb(49, 93, 62)",
+      );
+      await expect(chapter.locator(".chapter-progress > span")).toHaveCSS(
+        "font-style",
+        "italic",
+      );
+      await expect(chapter.locator(".chapter-progress > span")).toHaveCSS(
+        "opacity",
+        "0.85",
+      );
+      await expect(page.locator(".chapter-card").nth(1)).toHaveCSS(
+        "border-top-color",
+        "rgb(199, 221, 181)",
+      );
       await expect(chapter.locator(".chapter-progress")).toContainText(
         "để lên Chồi",
       );

@@ -2,7 +2,7 @@
 :root {
   --journey-copper: #ad562b;
   --journey-gold: #f1b63a;
-  --journey-cream: #fff0d2;
+  --journey-cream: #fff6dd;
 }
 
 .progress-track {
@@ -43,6 +43,9 @@
   background: var(--journey-cream);
   color: #77562f;
   line-height: 1.6;
+  font-style: italic;
+  font-synthesis: style;
+  opacity: 0.85;
 }
 
 .chapter-progress {
@@ -50,19 +53,55 @@
   gap: 8px;
 }
 
-.chapter-progress > strong,
-.chapter-level-summary strong {
+.chapter-progress > strong {
   color: #a76128;
 }
 
-.chapter-level-milestones li {
+.chapter-level-roadmap {
+  --road-height: 96px;
+  --road-top: 24px;
+  --stage-icon-size: 48px;
   position: relative;
+  height: 180px;
+}
+
+.chapter-level-milestones {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  margin: 0;
+}
+
+.chapter-level-milestones li {
+  position: absolute;
+  width: 20%;
+  top: calc(
+    var(--road-top) + var(--road-height) / 8 - var(--stage-icon-size) / 2 - 6px
+  );
+}
+
+.chapter-level-milestones li:nth-child(even) {
+  top: calc(
+    var(--road-top) + var(--road-height) * 7 / 8 - var(--stage-icon-size) / 2 -
+      6px
+  );
 }
 
 .chapter-level-milestones .current {
-  background: #fff0cf;
-  color: #754326;
-  box-shadow: inset 0 0 0 1px #e8cf9b;
+  background: transparent;
+  color: #164b35;
+}
+
+.chapter-level-milestones .current > span:not(.level-state-mark) {
+  padding-inline: 8px;
+  border-radius: 8px;
+  background: #e8f4de;
+}
+
+.chapter-level-milestones .current .student-level-icon {
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px #c7ddb5;
 }
 
 .chapter-level-milestones .locked {
@@ -94,7 +133,10 @@
 }
 
 .chapter-level-rail {
-  height: 64px;
+  position: absolute;
+  inset-inline: 0;
+  top: var(--road-top);
+  height: var(--road-height);
   background: none;
   border-radius: 0;
 }
@@ -189,28 +231,12 @@
   font-size: 14px;
 }
 
-.chapter-body > .button,
-.student-welcome-hero .garden-hero-actions > .button.primary {
-  background: var(--journey-copper);
-  border-color: var(--journey-copper);
-  color: #fffaf3;
-}
-
-.chapter-body > .button:hover:not(:disabled),
-.student-welcome-hero
-  .garden-hero-actions
-  > .button.primary:hover:not(:disabled) {
-  background: #8c4423;
-  border-color: #8c4423;
-}
-
-.garden-goal .text-button {
-  color: #a65a2b;
-}
-
 @media (max-width: 600px) {
-  .chapter-level-rail {
-    height: 44px;
+  .chapter-level-roadmap {
+    --road-height: 72px;
+    --road-top: 18px;
+    --stage-icon-size: 36px;
+    height: 160px;
   }
 
   .level-state-mark {

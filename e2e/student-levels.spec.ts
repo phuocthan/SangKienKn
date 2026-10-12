@@ -47,10 +47,13 @@ test("student switches independent subject icons, sees all five stages and retai
       return icons.map((icon, index) => {
         const a = icon.getBoundingClientRect(),
           b = ticks[index].getBoundingClientRect();
-        return Math.abs(a.x + a.width / 2 - b.x - b.width / 2);
+        return {
+          x: Math.abs(a.x + a.width / 2 - b.x - b.width / 2),
+          y: Math.abs(a.y + a.height / 2 - b.y - b.height / 2),
+        };
       });
     });
-    expect(alignment.every((offset) => offset < 2)).toBe(true);
+    expect(alignment.every(({ x, y }) => x < 2 && y < 2)).toBe(true);
     await expect(page.locator(".profile .student-level-badge")).toHaveCount(0);
     expect(
       await page.evaluate(

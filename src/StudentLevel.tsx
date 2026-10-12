@@ -248,91 +248,96 @@ export function ChapterLevelTimeline({ chapter }: { chapter: Chapter }) {
       data-chapter-id={chapter.id}
       data-level={stage.level}
     >
-      <ol
-        className="chapter-level-milestones"
-        aria-label={`Mốc cấp độ ${chapter.title}`}
-      >
-        {STUDENT_LEVEL_NAMES.map((name, index) => (
-          <li
-            key={name}
-            className={
-              index + 1 === stage.level
-                ? "current"
-                : index + 1 < stage.level
-                  ? "earned"
-                  : "locked"
-            }
-            aria-current={index + 1 === stage.level ? "step" : undefined}
-          >
-            <StudentLevelIcon level={index + 1} />
-            {index + 1 !== stage.level && (
-              <span
-                className="level-state-mark"
-                aria-hidden="true"
-                title={index + 1 < stage.level ? "Đã đạt" : "Chưa đạt"}
-              >
-                {index + 1 < stage.level ? (
-                  <Check size={10} />
-                ) : (
-                  <LockKeyhole size={10} />
-                )}
-              </span>
-            )}
-            <span>{name}</span>
-            <small>{duration(index * (chapter.levelMinutes ?? 60) * 60)}</small>
-          </li>
-        ))}
-      </ol>
-      <div
-        className="chapter-level-rail"
-        role="progressbar"
-        aria-label={`Tiến độ ${chapter.title}`}
-        aria-valuemin={0}
-        aria-valuemax={maximum}
-        aria-valuenow={Math.min(stage.seconds, maximum)}
-        aria-valuetext={`${duration(stage.seconds)} · Cấp ${stage.level} · ${stage.name}`}
-      >
-        <svg
-          className="chapter-level-path"
-          viewBox="0 0 1000 64"
-          preserveAspectRatio="none"
-          aria-hidden="true"
+      <div className="chapter-level-roadmap">
+        <ol
+          className="chapter-level-milestones"
+          aria-label={`Mốc cấp độ ${chapter.title}`}
         >
-          <defs>
-            <linearGradient id={journeyId}>
-              <stop stopColor="#b75e2b" />
-              <stop offset="1" stopColor="#f5b932" />
-            </linearGradient>
-            <clipPath id={`${journeyId}-fill`} clipPathUnits="userSpaceOnUse">
-              <rect x={-5} y={-10} width={percent * 10 + 5} height={84} />
-            </clipPath>
-          </defs>
-          <path
-            className="journey-path-base"
-            d="M0 8C125 8 125 56 250 56C375 56 375 8 500 8C625 8 625 56 750 56C875 56 875 8 1000 8"
-            vectorEffect="non-scaling-stroke"
-          />
-          {percent > 0 && (
+          {STUDENT_LEVEL_NAMES.map((name, index) => (
+            <li
+              key={name}
+              style={{ left: `${index * 20}%` }}
+              className={
+                index + 1 === stage.level
+                  ? "current"
+                  : index + 1 < stage.level
+                    ? "earned"
+                    : "locked"
+              }
+              aria-current={index + 1 === stage.level ? "step" : undefined}
+            >
+              <StudentLevelIcon level={index + 1} />
+              {index + 1 !== stage.level && (
+                <span
+                  className="level-state-mark"
+                  aria-hidden="true"
+                  title={index + 1 < stage.level ? "Đã đạt" : "Chưa đạt"}
+                >
+                  {index + 1 < stage.level ? (
+                    <Check size={10} />
+                  ) : (
+                    <LockKeyhole size={10} />
+                  )}
+                </span>
+              )}
+              <span>{name}</span>
+              <small>
+                {duration(index * (chapter.levelMinutes ?? 60) * 60)}
+              </small>
+            </li>
+          ))}
+        </ol>
+        <div
+          className="chapter-level-rail"
+          role="progressbar"
+          aria-label={`Tiến độ ${chapter.title}`}
+          aria-valuemin={0}
+          aria-valuemax={maximum}
+          aria-valuenow={Math.min(stage.seconds, maximum)}
+          aria-valuetext={`${duration(stage.seconds)} · Cấp ${stage.level} · ${stage.name}`}
+        >
+          <svg
+            className="chapter-level-path"
+            viewBox="0 0 1000 64"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id={journeyId}>
+                <stop stopColor="#b75e2b" />
+                <stop offset="1" stopColor="#f5b932" />
+              </linearGradient>
+              <clipPath id={`${journeyId}-fill`} clipPathUnits="userSpaceOnUse">
+                <rect x={-5} y={-10} width={percent * 10 + 5} height={84} />
+              </clipPath>
+            </defs>
             <path
-              className="journey-path-fill"
+              className="journey-path-base"
               d="M0 8C125 8 125 56 250 56C375 56 375 8 500 8C625 8 625 56 750 56C875 56 875 8 1000 8"
-              stroke={`url(#${journeyId})`}
-              clipPath={`url(#${journeyId}-fill)`}
-              data-progress-percent={percent}
               vectorEffect="non-scaling-stroke"
             />
-          )}
-        </svg>
-        {STUDENT_LEVEL_NAMES.map((name, index) => (
-          <span
-            key={name}
-            className={`chapter-level-tick ${index + 1 <= stage.level ? "earned" : ""}`}
-            style={{
-              left: `${index * 25}%`,
-              top: `${((index % 2 ? 56 : 8) / 64) * 100}%`,
-            }}
-          />
-        ))}
+            {percent > 0 && (
+              <path
+                className="journey-path-fill"
+                d="M0 8C125 8 125 56 250 56C375 56 375 8 500 8C625 8 625 56 750 56C875 56 875 8 1000 8"
+                stroke={`url(#${journeyId})`}
+                clipPath={`url(#${journeyId}-fill)`}
+                data-progress-percent={percent}
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
+          </svg>
+          {STUDENT_LEVEL_NAMES.map((name, index) => (
+            <span
+              key={name}
+              className={`chapter-level-tick ${index + 1 <= stage.level ? "earned" : ""}`}
+              style={{
+                left: `${index * 25}%`,
+                top: `${((index % 2 ? 56 : 8) / 64) * 100}%`,
+              }}
+            />
+          ))}
+        </div>
       </div>
       <div className="chapter-level-summary">
         <span>

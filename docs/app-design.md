@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: panel xanh, nhấn chương/tiến độ và cây bám đường — 12/10/2026
+
+Góp ý mới thay màu cam/vàng phủ rộng của đợt trước: panel dùng lại gradient xanh/viền xanh, kể cả thẻ chương thứ hai và nền minh họa chương; nút luyện tập/tiếp tục và trạng thái cấp hiện tại trở về xanh. Bỏ biến thể frame theo thứ tự/icon và màu riêng luân phiên nhóm online. Giữ màu trạng thái nghiệp vụ đúng/sai/cảnh báo. Cam→vàng chỉ nhấn tên chương dạng pill và thanh/đường tiến độ; lời nhắc còn thời gian nền vàng nhạt #fff6dd, chữ nghiêng với font-synthesis: style và opacity 0.85.
+
+ChapterLevelTimeline dùng một roadmap chung: SVG và năm icon cùng trục ngang, icon xen kẽ cao/thấp đặt ngay tại các điểm uốn của đường. Tên cấp/thời gian dưới từng icon; hiện tại vòng xanh/nhãn xanh, mốc đã đạt dấu kiểm, tương lai xám/khoá. Desktop và mobile cùng căn tâm icon vào tick cả X/Y, không đổi dữ liệu, cách tính cấp hay phần clip tiến độ. Menu/icon gốc và header Tổng quan từ đợt trước giữ nguyên. Các quyết định current vàng/CTA đồng/frame nhiều màu phía dưới là lịch sử đã được thay.
+
 ## Góp ý trực quan: menu cũ, icon gốc và hành trình cam/vàng — 12/10/2026
 
 **Bổ sung theo ảnh tiếp theo:** bỏ breadcrumb “Trang học tập / Khu vườn của tôi” ở Tổng quan và đưa khối tiêu đề/chào, chữ nhỏ và mô tả lên header desktop cạnh bộ chọn lớp/account. Áp dụng Tổng quan giáo viên và học sinh; màn hình hẹp tự xuống hàng để không đè nhau. Portrait/compact giữ account/lớp neo trên, tiêu đề trong nội dung ngay dưới, chỉ một h1 hiển thị; không đưa thêm chữ lớn vào header điện thoại. Các trang nghiệp vụ khác giữ breadcrumb hiện có. Khi vào phiên luyện từ trang chủ, header dùng điều hướng của phiên như cũ.

@@ -49,74 +49,6 @@
 }
 
 .main-content
-  .card:not(
-    :is(
-      .garden-goal,
-      .student-level-card,
-      .garden-honors,
-      .question-card,
-      .exam-map,
-      .completion,
-      .bank-management,
-      .question-preview
-    )
-  ):nth-child(4n + 2) {
-  --frame-color: var(--forest-honey);
-  --frame-border: var(--forest-honey-border);
-}
-
-.main-content
-  .card:not(
-    :is(
-      .garden-goal,
-      .student-level-card,
-      .garden-honors,
-      .question-card,
-      .exam-map,
-      .completion,
-      .bank-management,
-      .question-preview
-    )
-  ):nth-child(4n + 3) {
-  --frame-color: var(--forest-sky);
-  --frame-border: var(--forest-sky-border);
-}
-
-.main-content
-  .card:not(
-    :is(
-      .garden-goal,
-      .student-level-card,
-      .garden-honors,
-      .question-card,
-      .exam-map,
-      .completion,
-      .bank-management,
-      .question-preview
-    )
-  ):nth-child(4n) {
-  --frame-color: var(--forest-flower);
-  --frame-border: var(--forest-flower-border);
-}
-
-.main-content .stat-card:has(.stat-icon.blue),
-.main-content .quick-actions > .card:has(.stat-icon.blue) {
-  --frame-color: var(--forest-honey);
-  --frame-border: var(--forest-honey-border);
-}
-
-.main-content .stat-card:has(.stat-icon.amber),
-.main-content .quick-actions > .card:has(.stat-icon.amber) {
-  --frame-color: var(--forest-sky);
-  --frame-border: var(--forest-sky-border);
-}
-
-.main-content .stat-card:has(.stat-icon.rose) {
-  --frame-color: var(--forest-flower);
-  --frame-border: var(--forest-flower-border);
-}
-
-.main-content
   .card:is(
     .class-card.selected,
     .feedback-item.selected,
@@ -151,31 +83,15 @@
   box-shadow: 0 8px 24px #315d3e16;
 }
 
-.chapter-art.art-0 {
-  background: linear-gradient(125deg, #dcecc9, #f3f8e8);
-}
-
-.chapter-art.art-1 {
-  background: linear-gradient(125deg, #f5dfab, #fff6de);
-}
-
+.chapter-art.art-0,
+.chapter-art.art-1,
 .chapter-art.art-2 {
-  background: linear-gradient(125deg, #cde5ed, #eef8fa);
+  background: linear-gradient(125deg, #dcecc9, #f3f8e8);
 }
 
 .main-content .online-exam-group {
   background: linear-gradient(125deg, #edf5e6, #fffefa);
   border-color: #cadfb9;
-}
-
-.main-content .online-exam-group:nth-child(3n + 2) {
-  background: linear-gradient(125deg, #fff0cf, #fffefa);
-  border-color: #e8d29f;
-}
-
-.main-content .online-exam-group:nth-child(3n) {
-  background: linear-gradient(125deg, #e8f3f8, #fffefa);
-  border-color: #bedce6;
 }
 
 @media (max-width: 700px) {

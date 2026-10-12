@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Trả panel xanh và đưa icon lên đường lượn — 12/10/2026
+
+Yêu cầu mới nhất đã hoàn tất: bỏ màu cam/vàng phủ panel và CTA, trả frame chung/nền art chương/nút về xanh; chỉ giữ nhấn tên chương và progress cam→vàng. Lời nhắc còn thời gian dùng nền #fff6dd, chữ nghiêng, font-synthesis: style, opacity 0.85. ChapterLevelTimeline thêm wrapper roadmap; rail SVG và icon năm cấp dùng chung hình học, icon xen kẽ cao/thấp bám đúng điểm trên đường, current vòng/nhãn xanh, check/khóa giữ nguyên. Menu phẳng/icon Lucide/header trước giữ nguyên. Không đổi API/database/cách tính cấp/clip phần tô.
+
+**Kiểm tra mới đúng checkout push** .local/forest-push-checkout: TypeScript và Vite build .local/warm-journey-push-build đạt; **20/20 E2E** warm-journey/student-levels/portrait-navigation/account-popups desktop/mobile đạt trên DB/server riêng3331. Test xác nhận tâm icon trùng tick X/Y qua năm cấp, tiến độ0/25/100%, panel/nút xanh, nhắc nghiêng/85%, không tràn ngang, menu/header/tài khoản vẫn hoạt động. Đã xem ảnh desktop và mobile Hành trình. Không dùng kết quả cũ thay lượt này. HMR5173/API Railway đang chạy, không ghi thử dữ liệu thật.
+
+Chuẩn bị push riêng năm file UI/test và ba phần tài liệu mới; không gom các thay đổi backend/nhóm online/Excel/luyện sau nộp từ task song song. Manifest .local/green-roadmap-preserved.json lưu hash14 file đó để xác minh sau đồng bộ HEAD/index; không hard reset/force push. Kết quả push thực tế ghi sau hoàn thành; Railway deployment/runtime chưa xác minh. Các mục cam-vàng toàn khung/nút phía dưới là lịch sử đã thay.
+
 ## Đưa góp ý giao diện và tiêu đề Tổng quan lên remote — 12/10/2026
 
 Đợt push riêng **23 file UI/asset/test/tài liệu** từ remote `f7ccb42`: trả menu9 mục/icon Lucide gốc, bỏ accordion/Forest mầm lặp, progress/nhãn/chương/lộ trình cong cam-vàng, sidebar note mint/italic/chậu cây-cáo, banner giữ khẩu hiệu nhưng gọn theo lựa chọn1. Bổ sung ảnh mới: bỏ breadcrumb ở Tổng quan giáo viên/học sinh và đưa khối tiêu đề lên header desktop cạnh account/lớp; portrait giữ tiêu đề trong nội dung/một h1 hiển thị, account/dock neo cũ. Các trang nghiệp vụ khác giữ điều hướng. Chỉ thay Learning import/span icon, không gom nghiệp vụ nhóm thi/Excel/luyện sau nộp/backend của task khác; không force hoặc đưa DB/.local/secrets/file học sinh vào Git.

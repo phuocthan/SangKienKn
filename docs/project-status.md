@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Panel xanh và icon bám đường cong — 12/10/2026
+
+Đã thực hiện góp ý mới: trả panel/nền minh họa/nút về xanh; cam-vàng chỉ nhấn tên chương và tiến độ; lời nhắc thời gian vàng nhạt, nghiêng, opacity 85%. Năm icon cấp độ bám đường lượn cả chiều ngang/dọc, current xanh; desktop/mobile không tràn ngang và giữ dữ liệu cấp độc lập. Menu/icon gốc và header giữ như đợt trước.
+
+Kiểm tra mới trên checkout chuẩn bị push: TypeScript/Vite build và **20/20 E2E** warm-journey/student-levels/portrait-navigation/account-popups đạt trên server/SQLite riêng3331, gồm căn tâm icon/tick X/Y qua năm cấp, panel/nút xanh và lời nhắc nghiêng/85%; đã xem ảnh desktop/mobile. Frontend5173/HMR vẫn chạy với API Railway; không ghi thử dữ liệu thật. Push riêng UI/test/ba phần tài liệu theo yêu cầu, giữ các thay đổi backend/nhóm thi của task khác. Kết quả push được ghi trong session-handoff; runtime Railway chưa xác minh.
+
 ## Đưa bản góp ý UI lên remote — 12/10/2026
 
 Push riêng23 file menu/icon gốc/UI cam-vàng/asset/test/tài liệu, giữ các thay đổi ôn-thi/backend song song. Bỏ breadcrumb Tổng quan và đưa tiêu đề/chào lên header desktop; portrait chỉ một h1 trong nội dung, account/dock cũ. TypeScript/build và **20/20 E2E cuối trên đúng checkout push đạt** sau header mới; **34/34 trước đó** xác nhận clip đường cong/italic/cấp độ và luồng cũ, ghi là lượt riêng. Đã xem ảnh cuối, hash14 file task song song giữ nguyên. Deployment/runtime Railway commit mới chưa xác minh; bằng chứng [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).
