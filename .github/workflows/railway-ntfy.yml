@@ -1,0 +1,94 @@
+name: Railway deploy notification
+
+on:
+  deployment_status:
+  workflow_dispatch:
+
+# This workflow only sends notifications; it never builds or deploys the app.
+permissions: {}
+
+jobs:
+  notify:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.creator.login == 'railway-app[bot]' &&
+       github.event.deployment.environment == 'zooming-light / production' &&
+       github.event.deployment.transient_environment != true)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      # No checkout: deployment events can refer to older commits without this file.
+      - name: Send notification to Android
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+        shell: python
+        run: |
+          import json
+          import os
+          import re
+          import time
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          topic = os.environ.get('NTFY_TOPIC', '')
+          if not re.fullmatch(r'[A-Za-z0-9_-]{20,200}', topic):
+              raise SystemExit('Set the NTFY_TOPIC repository secret to a long random topic.')
+
+          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text(encoding='utf-8'))
+          event_name = os.environ['GITHUB_EVENT_NAME']
+          site = 'https://greenedu.up.railway.app'
+          manual = event_name == 'workflow_dispatch'
+          if manual:
+              title = 'GreenEdu - Test thông báo'
+              message = 'Kết nối GitHub Actions → ntfy hoạt động. Đây là tin thử, không phải kết quả deploy.'
+              tags = ['test_tube']
+          elif event_name == 'deployment_status':
+              deployment = event.get('deployment', {})
+              status = event.get('deployment_status', {})
+              if (status.get('state') != 'success'
+                  or deployment.get('creator', {}).get('login') != 'railway-app[bot]'
+                  or deployment.get('environment') != 'zooming-light / production'
+                  or deployment.get('transient_environment') is True):
+                  raise SystemExit('Ignoring a deployment outside Railway production success.')
+              sha = deployment.get('sha', '')
+              if not re.fullmatch(r'[a-fA-F0-9]{40}', sha):
+                  raise SystemExit('Deployment commit SHA is invalid.')
+              title = 'GreenEdu - Deploy thành công'
+              message = f'Railway đã triển khai thành công bản {sha[:7]} lên production. Bấm để mở GreenEdu.'
+              tags = ['white_check_mark', 'rocket']
+          else:
+              raise SystemExit('Unsupported event.')
+
+          payload = json.dumps({
+              'topic': topic, 'title': title, 'message': message,
+              'tags': tags, 'priority': 3, 'click': site,
+              'actions': [{'action': 'view', 'label': 'Mở GreenEdu', 'url': site}],
+          }, ensure_ascii=False).encode('utf-8')
+          headers = {'Content-Type': 'application/json; charset=utf-8'}
+          token = os.environ.get('NTFY_TOKEN', '')
+          if token:
+              headers['Authorization'] = f'Bearer {token}'
+          request = urllib.request.Request('https://ntfy.sh/', data=payload, headers=headers, method='POST')
+          for attempt in range(3):
+              try:
+                  with urllib.request.urlopen(request, timeout=20) as response:
+                      if response.status != 200:
+                          raise SystemExit('Unexpected ntfy response status.')
+                      receipt = json.loads(response.read())
+                      if receipt.get('event') != 'message' or receipt.get('topic') != topic or not receipt.get('id'):
+                          raise SystemExit('ntfy did not confirm message delivery.')
+                  break
+              except urllib.error.HTTPError as error:
+                  if attempt == 2 or (error.code != 429 and error.code < 500):
+                      raise SystemExit(f'ntfy returned HTTP {error.code}. Check topic/token or quota.') from None
+              except (urllib.error.URLError, TimeoutError):
+                  if attempt == 2:
+                      raise SystemExit('ntfy could not be reached after 3 attempts.') from None
+              time.sleep(2 ** (attempt + 1))
+
+          print('Test notification accepted by ntfy.' if manual else 'Deployment notification accepted by ntfy.')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
+              summary.write(f'### {title}\n\nntfy đã nhận thông báo. Mở ứng dụng ntfy trên Android để kiểm tra.\n')

@@ -1,5 +1,11 @@
 # Bàn giao session GreenEdu
 
+## Thông báo deploy Railway tới ntfy/Android — 12/10/2026
+
+Theo yêu cầu triển khai, thêm `.github/workflows/railway-ntfy.yml` và [hướng dẫn ntfy](deploy-notifications.md). Đã kiểm tra GitHub API thật: Actions bật, Railway tạo deployment bởi `railway-app[bot]`, môi trường **`zooming-light / production`**; deployment `7005473243` của `f7a655a` đã có trạng thái success. Workflow nhận `deployment_status`, lọc success/bot/môi trường/không transient, không dùng `states` sai schema; có workflow_dispatch gửi **Test thông báo** riêng. Python inline không checkout/build/deploy hoặc đọc/ghi API/DB GreenEdu; payload chỉ trạng thái/mã commit ngắn/link web, topic/token không in log, kiểm tra receipt ntfy và retry có giới hạn.
+
+Đã cấu hình GitHub Secret `NTFY_TOPIC` bằng kênh ngẫu nhiên 128-bit, mã đăng ký chỉ trong chat và `.local/ntfy-setup/topic.txt` bị Git ignore; chưa dùng NTFY_TOKEN. Người dùng cần cài ntfy/cho phép thông báo và đăng ký kênh trên Android. Kiểm tra mới: **actionlint 1.7.12 và 9/9 ca Python mock đạt**, gồm success/manual/failure/staging/sai bot/transient/secret/token/retry. Không chạy kiểm thử app/DB vì không đổi ứng dụng. Chuẩn bị commit/push chỉ workflow và tài liệu thông báo từ checkout riêng `.local/ntfy-setup/checkout` trên origin/main, giữ toàn bộ thay đổi ứng dụng chưa commit của phiên khác. Trạng thái push, GitHub Actions gửi thật và deployment mới cần đối chiếu sau bước thực hiện, không suy từ 9 ca mock. Không xác nhận Android hiện thông báo nếu chưa có bằng chứng thiết bị thật.
+
 ## Đưa cập nhật online và hai bộ Word lên remote theo yêu cầu — 12/10/2026
 
 Người dùng yêu cầu **push remote Git**. Đợt Git gom19file: quản lý thi online riêng, hai nguồn đề/radio/multi-chương-bài/upload, phân loại lịch sử lượt, kiểm thử/tài liệu và hai Word3bài×5câu. Fetch xác nhận remote có commit `73543a6` chuyển icon portrait sang top right; đã rebase commit local chưa push lên commit này, giữ CSS/kiểm thử/vị trí mới. Xung đột chỉ ở session-handoff, đã giữ cả hai phần nội dung, không bỏ thay đổi. Không đưa `.local`, database, file học sinh, ảnh QA hoặc secrets vào commit; không force push.

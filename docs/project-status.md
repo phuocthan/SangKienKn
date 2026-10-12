@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Thông báo deploy trên Android qua ntfy — 12/10/2026
+
+Đã thêm workflow **Railway deploy notification**: Railway → GitHub deployment_status success → ntfy → Android, lọc bot `railway-app[bot]` và môi trường thật `zooming-light / production`, loại transient. GitHub Secret `NTFY_TOPIC` đã cấu hình; topic ngẫu nhiên không đưa vào Git. Có nút Run workflow gửi tin thử ghi rõ Test. **Actionlint và 9/9 ca mock mới đạt**; không đổi ứng dụng/DB. Đưa riêng workflow/tài liệu lên main từ checkout riêng để giữ các thay đổi ứng dụng đang làm ở phiên khác; kết quả push/gửi thật/deploy mới kiểm tra sau thực hiện. Người dùng cần đăng ký topic trong app ntfy trên Android; thành công gửi tới ntfy không đồng nghĩa đã kiểm tra thiết bị. Xem [hướng dẫn](deploy-notifications.md), [bàn giao](session-handoff.md).
+
 ## Đồng bộ remote và push cập nhật online/Word — 12/10/2026
 
 Theo yêu cầu push Git, đã gom mã quản lý online/nguồn đề/upload/phân loại lịch sử, test/tài liệu và hai Word15câu vào commit; rebase lên remote `73543a6` và giữ icon portrait top right. Xung đột bàn giao đã giữ cả hai nội dung. TypeScript/build riêng và **18/18 E2E portrait/online desktop-mobile sau ghép đạt**, không lẫn với118backend/26E2E của đợt trước. Đưa bản này lên `origin/main`, không force hoặc đưa dữ liệu thật/.local/secrets lên Git. Kết quả Railway autobuild/deployment chưa xác minh; các ghi chú chưa push phía dưới thuộc lịch sử trước yêu cầu Git. Chi tiết ở [session-handoff.md](session-handoff.md).
