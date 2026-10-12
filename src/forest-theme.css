@@ -266,6 +266,24 @@
   color: #7a5693;
 }
 
+.sidebar .nav-group[data-tone="0"] .forest-icon {
+  --icon-light: #fff2cd;
+  --icon-dark: #ecd089;
+  color: #8b6229;
+}
+
+.sidebar .nav-group[data-tone="1"] .forest-icon {
+  --icon-light: #e0f2fa;
+  --icon-dark: #b5dce9;
+  color: #376b7e;
+}
+
+.sidebar .nav-group[data-tone="2"] .forest-icon {
+  --icon-light: #f2eafb;
+  --icon-dark: #d6c4ea;
+  color: #7a5693;
+}
+
 .sidebar .nav-item .forest-icon > .lucide {
   width: 18px;
   height: 18px;

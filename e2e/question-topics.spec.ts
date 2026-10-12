@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect } from "@playwright/test";
 
 test("teacher imports the 50-question Word with topics and student gets a balanced sequence", async ({
@@ -38,10 +39,7 @@ test("teacher imports the 50-question Word with topics and student gets a balanc
   ).toBeTruthy();
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption(classroom.id);
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ngân hàng câu hỏi" })
-    .click();
+  await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   await page.getByRole("button", { name: "Nhập file Word" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Bài nhận câu hỏi").selectOption(lessonTitle);
@@ -120,10 +118,7 @@ test("older API cannot silently discard topic labels while importing Word", asyn
     await route.fulfill({ response, json: classes });
   });
   await page.goto("/");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ngân hàng câu hỏi" })
-    .click();
+  await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   await page.getByRole("button", { name: "Nhập file Word" }).click();
   const dialog = page.getByRole("dialog");
   await dialog

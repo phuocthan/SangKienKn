@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect } from "@playwright/test";
 
 test("student switches independent subject icons, sees all five stages and retains them after reload", async ({
@@ -57,11 +58,9 @@ test("student switches independent subject icons, sees all five stages and retai
       fullPage: true,
     });
     if (i === 0)
-      await page
-        .locator(".student-stats")
-        .screenshot({
-          path: `.local/correction-card-${info.project.name}.png`,
-        });
+      await page.locator(".student-stats").screenshot({
+        path: `.local/correction-card-${info.project.name}.png`,
+      });
     if (i === 4)
       await timeline.locator(".chapter-level-milestones").screenshot({
         path: `.local/student-level-icons-preview-${info.project.name}.png`,
@@ -86,10 +85,7 @@ test("student switches independent subject icons, sees all five stages and retai
         '.chapter-level-timeline[data-chapter-id="levels-class-2-chapter"] .chapter-level-summary strong',
       ),
   ).toHaveText("Cấp 2 · Chồi");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Hành trình của tôi", exact: true })
-    .click();
+  await navigateTo(page, { name: "Hành trình của tôi", exact: true });
   await expect(
     page.locator(".progress-table .chapter-level-timeline"),
   ).toHaveCount(2);
@@ -115,10 +111,7 @@ test("teacher roster and class leaderboard show the same student stage for the s
     ["levels-class-5", "5"],
   ]) {
     await page.getByLabel("Chọn lớp học").selectOption(id);
-    await page
-      .getByRole("navigation")
-      .getByRole("button", { name: "Lớp học của tôi", exact: true })
-      .click();
+    await navigateTo(page, { name: "Lớp học của tôi", exact: true });
     const row = page
       .getByRole("row")
       .filter({ hasText: "levels@greenedu.test" });
@@ -128,10 +121,7 @@ test("teacher roster and class leaderboard show the same student stage for the s
         .filter({ hasText: "Chương 1" })
         .locator(".student-level-badge"),
     ).toHaveAttribute("data-level", level);
-    await page
-      .getByRole("navigation")
-      .getByRole("button", { name: "Xếp hạng chăm chỉ", exact: true })
-      .click();
+    await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
     const boardRow = page
       .getByRole("table", { name: "Xếp hạng chăm vườn" })
       .getByRole("row")

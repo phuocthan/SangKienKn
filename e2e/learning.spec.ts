@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect, type Page } from "@playwright/test";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { unzipSync, strFromU8 } from "fflate";
@@ -39,10 +40,7 @@ async function login(page: Page, teacher = false) {
   );
   if (teacher)
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ôn tập & kiểm tra" })
-    .click();
+  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
   await expect(
     page.getByRole("heading", { name: "Ôn tập & kiểm tra", exact: true }),
   ).toBeVisible();
@@ -262,10 +260,7 @@ test("teacher controls chapter access; qualified students wait, opening another 
     await student.getByRole("button", { name: "Làm mới", exact: true }).click();
     await expect(hunt).toBeEnabled();
     await student.reload();
-    await student
-      .getByRole("navigation")
-      .getByRole("button", { name: "Ôn tập & kiểm tra" })
-      .click();
+    await navigateTo(student, { name: "Ôn tập & kiểm tra" });
     await expect(hunt).toBeEnabled();
     await permission
       .getByRole("button", { name: "Khóa kiểm tra · Chương ôn I", exact: true })
@@ -318,19 +313,13 @@ test("student reviews semester, resumes exact question and repairs without revea
   await expect(page.locator(".question-meta")).toContainText("Câu 2/8");
   const text = await page.locator(".question-card h2").innerText();
   await page.reload();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ôn tập & kiểm tra" })
-    .click();
+  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
   await page.getByRole("button", { name: "Tiếp tục ôn" }).first().click();
   await expect(page.locator(".question-meta")).toContainText("Câu 2/8");
   await expect(page.locator(".question-card h2")).toHaveText(text);
   await page.locator(".choices .choice").first().click();
   await page.reload();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ôn tập & kiểm tra" })
-    .click();
+  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
   await page.getByRole("button", { name: "Tiếp tục ôn" }).first().click();
   await expect(page.locator(".choices .choice").first()).toHaveAttribute(
     "aria-pressed",
@@ -352,10 +341,7 @@ test("student reviews semester, resumes exact question and repairs without revea
       ).ok(),
     ).toBeTruthy();
   const corrections = await (await page.request.get("/api/corrections")).json();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ôn tập & kiểm tra" })
-    .click();
+  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
   // The API setup happens after the learning view mounts on ending the review.
   await page.getByRole("button", { name: "Làm mới", exact: true }).click();
   await expect(page.locator(".hunt-current-level > span")).toHaveCount(0);
@@ -395,10 +381,7 @@ test("student reviews semester, resumes exact question and repairs without revea
   });
   // The sidebar still opens the full notebook rather than retaining a shortcut filter.
   await filter.selectOption("learning-ch2");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Sổ tay sửa sai" })
-    .click();
+  await navigateTo(page, { name: "Sổ tay sửa sai" });
   await expect(filter).toHaveValue("");
   await filter.selectOption("learning-ch1");
   await page.locator(".correction-card").first().getByRole("button").click();

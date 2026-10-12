@@ -1,5 +1,14 @@
 # Thiết kế giao diện GreenEdu
 
+## Menu trái gom nhóm và submenu — 12/10/2026
+
+Theo yêu cầu menu trái gọn hơn, giáo viên có **4 mục cấp đầu**: Tổng quan; Lớp học → Lớp học của tôi/Hoạt động nhóm; Dạy học & kiểm tra → Ngân hàng câu hỏi/Ôn tập & kiểm tra/Quản lý kiểm tra online; Khu rừng tri thức → Tiến độ học tập/Khu vườn của lớp/Xếp hạng chăm chỉ. Học sinh có **5 mục cấp đầu**: Khu vườn của tôi/Hành trình của tôi; Học tập → Luyện tập/Sổ tay sửa sai; Kiểm tra → Ôn tập & kiểm tra/Kiểm tra online; Cùng lớp → Hoạt động nhóm/Khu vườn của lớp/Xếp hạng chăm chỉ. Admin giữ mục Quản lý tài khoản riêng vì không có nhiều chức năng để nhóm.
+
+`SidebarNavigation` dùng chung: một nhóm mở mỗi lần, bấm lại để đóng; vào trang từ submenu/nút trong nội dung tự mở nhóm chứa trang hiện tại. Home/tiện ích tài khoản đóng nhóm; chọn lớp giữ trang. Menu cha chỉ mở/đóng, không dẫn ngầm sang trang đầu. Parent có icon Forest và chevron; submenu dùng chấm nhỏ/đường nối, item hiện tại có aria-current và nền xanh nhẹ. Lời nhắc sidebar rút thành một dòng, ba tiện ích Góp ý/Tài khoản/Đăng xuất vẫn dưới cùng. Bộ đếm sửa sai hiện cả trên nhóm Học tập khi đóng và mục con; không tạo hoặc đổi dữ liệu học tập.
+
+Accordion dùng nút có aria-expanded/aria-controls, submenu đóng có hidden; Tab/Enter/Space hoạt động tự nhiên, Escape trong nhóm đóng và đưa focus về cha. Desktop/landscape dùng sidebar phân cấp; portrait≤1100px hoặc viewport≤700px giữ navigation phẳng theo bố cục compact hiện có, nên menu đáy/header trên phải và safe area không đổi. Khi xoay qua lại chỉ có một navigation DOM, không nhân đôi nút hoặc active route. CSS `sidebar-navigation.css` scoped, dùng palette Forest riêng cho từng nhóm; reduced-motion tắt hiệu ứng chevron. Không thay API/backend hoặc nghiệp vụ các trang.
+
+
 ## Màu khung và icon khu rừng tri thức — 12/10/2026
 
 Theo yêu cầu mới từ ảnh tổng quan giáo viên, **tiêu đề lớn đứng trước; slogan/chữ nhỏ nằm ngay dưới** trên các trang của giáo viên, học sinh và Admin. PageHeading chung, đầu trang nhóm/cộng đồng/tài khoản và learning-heading cùng thứ tự h1 → eyebrow → mô tả. Eyebrow12px desktop/11px màn hình≤700px, weight500, giãn dòng1,7; không di chuyển nhãn câu hỏi, số câu hoặc trạng thái phòng thi.

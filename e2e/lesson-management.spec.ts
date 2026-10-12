@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect } from "@playwright/test";
 
 test("teacher adds an empty lesson, duplicate is rejected, delete can be cancelled and restoration keeps one lesson", async ({
@@ -9,15 +10,10 @@ test("teacher adds an empty lesson, duplicate is rejected, delete can be cancell
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Lớp học của tôi", exact: true })
-    .click();
-  const chapter = page
-    .locator(".chapter-row")
-    .filter({
-      has: page.getByRole("heading", { name: "Chương ôn I", exact: true }),
-    });
+  await navigateTo(page, { name: "Lớp học của tôi", exact: true });
+  const chapter = page.locator(".chapter-row").filter({
+    has: page.getByRole("heading", { name: "Chương ôn I", exact: true }),
+  });
   const title = `Bài thêm ${info.project.name} ${Date.now()}`;
   async function add(value: string) {
     await chapter

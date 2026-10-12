@@ -1,5 +1,16 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Đưa menu/submenu lên remote theo yêu cầu — 12/10/2026
+
+Push riêng24 file menu/UI/test/tài liệu từremote `9d50b10`, giữForest/ntfy và phần ôn-thi/backend đang làm tạilocal. TypeScript/build và **30/30 E2E desktop/mobile mới trên đúng checkout push đạt**, gồm nhóm menu/bàn phím/auto mở theo trang/resize, header/dock/avatar/tài khoản và các luồng cũ. Lượt đầu29/30 phát hiện thiếu đồng bộ matchMedia khi resize ngay lúc mount; đã sửa runtime và chạy lại30/30 đầy đủ. Không đổi assertion nghiệp vụ hoặc ghi dữ liệu Railway. Deployment/runtime Railway củacommit menu chưa xác minh; bằng chứng/giới hạn tại [session-handoff.md](session-handoff.md).
+
+## Menu/submenu gọn cho giáo viên và học sinh — 12/10/2026
+
+Đã gom sidebar giáo viên9→4 mục chính, học sinh9→5; mỗi lần mở một nhóm, tự mở nhóm chứa trang hiện tại, submenu có active/bàn phím/Escape/badge sửa sai. Menu portrait vẫn phẳng theo dock/header cũ; xoay giữ đúng trang, Admin giữ menu đơn. CSS/icon Forest và lời nhắc sidebar gọn; không đổi API/DB. Helper test navigation đã dùng thao tác mở nhóm thực tế, giữ assertion nghiệp vụ.
+
+**TypeScript/build riêng và30/30 E2E desktop/mobile mới đạt** trên DB/server riêng3320, đã xem ảnh giáo viên/học sinh/mobile. Frontend5173/HMR đang chạy, API/DB Railway thật không ghi thử. Chuẩn bị push riêng menu/UI/test/tài liệu theo yêu cầu trước đó, giữ các thay đổi ôn-thi/backend của task song song; QA bản push và kết quả remote/deployment cần phân biệt. Chi tiết [app-design.md](app-design.md), [session-handoff.md](session-handoff.md).
+
+
 ## Đưa theme Forest lên Git theo yêu cầu — 12/10/2026
 
 Đợt push riêng14 file giao diện/tài liệu trên remote `00a15b9`, giữ commit ntfy; không gom thay đổi backend/nhóm thi/Excel của task song song. TypeScript/build riêng và **12/12 E2E portrait/account-popups mới trên checkout chuẩn bị push đạt**, không lấy12/48 tổ hợp của đợt triển khai thành lượt mới. Đích `origin/main`, không force; deployment/runtime Railway của commit mới chưa xác minh. Chi tiết và phạm vi tại [session-handoff.md](session-handoff.md).

@@ -47,6 +47,11 @@ import { GroupActivities } from "./GroupActivities";
 import { Feedback } from "./Feedback";
 import { AdminWorkspace } from "./Accounts";
 import { PortraitActions } from "./PortraitActions";
+import {
+  SidebarNavigation,
+  type NavigationItem,
+  type NavigationGroup,
+} from "./SidebarNavigation";
 import { Avatar, AvatarPicker } from "./Avatars";
 import {
   ChapterLevelTimeline,
@@ -307,7 +312,7 @@ export default function App() {
         error={error}
       />
     );
-  const nav: { id: Page; label: string; icon: typeof Leaf }[] = isTeacher
+  const nav: NavigationItem<Page>[] = isTeacher
     ? [
         { id: "home", label: "Tổng quan", icon: LayoutDashboard },
         { id: "classes", label: "Lớp học của tôi", icon: Users },
@@ -355,6 +360,47 @@ export default function App() {
     (n, c) => n + c.chapters.reduce((a, ch) => a + ch.openCorrections, 0),
     0,
   );
+  const navGroups: NavigationGroup<Page>[] = isTeacher
+    ? [
+        {
+          id: "classroom",
+          label: "Lớp học",
+          icon: Users,
+          pages: ["classes", "groups"],
+        },
+        {
+          id: "teaching",
+          label: "Dạy học & kiểm tra",
+          icon: BookOpen,
+          pages: ["questions", "learning", "online-exams"],
+        },
+        {
+          id: "forest",
+          label: "Khu rừng tri thức",
+          icon: Sprout,
+          pages: ["progress", "garden", "leaderboard"],
+        },
+      ]
+    : [
+        {
+          id: "study",
+          label: "Học tập",
+          icon: BookOpen,
+          pages: ["practice", "corrections"],
+        },
+        {
+          id: "assessment",
+          label: "Kiểm tra",
+          icon: ClipboardList,
+          pages: ["learning", "online-exams"],
+        },
+        {
+          id: "community",
+          label: "Cùng lớp",
+          icon: Users,
+          pages: ["groups", "garden", "leaderboard"],
+        },
+      ];
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -362,24 +408,16 @@ export default function App() {
         <div className="workspace-label">
           {isTeacher ? "TRANG GIÁO VIÊN" : "TRANG HỌC TẬP"}
         </div>
-        <nav aria-label="Điều hướng chính">
-          {nav.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${page === item.id ? "active" : ""}`}
-              aria-current={page === item.id ? "page" : undefined}
-              onClick={() => navigate(item.id)}
-            >
-              <ForestIcon compact>
-                <item.icon size={20} />
-              </ForestIcon>
-              <span>{item.label}</span>
-              {item.id === "corrections" && openCorrections > 0 && (
-                <span className="nav-count">{openCorrections}</span>
-              )}
-            </button>
-          ))}
-        </nav>
+        <SidebarNavigation
+          items={nav.map((item) =>
+            item.id === "corrections"
+              ? { ...item, count: openCorrections }
+              : item,
+          )}
+          groups={navGroups}
+          page={page}
+          onNavigate={navigate}
+        />
         <div className="sidebar-bottom">
           <div className="sidebar-note">
             <span className="note-leaf">

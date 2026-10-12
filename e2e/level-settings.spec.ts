@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect, type Page } from "@playwright/test";
 
 async function teacher(page: Page) {
@@ -6,10 +7,7 @@ async function teacher(page: Page) {
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await page.getByLabel("Chọn lớp học").selectOption("levels-class-2");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ôn tập & kiểm tra" })
-    .click();
+  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
 }
 
 test("teacher saves class level minutes, preview and persisted student milestones agree", async ({
@@ -54,10 +52,7 @@ test("teacher saves class level minutes, preview and persisted student milestone
   await page.reload();
   // Page selection resets after a normal reload; reopen the teacher settings.
   await page.getByLabel("Chọn lớp học").selectOption("levels-class-2");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ôn tập & kiểm tra" })
-    .click();
+  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
   await expect(input).toHaveValue("30");
   await form.scrollIntoViewIfNeeded();
   expect(
@@ -65,13 +60,11 @@ test("teacher saves class level minutes, preview and persisted student milestone
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page
-    .locator(".level-settings")
-    .screenshot({
-      path: `.local/level-settings-${info.project.name}.png`,
-      // Hide fixed navigation only for this cropped card capture.
-      style: ".sidebar { visibility: hidden !important; }",
-    });
+  await page.locator(".level-settings").screenshot({
+    path: `.local/level-settings-${info.project.name}.png`,
+    // Hide fixed navigation only for this cropped card capture.
+    style: ".sidebar { visibility: hidden !important; }",
+  });
   const studentContext = await browser.newContext({ baseURL });
   try {
     const studentPage = await studentContext.newPage();

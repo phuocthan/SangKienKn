@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect, type Page } from "@playwright/test";
 import { csvHeaders } from "../shared/questions";
 import { readFile } from "node:fs/promises";
@@ -28,10 +29,7 @@ test("teacher downloads and imports a real Word template with preview, format sw
   }
   await page.reload();
   await page.getByLabel("Chọn lớp học").selectOption(classroom.id);
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ngân hàng câu hỏi" })
-    .click();
+  await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   await page.getByRole("button", { name: "Nhập file Word" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByLabel("Định dạng file")).toHaveValue("word");
@@ -169,10 +167,7 @@ test("teacher imports with preview and network retry, edits/hides/restores; stud
   await page
     .getByLabel("Chọn lớp học")
     .selectOption({ label: `${className} · Toán` });
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ngân hàng câu hỏi" })
-    .click();
+  await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   await page.getByRole("button", { name: "Nhập file CSV" }).click();
   const dialog = page.getByRole("dialog");
   const download = page.waitForEvent("download");
@@ -261,10 +256,7 @@ test("teacher imports with preview and network retry, edits/hides/restores; stud
   await page
     .getByLabel("Chọn lớp học")
     .selectOption({ label: `${className} · Toán` });
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ngân hàng câu hỏi" })
-    .click();
+  await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   let card = page
     .locator(".bank-question")
     .filter({ hasText: "Câu nhập thứ nhất?" });
@@ -318,10 +310,7 @@ test("teacher imports with preview and network retry, edits/hides/restores; stud
   });
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
   await studentLogin();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: /Sổ tay sửa sai/ })
-    .click();
+  await navigateTo(page, { name: /Sổ tay sửa sai/ });
   const old = page
     .locator(".correction-card")
     .filter({ hasText: "Câu nhập thứ nhất?" });
@@ -332,10 +321,7 @@ test("teacher imports with preview and network retry, edits/hides/restores; stud
   await expect(page.getByText("Bạn đã khắc phục lỗi sai này!")).toBeVisible();
   await page.getByRole("button", { name: "Xem kết quả" }).click();
   await page.getByRole("button", { name: "Về khu vườn" }).click();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Luyện tập", exact: true })
-    .click();
+  await navigateTo(page, { name: "Luyện tập", exact: true });
   await page
     .getByLabel(`Luyện tập theo bài · ${chapterName}`)
     .selectOption("Bài CSV");
@@ -368,10 +354,7 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBeTruthy();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Luyện tập", exact: true })
-    .click();
+  await navigateTo(page, { name: "Luyện tập", exact: true });
   await page
     .getByRole("button", { name: "Chăm cây · Luyện tập" })
     .first()
@@ -387,10 +370,7 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
     page.getByText("Chưa đúng, cùng xem lại kiến thức nhé."),
   ).toBeVisible();
   await page.getByRole("button", { name: "Kết thúc phiên" }).click();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: /Sổ tay sửa sai/ })
-    .click();
+  await navigateTo(page, { name: /Sổ tay sửa sai/ });
   const card = page
     .locator(".correction-card")
     .filter({ hasText: "Đơn vị đo độ dài trong hệ đơn vị SI là gì?" });
@@ -405,10 +385,7 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
   ).toBeVisible();
   await page.getByRole("button", { name: "Về khu vườn" }).click();
   await page.reload();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: /Sổ tay sửa sai/ })
-    .click();
+  await navigateTo(page, { name: /Sổ tay sửa sai/ });
   await expect(
     page
       .locator(".correction-card")
@@ -417,16 +394,12 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
   await expect(
     page.getByRole("heading", { name: "Sổ tay đang sạch những lỗi sai" }),
   ).toBeVisible();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Khu vườn của lớp", exact: true })
-    .click();
-  await expect(page.locator('.garden-student[data-student-id="student-demo"]')).toHaveCount(1);
+  await navigateTo(page, { name: "Khu vườn của lớp", exact: true });
+  await expect(
+    page.locator('.garden-student[data-student-id="student-demo"]'),
+  ).toHaveCount(1);
   await expect(page.locator(".garden-honoree")).toHaveCount(0);
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Xếp hạng chăm chỉ", exact: true })
-    .click();
+  await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
   const repairTable = page.getByRole("table", { name: "Xếp hạng sửa sai" });
   const repairRow = repairTable
     .getByRole("row")
@@ -501,13 +474,10 @@ test("community honors earned students once with old API and keeps tied ranks wi
     }),
   );
   await demoLogin(page, "Học sinh");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Khu vườn của lớp", exact: true })
-    .click();
-  await expect(
-    page.getByRole("img", { name: "Cấp 5 · Kết Trái" }),
-  ).toHaveCount(2);
+  await navigateTo(page, { name: "Khu vườn của lớp", exact: true });
+  await expect(page.getByRole("img", { name: "Cấp 5 · Kết Trái" })).toHaveCount(
+    2,
+  );
   await expect(page.locator(".garden-honoree.is-mine")).toHaveCount(1);
   expect(
     await page.evaluate(
@@ -519,13 +489,10 @@ test("community honors earned students once with old API and keeps tied ranks wi
     fullPage: true,
   });
   await page.getByRole("button", { name: "Cập nhật", exact: true }).click();
-  await expect(
-    page.getByRole("img", { name: "Cấp 5 · Kết Trái" }),
-  ).toHaveCount(2);
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Xếp hạng chăm chỉ", exact: true })
-    .click();
+  await expect(page.getByRole("img", { name: "Cấp 5 · Kết Trái" })).toHaveCount(
+    2,
+  );
+  await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
   const table = page.getByRole("table", { name: "Xếp hạng chăm vườn" });
   await expect(table.getByRole("row")).toHaveCount(4);
   const positions = await table
@@ -550,10 +517,7 @@ test("teacher creates content and student account; student changes password, lea
   const studentEmail = `student-${stamp}@example.test`;
   const studentName = "Học sinh thử nghiệm";
   await demoLogin(page, "Giáo viên");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Lớp học của tôi" })
-    .click();
+  await navigateTo(page, { name: "Lớp học của tôi" });
   await page.getByRole("button", { name: "Tạo lớp mới" }).click();
   await page.getByLabel("Tên lớp", { exact: true }).fill(className);
   await page.getByLabel("Môn học", { exact: true }).fill("Toán");
@@ -570,10 +534,7 @@ test("teacher creates content and student account; student changes password, lea
     .getByRole("button", { name: "Lưu", exact: true })
     .click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ngân hàng câu hỏi" })
-    .click();
+  await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   await page.getByRole("button", { name: "Thêm câu hỏi" }).click();
   await page
     .getByLabel("Nội dung câu hỏi")
@@ -592,10 +553,7 @@ test("teacher creates content and student account; student changes password, lea
   await expect(
     page.getByRole("heading", { name: "Một cộng một bằng bao nhiêu?" }),
   ).toBeVisible();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Lớp học của tôi" })
-    .click();
+  await navigateTo(page, { name: "Lớp học của tôi" });
   await page
     .getByRole("button", { name: "Thêm học sinh", exact: true })
     .click();
@@ -637,10 +595,7 @@ test("teacher creates content and student account; student changes password, lea
   await page
     .getByLabel("Chọn lớp học")
     .selectOption({ label: `${className} · Toán` });
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Tiến độ học tập" })
-    .click();
+  await navigateTo(page, { name: "Tiến độ học tập" });
   const row = page.getByRole("row").filter({ hasText: studentName });
   await expect(row).toContainText("100%");
   await expect(row.getByRole("cell").nth(2)).toHaveText("1");
@@ -651,17 +606,14 @@ test("teacher creates content and student account; student changes password, lea
   const downloaded = page.waitForEvent("download");
   await page.getByRole("button", { name: "Xuất CSV" }).click();
   expect((await downloaded).suggestedFilename()).toBe("greenedu-tien-do.csv");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Khu vườn của lớp", exact: true })
-    .click();
+  await navigateTo(page, { name: "Khu vườn của lớp", exact: true });
   await expect(page.locator(".garden-student")).toHaveCount(1);
-  await expect(page.locator(".garden-student")).toHaveAttribute("title", studentName);
+  await expect(page.locator(".garden-student")).toHaveAttribute(
+    "title",
+    studentName,
+  );
   await expect(page.locator(".garden-honoree")).toHaveCount(0);
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Xếp hạng chăm chỉ", exact: true })
-    .click();
+  await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
   await expect(
     page.getByRole("heading", { name: "Chưa có câu được khắc phục" }),
   ).toBeVisible();

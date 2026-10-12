@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect, type Page } from "@playwright/test";
 
 async function login(page: Page, teacher: boolean) {
@@ -11,13 +12,10 @@ async function login(page: Page, teacher: boolean) {
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   if (teacher)
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", {
-      name: teacher ? "Quản lý kiểm tra online" : "Kiểm tra online",
-      exact: true,
-    })
-    .click();
+  await navigateTo(page, {
+    name: teacher ? "Quản lý kiểm tra online" : "Kiểm tra online",
+    exact: true,
+  });
   await expect(
     page.getByRole("heading", {
       name: teacher ? "Quản lý kiểm tra online" : "Kiểm tra online",
@@ -102,10 +100,7 @@ test("online manager requires one source and supports whole chapter plus selecte
   await expect(page.locator('.learning-notice[role="status"]')).toContainText(
     "Đã chuẩn bị",
   );
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ôn tập & kiểm tra", exact: true })
-    .click();
+  await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
   await expect(
     page.getByRole("heading", { name: "Ôn tập & kiểm tra", exact: true }),
   ).toBeVisible();

@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect, type Page } from "@playwright/test";
 import { strToU8, zipSync } from "fflate";
 import { readFile } from "node:fs/promises";
@@ -5,9 +6,7 @@ import type { GroupActivity } from "../shared/group-activities";
 
 async function teacherLogin(page: Page) {
   await page.goto("/");
-  await page
-    .getByLabel("Email", { exact: true })
-    .fill("giaovien@greenedu.nk");
+  await page.getByLabel("Email", { exact: true }).fill("giaovien@greenedu.nk");
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
@@ -29,10 +28,7 @@ async function studentLogin(page: Page, email: string) {
   await expect(page.getByRole("navigation")).toBeVisible();
 }
 async function openGroups(page: Page) {
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Hoạt động nhóm", exact: true })
-    .click();
+  await navigateTo(page, { name: "Hoạt động nhóm", exact: true });
 }
 
 test("teacher creates a Word group activity, changes representative; student uploads and retries, then sends Canva and teacher sees history", async ({

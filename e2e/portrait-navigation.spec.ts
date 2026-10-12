@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect } from "@playwright/test";
 
 const accounts = {
@@ -137,10 +138,7 @@ for (const role of ["teacher", "student", "admin"] as const) {
     await page.setViewportSize({ width: 390, height: 844 });
     // Main destinations stay below; utility actions are accessible from the header.
     if (role !== "admin") {
-      await page
-        .getByRole("navigation")
-        .getByRole("button", { name: "Xếp hạng chăm chỉ" })
-        .click();
+      await navigateTo(page, { name: "Xếp hạng chăm chỉ" });
       await expect(
         page
           .getByRole("navigation")

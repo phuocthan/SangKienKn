@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect } from "@playwright/test";
 
 test("teacher selects questions, cancels or deletes a batch, and deletes the whole lesson", async ({
@@ -44,10 +45,7 @@ test("teacher selects questions, cancels or deletes a batch, and deletes the who
     ).toBeTruthy();
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption(classroom.id);
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ngân hàng câu hỏi" })
-    .click();
+  await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   await page.getByLabel("Lọc theo bài học").selectOption("Bài 1");
   await expect(page.locator(".bank-question")).toHaveCount(3);
   await page
@@ -84,12 +82,10 @@ test("teacher selects questions, cancels or deletes a batch, and deletes the who
       exact: true,
     })
     .uncheck();
-  await page
-    .locator(".bank-management")
-    .screenshot({
-      path: info.outputPath("selection.png"),
-      style: ".sidebar {visibility:hidden!important}",
-    });
+  await page.locator(".bank-management").screenshot({
+    path: info.outputPath("selection.png"),
+    style: ".sidebar {visibility:hidden!important}",
+  });
   await page.getByRole("button", { name: "Xóa các câu đã chọn" }).click();
   await page
     .getByRole("dialog")
@@ -126,10 +122,7 @@ test("teacher selects questions, cancels or deletes a batch, and deletes the who
   await expect(page.locator(".bank-question")).toHaveCount(1);
   await page.reload();
   await page.getByLabel("Chọn lớp học").selectOption(classroom.id);
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ngân hàng câu hỏi" })
-    .click();
+  await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   await expect(page.locator(".bank-question")).toHaveCount(1);
   await page.getByLabel("Lọc theo bài học").selectOption("Bài rỗng");
   await page.getByRole("button", { name: "Xóa cả bài", exact: true }).click();
@@ -165,10 +158,7 @@ test("old backend capability disables bulk deletion without sending any mutation
   await page.getByLabel("Email", { exact: true }).fill("giaovien@greenedu.nk");
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Ngân hàng câu hỏi" })
-    .click();
+  await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   await expect(
     page.getByRole("button", { name: "Xóa các câu đã chọn" }),
   ).toBeDisabled();

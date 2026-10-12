@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 
@@ -14,10 +15,7 @@ async function login(page: Page, role: "teacher" | "admin") {
 }
 
 async function classForm(page: Page, name: string) {
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Lớp học của tôi", exact: true })
-    .click();
+  await navigateTo(page, { name: "Lớp học của tôi", exact: true });
   await page.getByRole("button", { name: "Tạo lớp mới", exact: true }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Tên lớp").fill(name);

@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect, type Page } from "@playwright/test";
 import type { GroupActivity } from "../shared/group-activities";
 async function login(page: Page, email: string) {
@@ -147,10 +148,7 @@ test("students read other groups after the extended deadline and the responsible
       },
     );
     expect(submit.ok()).toBeTruthy();
-    await peer
-      .getByRole("navigation")
-      .getByRole("button", { name: "Hoạt động nhóm", exact: true })
-      .click();
+    await navigateTo(peer, { name: "Hoạt động nhóm", exact: true });
     await peer
       .locator(".group-activity-card")
       .filter({ hasText: title })
@@ -200,10 +198,7 @@ test("students read other groups after the extended deadline and the responsible
     await expect(
       peerDialog.getByRole("button", { name: "Gửi phản biện" }),
     ).toHaveCount(0);
-    await owner
-      .getByRole("navigation")
-      .getByRole("button", { name: "Hoạt động nhóm", exact: true })
-      .click();
+    await navigateTo(owner, { name: "Hoạt động nhóm", exact: true });
     await owner
       .locator(".group-activity-card")
       .filter({ hasText: title })

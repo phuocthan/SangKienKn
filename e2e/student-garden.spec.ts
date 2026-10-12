@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect } from "@playwright/test";
 
 test("fenced garden includes everyone with moving icons and separate level-5 honors", async ({
@@ -28,10 +29,7 @@ test("fenced garden includes everyone with moving icons and separate level-5 hon
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
   await page.getByLabel("Chọn lớp học").selectOption("garden-class");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Khu vườn của lớp", exact: true })
-    .click();
+  await navigateTo(page, { name: "Khu vườn của lớp", exact: true });
   const garden = page.locator(".student-garden");
   await expect(garden).toBeVisible();
   const classSign = garden.getByRole("group", { name: "Lớp học", exact: true });
@@ -176,10 +174,7 @@ test("old garden API shows fenced waiting frame without inventing students or le
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Khu vườn của lớp", exact: true })
-    .click();
+  await navigateTo(page, { name: "Khu vườn của lớp", exact: true });
   await expect(
     page.getByText(
       "Danh sách học sinh, avatar và cấp cao nhất đang chờ cập nhật server.",
@@ -210,10 +205,7 @@ test("large class keeps all 47 students inside the fenced scrolling garden and h
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
   await page.getByLabel("Chọn lớp học").selectOption("garden-class");
-  await page
-    .getByRole("navigation")
-    .getByRole("button", { name: "Khu vườn của lớp", exact: true })
-    .click();
+  await navigateTo(page, { name: "Khu vườn của lớp", exact: true });
   await expect(page.locator(".garden-student")).toHaveCount(47);
   await expect(page.locator(".garden-honoree")).toHaveCount(9);
   const compact = await page.locator(".student-garden").evaluate((garden) => {

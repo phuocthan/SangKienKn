@@ -1,3 +1,4 @@
+import { navigateTo } from "./navigation";
 import { test, expect, type Page } from "@playwright/test";
 
 async function login(page: Page, email: string, password: string) {
@@ -146,10 +147,7 @@ test("all teacher/student pages fit desktop/mobile and group filters show real d
     ["Xếp hạng chăm chỉ", "teacher-leaderboard"],
     ["Hoạt động nhóm", "groups-empty"],
   ]) {
-    await page
-      .getByRole("navigation")
-      .getByRole("button", { name: label, exact: true })
-      .click();
+    await navigateTo(page, { name: label, exact: true });
     await checkLayout(page, name, info.project.name);
   }
   // Create through the actual API; only the group presentation is under review here.
@@ -197,10 +195,7 @@ test("all teacher/student pages fit desktop/mobile and group filters show real d
     ["Xếp hạng chăm chỉ", "student-leaderboard"],
     ["Hoạt động nhóm", "student-groups"],
   ]) {
-    await page
-      .getByRole("navigation")
-      .getByRole("button", { name: label, exact: true })
-      .click();
+    await navigateTo(page, { name: label, exact: true });
     await checkLayout(page, name, info.project.name);
   }
   await page
