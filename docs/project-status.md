@@ -1,5 +1,27 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Đồng bộ remote và push cập nhật online/Word — 12/10/2026
+
+Theo yêu cầu push Git, đã gom mã quản lý online/nguồn đề/upload/phân loại lịch sử, test/tài liệu và hai Word15câu vào commit; rebase lên remote `73543a6` và giữ icon portrait top right. Xung đột bàn giao đã giữ cả hai nội dung. TypeScript/build riêng và **18/18 E2E portrait/online desktop-mobile sau ghép đạt**, không lẫn với118backend/26E2E của đợt trước. Đưa bản này lên `origin/main`, không force hoặc đưa dữ liệu thật/.local/secrets lên Git. Kết quả Railway autobuild/deployment chưa xác minh; các ghi chú chưa push phía dưới thuộc lịch sử trước yêu cầu Git. Chi tiết ở [session-handoff.md](session-handoff.md).
+
+## Trang kiểm tra online riêng và hai nguồn đề — 12/10/2026
+
+Đã thêm **Quản lý kiểm tra online** cho giáo viên và **Kiểm tra online** cho học sinh; giữ banner đếm chờ và vào đúng lớp/phòng/reload. Tách khỏi cấp cây/ôn/ma trận/thưởng. Nguồn đề2radio bắt buộc chọn một: Upload file hoặc Chọn từ ngân hàng. Upload chọn chương tại khối file, đọc Word/CSV/cảnh báo thành công/lỗi, không cần checkbox chương trước. Ngân hàng chọn nhiều chương, toàn chương hoặc từng bài độc lập giữa các chương. Đã kiểm tra hai Word15câu thành đề30câu trên testserver.
+
+**118/118 backend,26/26 E2E desktop/mobile, TypeScript/build riêng đạt**, đã xem ảnh; các lỗi lượt đầu thuộc locator/fixture và đã sửa, không gọi gap audit là đã khắc phục. Frontend local5173/HMR đã mở lại, API/DB Railway, kiểm tra login/source/health chỉ đọc đạt. Backend thêm phân loại delivery của lượt thi để lọc lịch sử online, **cần deploy Railway mới có hiệu lực; chưa push/deploy/ghi dữ liệu thật**. Thiết kế [app-design.md](app-design.md), nghiệp vụ [online-exams.md](online-exams.md), bằng chứng [session-handoff.md](session-handoff.md).
+
+## Hai file Word mở rộng theo chương và bài — 12/10/2026
+
+Đã mở rộng hai file vui thành **2chương, mỗi chương3bài, mỗi bài5câu**:15câu/file, tổng30câu. Giữ10câu cũ, thêm20câu. Parser thật xác nhận15câu/0lỗi, đúng3bài×5; đã xem8trang Word cuối, giữ mẫu gốc. Khi nhập chọn chương tương ứng và **Theo tên bài trong file** để không gộp15câu vào một bài. [File và cấu trúc](../artifacts/question-banks/README.md). Chỉ tạo/cập nhật tài liệu, chưa nhập Railway hoặc sửa ứng dụng/deploy; bản5câu ở mục dưới là lịch sử.
+
+## Hai bộ Word câu hỏi vui — 12/10/2026
+
+Đã tạo hai file theo mẫu Word nhập GreenEdu, mỗi file5câu trắc nghiệm vui/đơn giản có đáp án và lời giải: Đố vui quanh em/Vui học mỗi ngày. Parser thật nhận5câu/0lỗi từng file; đã xem4trang render Word cuối, giữ mẫu gốc. Xem [file và cách nhập](../artifacts/question-banks/README.md). Chỉ tạo tài liệu, chưa nhập ngân hàng Railway hoặc sửa ứng dụng/dữ liệu/deploy. Chi tiết ở [session-handoff.md](session-handoff.md).
+
+## Frontend local đang chạy, API/database Railway — 12/10/2026
+
+Đã cài dependencies theo lockfile và chạy `npm run local` trên checkout Windows `D:/WorkSpace/Others/SangKienKn`, HEAD `8faa58c`. Frontend **http://localhost:5173** chạy nền/HMR, server/database vẫn Railway. Kiểm tra chỉ đọc mới: trang/Vite/source icon header200, health local-proxy và Railway200 cùng `demo:false/quickLogin:false`, auth chưa đăng nhập401. Không chạy API SQLite offline, ghi dữ liệu thật, chạy backend/E2E hoặc push/deploy Railway. Chi tiết ở [session-handoff.md](session-handoff.md).
+
 ## Góp ý, Tài khoản, Đăng xuất lên header portrait
 
 Theo đính chính mới nhất, ba icon ở **góc trên phải**, neo cùng header; tên account/avatar bên trái, lớp ở hàng dưới. Dock đáy chỉ giữ điều hướng chính; landscape/desktop giữ sidebar. Admin có Tài khoản/Đăng xuất như quyền hiện có. Đợt icon trước có build/TypeScript và 12/12 E2E đạt bằng database riêng; vị trí mới kiểm tra riêng và đưa vào commit để push `origin/main` theo yêu cầu autobuild. Kết quả deploy Railway chưa được xác minh. Chi tiết/kiểm tra tại [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).

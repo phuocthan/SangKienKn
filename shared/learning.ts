@@ -91,6 +91,7 @@ export type LearningOverview = {
   exams: ExamDefinition[];
   runs: {
     id: string;
+    delivery?: "online" | "scheduled";
     title: string;
     kind: string;
     studentName: string;

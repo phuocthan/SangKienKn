@@ -1,5 +1,18 @@
 # Ngân hàng câu hỏi Vật lí 11
 
+## Hai chương câu hỏi vui đơn giản — mở rộng 12/10/2026
+
+Mỗi file là một chương, gồm **3 bài × 5 câu = 15 câu**, tổng cộng30câu. Giữ10câu ban đầu và thêm20câu mới.
+
+| File | Chương | Ba bài học |
+| --- | --- | --- |
+| [Đố vui quanh em](bo-cau-hoi-vui-1-do-vui-quanh-em.docx) | Chương1 | Bài1 Đồ vật ngộ nghĩnh; Bài2 Thế giới động vật; Bài3 Đố vui số lượng |
+| [Vui học mỗi ngày](bo-cau-hoi-vui-2-vui-hoc-moi-ngay.docx) | Chương2 | Bài1 Con số vui nhộn; Bài2 Khoa học quanh em; Bài3 Cuộc sống mỗi ngày |
+
+Hai file tạo từ `public/templates/greenedu-cau-hoi-mau.docx`, mỗi câu đủ Bài học/A–D/Đáp án/Lời giải, không dùng topic hoặc nội dung nhúng. Đây là câu hỏi vui tổng hợp, không phải bộ Vật lí11. Kiểm tra mới: parser Word thật nhận15câu/0lỗi mỗi file, đúng3tên bài và5câu mỗi bài; đã xem đủ8trang render Microsoft Word cuối, không tách câu qua trang, giữ mẫu gốc và các phần package không liên quan. Bản5câu trước đó là lịch sử, có backup nội bộ `.local/fun-question-banks/before-expansion/`.
+
+Khi nhập từng file, chọn **chương tương ứng** trong Ngân hàng câu hỏi và đặt **Bài nhận câu hỏi → Theo tên bài trong file** để giữ cả3bài. Không chọn một bài có sẵn cho toàn bộ file vì sẽ gộp15câu vào bài đó. Tên chương ở tiêu đề tài liệu là thông tin nhận diện, không tự tạo/chọn chương qua parser. Chưa nhập vào Railway; file có đáp án nên dùng cho ngân hàng giáo viên. Script/QA nội bộ ở `.local/fun-question-banks/`.
+
 File `vat-li-11-chuong-1-bai-1-50-cau.docx` chứa 50 câu tự biên soạn cho Chương I Dao động, Bài 1 Dao động điều hoà, theo phạm vi mở đầu của sách Kết nối tri thức với cuộc sống. Có 4 phương án/câu, một đáp án đúng, lời giải và dòng `Chủ đề:`; công thức gõ bằng văn bản để nhập Word theo mẫu GreenEdu. Không có hình ảnh hoặc Equation.
 
 | Mã | Nhóm kiến thức | Câu |

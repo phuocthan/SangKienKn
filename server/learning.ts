@@ -562,12 +562,13 @@ export function registerLearningRoutes(
         }),
       runs: db
         .prepare(
-          `SELECT r.*,u.name AS studentName,(SELECT COUNT(*) FROM exam_tab_events t WHERE t.run_id=r.id) AS warnings
+          `SELECT r.*,u.name AS studentName,EXISTS(SELECT 1 FROM online_exam_sessions o WHERE o.exam_id=r.exam_id) AS isOnline,(SELECT COUNT(*) FROM exam_tab_events t WHERE t.run_id=r.id) AS warnings
         FROM exam_runs r JOIN users u ON u.id=r.student_id WHERE r.classroom_id=?${own} ORDER BY r.started_at DESC LIMIT 200`,
         )
         .all(...args)
         .map((r) => ({
           id: r.id,
+          delivery: r.isOnline ? "online" : "scheduled",
           title: r.title,
           kind: r.kind,
           studentName: r.studentName,

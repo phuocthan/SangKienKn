@@ -53,9 +53,18 @@ test("teacher starts a multi-lesson online exam; students get a persistent prepa
   const form = page.locator(".learning-form");
   const title = `Online chờ ${info.project.name} ${Date.now()}`;
   await form.getByLabel("Tên bộ câu").fill(title);
+  await expect(
+    form.getByRole("button", { name: "Chuẩn bị kiểm tra online" }),
+  ).toBeDisabled();
+  await form
+    .getByRole("radio", { name: "Chọn từ ngân hàng", exact: true })
+    .check();
   await form.getByLabel("Chương ôn I", { exact: true }).check();
   await form.getByLabel("Chương ôn II", { exact: true }).check();
-  await form.getByLabel("Phạm vi bài").selectOption("selected");
+  await form.getByLabel("Toàn chương · Chương ôn I", { exact: true }).uncheck();
+  await form
+    .getByLabel("Toàn chương · Chương ôn II", { exact: true })
+    .uncheck();
   await form.getByLabel("Chương ôn I · Bài 1", { exact: false }).check();
   await form.getByLabel("Chương ôn II · Bài 2", { exact: false }).check();
   await form.getByLabel("Số câu", { exact: true }).fill("4");
@@ -122,8 +131,7 @@ test("uploaded online exam notifies and opens a saved room; reload keeps questio
   const form = page.locator(".learning-form");
   const title = `Online tải đề ${info.project.name} ${Date.now()}`;
   await form.getByLabel("Tên bộ câu").fill(title);
-  await form.getByLabel("Chương ôn I", { exact: true }).check();
-  await form.getByLabel("Nguồn đề").selectOption("upload");
+  await form.getByRole("radio", { name: "Upload file", exact: true }).check();
   await form.getByLabel("File đề (.docx hoặc .csv)").setInputFiles({
     name: "online.csv",
     mimeType: "text/csv",
@@ -218,8 +226,10 @@ test("older Railway capability disables online preparation and start without sen
     .click();
   await expect(
     page.getByRole("button", { name: "Tạo kiểm tra online", exact: true }),
-  ).toBeDisabled();
-  await page.getByLabel("Loại bộ câu").selectOption("online");
+  ).toBeEnabled();
+  await page
+    .getByRole("button", { name: "Tạo kiểm tra online", exact: true })
+    .click();
   await expect(page.locator(".learning-form")).toContainText(
     "đang chờ cập nhật server Railway",
   );

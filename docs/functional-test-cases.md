@@ -1,5 +1,15 @@
 # Ca kiểm thử chức năng GreenEdu
 
+## Quản lý online riêng, chọn nguồn và upload Word thật — 12/10/2026
+
+- ONLINE-PAGES: mục giáo viên/học sinh riêng, không hiển thị cấu hình cây/ma trận/thưởng; tách buổi online khỏi lịch cũ, đúng lớp/lượt qua thông báo và reload.
+- ONLINE-SOURCE-REQUIRED: ban đầu không chọn nguồn, không lưu; radio chỉ một lựa chọn, đổi nguồn không gửi payload của nguồn còn lại.
+- ONLINE-BANK-SCOPE: chọn nhiều chương, toàn chương1 cộng một bài chương2; đúng chapterIds/lessonKeys, bỏ chương/bài không còn trong phạm vi, không tràn ngang.
+- ONLINE-WORD-REAL: hai file15câu đã tạo đọc từ trình duyệt, gắn hai chương và gửi đề30câu; không cần tích chương trước khi upload. File hỏng/câu trùng không thêm, draft cũ còn, giới hạn/đang đọc giữ nút khóa.
+- ONLINE-HISTORY: overview lượt thi có delivery sau quyền lớp/tài khoản, student không đọc lượt bạn, lọc lịch sử online riêng; API cũ có thông báo chờ cập nhật.
+
+Kiểm tra mới:118/118 backend và26/26 E2E desktop/mobile (learning, online-exams, online-management) đạt trên SQLite/server riêng3297, build `.local/online-management-build`. Lượt đầu22/26 do locator status khớp thông báo đọc file và fixture sửa sai mặc địnhA cho đề riêng B/C; đã sửa test dùng thông báo tạo đề riêng và đáp án đã công bố của chính student fixture, chạy lại toàn bộ26/26. Đã xem ảnh desktop/mobile. Không ghi Railway, không sửa các gap vi phạm trong audit.
+
 ## Kiểm tra online X phút chờ / Y phút làm — 12/10/2026
 
 - ONLINE-SCHEDULE: tạo bản chuẩn bị không thông báo/hết hạn; bấm bắt đầu chốt T+X/T+X+Y, trước giờ không vào được, vào muộn cùng hạn, hết giờ tự thu. X0–60/Y1–180, sai kiểu/ngoài khoảng bị chặn.

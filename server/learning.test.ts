@@ -354,6 +354,20 @@ test("online uploaded paper stays private, can start immediately, and teacher cl
   );
   const room = await f.read(`/learning/exam-runs/${a.id}`);
   assert.equal(room.deadlineAt, f.now() + 30 * 60000);
+  const studentOverview = await f.read("/classrooms/class-demo/learning");
+  assert.equal(
+    studentOverview.runs.find((run: any) => run.id === a.id).delivery,
+    "online",
+  );
+  assert.ok(!studentOverview.runs.some((run: any) => run.id === b.id));
+  const teacherOverview = await f.read(
+    "/classrooms/class-demo/learning",
+    f.teacher,
+  );
+  assert.equal(
+    teacherOverview.runs.find((run: any) => run.id === b.id).delivery,
+    "online",
+  );
   for (const q of room.questions)
     assert.equal(
       f.db.prepare("SELECT active FROM questions WHERE id=?").get(q.id)!.active,

@@ -1,10 +1,46 @@
 # Bàn giao session GreenEdu
 
+## Đưa cập nhật online và hai bộ Word lên remote theo yêu cầu — 12/10/2026
+
+Người dùng yêu cầu **push remote Git**. Đợt Git gom19file: quản lý thi online riêng, hai nguồn đề/radio/multi-chương-bài/upload, phân loại lịch sử lượt, kiểm thử/tài liệu và hai Word3bài×5câu. Fetch xác nhận remote có commit `73543a6` chuyển icon portrait sang top right; đã rebase commit local chưa push lên commit này, giữ CSS/kiểm thử/vị trí mới. Xung đột chỉ ở session-handoff, đã giữ cả hai phần nội dung, không bỏ thay đổi. Không đưa `.local`, database, file học sinh, ảnh QA hoặc secrets vào commit; không force push.
+
+Kiểm tra mới sau ghép: TypeScript, build riêng và **18/18 E2E desktop/mobile** (portrait-navigation/online-exams/online-management) đạt trên SQLite/server riêng3297, output `.local/pre-push-ui-results`; đã xem ảnh390px giáo viên/học sinh với icon bên phải. Backend/shared và mã nghiệp vụ online không đổi qua rebase, kết quả118backend/26E2E ở đợt trước vẫn được ghi là của đợt trước. Đưa bản ghép/tài liệu vào commit để push `origin/main`. Những ghi chú chưa push của đợt online/Word bên dưới là trạng thái trước yêu cầu Git này; kiểm tra Git để biết commit remote hiện hành. Railway đã cấu hình autobuild từ main theo bàn giao, nhưng **kết quả deployment/runtime Railway chưa được xác minh trong đợt push này**. Mặc định frontend5173/API/DB Railway giữ nguyên.
+
 ## Sửa vị trí icon portrait thành top right và push để autobuild
 
 Người dùng đính chính **top right**, đồng thời yêu cầu hoàn thành rồi push Git repo để autobuild. Đổi thứ tự grid header: account/avatar bên trái, ba icon Góp ý/Tài khoản/Đăng xuất ở góc trên phải, lớp ở hàng dưới. Giữ neo header/dock, quyền và hành vi; không thay backend hoặc ghi dữ liệu Railway. Cập nhật kiểm thử vị trí icon ở bên phải account và sát lề phải, các mô tả top left bên dưới là lịch sử. Đợt này được đưa vào commit để push `origin/main` theo yêu cầu; trạng thái autobuild/deployment cần phân biệt với kết quả push.
 
 Kiểm tra mới: TypeScript/Vite build riêng `.local/portrait-right-build` và diff check đạt; **6/6 E2E portrait-navigation desktop/mobile** đạt trên database riêng, gồm ba vai trò và portrait320/390/768/1024, neo/click/đổi lớp/modal/đăng xuất/rotate như bộ test hiện có. Đã xem ảnh390px giáo viên xác nhận icon trên phải. Không chạy lại backend hoặc bộ account-popup vì không thay hành vi/API; 12/12 ở đợt trước là bằng chứng của đợt trước. Kết quả deploy Railway chưa được xác minh ở lượt này.
+
+## Tách trang quản lý thi online, nguồn đề bắt buộc và kiểm tra upload — 12/10/2026
+
+Yêu cầu mới theo ảnh: mục riêng ở giáo viên/học sinh, thông báo thi sắp bắt đầu; hai nguồn đề bắt buộc chọn một; kiểm tra upload và chọn nhiều chương/toàn chương/từng bài. Đã thêm navigation **Quản lý kiểm tra online / Kiểm tra online**, tái sử dụng Learning với view online; tách khỏi cấp cây/quyền Săn điểm/ôn/ma trận/thưởng. Nút cũ Tạo kiểm tra online dẫn sang trang mới. Banner hiện có vẫn đếm chờ/chuyển đúng lớp/phòng, hash workspace online giữ trang qua reload. Lịch theo giờ/Săn điểm vẫn trang cũ. File App/Learning/ExamBank/ExamUpload và CSS, kiểu shared/learning.
+
+Nguồn đề chuyển từ select mặc định bank sang2radio chưa chọn **Upload file / Chọn từ ngân hàng**, bắt buộc một nguồn. Upload không còn phụ thuộc checkbox chương ở khu khác: chọn ngay trong khối file từ danh mục lớp; thêm tên/số câu đọc thành công, chặn file hỏng/câu trùng, Word5MB/CSV512KB/100câu. Ngân hàng checkbox chương + details bài, toàn chương hoặc nhiều bài riêng độc lập từng chương; hỗ trợ trộn toàn chương1 và bài cụ thể chương2. Chọn từng nguồn giữ draft nhưng payload độc lập. Đã upload thật hai Word15câu của đợt trước thành30câu/two chapters trên testserver.
+
+Backend overview runs thêm delivery bằng EXISTS online_exam_sessions liên kết exam_id, giữ phân quyền/scope, không migration/sửa dữ liệu cũ. Trang mới lọc kết quả online; server cũ thiếu trường hiện lời báo lịch sử chờ cập nhật. **Backend Railway cần deploy để nhận trường này; chưa push/deploy Railway**. Không khẳng định việc đọc file local đã nghiệm thu API production. Các gap offline/ngưỡng tab/focus/AI còn nguyên.
+
+Kiểm tra mới: TypeScript và Vite build riêng `.local/online-management-build` đạt; **118/118 toàn bộ backend** đạt; **26/26 E2E desktop/mobile** (learning/online-exams/online-management) đạt bằng SQLite `.local/e2e-online-management-*.sqlite`, server3297, config/output `.local/online-management.config.ts`/`.local/online-management-results`. Lượt đầu22/26:2ca locator status bắt thêm thông báo đọc file,2ca mobile fixture sửa sai chọnA cho câu đề riêng B/C; sửa test theo thông báo chính và đáp án đã công bố cho student fixture, không sửa quy tắc app, chạy lại26/26. Đã xem ảnh quản lý bank/upload/student desktop/mobile. Sandbox build realpath EPERM, chạy ngoài sandbox qua approval review đạt. Không chạy thử tạo dữ liệu trên Railway hoặc SQLite chính.
+
+Kiểm tra local cuối phát hiện5173 đã dừng; `npm run local` mở lại Vite nền/HMR thành công. Chrome profile riêng chỉ đọc trang đăng nhập/source ExamBank200, không lỗiJS; API health qua local `ok:true/demo:false/quickLogin:false` vẫn Railway. Script kiểm tra ban đầu dùng request URL tương đối khi context không có baseURL nên Invalid URL; sửa absoluteURL và chạy lại đạt. Không đăng nhập/POST dữ liệu thật. Giữ file Word/README/tài liệu từ đợt trước và nhánh main đang behind origin1commit, không tự pull/reset/commit/push. Thiết kế/nghiệp vụ/ca kiểm thử đã cập nhật.
+
+## Mở rộng hai bộ Word thành hai chương, mỗi chương3bài — 12/10/2026
+
+Theo yêu cầu mới, đã cập nhật chính hai file câu hỏi vui ở `artifacts/question-banks/`: mỗi file một chương, mỗi chương3bài, mỗi bài5câu, tổng15câu/file và30câu. Chương1 Đố vui quanh em gồm Đồ vật ngộ nghĩnh/Thế giới động vật/Đố vui số lượng; Chương2 Vui học mỗi ngày gồm Con số vui nhộn/Khoa học quanh em/Cuộc sống mỗi ngày. Giữ10câu trước, thêm20câu mới; backup bản5câu ở `.local/fun-question-banks/before-expansion/`. Mỗi câu có tên bài riêng và đầy đủ4lựa chọn/đáp án/lời giải; số câu1–15 liên tục trong mỗi file.
+
+Kiểm tra mới: parser Word thực của GreenEdu nhận15câu/0lỗi từng file, đúng3bài×5câu. Template hash/section A4 và package không liên quan giữ nguyên. Word ẩn mở read-only xuất PDF, PDFium đóng gói render; đã xem8trang cuối, không lỗi chữ hoặc câu bị tách trang. Script/data/contract/manifest riêng `.local/fun-question-banks/expand.py`, `expanded-bank-data.json`, `artifact-expanded.md`, `expanded-manifest.json`. Khi nhập mỗi file chọn đúng chương và **Bài nhận câu hỏi → Theo tên bài trong file**; chọn một bài có sẵn sẽ gộp toàn bộ15câu, không đúng cấu trúc này. Không thêm heading bài giữa các khối câu vì parser sẽ nối heading vào lời giải trước; nhận diện bằng nhãn Bài học trong từng câu. Chỉ sửa tài liệu/file, chưa nhập dữ liệu Railway/sửa runtime/push/deploy. Mô tả5câu của đợt trước bên dưới là lịch sử đã thay bằng bản15câu.
+
+## Hai file Word câu hỏi vui theo mẫu — 12/10/2026
+
+Theo yêu cầu, đã tạo `artifacts/question-banks/bo-cau-hoi-vui-1-do-vui-quanh-em.docx` và `bo-cau-hoi-vui-2-vui-hoc-moi-ngay.docx`, mỗi file5câu vui/đơn giản,4phương án/một đáp án/lời giải. Dùng trực tiếp mẫu `public/templates/greenedu-cau-hoi-mau.docx`, giữ Arial11/A4 và package không liên quan; mẫu gốc không đổi. Không có topic để tránh cần capability mới; tên Bài học theo chủ đề từng file, có thể chọn Bài nhận câu hỏi khi nhập. Nội dung tổng hợp, không giả là ngân hàng Vật lí11 chính khóa.
+
+Kiểm tra mới bằng `readWordDocument`/`parseQuestionWordText` thực của ứng dụng: mỗi file5câu/0lỗi, đủ lựa chọn/đáp án/lời giải, không hình ảnh/Equation/Track Changes. Renderer đóng gói thiếu LibreOffice; dùng một phiên Word ẩn mở read-only, xuất PDF nội bộ và PDFium đóng gói tạo PNG. Đã xem đủ4trang cuối, cân bố cục3câu trang đầu/2câu trang sau, không tách câu qua trang. QA/script/contract riêng `.local/fun-question-banks/`; không cung cấp PDF/ảnh trung gian. Chỉ tạo file/tài liệu, chưa nhập Railway hoặc ghi dữ liệu thật, không sửa runtime/khởi động lại frontend/API/push/deploy. Giữ các cập nhật bàn giao chạy local từ đợt trước.
+
+## Chạy frontend local trên máy Windows — 12/10/2026
+
+Theo yêu cầu mới, đã chạy frontend tại **http://localhost:5173** trên checkout `D:/WorkSpace/Others/SangKienKn`, HEAD `8faa58c`. API/server và database tiếp tục dùng **https://greenedu.up.railway.app** qua proxy Vite chế độ railway. Checkout ban đầu thiếu dependencies; đã cài187gói bằng `npm ci` theo lockfile, không thay package/lockfile. Sandbox chặn tạo thư mục và kết nối loopback; cài/khởi động lại ngoài sandbox qua approval review thành công. `npm run local` chạy Vite nền/HMR, không khởi động API SQLite local, không build/deploy hoặc push Railway.
+
+Kiểm tra mới chỉ đọc: trang local, Vite client và source `PortraitActions.tsx` đều200; `/api/health` qua proxy local và trực tiếp Railway cùng `ok:true/demo:false/quickLogin:false`, không có tài khoản vào nhanh. `/api/auth/me` local401 khi chưa đăng nhập. Không đăng nhập thử, ghi dữ liệu thật, chạy backend/E2E hoặc reset database. Đã yêu cầu mở trang local trong panel Codex; tool trảqueued. Quản lý frontend bằng `npm run local -- -Action Status/Stop`; các trạng thái deployment Railway ở đợt trước chưa được xác minh lại bằng việc kiểm tra health này.
 
 ## Push icon header portrait theo yêu cầu
 

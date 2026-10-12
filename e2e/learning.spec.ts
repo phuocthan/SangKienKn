@@ -55,14 +55,48 @@ async function noOverflow(page: Page) {
   ).toBeTruthy();
 }
 
+async function repairPublishedNotebook(page: Page) {
+  // Other suites also submit private uploads with non-A answer keys. Read only
+  // results already published to this fixture student, then restore eligibility.
+  const overview = await (
+    await page.request.get("/api/classrooms/learning-class/learning")
+  ).json();
+  const answers = new Map<string, number>();
+  for (const run of overview.runs.filter(
+    (run: { status: string }) => run.status === "submitted",
+  )) {
+    const result = await (
+      await page.request.get(`/api/learning/exam-runs/${run.id}`)
+    ).json();
+    for (const row of result.results ?? [])
+      answers.set(row.questionId, row.correctIndex);
+  }
+  const corrections = await (await page.request.get("/api/corrections")).json();
+  for (const question of corrections) {
+    const response = await page.request.post("/api/attempts", {
+      data: {
+        questionId: question.id,
+        selected: answers.get(question.id) ?? 0,
+        mode: "correction",
+        requestId: crypto.randomUUID(),
+      },
+    });
+    expect(response.ok()).toBe(true);
+    expect((await response.json()).correct).toBe(true);
+  }
+}
+
 test("teacher selects individual lessons or uploads a private exam and manually opens it", async ({
   page,
 }, info) => {
   await login(page, true);
   const form = page.locator(".learning-form");
   await form.getByLabel("Loại bộ câu").selectOption("exam");
+  await form
+    .getByRole("radio", { name: "Chọn từ ngân hàng", exact: true })
+    .check();
   await form.getByLabel("Chương ôn I", { exact: true }).check();
-  await form.getByLabel("Phạm vi bài").selectOption("selected");
+  await form.getByLabel("Toàn chương · Chương ôn I", { exact: true }).uncheck();
   await expect(
     form.getByRole("button", { name: "Lưu lịch kiểm tra" }),
   ).toBeDisabled();
@@ -71,14 +105,16 @@ test("teacher selects individual lessons or uploads a private exam and manually 
   const bankTitle = `Bài chọn ${info.project.name} ${Date.now()}`;
   await form.getByLabel("Tên bộ câu").fill(bankTitle);
   await form.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
-  await expect(page.getByRole("status")).toContainText("Đã tạo kiểm tra");
+  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
+    "Đã tạo kiểm tra",
+  );
   const bank = page
     .locator(".learning-row")
     .filter({ has: page.getByText(bankTitle, { exact: true }) })
     .first();
   await expect(bank).toContainText("2 câu");
   await expect(bank).toContainText("Đã đóng");
-  await form.getByLabel("Nguồn đề").selectOption("upload");
+  await form.getByRole("radio", { name: "Upload file", exact: true }).check();
   const uploadTitle = `Đề riêng ${info.project.name} ${Date.now()}`;
   await form.getByLabel("Tên bộ câu").fill(uploadTitle);
   await form.getByLabel("File đề (.docx hoặc .csv)").setInputFiles({
@@ -90,14 +126,18 @@ test("teacher selects individual lessons or uploads a private exam and manually 
   });
   await expect(form).toContainText("1 câu đã chọn / tối đa 100");
   await form.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
-  await expect(page.getByRole("status")).toContainText("Đã tạo kiểm tra");
+  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
+    "Đã tạo kiểm tra",
+  );
   const row = page
     .locator(".learning-row")
     .filter({ has: page.getByText(uploadTitle, { exact: true }) })
     .first();
   await expect(row).toContainText("1 câu");
   await row.getByRole("button", { name: "Mở kiểm tra ngay" }).click();
-  await expect(page.getByRole("status")).toContainText("Đã mở kiểm tra");
+  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
+    "Đã mở kiểm tra",
+  );
   await expect(row).toContainText("Đang mở");
   await noOverflow(page);
 });
@@ -177,22 +217,7 @@ test("teacher controls chapter access; qualified students wait, opening another 
     await login(student);
     // Earlier scenarios can leave notebook errors in the shared E2E student.
     // Restore personal eligibility before asserting only the teacher gate.
-    const corrections = await (
-      await student.request.get("/api/corrections")
-    ).json();
-    for (const q of corrections)
-      expect(
-        (
-          await student.request.post("/api/attempts", {
-            data: {
-              questionId: q.id,
-              selected: 0,
-              mode: "correction",
-              requestId: crypto.randomUUID(),
-            },
-          })
-        ).ok(),
-      ).toBeTruthy();
+    await repairPublishedNotebook(student);
     for (let i = 0; i < 8; i++)
       expect(
         (
@@ -407,16 +432,7 @@ test("student uses hunt ticket and teacher approves the earned point", async ({
     ).ok(),
   ).toBeTruthy();
   await login(page);
-  const corrections = await (await page.request.get("/api/corrections")).json();
-  for (const q of corrections)
-    await page.request.post("/api/attempts", {
-      data: {
-        questionId: q.id,
-        selected: 0,
-        mode: "correction",
-        requestId: crypto.randomUUID(),
-      },
-    });
+  await repairPublishedNotebook(page);
   for (let i = 0; i < 8; i++)
     await page.request.post("/api/attempts", {
       data: {
@@ -489,6 +505,10 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
   await page.getByRole("button", { name: "Lưu ma trận" }).click();
   await expect(page.getByRole("status")).toContainText("Đã lưu ma trận");
   await page.getByLabel("Loại bộ câu").selectOption("exam");
+  await page
+    .getByRole("radio", { name: "Chọn từ ngân hàng", exact: true })
+    .check();
+  await page.getByLabel("Chương ôn I", { exact: true }).check();
   const title = `Thi ${info.project.name} ${Date.now()}`;
   await page.getByLabel("Tên bộ câu").fill(title);
   await page.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();

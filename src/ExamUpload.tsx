@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   csvTemplate,
   parseQuestionCsv,
+  questionContentKey,
   type QuestionInput,
 } from "../shared/questions";
 import { errorMessage } from "./api";
@@ -26,6 +27,7 @@ export function ExamUpload({
   const [chapterId, setChapterId] = useState(chapters[0]?.id ?? "");
   const [errors, setErrors] = useState<string[]>([]);
   const [reading, setReading] = useState(false);
+  const [success, setSuccess] = useState("");
   const generation = useRef(0);
   const target = chapters.some((ch) => ch.id === chapterId)
     ? chapterId
@@ -40,11 +42,16 @@ export function ExamUpload({
   async function read(file: File) {
     const token = ++generation.current;
     setErrors([]);
+    setSuccess("");
     setReading(true);
     onReadingChange(true);
     try {
       if (!target) throw new Error("Chọn chương trước khi tải đề.");
-      if (file.size > 2 * 1024 * 1024) throw new Error("File tối đa 2 MB.");
+      const word = /\.docx$/i.test(file.name);
+      if (file.size > (word ? 5 * 1024 * 1024 : 512 * 1024))
+        throw new Error(
+          word ? "File Word tối đa 5 MB." : "File CSV tối đa 512 KB.",
+        );
       const bytes = new Uint8Array(await file.arrayBuffer());
       const parsed = /\.docx$/i.test(file.name)
         ? (await import("./importWord")).parseWordFile(bytes)
@@ -66,6 +73,19 @@ export function ExamUpload({
         throw new Error(
           "Mỗi đề tối đa 100 câu. Xóa bớt câu trước khi tải thêm.",
         );
+      const seen = new Set(
+        questions
+          .filter((row) => row.chapterId === target)
+          .map((row) => questionContentKey(row.question)),
+      );
+      if (
+        parsed.questions.some((question) =>
+          seen.has(questionContentKey(question)),
+        )
+      )
+        throw new Error(
+          "File có câu trùng với đề đã tải vào chương này. Bỏ câu trùng hoặc chọn file khác.",
+        );
       onChange([
         ...questions,
         ...parsed.questions.map((question) => ({
@@ -73,6 +93,7 @@ export function ExamUpload({
           question,
         })),
       ]);
+      setSuccess(`Đã đọc ${file.name}: ${parsed.questions.length} câu hợp lệ.`);
     } catch (e) {
       if (token === generation.current) setErrors([errorMessage(e)]);
     } finally {
@@ -97,8 +118,8 @@ export function ExamUpload({
       <legend>Tải đề của giáo viên</legend>
       <p>
         Dùng Word/CSV theo mẫu, có đủ lựa chọn và đáp án để chấm tự động. Mỗi
-        file gắn với một chương; tải thêm file để tạo đề nhiều chương. Câu tải
-        lên chỉ dùng cho đề này.
+        file gắn với chương được chọn bên dưới; tải thêm file để tạo đề nhiều
+        chương. Câu tải lên chỉ dùng cho đề này.
       </p>
       <div className="learning-actions">
         <a
@@ -145,6 +166,7 @@ export function ExamUpload({
         />
       </label>
       {reading && <p role="status">Đang đọc đề…</p>}
+      {success && <p role="status">{success}</p>}
       {!!errors.length && (
         <div role="alert">
           <ul>

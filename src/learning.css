@@ -253,6 +253,52 @@
   display: flex;
   flex-direction: row;
 }
+
+.exam-source .learning-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.learning-options input[type="radio"] {
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  accent-color: var(--green);
+}
+.exam-bank-chapter {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  margin-top: 10px;
+}
+.exam-bank-chapter summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.learning-form .exam-bank-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-direction: row;
+  margin-bottom: 10px;
+}
+.exam-bank-title input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  flex: 0 0 18px;
+}
+.exam-bank-chapter .learning-options {
+  padding-top: 12px;
+  display: grid;
+}
+.exam-bank-lesson {
+  margin-left: 14px;
+}
+@media (max-width: 700px) {
+  .exam-source .learning-options {
+    grid-template-columns: 1fr;
+  }
+}
 .learning-form summary {
   cursor: pointer;
   font-weight: 600;

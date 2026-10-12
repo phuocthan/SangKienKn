@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Clock3,
+  ClipboardList,
   Download,
   Flower2,
   LayoutDashboard,
@@ -63,6 +64,7 @@ type Page =
   | "home"
   | "practice"
   | "learning"
+  | "online-exams"
   | "corrections"
   | "classes"
   | "groups"
@@ -96,7 +98,12 @@ export default function App() {
     new URLSearchParams(location.hash.slice(1)).get("learning") ?? "",
   );
   const [page, setPage] = useState<Page>(
-    location.hash.includes("learning=") ? "learning" : "home",
+    location.hash.includes("learning=")
+      ? new URLSearchParams(location.hash.slice(1)).get("workspace") ===
+        "online"
+        ? "online-exams"
+        : "learning"
+      : "home",
   );
   const [study, setStudy] = useState<Study | null>(null);
   const [entryRunId, setEntryRunId] = useState("");
@@ -306,6 +313,11 @@ export default function App() {
         { id: "groups", label: "Hoạt động nhóm", icon: Users },
         { id: "questions", label: "Ngân hàng câu hỏi", icon: BookOpen },
         { id: "learning", label: "Ôn tập & kiểm tra", icon: Clock3 },
+        {
+          id: "online-exams",
+          label: "Quản lý kiểm tra online",
+          icon: ClipboardList,
+        },
         { id: "progress", label: "Tiến độ học tập", icon: TrendingUp },
         { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
         { id: "leaderboard", label: "Xếp hạng chăm chỉ", icon: Trophy },
@@ -314,6 +326,7 @@ export default function App() {
         { id: "home", label: "Khu vườn của tôi", icon: Sprout },
         { id: "practice", label: "Luyện tập", icon: BookOpen },
         { id: "learning", label: "Ôn tập & kiểm tra", icon: Clock3 },
+        { id: "online-exams", label: "Kiểm tra online", icon: ClipboardList },
         { id: "groups", label: "Hoạt động nhóm", icon: Users },
         { id: "corrections", label: "Sổ tay sửa sai", icon: CheckCircle2 },
         { id: "progress", label: "Hành trình của tôi", icon: TrendingUp },
@@ -324,6 +337,7 @@ export default function App() {
     home: isTeacher ? "Tổng quan" : "Khu vườn của tôi",
     practice: "Luyện tập",
     learning: "Ôn tập & kiểm tra",
+    "online-exams": isTeacher ? "Quản lý kiểm tra online" : "Kiểm tra online",
     corrections: "Sổ tay sửa sai",
     classes: "Lớp học của tôi",
     groups: "Hoạt động nhóm",
@@ -454,7 +468,9 @@ export default function App() {
           {!isTeacher && (
             <ExamNotices
               key={user.id}
-              inLearning={page === "learning" && !study}
+              inLearning={
+                (page === "learning" || page === "online-exams") && !study
+              }
               onJoin={async (classroomId, runId) => {
                 if (
                   !classes.some((classroom) => classroom.id === classroomId)
@@ -471,9 +487,10 @@ export default function App() {
                 location.hash = new URLSearchParams({
                   learning: classroomId,
                   exam: runId,
+                  workspace: "online",
                 }).toString();
                 setClassId(classroomId);
-                navigate("learning");
+                navigate("online-exams");
                 setEntryRunId(runId);
                 setEntryClassId(classroomId);
               }}
@@ -679,9 +696,11 @@ export default function App() {
                     <StudentLevelCard classroom={current} />
                   </div>
                 ))}
-              {page === "learning" && (
+              {(page === "learning" || page === "online-exams") && (
                 <Learning
-                  key={current.id}
+                  key={`${current.id}-${page}`}
+                  view={page === "online-exams" ? "online" : "learning"}
+                  onOnline={() => navigate("online-exams")}
                   classroom={current}
                   user={user}
                   entryRunId={

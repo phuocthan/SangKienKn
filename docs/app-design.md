@@ -1,5 +1,13 @@
 # Thiết kế giao diện GreenEdu
 
+## Trang kiểm tra online riêng và hai nguồn đề — 12/10/2026
+
+Điều hướng chính bổ sung **Quản lý kiểm tra online** cho giáo viên và **Kiểm tra online** cho học sinh, icon ClipboardList. Giáo viên có form chuẩn bị đề, danh sách buổi/bắt đầu/đóng và lượt thi/kết quả; học sinh xem buổi chờ/đang mở/đã đóng và lượt của mình. Không đưa cấu hình cấp cây, quyền Săn điểm, ma trận ôn hoặc thưởng cây vào trang riêng này. Nút Tạo kiểm tra online ở trang Ôn tập & kiểm tra dẫn sang trang mới. Phòng thi dùng lại luồng hiện có, reload giữ đúng trang online/lớp/lượt bằng workspace trong hash. Lịch kiểm tra theo lịch và Săn điểm tiếp tục ở trang cũ.
+
+**Nguồn đề** là fieldset hai radio **Upload file / Chọn từ ngân hàng**, ban đầu chưa chọn; bắt buộc chọn đúng một. Upload chọn chương ngay trong khối file, không cần tích chương ở khối khác trước. Có mẫu Word/CSV, thông báo đọc thành công, xem/bỏ câu và lỗi tại chỗ; Word5MB/CSV512KB, đề tối đa100câu. Ngân hàng hiển thị checkbox chương, xổ danh sách bằng details và chọn toàn chương hoặc các bài riêng; các chương có phạm vi độc lập, hỗ trợ chọn toàn chương này và vài bài chương khác cùng lúc. Checkbox chương có trạng thái chọn một phần, trọng số chỉ hiện các bài thuộc phạm vi được chọn.
+
+Banner thông báo học sinh ở mọi trang vẫn đếm chờ theo server; bấm vào chuyển đúng trang Kiểm tra online và lớp/phòng. Trong phòng ẩn banner, giữ đồng hồ và autosave hiện có. Desktop/mobile sử dụng theme vườn và header/dock portrait hiện hành. Overview lượt thi thêm delivery để lọc đúng lịch sử online; backend Railway cần triển khai trường này. API cũ thiếu capability khóa tạo/bắt đầu, thiếu phân loại có lời báo lịch sử chờ server. Chưa xác nhận deployment từ việc đọc checkout; nghiệp vụ [online-exams.md](online-exams.md), bằng chứng tại [session-handoff.md](session-handoff.md).
+
 ## Header và menu đáy ở portrait
 
 Theo yêu cầu mới đã sửa lại vị trí, điện thoại/tablet **portrait, rộng tối đa 1100 px** dùng header sticky ở đầu trang để luôn thấy **tên tài khoản/avatar và bộ chọn lớp/môn** khi cuộn. **Góp ý, Tài khoản và Đăng xuất** ở góc trên phải, chỉ hiển thị icon 20px trong nút44×44px có tooltip/aria-label; tên tài khoản/avatar bên trái, bộ chọn lớp ở hàng dưới. Admin có hai icon Tài khoản/Đăng xuất vì không có luồng Góp ý. Tên tài khoản không bị ẩn theo breakpoint, được xuống dòng khi thiếu chỗ. Breadcrumb không nằm trong header portrait. Vị trí top left ở ghi chú trước đã được thay theo yêu cầu mới.
