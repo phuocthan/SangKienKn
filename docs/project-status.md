@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Góp ý, Tài khoản, Đăng xuất lên header portrait
+
+Đã chuyển ba thao tác sang icon ở góc trên trái, neo cùng header; tên account/avatar bên phải, lớp ở hàng dưới. Dock đáy chỉ giữ điều hướng chính; landscape/desktop giữ sidebar. Admin có Tài khoản/Đăng xuất như quyền hiện có. Build/TypeScript và 12/12 E2E đạt bằng database riêng. Theo yêu cầu tiếp theo, đưa bản icon vào commit để push `origin/main`; chưa xác minh kết quả deploy Railway. Chi tiết/kiểm tra tại [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).
+
 ## Bố cục portrait: tài khoản/lớp ở trên, menu ở dưới
 
 Đã chỉnh frontend theo yêu cầu mới: header luôn neo tên tài khoản/avatar/lớp ở đầu khi cuộn, thanh điều hướng fixed ở đáy và cuộn ngang; nội dung chừa khoảng để không bị che. Áp dụng portrait ≤1100px, cả giáo viên/học sinh/Admin; landscape và desktop giữ sidebar. CSS riêng nạp sau theme, có safe area. Build/TypeScript và 22/22 E2E đạt bằng database riêng. Theo yêu cầu tiếp theo, đưa bản này vào commit để push `origin/main`; không thay backend/dữ liệu và chưa xác minh kết quả deploy Railway. Chi tiết/bằng chứng trong [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).

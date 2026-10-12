@@ -44,6 +44,7 @@ import { ClassCommunity } from "./ClassCommunity";
 import { GroupActivities } from "./GroupActivities";
 import { Feedback } from "./Feedback";
 import { AdminWorkspace } from "./Accounts";
+import { PortraitActions } from "./PortraitActions";
 import { Avatar, AvatarPicker } from "./Avatars";
 import {
   ChapterLevelTimeline,
@@ -400,6 +401,13 @@ export default function App() {
       </aside>
       <div className="main-shell">
         <header className="topbar">
+          <PortraitActions
+            page={page}
+            feedbackLabel={isTeacher ? "Quản lý góp ý" : "Góp ý"}
+            onFeedback={() => navigate("feedback")}
+            onAccount={() => navigate("settings")}
+            onLogout={() => void logout()}
+          />
           <div className="breadcrumb">
             Trang {isTeacher ? "giáo viên" : "học tập"}
             <span>/</span>

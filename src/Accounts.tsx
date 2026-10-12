@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { api, errorMessage } from "./api";
 import { Avatar } from "./Avatars";
+import { PortraitActions } from "./PortraitActions";
 import { Empty, GardenIllustration, Logo, Modal } from "./components";
 import type { User } from "./types";
 
@@ -115,6 +116,11 @@ export function AdminWorkspace({
       </aside>
       <div className="main-shell">
         <header className="topbar">
+          <PortraitActions
+            page={page}
+            onAccount={() => setPage("settings")}
+            onLogout={() => void onLogout()}
+          />
           <div className="breadcrumb">
             Trang quản trị<span>/</span>
             <strong>

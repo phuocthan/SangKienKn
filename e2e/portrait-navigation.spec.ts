@@ -59,6 +59,36 @@ for (const role of ["teacher", "student", "admin"] as const) {
       await expect(page.locator(".topbar .profile strong")).toBeInViewport();
       if (role !== "admin")
         await expect(page.getByLabel("Chọn lớp học")).toBeInViewport();
+      const actions = header.getByRole("group", { name: "Thao tác tài khoản" });
+      await expect(actions).toBeInViewport();
+      await expect(actions.getByRole("button")).toHaveCount(
+        role === "admin" ? 2 : 3,
+      );
+      const actionsBox = (await actions.boundingBox())!;
+      const profileBox = (await header.locator(".profile").boundingBox())!;
+      expect(actionsBox.x).toBeLessThan(profileBox.x);
+      expect(actionsBox.y + actionsBox.height).toBeLessThanOrEqual(
+        (await header.boundingBox())!.height,
+      );
+      for (const button of await actions.getByRole("button").all()) {
+        expect((await button.textContent())?.trim()).toBe("");
+        expect(
+          await button.evaluate((element) => {
+            const box = element.getBoundingClientRect();
+            return (
+              document
+                .elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
+                ?.closest("button") === element
+            );
+          }),
+        ).toBe(true);
+      }
+      await expect(
+        dock.getByRole("button", { name: "Tài khoản", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        dock.getByRole("button", { name: "Đăng xuất", exact: true }),
+      ).toHaveCount(0);
       const bottomButton = page.getByRole("button", {
         name: "Cuối nội dung kiểm thử",
       });
@@ -99,7 +129,7 @@ for (const role of ["teacher", "student", "admin"] as const) {
     }
 
     await page.setViewportSize({ width: 390, height: 844 });
-    // All destinations and the account action remain reachable in the horizontal dock.
+    // Main destinations stay below; utility actions are accessible from the header.
     if (role !== "admin") {
       await page
         .getByRole("navigation")
@@ -111,9 +141,19 @@ for (const role of ["teacher", "student", "admin"] as const) {
           .getByRole("button", { name: "Xếp hạng chăm chỉ" }),
       ).toHaveAttribute("aria-current", "page");
     }
-    await dock.getByRole("button", { name: "Tài khoản", exact: true }).click();
+    if (role !== "admin") {
+      const feedback = header.getByRole("button", {
+        name: role === "teacher" ? "Quản lý góp ý" : "Góp ý",
+        exact: true,
+      });
+      await feedback.click();
+      await expect(feedback).toHaveAttribute("aria-current", "page");
+    }
+    await header
+      .getByRole("button", { name: "Tài khoản", exact: true })
+      .click();
     await expect(
-      dock.getByRole("button", { name: "Tài khoản", exact: true }),
+      header.getByRole("button", { name: "Tài khoản", exact: true }),
     ).toHaveAttribute("aria-current", "page");
     if (role !== "admin")
       await header.locator(".profile-avatar-button").click();
@@ -141,9 +181,15 @@ for (const role of ["teacher", "student", "admin"] as const) {
       expect(
         await header.evaluate((el) => getComputedStyle(el).position),
       ).not.toBe("sticky");
+      await expect(header.locator(".portrait-actions")).toBeHidden();
+      await expect(
+        dock.getByRole("button", { name: "Tài khoản", exact: true }),
+      ).toBeVisible();
     }
     await page.setViewportSize({ width: 390, height: 844 });
-    await dock.getByRole("button", { name: "Đăng xuất", exact: true }).click();
+    await header
+      .getByRole("button", { name: "Đăng xuất", exact: true })
+      .click();
     await expect(
       page.getByRole("button", { name: "Đăng nhập", exact: true }),
     ).toBeVisible();

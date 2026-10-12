@@ -1,5 +1,17 @@
 # Bàn giao session GreenEdu
 
+## Push icon header portrait theo yêu cầu
+
+Sau khi hoàn thành bản icon và 12/12 E2E bên dưới, người dùng yêu cầu **Push git**. Đưa component PortraitActions, App/AdminWorkspace, CSS portrait, E2E và tài liệu liên quan vào commit để push `origin/main`; giữ các commit đã có, không force push và không đưa `.local`/database/ảnh kiểm thử lên Git. Ghi chú “chưa push” của đợt triển khai icon bên dưới là lịch sử trước yêu cầu này. Kết quả Railway tự deploy chưa được xác minh trong đợt Git này.
+
+## Icon Góp ý/Tài khoản/Đăng xuất ở góc trên trái portrait
+
+Yêu cầu tiếp theo: đưa ba thao tác khỏi dock dưới lên top left, neo cùng header tên account, chỉ dùng icon. Đã thêm `src/PortraitActions.tsx` dùng chung App/AdminWorkspace; portrait ≤1100px hiển thị Góp ý/Tài khoản/Đăng xuất bên trái (Admin chỉ hai thao tác có sẵn), account/avatar bên phải và lớp ở hàng dưới. Nút44×44px/icon20px, có aria-label/title và trạng thái trang hiện tại; không hiển thị chữ. Sidebar-bottom ẩn ở portrait, menu chính vẫn fixed dưới; landscape/desktop giữ các nút sidebar cũ và không hiện icon header trùng.
+
+Chỉ sửa frontend, không gọi API/database Railway, chưa push/deploy đợt icon này. Build kiểm tra riêng `.local/portrait-actions-build`; kế thừa quy tắc safe area và khoảng đệm dưới. Mô tả ba thao tác còn trong dock ở đợt portrait đầu tiên dưới đây là lịch sử đã được thay.
+
+Kiểm tra mới: TypeScript/build riêng và diff check đạt; **12/12 E2E** portrait-navigation/account-popups desktop/mobile đạt trên database riêng. Ba vai trò, portrait320/390/768/1024, icon không có chữ và hit-test không bị che khi cuộn, tên/lớp giữ trên, Góp ý/Tài khoản/Đăng xuất chỉ có một nơi hiển thị, đổi lớp, trạng thái trang, mở/đóng modal, landscape/desktop khôi phục sidebar. Đã xem ảnh390px giáo viên/học sinh; không kiểm tra lại production hoặc Safari/thiết bị thật.
+
 ## Đưa bản portrait lên Git theo yêu cầu
 
 Sau khi hoàn tất chỉnh giao diện và kiểm thử bên dưới, người dùng yêu cầu **Pushgit remote**. Đợt Git đưa CSS portrait, import CSS, viewport safe area, E2E và ba tài liệu cập nhật vào commit để push `origin/main`. Không đưa database, ảnh kiểm thử hoặc `.local` lên Git. Đối chiếu remote trước push, giữ các commit đã có và không force push. Trạng thái “chưa push” của đợt sửa giao diện bên dưới là lịch sử; xem Git để biết commit hiện hành. Railway đã có cấu hình tự nhận main theo bàn giao trước, nhưng kết quả deploy/runtime Railway chưa được xác minh trong đợt Git này.

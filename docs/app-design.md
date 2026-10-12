@@ -2,9 +2,9 @@
 
 ## Header và menu đáy ở portrait
 
-Theo yêu cầu mới, điện thoại/tablet **portrait, rộng tối đa 1100 px** dùng header sticky ở đầu trang để luôn thấy **tên tài khoản/avatar và bộ chọn lớp/môn** khi cuộn. Tên tài khoản không bị ẩn theo breakpoint; màn hình ≤420 px xếp tài khoản rồi lớp thành hai hàng để không ép tên. Breadcrumb không nằm trong header portrait.
+Theo yêu cầu mới, điện thoại/tablet **portrait, rộng tối đa 1100 px** dùng header sticky ở đầu trang để luôn thấy **tên tài khoản/avatar và bộ chọn lớp/môn** khi cuộn. **Góp ý, Tài khoản và Đăng xuất** ở góc trên trái, chỉ hiển thị icon 20px trong nút44×44px có tooltip/aria-label; tên tài khoản/avatar bên phải, bộ chọn lớp ở hàng dưới. Admin có hai icon Tài khoản/Đăng xuất vì không có luồng Góp ý. Tên tài khoản không bị ẩn theo breakpoint, được xuống dòng khi thiếu chỗ. Breadcrumb không nằm trong header portrait.
 
-Menu chuyển xuống **đáy màn hình**, cố định thành một dải cuộn ngang có icon và nhãn. Giữ đầy đủ các mục điều hướng, góp ý, Tài khoản và Đăng xuất; ẩn logo/lời nhắc ở sidebar portrait để dock gọn. Nội dung có khoảng đệm dưới bằng chiều cao dock và safe area để thao tác cuối trang không bị che; header/dock có nền kem và viền nhẹ. Modal vẫn nằm trên cả header/menu. Hỗ trợ safe area trên thiết bị có tai thỏ/thanh home, `viewport-fit=cover`.
+Menu điều hướng chính ở **đáy màn hình**, cố định thành một dải cuộn ngang có icon và nhãn. Góp ý/Tài khoản/Đăng xuất đã chuyển lên header, không nằm trong dock; ẩn logo/lời nhắc ở sidebar portrait để dock gọn. Nội dung có khoảng đệm dưới bằng chiều cao dock và safe area để thao tác cuối trang không bị che; header/dock có nền kem và viền nhẹ. Modal vẫn nằm trên cả header/menu. Hỗ trợ safe area trên thiết bị có tai thỏ/thanh home, `viewport-fit=cover`.
 
 Landscape và desktop giữ bố cục sidebar hiện có. CSS riêng `src/portrait-navigation.css` nạp sau `garden.css`, không đổi API/database hay quy tắc nghiệp vụ. Quyết định này thay mô tả menu trên cùng ở điện thoại trong các ghi chú cũ.
 
