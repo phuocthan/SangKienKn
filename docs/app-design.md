@@ -1,5 +1,14 @@
 # Thiết kế giao diện GreenEdu
 
+## Màu khung và icon khu rừng tri thức — 12/10/2026
+
+Theo yêu cầu mới từ ảnh tổng quan giáo viên, **tiêu đề lớn đứng trước; slogan/chữ nhỏ nằm ngay dưới** trên các trang của giáo viên, học sinh và Admin. PageHeading chung, đầu trang nhóm/cộng đồng/tài khoản và learning-heading cùng thứ tự h1 → eyebrow → mô tả. Eyebrow12px desktop/11px màn hình≤700px, weight500, giãn dòng1,7; không di chuyển nhãn câu hỏi, số câu hoặc trạng thái phòng thi.
+
+Theme dùng chung `src/forest-theme.css`, nạp sau portrait-navigation.css: khung nội dung có gradient xanh lá/vàng mật ong/xanh trời/tím hoa và viền tương ứng; thống kê/thao tác nhanh đồng bộ màu theo icon. Giữ màu báo đúng/sai, cảnh báo, trạng thái thi, câu đang chọn và các khung cấp độ/vinh danh đặc thù. `ForestIcon` tại components.tsx kết hợp icon nghiệp vụ hiện có với SVG lá/mầm, đốm sáng, nền nổi mềm; dùng ở menu ba vai trò, thao tác tài khoản portrait, thống kê, thẻ lớp/nhóm, mục tiêu, vinh danh và empty state. Trang có ít dữ liệu vẫn có bộ icon/theme chung, không tạo dữ liệu để lấp thẻ.
+
+Icon trang trí aria-hidden; nhãn/tooltip/nút44px giữ ở thao tác gốc. Hover xoay icon rất nhẹ, tắt khi reduced-motion; menu portrait vẫn ở đáy/header tài khoản trên phải. Chỉ thay frontend, local5173 nhận HMR/API và DB vẫn Railway; không tự push/deploy. Kết quả kiểm tra mới của đợt Forest ghi riêng tại session-handoff.md, không dùng kết quả ôn-thi của task song song làm bằng chứng.
+
+
 ## Trang kiểm tra online riêng và hai nguồn đề — 12/10/2026
 
 Điều hướng chính bổ sung **Quản lý kiểm tra online** cho giáo viên và **Kiểm tra online** cho học sinh, icon ClipboardList. Giáo viên có form chuẩn bị đề, danh sách buổi/bắt đầu/đóng và lượt thi/kết quả; học sinh xem buổi chờ/đang mở/đã đóng và lượt của mình. Không đưa cấu hình cấp cây, quyền Săn điểm, ma trận ôn hoặc thưởng cây vào trang riêng này. Nút Tạo kiểm tra online ở trang Ôn tập & kiểm tra dẫn sang trang mới. Phòng thi dùng lại luồng hiện có, reload giữ đúng trang online/lớp/lượt bằng workspace trong hash. Lịch kiểm tra theo lịch và Săn điểm tiếp tục ở trang cũ.

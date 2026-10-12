@@ -1,5 +1,22 @@
 # Bàn giao session GreenEdu
 
+## Push theme khu rừng tri thức lên remote — 12/10/2026
+
+Người dùng yêu cầu push ngay khi hoàn thành. Đợt Git đưa **14 file frontend/tài liệu Forest** lên `origin/main`, dùng checkout riêng `.local/forest-push-checkout` bắt đầu từ remote `00a15b9`, giữ commit ntfy và không force push. Learning chỉ đưa ba thay đổi giao diện: import ForestIcon, chữ nhỏ dưới h1 và biểu tượng Thời gian tăng cấp; không gom mã nhóm buổi thi/Excel/luyện tập sau nộp/backend còn ở task song song. Chỉ lấy ba phần tài liệu Forest, giữ lịch sử remote và không đưa `.local`, database, file học sinh hay secrets vào commit.
+
+Kiểm tra **mới trên đúng checkout chuẩn bị push**: TypeScript/build riêng `.local/forest-push-build` và **12/12 E2E portrait-navigation/account-popups desktop/mobile** đạt trên SQLite/server riêng3310; diff check đạt. Bộ12/48 tổ hợp của đợt triển khai trước được ghi riêng bên dưới, không gọi là lượt kiểm tra mới này. Push Git và Railway deploy là hai trạng thái riêng; **deployment/runtime Railway của commit giao diện chưa được xác minh**. Kiểm tra Git remote để xác nhận commit cuối; các ghi chú chưa push đợt Forest bên dưới thuộc thời điểm trước yêu cầu này.
+
+## Đồng bộ chữ nhỏ, màu khung và icon khu rừng tri thức — 12/10/2026
+
+Theo yêu cầu từ ảnh tổng quan giáo viên: chuyển slogan/chữ nhỏ **xuống dưới tiêu đề chính** cho đầu trang giáo viên/học sinh/Admin; cỡ12px desktop,11px≤700px. Áp dụng PageHeading chung, Accounts/ClassCommunity/GroupActivities và learning-heading; giữ mô tả lớp/môn bên dưới. Frame nội dung dùng bốn màu gradient xanh lá/vàng mật ong/xanh trời/tím hoa, viền cùng màu; giữ hiển thị đang chọn/đúng-sai/cảnh báo/cấp cây và những khung nghiệp vụ đặc thù.
+
+Đã tạo `src/forest-theme.css` nạp cuối sau portrait-navigation và `ForestIcon` SVG dùng chung: lá/mầm/đốm sáng, nền mềm nhiều màu, icon nghiệp vụ vẫn nhận biết được. Dùng trong menu cả ba vai trò, thao tác tài khoản portrait, thống kê/thẻ thao tác/lớp/nhóm, mục tiêu học tập, vinh danh/empty state. Icon trang trí aria-hidden, label/tooltip và nút44px giữ nguyên; hover nhẹ và reduced-motion. Header trên phải/menu đáy portrait tiếp tục hoạt động. Chỉ sửa frontend/theme; giữ các thay đổi online/backend/tài liệu đang có từ task song song. Ghi chú thiếu forest-theme.css trong phần bàn giao trước là trạng thái lúc task Forest chưa tạo file; **file đã hoàn tất và checkout hiện tại đã build thành công**.
+
+Kiểm tra **mới đợt Forest**: TypeScript và Vite build riêng `.local/forest-theme-build` đạt; **12/12 E2E portrait-navigation/account-popups desktop/mobile** trên SQLite/server riêng3308 đạt (ba vai trò,320/390/768/1024,neo/đổi lớp/modal/đăng xuất/xoay). Rà soát trình duyệt **48 tổ hợp trang×vai trò×desktop1440/mobile390**, tiêu đề/chữ nhỏ đúng thứ tự, không tràn ngang hoặc lỗiJS; đã xem ảnh tổng quan giáo viên/học sinh, nhóm/ôn-thi và quản trị. QA tại `.local/forest-preview/summary.json` và PNG, script/config riêng `.local/forest-preview.mjs`/`forest-check.config.ts`. Lượt đầu sửa cwd config và accessible name Góp ý học sinh trong script QA rồi chạy lại đạt; không sửa hành vi sản phẩm để vượt test. Không chạy lại backend hoặc báo kết quả120backend/26E2E của đợt khác thành kiểm tra Forest.
+
+`npm run local -- -Action Status` xác nhận frontend5173 đang chạy/HMR; GET nguồn forest-theme.css trả200. API/database vẫn Railway, các kiểm thử/ảnh chỉ dùng database riêng, không ghi dữ liệu thật. **Chưa commit/push/deploy Railway đợt Forest.** Thiết kế hiện hành tại [app-design.md](app-design.md).
+
+
 ## Thông báo deploy Railway tới ntfy/Android — 12/10/2026
 
 Theo yêu cầu triển khai, thêm `.github/workflows/railway-ntfy.yml` và [hướng dẫn ntfy](deploy-notifications.md). Đã kiểm tra GitHub API thật: Actions bật, Railway tạo deployment bởi `railway-app[bot]`, môi trường **`zooming-light / production`**; deployment `7005473243` của `f7a655a` đã có trạng thái success. Workflow nhận `deployment_status`, lọc success/bot/môi trường/không transient, không dùng `states` sai schema; có workflow_dispatch gửi **Test thông báo** riêng. Python inline không checkout/build/deploy hoặc đọc/ghi API/DB GreenEdu; payload chỉ trạng thái/mã commit ngắn/link web, topic/token không in log, kiểm tra receipt ntfy và retry có giới hạn.

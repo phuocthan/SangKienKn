@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { api, ApiError, duration, errorMessage } from "./api";
 import { StudentLevelIcon } from "./StudentLevel";
+import { ForestIcon } from "./components";
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { ExamUpload, type UploadedExamQuestion } from "./ExamUpload";
 import { ExamBank, type ExamBankSelection } from "./ExamBank";
@@ -261,7 +262,6 @@ export function Learning({
     <div className="learning-workspace">
       <div className="learning-heading">
         <div>
-          <span className="eyebrow">HỌC VỮNG · THI TỰ TIN</span>
           <h1>
             {onlinePage
               ? teacher
@@ -269,6 +269,7 @@ export function Learning({
                 : "Kiểm tra online"
               : "Ôn tập & kiểm tra"}
           </h1>
+          <span className="eyebrow">HỌC VỮNG · THI TỰ TIN</span>
           <p>
             {onlinePage
               ? teacher
@@ -1239,9 +1240,9 @@ function LevelSettings({
       aria-labelledby="level-settings-title"
     >
       <div className="level-settings-heading">
-        <span className="level-settings-symbol">
+        <ForestIcon className="level-settings-symbol">
           <Clock3 size={23} />
-        </span>
+        </ForestIcon>
         <div>
           <h2 id="level-settings-title">Thời gian tăng cấp</h2>
           <p>

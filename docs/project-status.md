@@ -1,5 +1,16 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Đưa theme Forest lên Git theo yêu cầu — 12/10/2026
+
+Đợt push riêng14 file giao diện/tài liệu trên remote `00a15b9`, giữ commit ntfy; không gom thay đổi backend/nhóm thi/Excel của task song song. TypeScript/build riêng và **12/12 E2E portrait/account-popups mới trên checkout chuẩn bị push đạt**, không lấy12/48 tổ hợp của đợt triển khai thành lượt mới. Đích `origin/main`, không force; deployment/runtime Railway của commit mới chưa xác minh. Chi tiết và phạm vi tại [session-handoff.md](session-handoff.md).
+
+## Theme khu rừng tri thức áp dụng các trang — 12/10/2026
+
+Đã đưa chữ nhỏ xuống dưới tiêu đề (12px desktop/11px mobile) ở đầu trang cả ba vai trò; frame dùng xanh lá/vàng mật ong/xanh trời/tím hoa, giữ trạng thái chọn và các màu đúng/sai/cảnh báo. Bộ `ForestIcon` dùng chung thêm lá/mầm/đốm sáng cho menu, header portrait, thống kê, thẻ lớp/nhóm, mục tiêu/vinh danh và empty state. Theme `src/forest-theme.css` đã hoàn tất; trạng thái thiếu file trong bàn giao task song song trước đó đã được giải quyết bằng mã thật và build mới.
+
+**TypeScript/build riêng,12/12 E2E portrait/account-popups và48 tổ hợp trang/vai trò/desktop-mobile đạt** trên server/database kiểm thử riêng; đã xem ảnh, không tràn ngang/lỗiJS. Frontend5173/HMR đang chạy, nguồn CSS mới200/API vẫn Railway. Giữ toàn bộ thay đổi online/backend có sẵn, không ghi Railway/đổi database chính hoặc tự commit/push/deploy. Thiết kế và bằng chứng tại [app-design.md](app-design.md), [session-handoff.md](session-handoff.md).
+
+
 ## Thông báo deploy trên Android qua ntfy — 12/10/2026
 
 Đã thêm workflow **Railway deploy notification**: Railway → GitHub deployment_status success → ntfy → Android, lọc bot `railway-app[bot]` và môi trường thật `zooming-light / production`, loại transient. GitHub Secret `NTFY_TOPIC` đã cấu hình; topic ngẫu nhiên không đưa vào Git. Có nút Run workflow gửi tin thử ghi rõ Test. **Actionlint và 9/9 ca mock mới đạt**; không đổi ứng dụng/DB. Đưa riêng workflow/tài liệu lên main từ checkout riêng để giữ các thay đổi ứng dụng đang làm ở phiên khác; kết quả push/gửi thật/deploy mới kiểm tra sau thực hiện. Người dùng cần đăng ký topic trong app ntfy trên Android; thành công gửi tới ntfy không đồng nghĩa đã kiểm tra thiết bị. Xem [hướng dẫn](deploy-notifications.md), [bàn giao](session-handoff.md).

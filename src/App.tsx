@@ -31,6 +31,7 @@ import {
 import { api, ApiError, duration, errorMessage } from "./api";
 import {
   Empty,
+  ForestIcon,
   GardenIllustration,
   LinkButton,
   Logo,
@@ -369,7 +370,9 @@ export default function App() {
               aria-current={page === item.id ? "page" : undefined}
               onClick={() => navigate(item.id)}
             >
-              <item.icon size={20} />
+              <ForestIcon compact>
+                <item.icon size={20} />
+              </ForestIcon>
               <span>{item.label}</span>
               {item.id === "corrections" && openCorrections > 0 && (
                 <span className="nav-count">{openCorrections}</span>
@@ -395,7 +398,9 @@ export default function App() {
             aria-label={isTeacher ? "Quản lý góp ý" : "Góp ý"}
             onClick={() => navigate("feedback")}
           >
-            <MessageSquare size={19} />
+            <ForestIcon compact>
+              <MessageSquare size={19} />
+            </ForestIcon>
             {isTeacher ? "Quản lý góp ý" : "Góp ý"}
           </button>
           <button
@@ -403,11 +408,15 @@ export default function App() {
             aria-current={page === "settings" ? "page" : undefined}
             onClick={() => navigate("settings")}
           >
-            <Settings size={19} />
+            <ForestIcon compact>
+              <Settings size={19} />
+            </ForestIcon>
             Tài khoản
           </button>
           <button className="nav-item" onClick={() => void logout()}>
-            <LogOut size={19} />
+            <ForestIcon compact>
+              <LogOut size={19} />
+            </ForestIcon>
             Đăng xuất
           </button>
           <span className="sidebar-version">GREENEDU · MVP 0.1</span>
@@ -771,9 +780,9 @@ export default function App() {
                         className={`card class-card ${c.id === current.id ? "selected" : ""}`}
                         onClick={() => setClassId(c.id)}
                       >
-                        <span className="class-icon">
+                        <ForestIcon className="class-icon">
                           <Users size={25} />
-                        </span>
+                        </ForestIcon>
                         <h3>{c.name}</h3>
                         <p>
                           {c.subject} · Khối {c.grade}
@@ -1085,8 +1094,8 @@ function PageHeading({
   return (
     <div className="page-heading">
       <div>
-        <span className="eyebrow">{eyebrow}</span>
         <h1>{title}</h1>
+        <span className="eyebrow">{eyebrow}</span>
         <p>{text}</p>
       </div>
       {action}
@@ -1356,7 +1365,7 @@ function Stat({
 }) {
   return (
     <div className="stat-card card">
-      <span className={`stat-icon ${color}`}>{icon}</span>
+      <ForestIcon className={`stat-icon ${color}`}>{icon}</ForestIcon>
       <span className="stat-label">{label}</span>
       <strong>{value}</strong>
       <small>{note}</small>
@@ -1573,25 +1582,25 @@ function TeacherHome({
       />
       <div className="quick-actions">
         <button className="card" onClick={() => onEditor("student")}>
-          <span className="stat-icon green">
+          <ForestIcon className="stat-icon green">
             <Users size={22} />
-          </span>
+          </ForestIcon>
           <h3>Thêm học sinh</h3>
           <p>Tạo tài khoản và đưa học sinh vào lớp.</p>
           <ArrowRight size={18} />
         </button>
         <button className="card" onClick={() => onEditor("chapter")}>
-          <span className="stat-icon blue">
+          <ForestIcon className="stat-icon blue">
             <BookOpen size={22} />
-          </span>
+          </ForestIcon>
           <h3>Tạo chương học</h3>
           <p>Tổ chức kiến thức theo từng chặng.</p>
           <ArrowRight size={18} />
         </button>
         <button className="card" onClick={() => onPage("progress")}>
-          <span className="stat-icon amber">
+          <ForestIcon className="stat-icon amber">
             <TrendingUp size={22} />
-          </span>
+          </ForestIcon>
           <h3>Xem tiến độ</h3>
           <p>Tìm những học sinh cần hỗ trợ thêm.</p>
           <ArrowRight size={18} />

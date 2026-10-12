@@ -18,7 +18,13 @@ import {
 import { api, errorMessage } from "./api";
 import { Avatar } from "./Avatars";
 import { PortraitActions } from "./PortraitActions";
-import { Empty, GardenIllustration, Logo, Modal } from "./components";
+import {
+  Empty,
+  ForestIcon,
+  GardenIllustration,
+  Logo,
+  Modal,
+} from "./components";
 import type { User } from "./types";
 
 type Account = User & { classCount: number };
@@ -90,7 +96,9 @@ export function AdminWorkspace({
             aria-current={page === "accounts" ? "page" : undefined}
             onClick={() => setPage("accounts")}
           >
-            <Users size={20} />
+            <ForestIcon compact>
+              <Users size={20} />
+            </ForestIcon>
             Quản lý tài khoản
           </button>
         </nav>
@@ -105,11 +113,15 @@ export function AdminWorkspace({
             aria-current={page === "settings" ? "page" : undefined}
             onClick={() => setPage("settings")}
           >
-            <Settings size={19} />
+            <ForestIcon compact>
+              <Settings size={19} />
+            </ForestIcon>
             Tài khoản
           </button>
           <button className="nav-item" onClick={() => void onLogout()}>
-            <LogOut size={19} />
+            <ForestIcon compact>
+              <LogOut size={19} />
+            </ForestIcon>
             Đăng xuất
           </button>
         </div>
@@ -152,8 +164,8 @@ export function AdminWorkspace({
             <>
               <div className="page-heading">
                 <div>
-                  <span className="eyebrow">TÀI KHOẢN CÁ NHÂN</span>
                   <h1>Bảo vệ tài khoản</h1>
+                  <span className="eyebrow">TÀI KHOẢN CÁ NHÂN</span>
                   <p>{user.email}</p>
                 </div>
               </div>
@@ -175,8 +187,8 @@ export function AdminWorkspace({
             <>
               <div className="page-heading">
                 <div>
-                  <span className="eyebrow">QUẢN TRỊ TOÀN TRƯỜNG</span>
                   <h1>Quản lý tài khoản</h1>
+                  <span className="eyebrow">QUẢN TRỊ TOÀN TRƯỜNG</span>
                   <p>
                     Tạo tài khoản giáo viên, học sinh và cấp lại mật khẩu khi
                     cần.
@@ -191,9 +203,9 @@ export function AdminWorkspace({
                 </button>
               </div>
               <div className="admin-welcome">
-                <span className="admin-welcome-icon">
+                <ForestIcon className="admin-welcome-icon">
                   <ShieldCheck size={26} />
-                </span>
+                </ForestIcon>
                 <div>
                   <strong>Kết nối lớp học, nuôi dưỡng tri thức.</strong>
                   <p>Mỗi tài khoản mở ra một hành trình học tập mới.</p>

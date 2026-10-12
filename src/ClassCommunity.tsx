@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Clock3, Flower2, RefreshCw, Users } from "lucide-react";
 import { api, duration, errorMessage } from "./api";
-import { Empty, SectionTitle } from "./components";
+import { Empty, ForestIcon, SectionTitle } from "./components";
 import { StudentLevelBadge } from "./StudentLevel";
 import { StudentGarden } from "./StudentGarden";
 import type {
@@ -73,10 +73,10 @@ export function ClassCommunity({
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">CÙNG NHAU LỚN LÊN · {classroom.name}</span>
           <h1>
             {page === "garden" ? "Khu vườn của lớp" : "Xếp hạng chăm chỉ"}
           </h1>
+          <span className="eyebrow">CÙNG NHAU LỚN LÊN · {classroom.name}</span>
           <p>
             {page === "garden"
               ? "Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp."
@@ -105,17 +105,17 @@ export function ClassCommunity({
         <>
           <div className="stats-grid community-stats">
             <div className="stat-card card">
-              <span className="stat-icon rose">
+              <ForestIcon className="stat-icon rose">
                 <Flower2 size={21} />
-              </span>
+              </ForestIcon>
               <span className="stat-label">Cây đã ra hoa</span>
               <strong>{data.board.bloomedTrees}</strong>
               <small>Mỗi cây ứng với một học sinh và một chương</small>
             </div>
             <div className="stat-card card">
-              <span className="stat-icon">
+              <ForestIcon className="stat-icon">
                 <Users size={21} />
-              </span>
+              </ForestIcon>
               <span className="stat-label">Thành viên có hoạt động</span>
               <strong>
                 {data.board.activeStudents}/{data.board.participantCount}
@@ -123,9 +123,9 @@ export function ClassCommunity({
               <small>Đã học hoặc khắc phục lỗi sai trong lớp này</small>
             </div>
             <div className="stat-card card">
-              <span className="stat-icon blue">
+              <ForestIcon className="stat-icon blue">
                 <Clock3 size={21} />
-              </span>
+              </ForestIcon>
               <span className="stat-label">Thời gian học của lớp</span>
               <strong>{studyTime(data.board.totalSeconds)}</strong>
               <small>Tổng thời gian có hoạt động đã được ghi nhận</small>

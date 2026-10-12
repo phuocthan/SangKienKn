@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { api, errorMessage } from "./api";
 import { Avatar } from "./Avatars";
-import { Empty, Modal, SectionTitle } from "./components";
+import { Empty, ForestIcon, Modal, SectionTitle } from "./components";
 import { GroupDiscussion } from "./GroupDiscussion";
 import "./group-activities.css";
 import type { Classroom, User } from "./types";
@@ -172,8 +172,8 @@ export function GroupActivities({
     <div className="group-workspace">
       <div className="page-heading group-page-heading">
         <div className="group-heading-copy">
-          <span className="eyebrow">TRANG CỘNG TÁC</span>
           <h1>Hoạt động nhóm</h1>
+          <span className="eyebrow">TRANG CỘNG TÁC</span>
           <p>
             {classroom.name} ·{" "}
             {teacher
@@ -297,9 +297,9 @@ export function GroupActivities({
                 }}
               >
                 <div className="group-section-head">
-                  <span className="group-card-icon">
+                  <ForestIcon className="group-card-icon">
                     <Users size={22} />
-                  </span>
+                  </ForestIcon>
                   <span
                     className={`group-status ${now >= activity.deadlineAt ? "closed" : "open"}`}
                   >
