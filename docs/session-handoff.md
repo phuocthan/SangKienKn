@@ -1,5 +1,11 @@
 # Bàn giao session GreenEdu
 
+## Sửa vị trí icon portrait thành top right và push để autobuild
+
+Người dùng đính chính **top right**, đồng thời yêu cầu hoàn thành rồi push Git repo để autobuild. Đổi thứ tự grid header: account/avatar bên trái, ba icon Góp ý/Tài khoản/Đăng xuất ở góc trên phải, lớp ở hàng dưới. Giữ neo header/dock, quyền và hành vi; không thay backend hoặc ghi dữ liệu Railway. Cập nhật kiểm thử vị trí icon ở bên phải account và sát lề phải, các mô tả top left bên dưới là lịch sử. Đợt này được đưa vào commit để push `origin/main` theo yêu cầu; trạng thái autobuild/deployment cần phân biệt với kết quả push.
+
+Kiểm tra mới: TypeScript/Vite build riêng `.local/portrait-right-build` và diff check đạt; **6/6 E2E portrait-navigation desktop/mobile** đạt trên database riêng, gồm ba vai trò và portrait320/390/768/1024, neo/click/đổi lớp/modal/đăng xuất/rotate như bộ test hiện có. Đã xem ảnh390px giáo viên xác nhận icon trên phải. Không chạy lại backend hoặc bộ account-popup vì không thay hành vi/API; 12/12 ở đợt trước là bằng chứng của đợt trước. Kết quả deploy Railway chưa được xác minh ở lượt này.
+
 ## Push icon header portrait theo yêu cầu
 
 Sau khi hoàn thành bản icon và 12/12 E2E bên dưới, người dùng yêu cầu **Push git**. Đưa component PortraitActions, App/AdminWorkspace, CSS portrait, E2E và tài liệu liên quan vào commit để push `origin/main`; giữ các commit đã có, không force push và không đưa `.local`/database/ảnh kiểm thử lên Git. Ghi chú “chưa push” của đợt triển khai icon bên dưới là lịch sử trước yêu cầu này. Kết quả Railway tự deploy chưa được xác minh trong đợt Git này.

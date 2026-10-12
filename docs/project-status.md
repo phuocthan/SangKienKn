@@ -2,7 +2,7 @@
 
 ## Góp ý, Tài khoản, Đăng xuất lên header portrait
 
-Đã chuyển ba thao tác sang icon ở góc trên trái, neo cùng header; tên account/avatar bên phải, lớp ở hàng dưới. Dock đáy chỉ giữ điều hướng chính; landscape/desktop giữ sidebar. Admin có Tài khoản/Đăng xuất như quyền hiện có. Build/TypeScript và 12/12 E2E đạt bằng database riêng. Theo yêu cầu tiếp theo, đưa bản icon vào commit để push `origin/main`; chưa xác minh kết quả deploy Railway. Chi tiết/kiểm tra tại [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).
+Theo đính chính mới nhất, ba icon ở **góc trên phải**, neo cùng header; tên account/avatar bên trái, lớp ở hàng dưới. Dock đáy chỉ giữ điều hướng chính; landscape/desktop giữ sidebar. Admin có Tài khoản/Đăng xuất như quyền hiện có. Đợt icon trước có build/TypeScript và 12/12 E2E đạt bằng database riêng; vị trí mới kiểm tra riêng và đưa vào commit để push `origin/main` theo yêu cầu autobuild. Kết quả deploy Railway chưa được xác minh. Chi tiết/kiểm tra tại [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).
 
 ## Bố cục portrait: tài khoản/lớp ở trên, menu ở dưới
 

@@ -16,9 +16,9 @@
 
   .topbar {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
-      "actions profile"
+      "profile actions"
       "classroom classroom";
     gap: 8px 12px;
     position: sticky;

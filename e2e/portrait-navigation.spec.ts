@@ -66,7 +66,13 @@ for (const role of ["teacher", "student", "admin"] as const) {
       );
       const actionsBox = (await actions.boundingBox())!;
       const profileBox = (await header.locator(".profile").boundingBox())!;
-      expect(actionsBox.x).toBeLessThan(profileBox.x);
+      expect(actionsBox.x).toBeGreaterThanOrEqual(
+        profileBox.x + profileBox.width,
+      );
+      expect(actionsBox.x + actionsBox.width).toBeCloseTo(
+        viewport.width - 16,
+        0,
+      );
       expect(actionsBox.y + actionsBox.height).toBeLessThanOrEqual(
         (await header.boundingBox())!.height,
       );
