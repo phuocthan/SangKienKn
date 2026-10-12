@@ -38,7 +38,11 @@ test("student switches independent subject icons, sees all five stages and retai
       .all())
       await expect(step).toBeInViewport();
     const alignment = await timeline.evaluate((node) => {
-      const icons = [...node.querySelectorAll(".chapter-level-milestones svg")];
+      const icons = [
+        ...node.querySelectorAll(
+          ".chapter-level-milestones .student-level-icon",
+        ),
+      ];
       const ticks = [...node.querySelectorAll(".chapter-level-tick")];
       return icons.map((icon, index) => {
         const a = icon.getBoundingClientRect(),

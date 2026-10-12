@@ -1,5 +1,18 @@
 # Thiết kế giao diện GreenEdu
 
+## Góp ý trực quan: menu cũ, icon gốc và hành trình cam/vàng — 12/10/2026
+
+**Bổ sung theo ảnh tiếp theo:** bỏ breadcrumb “Trang học tập / Khu vườn của tôi” ở Tổng quan và đưa khối tiêu đề/chào, chữ nhỏ và mô tả lên header desktop cạnh bộ chọn lớp/account. Áp dụng Tổng quan giáo viên và học sinh; màn hình hẹp tự xuống hàng để không đè nhau. Portrait/compact giữ account/lớp neo trên, tiêu đề trong nội dung ngay dưới, chỉ một h1 hiển thị; không đưa thêm chữ lớn vào header điện thoại. Các trang nghiệp vụ khác giữ breadcrumb hiện có. Khi vào phiên luyện từ trang chủ, header dùng điều hướng của phiên như cũ.
+
+Yêu cầu mới **thay quyết định gom menu**: giáo viên/học sinh trở lại9 mục riêng theo thứ tự cũ, không menu cha/submenu. SidebarNavigation chỉ render danh sách phẳng; bỏ CSS/ca kiểm thử riêng của accordion, helper navigation chuyển sang bấm mục trực tiếp. Portrait vẫn header trên/menu đáy, Admin giữ menu đơn. **Khôi phục icon Lucide gốc** ở menu/thống kê/tài khoản/lớp/nhóm/mục tiêu/vinh danh/empty state; bỏ ForestIcon, lá/mầm/đốm sáng gắn thêm và CSS trang trí. Giữ SVG cấp độ Mầm→Kết Trái vì đó là trạng thái học tập thật, không phải mầm trang trí lặp lại.
+
+Theo ảnh góp ý: progress-track dùng thanh dày bo tròn và gradient đồng/cam→vàng, nền kem; áp dụng thẻ chương/mục tiêu/phiên luyện/tổng hợp dùng thành phần này. Tên chương trong thẻ học, timeline và điều kiện ôn-thi có nền pill đào; lời nhắc còn bao lâu lên cấp có nền vàng nhạt, gọi tên giai đoạn kế tiếp thay số cấp trên thẻ chương/mục tiêu. Các số phút/tỷ lệ/cấp vẫn dùng dữ liệu và mốc hiện có, không đổi cách tính.
+
+Lộ trình từng chương đổi rail thẳng sang SVG đường lượn nối5 mốc: mốc đã đạt có dấu kiểm, hiện tại nền vàng, tương lai icon xám/khoá. Rail vẫn progressbar với thời gian thật/min-max; phần tô màu cắt theo tỷ lệ trên trục ngang để khớp mốc dù co giãn desktop/mobile (không dùng dash với non-scaling-stroke vì có thể lệch). Tick/nhãn/icon giữ căn giữa cùng cột, không đổi thời gian/điều kiện tiến cấp. Sidebar note nền mint sáng, chữ nghiêng, minh họa vector chậu cây/cáo ở góc; chỉ trang trí tại lời nhắc, không gắn lên mọi icon. Asset `public/assets/garden-note-friends.svg`.
+
+Người dùng đã chọn **giữ câu “Gieo nỗ lực hôm nay, đón tri thức ngày mai” nhưng thu gọn**, không bỏ; h2 banner học sinh21–26px, mô tả14px, nút Tiếp tục luyện tập và nút luyện từng chương màu đồng/cam. Nút Xem hành trình giữ viền xanh. `src/learning-journey.css` nạp cuối dùng chung cho các chi tiết này; giữ palette khung đa sắc trước đó, trạng thái đúng/sai/cảnh báo và dữ liệu. Kết quả QA/push mới ghi ở bàn giao, không suy Railway deploy từ mã local.
+
+
 ## Menu trái gom nhóm và submenu — 12/10/2026
 
 Theo yêu cầu menu trái gọn hơn, giáo viên có **4 mục cấp đầu**: Tổng quan; Lớp học → Lớp học của tôi/Hoạt động nhóm; Dạy học & kiểm tra → Ngân hàng câu hỏi/Ôn tập & kiểm tra/Quản lý kiểm tra online; Khu rừng tri thức → Tiến độ học tập/Khu vườn của lớp/Xếp hạng chăm chỉ. Học sinh có **5 mục cấp đầu**: Khu vườn của tôi/Hành trình của tôi; Học tập → Luyện tập/Sổ tay sửa sai; Kiểm tra → Ôn tập & kiểm tra/Kiểm tra online; Cùng lớp → Hoạt động nhóm/Khu vườn của lớp/Xếp hạng chăm chỉ. Admin giữ mục Quản lý tài khoản riêng vì không có nhiều chức năng để nhóm.

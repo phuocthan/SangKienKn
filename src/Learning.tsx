@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { api, ApiError, duration, errorMessage } from "./api";
 import { StudentLevelIcon } from "./StudentLevel";
-import { ForestIcon } from "./components";
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { ExamUpload, type UploadedExamQuestion } from "./ExamUpload";
 import { ExamBank, type ExamBankSelection } from "./ExamBank";
@@ -1240,9 +1239,9 @@ function LevelSettings({
       aria-labelledby="level-settings-title"
     >
       <div className="level-settings-heading">
-        <ForestIcon className="level-settings-symbol">
+        <span className="level-settings-symbol">
           <Clock3 size={23} />
-        </ForestIcon>
+        </span>
         <div>
           <h2 id="level-settings-title">Thời gian tăng cấp</h2>
           <p>

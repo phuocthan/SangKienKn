@@ -18,13 +18,7 @@ import {
 import { api, errorMessage } from "./api";
 import { Avatar } from "./Avatars";
 import { PortraitActions } from "./PortraitActions";
-import {
-  Empty,
-  ForestIcon,
-  GardenIllustration,
-  Logo,
-  Modal,
-} from "./components";
+import { Empty, GardenIllustration, Logo, Modal } from "./components";
 import type { User } from "./types";
 
 type Account = User & { classCount: number };
@@ -96,9 +90,7 @@ export function AdminWorkspace({
             aria-current={page === "accounts" ? "page" : undefined}
             onClick={() => setPage("accounts")}
           >
-            <ForestIcon compact>
-              <Users size={20} />
-            </ForestIcon>
+            <Users size={20} />
             Quản lý tài khoản
           </button>
         </nav>
@@ -113,15 +105,11 @@ export function AdminWorkspace({
             aria-current={page === "settings" ? "page" : undefined}
             onClick={() => setPage("settings")}
           >
-            <ForestIcon compact>
-              <Settings size={19} />
-            </ForestIcon>
+            <Settings size={19} />
             Tài khoản
           </button>
           <button className="nav-item" onClick={() => void onLogout()}>
-            <ForestIcon compact>
-              <LogOut size={19} />
-            </ForestIcon>
+            <LogOut size={19} />
             Đăng xuất
           </button>
         </div>
@@ -203,9 +191,9 @@ export function AdminWorkspace({
                 </button>
               </div>
               <div className="admin-welcome">
-                <ForestIcon className="admin-welcome-icon">
+                <span className="admin-welcome-icon">
                   <ShieldCheck size={26} />
-                </ForestIcon>
+                </span>
                 <div>
                   <strong>Kết nối lớp học, nuôi dưỡng tri thức.</strong>
                   <p>Mỗi tài khoản mở ra một hành trình học tập mới.</p>

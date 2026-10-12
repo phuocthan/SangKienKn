@@ -12,6 +12,7 @@ import "./student-level.css";
 import "./garden.css";
 import "./portrait-navigation.css";
 import "./forest-theme.css";
+import "./learning-journey.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

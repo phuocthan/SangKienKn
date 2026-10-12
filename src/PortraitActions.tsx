@@ -1,5 +1,4 @@
 import { LogOut, MessageSquare, Settings } from "lucide-react";
-import { ForestIcon } from "./components";
 
 export function PortraitActions({
   page,
@@ -29,9 +28,7 @@ export function PortraitActions({
           aria-current={page === "feedback" ? "page" : undefined}
           onClick={onFeedback}
         >
-          <ForestIcon compact>
-            <MessageSquare size={20} />
-          </ForestIcon>
+          <MessageSquare size={20} aria-hidden="true" />
         </button>
       )}
       <button
@@ -42,9 +39,7 @@ export function PortraitActions({
         aria-current={page === "settings" ? "page" : undefined}
         onClick={onAccount}
       >
-        <ForestIcon compact>
-          <Settings size={20} />
-        </ForestIcon>
+        <Settings size={20} aria-hidden="true" />
       </button>
       <button
         type="button"
@@ -53,9 +48,7 @@ export function PortraitActions({
         title="Đăng xuất"
         onClick={onLogout}
       >
-        <ForestIcon compact>
-          <LogOut size={20} />
-        </ForestIcon>
+        <LogOut size={20} aria-hidden="true" />
       </button>
     </div>
   );

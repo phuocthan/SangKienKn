@@ -31,7 +31,6 @@ import {
 import { api, ApiError, duration, errorMessage } from "./api";
 import {
   Empty,
-  ForestIcon,
   GardenIllustration,
   LinkButton,
   Logo,
@@ -47,11 +46,7 @@ import { GroupActivities } from "./GroupActivities";
 import { Feedback } from "./Feedback";
 import { AdminWorkspace } from "./Accounts";
 import { PortraitActions } from "./PortraitActions";
-import {
-  SidebarNavigation,
-  type NavigationItem,
-  type NavigationGroup,
-} from "./SidebarNavigation";
+import { SidebarNavigation, type NavigationItem } from "./SidebarNavigation";
 import { Avatar, AvatarPicker } from "./Avatars";
 import {
   ChapterLevelTimeline,
@@ -360,47 +355,21 @@ export default function App() {
     (n, c) => n + c.chapters.reduce((a, ch) => a + ch.openCorrections, 0),
     0,
   );
-  const navGroups: NavigationGroup<Page>[] = isTeacher
-    ? [
-        {
-          id: "classroom",
-          label: "Lớp học",
-          icon: Users,
-          pages: ["classes", "groups"],
-        },
-        {
-          id: "teaching",
-          label: "Dạy học & kiểm tra",
-          icon: BookOpen,
-          pages: ["questions", "learning", "online-exams"],
-        },
-        {
-          id: "forest",
-          label: "Khu rừng tri thức",
-          icon: Sprout,
-          pages: ["progress", "garden", "leaderboard"],
-        },
-      ]
-    : [
-        {
-          id: "study",
-          label: "Học tập",
-          icon: BookOpen,
-          pages: ["practice", "corrections"],
-        },
-        {
-          id: "assessment",
-          label: "Kiểm tra",
-          icon: ClipboardList,
-          pages: ["learning", "online-exams"],
-        },
-        {
-          id: "community",
-          label: "Cùng lớp",
-          icon: Users,
-          pages: ["groups", "garden", "leaderboard"],
-        },
-      ];
+  const homeHeading =
+    page === "home" && current && !study
+      ? {
+          eyebrow: isTeacher
+            ? "CÙNG HỌC SINH GIEO NHỮNG MẦM XANH"
+            : "HỌC MỘT CHÚT · LỚN MỘT CHÚT",
+          title: isTeacher
+            ? "Một lớp học, nhiều cơ hội lớn lên."
+            : `Chào ${user.name.split(" ").slice(-2).join(" ")}, hôm nay mình học gì?`,
+          text: isTeacher
+            ? `${current.name} · ${current.subject} · Giáo viên ${current.teacherName}`
+            : "Khu vườn nhỏ đang lớn lên từ những cố gắng của bạn.",
+        }
+      : null;
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -414,7 +383,6 @@ export default function App() {
               ? { ...item, count: openCorrections }
               : item,
           )}
-          groups={navGroups}
           page={page}
           onNavigate={navigate}
         />
@@ -429,6 +397,14 @@ export default function App() {
                 ? "Cùng học sinh gieo những hạt mầm tri thức."
                 : "Không cần đi thật nhanh. Chỉ cần tiếp tục lớn lên."}
             </p>
+            <img
+              className="sidebar-note-art"
+              src="/assets/garden-note-friends.svg"
+              alt=""
+              width={120}
+              height={88}
+              aria-hidden="true"
+            />
           </div>
           <button
             className={`nav-item ${page === "feedback" ? "active" : ""}`}
@@ -436,9 +412,7 @@ export default function App() {
             aria-label={isTeacher ? "Quản lý góp ý" : "Góp ý"}
             onClick={() => navigate("feedback")}
           >
-            <ForestIcon compact>
-              <MessageSquare size={19} />
-            </ForestIcon>
+            <MessageSquare size={19} />
             {isTeacher ? "Quản lý góp ý" : "Góp ý"}
           </button>
           <button
@@ -446,22 +420,20 @@ export default function App() {
             aria-current={page === "settings" ? "page" : undefined}
             onClick={() => navigate("settings")}
           >
-            <ForestIcon compact>
-              <Settings size={19} />
-            </ForestIcon>
+            <Settings size={19} />
             Tài khoản
           </button>
           <button className="nav-item" onClick={() => void logout()}>
-            <ForestIcon compact>
-              <LogOut size={19} />
-            </ForestIcon>
+            <LogOut size={19} />
             Đăng xuất
           </button>
           <span className="sidebar-version">GREENEDU · MVP 0.1</span>
         </div>
       </aside>
       <div className="main-shell">
-        <header className="topbar">
+        <header
+          className={`topbar ${homeHeading ? "home-heading-topbar" : ""}`}
+        >
           <PortraitActions
             page={page}
             feedbackLabel={isTeacher ? "Quản lý góp ý" : "Góp ý"}
@@ -469,11 +441,15 @@ export default function App() {
             onAccount={() => navigate("settings")}
             onLogout={() => void logout()}
           />
-          <div className="breadcrumb">
-            Trang {isTeacher ? "giáo viên" : "học tập"}
-            <span>/</span>
-            <strong>{pageNames[page]}</strong>
-          </div>
+          {homeHeading ? (
+            <PageHeading {...homeHeading} />
+          ) : (
+            <div className="breadcrumb">
+              Trang {isTeacher ? "giáo viên" : "học tập"}
+              <span>/</span>
+              <strong>{pageNames[page]}</strong>
+            </div>
+          )}
           <div className="topbar-right">
             {current && (
               <label className="class-switch">
@@ -677,22 +653,19 @@ export default function App() {
                 ) : (
                   <div className="student-home">
                     <PageHeading
+                      className="home-content-heading"
                       eyebrow="HỌC MỘT CHÚT · LỚN MỘT CHÚT"
                       title={`Chào ${user.name.split(" ").slice(-2).join(" ")}, hôm nay mình học gì?`}
                       text="Khu vườn nhỏ đang lớn lên từ những cố gắng của bạn."
                     />
                     <div className="garden-welcome-grid">
-                      <div className="garden-hero">
+                      <div className="garden-hero student-welcome-hero">
                         <div className="hero-copy">
                           <span className="pill hero-pill">
                             <Leaf size={14} />
                             KHU VƯỜN KIẾN THỨC
                           </span>
-                          <h2>
-                            Gieo nỗ lực hôm nay,
-                            <br />
-                            đón tri thức ngày mai.
-                          </h2>
+                          <h2>Gieo nỗ lực hôm nay, đón tri thức ngày mai.</h2>
                           <p>
                             {totalSeconds
                               ? `Bạn đã dành ${duration(totalSeconds)} để chăm khu vườn ${current.subject}. Tiếp tục hành trình của mình nhé.`
@@ -818,9 +791,9 @@ export default function App() {
                         className={`card class-card ${c.id === current.id ? "selected" : ""}`}
                         onClick={() => setClassId(c.id)}
                       >
-                        <ForestIcon className="class-icon">
+                        <span className="class-icon">
                           <Users size={25} />
-                        </ForestIcon>
+                        </span>
                         <h3>{c.name}</h3>
                         <p>
                           {c.subject} · Khối {c.grade}
@@ -1123,14 +1096,16 @@ function PageHeading({
   title,
   text,
   action,
+  className = "",
 }: {
   eyebrow: string;
   title: string;
   text: string;
   action?: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="page-heading">
+    <div className={`page-heading ${className}`}>
       <div>
         <h1>{title}</h1>
         <span className="eyebrow">{eyebrow}</span>
@@ -1403,7 +1378,7 @@ function Stat({
 }) {
   return (
     <div className="stat-card card">
-      <ForestIcon className={`stat-icon ${color}`}>{icon}</ForestIcon>
+      <span className={`stat-icon ${color}`}>{icon}</span>
       <span className="stat-label">{label}</span>
       <strong>{value}</strong>
       <small>{note}</small>
@@ -1454,7 +1429,19 @@ function ChapterGrid({
                 {ch.questionCount} câu hỏi
               </span>
             </div>
-            <div className="progress-track">
+            <div
+              className="progress-track"
+              role="progressbar"
+              aria-label={`Tiến độ ${ch.title}`}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(
+                Math.min(
+                  100,
+                  (ch.seconds / (4 * (ch.levelMinutes ?? 60) * 60)) * 100,
+                ),
+              )}
+            >
               <span
                 style={{
                   width: `${Math.min(100, (ch.seconds / (4 * (ch.levelMinutes ?? 60) * 60)) * 100)}%`,
@@ -1464,8 +1451,8 @@ function ChapterGrid({
             <div className="chapter-progress">
               <span>
                 {ch.level === 5
-                  ? "Cây đã ra hoa!"
-                  : `Còn ${duration(ch.level * (ch.levelMinutes ?? 60) * 60 - ch.seconds)} đến cấp ${ch.level + 1}`}
+                  ? "Đã đạt Kết Trái."
+                  : `Còn ${duration(ch.level * (ch.levelMinutes ?? 60) * 60 - ch.seconds)} để lên ${stages[ch.level]}.`}
               </span>
               <strong>
                 {Math.round(
@@ -1549,6 +1536,7 @@ function TeacherHome({
   return (
     <>
       <PageHeading
+        className="home-content-heading"
         eyebrow="CÙNG HỌC SINH GIEO NHỮNG MẦM XANH"
         title="Một lớp học, nhiều cơ hội lớn lên."
         text={`${classroom.name} · ${classroom.subject} · Giáo viên ${classroom.teacherName}`}
@@ -1620,25 +1608,25 @@ function TeacherHome({
       />
       <div className="quick-actions">
         <button className="card" onClick={() => onEditor("student")}>
-          <ForestIcon className="stat-icon green">
+          <span className="stat-icon green">
             <Users size={22} />
-          </ForestIcon>
+          </span>
           <h3>Thêm học sinh</h3>
           <p>Tạo tài khoản và đưa học sinh vào lớp.</p>
           <ArrowRight size={18} />
         </button>
         <button className="card" onClick={() => onEditor("chapter")}>
-          <ForestIcon className="stat-icon blue">
+          <span className="stat-icon blue">
             <BookOpen size={22} />
-          </ForestIcon>
+          </span>
           <h3>Tạo chương học</h3>
           <p>Tổ chức kiến thức theo từng chặng.</p>
           <ArrowRight size={18} />
         </button>
         <button className="card" onClick={() => onPage("progress")}>
-          <ForestIcon className="stat-icon amber">
+          <span className="stat-icon amber">
             <TrendingUp size={22} />
-          </ForestIcon>
+          </span>
           <h3>Xem tiến độ</h3>
           <p>Tìm những học sinh cần hỗ trợ thêm.</p>
           <ArrowRight size={18} />

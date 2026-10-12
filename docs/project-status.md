@@ -1,5 +1,16 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Đưa bản góp ý UI lên remote — 12/10/2026
+
+Push riêng23 file menu/icon gốc/UI cam-vàng/asset/test/tài liệu, giữ các thay đổi ôn-thi/backend song song. Bỏ breadcrumb Tổng quan và đưa tiêu đề/chào lên header desktop; portrait chỉ một h1 trong nội dung, account/dock cũ. TypeScript/build và **20/20 E2E cuối trên đúng checkout push đạt** sau header mới; **34/34 trước đó** xác nhận clip đường cong/italic/cấp độ và luồng cũ, ghi là lượt riêng. Đã xem ảnh cuối, hash14 file task song song giữ nguyên. Deployment/runtime Railway commit mới chưa xác minh; bằng chứng [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).
+
+## Trả menu/icon gốc; tiến độ và lộ trình theo ảnh góp ý — 12/10/2026
+
+Đã trả9 mục riêng giáo viên/học sinh, bỏ submenu và bộ icon Forest gắn mầm khắp nơi, dùng Lucide gốc. Giữ cây cấp độ thật. Thanh tiến độ cam/vàng/bo tròn, tên chương và lời nhắc lên tên cấp dạng pill; lộ trình cong5mốc với current/check/khóa. Sidebar note mint/italic/chậu cây-cáo một góc; banner giữ khẩu hiệu nhưng thu gọn theo lựa chọn1, CTA luyện màu đồng. Không đổi API/DB/cách tính thời gian/điểm.
+
+TypeScript/build riêng và **34/34 E2E desktop/mobile trước tinh chỉnh cuối đạt**, đã xem ảnh; đang QA clip đường tô/italic và bản push riêng. Theo quyền push ngay khi hoàn thành đã chốt, chuẩn bị commit UI/asset/test/tài liệu, giữ phần ôn-thi/backend song song; chưa suy deployment Railway. Chi tiết [app-design.md](app-design.md), [session-handoff.md](session-handoff.md).
+
+
 ## Đưa menu/submenu lên remote theo yêu cầu — 12/10/2026
 
 Push riêng24 file menu/UI/test/tài liệu từremote `9d50b10`, giữForest/ntfy và phần ôn-thi/backend đang làm tạilocal. TypeScript/build và **30/30 E2E desktop/mobile mới trên đúng checkout push đạt**, gồm nhóm menu/bàn phím/auto mở theo trang/resize, header/dock/avatar/tài khoản và các luồng cũ. Lượt đầu29/30 phát hiện thiếu đồng bộ matchMedia khi resize ngay lúc mount; đã sửa runtime và chạy lại30/30 đầy đủ. Không đổi assertion nghiệp vụ hoặc ghi dữ liệu Railway. Deployment/runtime Railway củacommit menu chưa xác minh; bằng chứng/giới hạn tại [session-handoff.md](session-handoff.md).

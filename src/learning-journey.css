@@ -1,0 +1,260 @@
+/* Warm learning accents from the user's visual feedback; data stays unchanged. */
+:root {
+  --journey-copper: #ad562b;
+  --journey-gold: #f1b63a;
+  --journey-cream: #fff0d2;
+}
+
+.progress-track {
+  height: 12px;
+  padding: 2px;
+  border-radius: 999px;
+  background: #f1dfc8;
+  box-shadow: inset 0 1px 2px #93613c12;
+}
+
+.progress-track > span {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--journey-copper),
+    var(--journey-gold)
+  );
+}
+
+:is(.chapter-body, .chapter-level-card, .hunt-chapter) > h3 {
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 11px;
+  border-radius: 14px;
+  background: #fae2c1;
+  color: #754326;
+  line-height: 1.5;
+}
+
+.chapter-progress > span,
+.chapter-level-next,
+.garden-goal-stage p {
+  display: inline-block;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: var(--journey-cream);
+  color: #77562f;
+  line-height: 1.6;
+}
+
+.chapter-progress {
+  align-items: center;
+  gap: 8px;
+}
+
+.chapter-progress > strong,
+.chapter-level-summary strong {
+  color: #a76128;
+}
+
+.chapter-level-milestones li {
+  position: relative;
+}
+
+.chapter-level-milestones .current {
+  background: #fff0cf;
+  color: #754326;
+  box-shadow: inset 0 0 0 1px #e8cf9b;
+}
+
+.chapter-level-milestones .locked {
+  color: #81867d;
+}
+
+.chapter-level-milestones .locked .student-level-icon {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.level-state-mark {
+  position: absolute;
+  top: 7px;
+  left: calc(50% + 13px);
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fffefa;
+  border-radius: 50%;
+  background: #e4e7e0;
+  color: #747b70;
+}
+
+.earned .level-state-mark {
+  background: #537c45;
+  color: white;
+}
+
+.chapter-level-rail {
+  height: 64px;
+  background: none;
+  border-radius: 0;
+}
+
+.chapter-level-path {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+}
+
+.journey-path-base {
+  stroke: #dfe4d9;
+  stroke-width: 2;
+  stroke-dasharray: 4 5;
+}
+
+.journey-path-fill {
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.chapter-level-tick {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fffefa;
+  border-radius: 50%;
+  background: #d2d8ca;
+  transform: translate(-50%, -50%);
+}
+
+.chapter-level-tick.earned {
+  background: var(--journey-copper);
+}
+
+.chapter-level-summary {
+  margin-top: 10px;
+}
+
+.sidebar .sidebar-note {
+  position: relative;
+  padding: 18px 15px 62px;
+  border: 2px solid #aec5b5;
+  border-radius: 18px;
+  background: #eaf4ee;
+  font-style: italic;
+  font-synthesis: style;
+}
+
+.sidebar .sidebar-note strong {
+  display: block;
+  color: #264a32;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.sidebar .sidebar-note p {
+  color: #355840;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.sidebar .sidebar-note .note-leaf,
+.sidebar .sidebar-note .note-leaf svg {
+  color: #315d3e;
+}
+
+.sidebar-note-art {
+  position: absolute;
+  right: 7px;
+  bottom: 5px;
+  width: 88px;
+  height: auto;
+  pointer-events: none;
+}
+
+.garden-welcome-grid .student-welcome-hero .hero-copy h2 {
+  font-size: clamp(21px, 1.65vw, 26px);
+  line-height: 1.4;
+}
+
+.student-welcome-hero h2 br {
+  display: none;
+}
+
+.garden-welcome-grid .student-welcome-hero .hero-copy {
+  padding: 24px;
+}
+
+.student-welcome-hero .hero-copy p {
+  font-size: 14px;
+}
+
+.chapter-body > .button,
+.student-welcome-hero .garden-hero-actions > .button.primary {
+  background: var(--journey-copper);
+  border-color: var(--journey-copper);
+  color: #fffaf3;
+}
+
+.chapter-body > .button:hover:not(:disabled),
+.student-welcome-hero
+  .garden-hero-actions
+  > .button.primary:hover:not(:disabled) {
+  background: #8c4423;
+  border-color: #8c4423;
+}
+
+.garden-goal .text-button {
+  color: #a65a2b;
+}
+
+@media (max-width: 600px) {
+  .chapter-level-rail {
+    height: 44px;
+  }
+
+  .level-state-mark {
+    left: calc(50% + 9px);
+    width: 14px;
+    height: 14px;
+  }
+
+  .garden-welcome-grid .student-welcome-hero .hero-copy {
+    padding: 22px 20px;
+  }
+}
+
+.home-content-heading {
+  display: none;
+}
+
+@media (min-width: 1101px), (min-width: 701px) and (orientation: landscape) {
+  .home-heading-topbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    padding-block: 22px 12px;
+    min-height: 0;
+  }
+
+  .home-heading-topbar > .page-heading {
+    flex: 1 1 360px;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .home-heading-topbar .topbar-right {
+    margin-left: auto;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 700px), (max-width: 1100px) and (orientation: portrait) {
+  .home-heading-topbar > .page-heading {
+    display: none;
+  }
+
+  .home-content-heading {
+    display: flex;
+  }
+}

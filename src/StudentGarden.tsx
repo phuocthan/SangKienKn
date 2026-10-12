@@ -3,7 +3,6 @@ import { Flower2, Leaf, Pause, Play, Sprout, Trophy } from "lucide-react";
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { Avatar } from "./Avatars";
 import { StudentLevelIcon } from "./StudentLevel";
-import { ForestIcon } from "./components";
 import type { ClassGardenMember, ClassTree } from "./types";
 import "./student-garden.css";
 
@@ -57,9 +56,9 @@ export function StudentGarden({
         aria-labelledby="garden-honors-title"
       >
         <header className="garden-honors-heading">
-          <ForestIcon className="garden-trophy">
+          <span className="garden-trophy">
             <Trophy size={25} />
-          </ForestIcon>
+          </span>
           <div>
             <span className="eyebrow">NHỮNG CÂY ĐÃ KẾT TRÁI</span>
             <h2 id="garden-honors-title">Vinh danh Kết Trái · Cấp 5</h2>

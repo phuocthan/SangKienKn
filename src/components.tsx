@@ -1,40 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { X, Leaf, Sprout, ArrowRight } from "lucide-react";
 
-export function ForestIcon({
-  children,
-  className = "",
-  compact = false,
-}: {
-  children: ReactNode;
-  className?: string;
-  compact?: boolean;
-}) {
-  return (
-    <span
-      className={`forest-icon ${compact ? "forest-icon--compact" : ""} ${className}`}
-      aria-hidden="true"
-    >
-      <svg className="forest-icon-foliage" viewBox="0 0 48 48" fill="none">
-        <path d="M32 13c-1-7 3-11 10-11 0 7-4 11-10 11Z" fill="#79b65b" />
-        <path d="M33 14c-6 0-9-3-9-8 6 0 9 3 9 8Z" fill="#b9d97b" />
-        <path
-          d="m32 15 6-8"
-          stroke="#4c8246"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-        />
-        <path
-          d="m8 33 1.6 3.4L13 38l-3.4 1.6L8 43l-1.6-3.4L3 38l3.4-1.6L8 33Z"
-          fill="#e6b653"
-        />
-        <circle cx="38" cy="36" r="2" fill="#df9c72" />
-      </svg>
-      {children}
-    </span>
-  );
-}
-
 export function Logo({ school = false }: { school?: boolean }) {
   return (
     <div className={`logo ${school ? "school-logo" : ""}`}>
@@ -272,9 +238,9 @@ export function Empty({
 }) {
   return (
     <div className="empty">
-      <ForestIcon className="empty-icon">
+      <span className="empty-icon">
         <Leaf size={27} />
-      </ForestIcon>
+      </span>
       <h3>{title}</h3>
       <p>{text}</p>
       {action}

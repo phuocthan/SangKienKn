@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { api, errorMessage } from "./api";
 import { Avatar } from "./Avatars";
-import { Empty, ForestIcon, Modal, SectionTitle } from "./components";
+import { Empty, Modal, SectionTitle } from "./components";
 import { GroupDiscussion } from "./GroupDiscussion";
 import "./group-activities.css";
 import type { Classroom, User } from "./types";
@@ -297,9 +297,9 @@ export function GroupActivities({
                 }}
               >
                 <div className="group-section-head">
-                  <ForestIcon className="group-card-icon">
+                  <span className="group-card-icon">
                     <Users size={22} />
-                  </ForestIcon>
+                  </span>
                   <span
                     className={`group-status ${now >= activity.deadlineAt ? "closed" : "open"}`}
                   >

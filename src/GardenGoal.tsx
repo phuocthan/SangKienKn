@@ -2,7 +2,6 @@ import { ArrowRight, Flower2, Target } from "lucide-react";
 import { studentLevel, STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { duration } from "./api";
 import { StudentLevelIcon } from "./StudentLevel";
-import { ForestIcon } from "./components";
 import type { Classroom } from "./types";
 
 export function GardenGoal({
@@ -28,9 +27,9 @@ export function GardenGoal({
   return (
     <section className="card garden-goal" aria-label="Mục tiêu học tập kế tiếp">
       <div className="garden-goal-heading">
-        <ForestIcon className="goal-symbol">
+        <span className="goal-symbol">
           <Target size={24} />
-        </ForestIcon>
+        </span>
         <span className="eyebrow">TỪNG CHÚT MỖI NGÀY</span>
       </div>
       <h2>
@@ -47,7 +46,7 @@ export function GardenGoal({
           <p>
             {stage.level === 5
               ? "Bạn đã đạt cấp cao nhất trong chương này."
-              : `Còn ${duration(stage.remainingSeconds)} để lên cấp kế tiếp.`}
+              : `Còn ${duration(stage.remainingSeconds)} để lên ${STUDENT_LEVEL_NAMES[stage.level]}.`}
           </p>
         </div>
       </div>
