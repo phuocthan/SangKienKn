@@ -43,6 +43,29 @@
 .exam-invitation button {
   flex-shrink: 0;
 }
+.exam-notice-dialog {
+  max-width: 490px;
+}
+.exam-notice-dialog > strong {
+  display: block;
+  font-size: var(--text-card);
+  color: #254e34;
+}
+.exam-notice-dialog > p {
+  margin: 8px 0;
+  color: #52684b;
+  line-height: 1.55;
+}
+.exam-notice-dialog .exam-notice-intro {
+  margin-bottom: 18px;
+}
+.exam-notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
 @media (max-width: 600px) {
   .exam-notices {
     padding: 14px;
@@ -54,5 +77,9 @@
   }
   .exam-invitation button {
     width: 100%;
+  }
+  .exam-notice-actions .button {
+    flex: 1;
+    min-width: 125px;
   }
 }

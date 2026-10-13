@@ -9,11 +9,15 @@ export async function navigateTo(
   await navigation.waitFor({ state: "visible" });
   const direct = navigation.getByRole("button", options);
   if (await direct.count()) return direct.click();
+  const teacher = await navigation.getByRole("button", { name: "Lớp học của tôi", exact: true }).count() > 0;
   const destinations = [
-    ["Hoạt động nhóm", "Lớp học của tôi"],
+    ["Hoạt động nhóm", teacher ? "Lớp học của tôi" : "Khu vườn của lớp"],
+    ["Sổ tay sửa sai", "Luyện tập"],
+    ["Khu vườn của lớp", "Lớp học của tôi"],
+    ["Quản lý lớp học", "Lớp học của tôi"],
     ["Tiến độ học tập", "Lớp học của tôi"],
     ["Hành trình của tôi", "Khu vườn của tôi"],
-    ["Xếp hạng chăm chỉ", "Khu vườn của lớp"],
+    ["Xếp hạng chăm chỉ", teacher ? "Lớp học của tôi" : "Khu vườn của lớp"],
   ];
   const match = destinations.find(([name]) =>
     typeof options.name === "string"
@@ -23,11 +27,11 @@ export async function navigateTo(
   if (!match)
     throw new Error(`Không có mục điều hướng: ${String(options.name)}`);
   await navigation.getByRole("button", { name: match[1], exact: true }).click();
-  if (
-    match[0] === "Tiến độ học tập" ||
-    match[0] === "Xếp hạng chăm chỉ" ||
-    match[0] === "Hành trình của tôi"
-  )
+  if (match[0] === "Tiến độ học tập" || match[0] === "Hành trình của tôi")
     return;
+  if (match[0] === "Xếp hạng chăm chỉ") {
+    if (teacher) await page.getByRole("tab", { name: "Khu vườn của lớp", exact: true }).click();
+    return;
+  }
   await page.getByRole("tab", options).click();
 }

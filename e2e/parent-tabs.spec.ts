@@ -16,9 +16,7 @@ for (const role of ["teacher", "student"] as const) {
     await page.goto("/");
     await page.setViewportSize({ width: 1440, height: 1000 });
     const nav = page.getByRole("navigation", { name: "Điều hướng chính" });
-    await expect(nav.getByRole("button")).toHaveCount(
-      role === "teacher" ? 6 : 7,
-    );
+    await expect(nav.getByRole("button")).toHaveCount(5);
     const landscapeBackground = await page
       .locator(".sidebar")
       .evaluate((node) => getComputedStyle(node).backgroundImage);
@@ -27,10 +25,13 @@ for (const role of ["teacher", "student"] as const) {
         ? [
             {
               label: "Lớp học của tôi",
-              items: ["Lớp học của tôi", "Hoạt động nhóm"],
+              items: ["Lớp học của tôi", "Hoạt động nhóm", "Khu vườn của lớp", "Quản lý lớp học"],
             },
           ]
-        : [];
+        : [
+            { label: "Luyện tập", items: ["Luyện tập", "Sổ tay sửa sai"] },
+            { label: "Khu vườn của lớp", items: ["Khu vườn của lớp", "Hoạt động nhóm"] },
+          ];
     for (const viewport of [
       { width: 1440, height: 1000 },
       { width: 390, height: 844 },
@@ -116,14 +117,14 @@ for (const role of ["teacher", "student"] as const) {
         ).toBeGreaterThan(0);
       }
     }
-    // Student collaboration remains a main destination.
+    // Student collaboration and corrections now live under their parent destinations.
     if (role === "student")
       await expect(
         nav.getByRole("button", { name: "Hoạt động nhóm", exact: true }),
-      ).toHaveCount(1);
+      ).toHaveCount(0);
     for (const hidden of role === "teacher"
-      ? ["Hoạt động nhóm", "Tiến độ học tập", "Xếp hạng chăm chỉ"]
-      : ["Hành trình của tôi", "Xếp hạng chăm chỉ"])
+      ? ["Hoạt động nhóm", "Khu vườn của lớp", "Tiến độ học tập", "Xếp hạng chăm chỉ"]
+      : ["Hoạt động nhóm", "Sổ tay sửa sai", "Hành trình của tôi", "Xếp hạng chăm chỉ"])
       await expect(
         nav.getByRole("button", { name: hidden, exact: true }),
       ).toHaveCount(0);

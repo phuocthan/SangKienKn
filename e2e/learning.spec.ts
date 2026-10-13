@@ -212,10 +212,8 @@ test("teacher controls chapter access; qualified students wait, opening another 
         })
       ).ok(),
     ).toBeTruthy();
-  await page.getByRole("button", { name: "Làm mới", exact: true }).click();
-  const permission = page.getByRole("region", {
-    name: "Quyền kiểm tra theo chương",
-  });
+  await navigateTo(page, { name: "Lớp học của tôi", exact: true });
+  const permission = page.locator(".chapter-list");
   const studentContext = await browser.newContext({
     viewport: page.viewportSize()!,
   });
@@ -480,14 +478,14 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
   browser,
 }, info) => {
   await login(page, true);
-  const permission = page.getByRole("region", {
-    name: "Quyền kiểm tra theo chương",
-  });
+  await navigateTo(page, { name: "Lớp học của tôi", exact: true });
+  const permission = page.locator(".chapter-list");
   const openChapter = permission.getByRole("button", {
     name: "Mở kiểm tra · Chương ôn I",
     exact: true,
   });
   if (await openChapter.count()) await openChapter.click();
+  await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
   await page.getByLabel("Tên bộ câu").fill(`Ôn ma trận ${info.project.name}`);
   await page
     .locator("fieldset")

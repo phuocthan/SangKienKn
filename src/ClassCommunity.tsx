@@ -184,7 +184,7 @@ function Ranking({
       />
     );
   return (
-    <div className="card community-ranking table-scroll">
+    <div className={`card community-ranking table-scroll ${kind}`}>
       <table
         aria-label={
           kind === "effort" ? "Xếp hạng chăm vườn" : "Xếp hạng sửa sai"

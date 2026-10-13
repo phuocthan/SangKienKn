@@ -47,7 +47,6 @@ export function Learning({
   user,
   onReview,
   onCorrections,
-  onSettingsChanged,
   entryRunId,
   onExamExit,
   view = "learning",
@@ -57,7 +56,6 @@ export function Learning({
   user: User;
   onReview: (id: string, chapter: Chapter) => void;
   onCorrections: (chapterId: string) => void;
-  onSettingsChanged?: () => void;
   entryRunId?: string;
   onExamExit?: () => void;
   view?: "learning" | "online";
@@ -313,79 +311,6 @@ export function Learning({
         <div className="loading-panel">Đang tải tiến độ…</div>
       ) : (
         <>
-          {teacher && !onlinePage && (
-            <LevelSettings
-              key={`${classroom.id}-${data.levelMinutes ?? 60}`}
-              minutes={data.levelMinutes ?? 60}
-              enabled={data.canConfigureLevels === true}
-              busy={busy}
-              onSave={(minutes) =>
-                act(async () => {
-                  await api(`/classrooms/${classroom.id}/level-settings`, {
-                    minutes,
-                  });
-                  onSettingsChanged?.();
-                }, "Đã lưu thời gian tăng cấp cho lớp.")
-              }
-            />
-          )}
-          {teacher && !onlinePage && (
-            <section
-              className="card learning-section"
-              aria-labelledby="chapter-exam-access"
-            >
-              <h2 id="chapter-exam-access">Quyền kiểm tra theo chương</h2>
-              <p>
-                Chỉ mở khi lớp đã học và ôn đến chương đó. Săn điểm vẫn yêu cầu
-                đủ thời gian, tỷ lệ đúng, sửa sai và vé. Khóa chương ngăn lượt
-                mới; lượt đang làm được hoàn thành.
-              </p>
-              <div className="learning-list">
-                {data.chapters.map((ch) => (
-                  <div className="learning-row" key={ch.id}>
-                    <div>
-                      <strong>{ch.title}</strong>
-                      <p
-                        className={ch.examAllowed ? "learning-ready" : "muted"}
-                      >
-                        {ch.examAllowed
-                          ? "Đã mở kiểm tra"
-                          : "Đang khóa kiểm tra"}
-                      </p>
-                    </div>
-                    <button
-                      className={`button ${ch.examAllowed ? "danger" : "primary"} small`}
-                      disabled={busy || typeof ch.examAllowed !== "boolean"}
-                      aria-label={`${ch.examAllowed ? "Khóa" : "Mở"} kiểm tra · ${ch.title}`}
-                      onClick={() =>
-                        void act(
-                          () =>
-                            api(`/chapters/${ch.id}/exam-access`, {
-                              enabled: !ch.examAllowed,
-                            }),
-                          ch.examAllowed
-                            ? "Đã khóa kiểm tra chương."
-                            : "Đã mở kiểm tra chương.",
-                        )
-                      }
-                    >
-                      {ch.examAllowed ? "Khóa kiểm tra" : "Mở kiểm tra"}
-                    </button>
-                  </div>
-                ))}
-              </div>
-              {data.chapters.some(
-                (ch) => typeof ch.examAllowed !== "boolean",
-              ) && (
-                <p className="muted">
-                  Chức năng mở kiểm tra theo chương đang chờ cập nhật server.
-                </p>
-              )}
-              {!data.chapters.length && (
-                <p className="muted">Tạo chương để thiết lập quyền kiểm tra.</p>
-              )}
-            </section>
-          )}
           {!teacher && !onlinePage && (
             <section aria-labelledby="learning-eligibility">
               <h2 id="learning-eligibility">
@@ -1248,104 +1173,6 @@ export function Learning({
         </>
       )}
     </div>
-  );
-}
-
-function LevelSettings({
-  minutes,
-  enabled,
-  busy,
-  onSave,
-}: {
-  minutes: number;
-  enabled: boolean;
-  busy: boolean;
-  onSave: (minutes: number) => Promise<void>;
-}) {
-  const [draft, setDraft] = useState(String(minutes));
-  const value = Number(draft);
-  const valid =
-    draft.trim() !== "" &&
-    Number.isInteger(value) &&
-    value >= 1 &&
-    value <= 1440;
-  return (
-    <section
-      className="card learning-section level-settings"
-      aria-labelledby="level-settings-title"
-    >
-      <div className="level-settings-heading">
-        <span className="level-settings-symbol">
-          <Clock3 size={23} />
-        </span>
-        <div>
-          <h2 id="level-settings-title">Thời gian tăng cấp</h2>
-          <p>
-            Chọn nhịp lớn lên của khu vườn cho lớp này, áp dụng cho mọi chương.
-          </p>
-        </div>
-      </div>
-      <form
-        aria-label="Cài đặt thời gian tăng cấp"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (enabled && valid && value !== minutes && !busy)
-            void onSave(value);
-        }}
-      >
-        <div className="level-settings-controls">
-          <label>
-            Số phút cho mỗi cấp
-            <div className="level-settings-input">
-              <input
-                type="number"
-                min={1}
-                max={1440}
-                step={1}
-                required
-                value={draft}
-                disabled={busy || !enabled}
-                onChange={(e) => setDraft(e.target.value)}
-                aria-describedby="level-settings-help"
-              />
-              <span>phút</span>
-            </div>
-          </label>
-          <button
-            className="button primary"
-            disabled={busy || !enabled || !valid || value === minutes}
-          >
-            {busy ? "Đang lưu…" : "Lưu thời gian"}
-          </button>
-        </div>
-        <p id="level-settings-help" className="muted">
-          Mặc định 60 phút mỗi cấp · Có thể đặt từ 1 đến 1440 phút.
-        </p>
-        <ol
-          className="level-settings-preview"
-          aria-label="Xem trước mốc tăng cấp"
-        >
-          {STUDENT_LEVEL_NAMES.map((name, index) => (
-            <li key={name}>
-              <StudentLevelIcon level={index + 1} />
-              <strong>
-                Cấp {index + 1} · {name}
-              </strong>
-              <small>{valid ? duration(index * value * 60) : "—"}</small>
-            </li>
-          ))}
-        </ol>
-        <p className="muted">
-          Khi lưu, cấp độ tính lại từ thời gian đã học. Vé và điểm đã được cấp
-          vẫn được giữ.
-        </p>
-        {!enabled && (
-          <p role="status" className="muted">
-            Cài đặt này đang chờ cập nhật server Railway.
-          </p>
-        )}
-      </form>
-    </section>
   );
 }
 

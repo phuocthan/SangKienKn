@@ -1,0 +1,67 @@
+.class-management-card {
+  display: grid;
+  gap: 10px;
+  padding: 20px 24px;
+  max-width: 760px;
+}
+
+.class-management-card h2 {
+  margin: 0;
+  font-size: var(--text-section);
+}
+
+.class-management-card p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.class-management-card form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.class-management-card form label {
+  font-weight: 600;
+}
+
+.class-management-card input {
+  width: 110px;
+}
+
+.class-management-card small {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.class-chapter-access {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  min-width: 0;
+  padding-top: 8px;
+  border-top: 1px solid #dfe8d8;
+  color: var(--muted);
+  font-size: var(--text-caption);
+}
+
+.class-chapter-access .button {
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+@media (max-width: 600px) {
+  .class-management-card {
+    padding: 16px;
+  }
+  .class-management-card form label {
+    width: 100%;
+  }
+  .class-management-card form .button {
+    flex: 1;
+  }
+}

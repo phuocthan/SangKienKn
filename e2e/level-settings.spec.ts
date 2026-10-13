@@ -7,10 +7,10 @@ async function teacher(page: Page) {
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await page.getByLabel("Chọn lớp học").selectOption("levels-class-2");
-  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
+  await navigateTo(page, { name: "Quản lý lớp học", exact: true });
 }
 
-test("teacher saves class level minutes, preview and persisted student milestones agree", async ({
+test("teacher saves class level minutes and persisted student milestones agree", async ({
   page,
   request,
   browser,
@@ -28,31 +28,24 @@ test("teacher saves class level minutes, preview and persisted student milestone
   ).toBeTruthy();
   await teacher(page);
   const form = page.getByRole("form", { name: "Cài đặt thời gian tăng cấp" });
-  const input = form.getByLabel("Số phút cho mỗi cấp");
+  const input = form.getByLabel("Phút mỗi cấp");
   await expect(input).toHaveValue("60");
   await expect(
-    form.getByRole("button", { name: "Lưu thời gian" }),
+    form.getByRole("button", { name: "Lưu thay đổi" }),
   ).toBeDisabled();
   await input.fill("0");
   await expect(
-    form.getByRole("button", { name: "Lưu thời gian" }),
+    form.getByRole("button", { name: "Lưu thay đổi" }),
   ).toBeDisabled();
   await input.fill("30");
-  await expect(form.locator(".level-settings-preview li small")).toHaveText([
-    "0 phút",
-    "30 phút",
-    "1 giờ 0 phút",
-    "1 giờ 30 phút",
-    "2 giờ 0 phút",
-  ]);
-  await form.getByRole("button", { name: "Lưu thời gian" }).click();
+  await form.getByRole("button", { name: "Lưu thay đổi" }).click();
   await expect(page.getByRole("status")).toContainText(
     "Đã lưu thời gian tăng cấp cho lớp.",
   );
   await page.reload();
   // Page selection resets after a normal reload; reopen the teacher settings.
   await page.getByLabel("Chọn lớp học").selectOption("levels-class-2");
-  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
+  await navigateTo(page, { name: "Quản lý lớp học", exact: true });
   await expect(input).toHaveValue("30");
   await form.scrollIntoViewIfNeeded();
   expect(
@@ -60,7 +53,7 @@ test("teacher saves class level minutes, preview and persisted student milestone
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.locator(".level-settings").screenshot({
+  await page.locator(".class-management-card").screenshot({
     path: `.local/level-settings-${info.project.name}.png`,
     // Hide fixed navigation only for this cropped card capture.
     style: ".sidebar { visibility: hidden !important; }",
@@ -133,12 +126,12 @@ test("teacher cannot submit configuration to an older server without the capabil
   });
   await teacher(page);
   const form = page.getByRole("form", { name: "Cài đặt thời gian tăng cấp" });
-  await expect(form.getByLabel("Số phút cho mỗi cấp")).toBeDisabled();
+  await expect(form.getByLabel("Phút mỗi cấp")).toBeDisabled();
   await expect(
-    form.getByRole("button", { name: "Lưu thời gian" }),
+    form.getByRole("button", { name: "Lưu thay đổi" }),
   ).toBeDisabled();
-  await expect(form.getByRole("status")).toHaveText(
-    "Cài đặt này đang chờ cập nhật server Railway.",
+  await expect(page.locator(".class-management-card").getByRole("status")).toHaveText(
+    "Cài đặt này đang chờ cập nhật server.",
   );
   expect(writes).toBe(0);
 });

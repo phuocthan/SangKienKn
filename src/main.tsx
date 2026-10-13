@@ -17,6 +17,7 @@ import "./login.css";
 import "./workspace-tabs.css";
 import "./ui-refinement.css";
 import "./action-buttons.css";
+import "./mobile-density.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

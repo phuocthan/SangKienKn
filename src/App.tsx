@@ -63,6 +63,8 @@ import {
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { GardenGoal } from "./GardenGoal";
 import { GardenNote } from "./GardenNote";
+import type { LearningOverview } from "../shared/learning";
+import { ClassLevelSettings } from "./ClassLevelSettings";
 import {
   WorkspaceHeading,
   WorkspaceFrame,
@@ -81,6 +83,7 @@ type Page =
   | "online-exams"
   | "corrections"
   | "classes"
+  | "class-settings"
   | "groups"
   | "questions"
   | "progress"
@@ -122,7 +125,10 @@ export default function App() {
     if (section === "progress") return "home";
     return [
       "home",
+      "practice",
+      "corrections",
       "classes",
+      "class-settings",
       "groups",
       "progress",
       "garden",
@@ -174,7 +180,7 @@ export default function App() {
           );
         if (signedIn.role === "student") {
           setPage((restored) =>
-            restored === "classes" || restored === "progress"
+            restored === "classes" || restored === "class-settings" || restored === "progress"
               ? "home"
               : restored,
           );
@@ -211,6 +217,41 @@ export default function App() {
       setError(errorMessage(e));
     }
   }, [user]);
+  const [classLearning, setClassLearning] = useState<LearningOverview | null>(null);
+  const [classLearningError, setClassLearningError] = useState("");
+  const [classLearningBusy, setClassLearningBusy] = useState(false);
+  useEffect(() => {
+    if (!isTeacher || !current || !["classes", "class-settings"].includes(page))
+      return;
+    let active = true;
+    setClassLearning(null);
+    setClassLearningError("");
+    void api<LearningOverview>(`/classrooms/${current.id}/learning`)
+      .then((data) => {
+        if (active) setClassLearning(data);
+      })
+      .catch((error) => {
+        if (active) setClassLearningError(errorMessage(error));
+      });
+    return () => {
+      active = false;
+    };
+  }, [isTeacher, current?.id, page, revision]);
+  async function updateClassLearning(path: string, body: object, message: string) {
+    if (!current || classLearningBusy) return;
+    setClassLearningBusy(true);
+    setClassLearningError("");
+    try {
+      await api(path, body);
+      setClassLearning(await api<LearningOverview>(`/classrooms/${current.id}/learning`));
+      await reload();
+      setNotice(message);
+    } catch (error) {
+      setClassLearningError(errorMessage(error));
+    } finally {
+      setClassLearningBusy(false);
+    }
+  }
   useEffect(() => {
     if (!user || user.mustChange) return;
     setLoadingClasses(true);
@@ -225,7 +266,10 @@ export default function App() {
     if (
       [
         "home",
+        "practice",
+        "corrections",
         "classes",
+        "class-settings",
         "groups",
         "progress",
         "garden",
@@ -409,22 +453,27 @@ export default function App() {
           label: "Quản lý kiểm tra online",
           icon: ClipboardList,
         },
-        { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
       ]
     : [
         { id: "home", label: "Khu vườn của tôi", icon: Sprout },
         { id: "practice", label: "Luyện tập", icon: BookOpen },
         { id: "learning", label: "Ôn tập & kiểm tra", icon: Clock3 },
         { id: "online-exams", label: "Kiểm tra online", icon: ClipboardList },
-        { id: "groups", label: "Hoạt động nhóm", icon: Users },
-        { id: "corrections", label: "Sổ tay sửa sai", icon: CheckCircle2 },
         { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
       ];
   const parentPage: Page =
     page === "leaderboard"
       ? "garden"
-      : isTeacher && (page === "groups" || page === "progress")
+      : isTeacher &&
+          (page === "groups" ||
+            page === "progress" ||
+            page === "garden" ||
+            page === "class-settings")
         ? "classes"
+        : !isTeacher && page === "corrections"
+          ? "practice"
+          : !isTeacher && page === "groups"
+            ? "garden"
         : !isTeacher && page === "progress"
           ? "home"
           : page;
@@ -440,10 +489,29 @@ export default function App() {
           items: [
             { id: "classes", label: "Lớp học của tôi", icon: Users },
             { id: "groups", label: "Hoạt động nhóm", icon: Users },
+            { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
+            { id: "class-settings", label: "Quản lý lớp học", icon: Settings },
           ],
         },
       ]
-    : [];
+    : [
+        {
+          parent: "practice",
+          label: "Luyện tập",
+          items: [
+            { id: "practice", label: "Luyện tập", icon: BookOpen },
+            { id: "corrections", label: "Sổ tay sửa sai", icon: CheckCircle2 },
+          ],
+        },
+        {
+          parent: "garden",
+          label: "Khu vườn của lớp",
+          items: [
+            { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
+            { id: "groups", label: "Hoạt động nhóm", icon: Users },
+          ],
+        },
+      ];
   const activeTabs =
     !study && current
       ? tabGroups.find((group) => group.parent === parentPage)
@@ -548,6 +616,7 @@ export default function App() {
           {!isTeacher && (
             <ExamNotices
               key={user.id}
+              userId={user.id}
               inLearning={
                 (page === "learning" || page === "online-exams") && !study
               }
@@ -761,21 +830,6 @@ export default function App() {
                       classroom={current}
                       onCorrections={() => navigate("corrections")}
                     />
-                    <SectionTitle
-                      title="Những mầm xanh của bạn"
-                      description={`${current.subject} · ${current.name}`}
-                      action={
-                        <LinkButton onClick={() => navigate("practice")}>
-                          Xem bài luyện tập
-                        </LinkButton>
-                      }
-                    />
-                    <ChapterGrid
-                      classroom={current}
-                      onStudy={(ch, lesson) =>
-                        setStudy({ chapter: ch, mode: "practice", lesson })
-                      }
-                    />
                     <section
                       id="student-journey"
                       style={{ scrollMarginTop: 100 }}
@@ -807,7 +861,6 @@ export default function App() {
                     entryClassId === current.id ? entryRunId : undefined
                   }
                   onExamExit={() => setEntryRunId("")}
-                  onSettingsChanged={refresh}
                   onCorrections={(chapterId) =>
                     navigate("corrections", chapterId)
                   }
@@ -868,9 +921,14 @@ export default function App() {
                       </button>
                     }
                   />
+                  {classLearningError && (
+                    <div className="error-banner" role="alert">{classLearningError}</div>
+                  )}
                   <div className="chapter-list">
                     {current.chapters.length ? (
-                      current.chapters.map((ch, i) => (
+                      current.chapters.map((ch, i) => {
+                        const access = classLearning?.chapters.find((row) => row.id === ch.id);
+                        return (
                         <div className="card chapter-row" key={ch.id}>
                           <span className="chapter-index">
                             {String(i + 1).padStart(2, "0")}
@@ -899,8 +957,23 @@ export default function App() {
                           >
                             Quản lý câu hỏi
                           </LinkButton>
+                          <div className="class-chapter-access">
+                            <span>{access?.examAllowed ? "Kiểm tra đang mở" : "Kiểm tra đang khóa"}</span>
+                            <button
+                              className={`button ${access?.examAllowed ? "danger" : "primary"} small`}
+                              disabled={classLearningBusy || typeof access?.examAllowed !== "boolean"}
+                              aria-label={`${access?.examAllowed ? "Khóa" : "Mở"} kiểm tra · ${ch.title}`}
+                              onClick={() => void updateClassLearning(
+                                `/chapters/${ch.id}/exam-access`,
+                                { enabled: !access?.examAllowed },
+                                access?.examAllowed ? "Đã khóa kiểm tra chương." : "Đã mở kiểm tra chương.",
+                              )}
+                            >
+                              {access?.examAllowed ? "Khóa kiểm tra" : "Mở kiểm tra"}
+                            </button>
+                          </div>
                         </div>
-                      ))
+                      );})
                     ) : (
                       <Empty
                         title="Thêm chương học đầu tiên"
@@ -914,6 +987,33 @@ export default function App() {
                     onAdd={() => setEditor("student")}
                     onReset={(s) => setEditor({ student: s })}
                   />
+                </>
+              )}
+              {page === "class-settings" && (
+                <>
+                  <PageHeading
+                    eyebrow="QUẢN LÝ LỚP HỌC"
+                    title="Quản lý lớp học"
+                    text={`Điều chỉnh nhịp tăng cấp cho ${current.name}.`}
+                  />
+                  {classLearningError && (
+                    <div className="error-banner" role="alert">{classLearningError}</div>
+                  )}
+                  {classLearning ? (
+                    <ClassLevelSettings
+                      key={`${current.id}-${classLearning.levelMinutes ?? 60}`}
+                      minutes={classLearning.levelMinutes ?? 60}
+                      enabled={classLearning.canConfigureLevels === true}
+                      busy={classLearningBusy}
+                      onSave={(minutes) => updateClassLearning(
+                        `/classrooms/${current.id}/level-settings`,
+                        { minutes },
+                        "Đã lưu thời gian tăng cấp cho lớp.",
+                      )}
+                    />
+                  ) : !classLearningError ? (
+                    <div className="loading-panel">Đang tải cài đặt lớp…</div>
+                  ) : null}
                 </>
               )}
               {page === "questions" && (

@@ -157,13 +157,17 @@ export function Modal({
   children,
   onClose,
   className = "",
+  dismissible = true,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
   className?: string;
+  dismissible?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   const titleId = useId();
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
@@ -180,7 +184,7 @@ export function Modal({
     const initial = elements();
     (initial.find((e) => e.tagName !== "BUTTON") ?? initial[0])?.focus();
     function key(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape" && dismissible) onCloseRef.current();
       if (event.key === "Tab") {
         const all = elements(),
           first = all[0],
@@ -200,12 +204,12 @@ export function Modal({
       document.removeEventListener("keydown", key);
       previous?.focus();
     };
-  }, [onClose]);
+  }, [dismissible]);
   return (
     <div
       className="modal-backdrop"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (dismissible && e.target === e.currentTarget) onClose();
       }}
     >
       <div
@@ -217,9 +221,11 @@ export function Modal({
       >
         <div className="modal-head">
           <h2 id={titleId}>{title}</h2>
-          <button className="icon-button" aria-label="Đóng" onClick={onClose}>
-            <X size={20} />
-          </button>
+          {dismissible && (
+            <button className="icon-button" aria-label="Đóng" onClick={onClose}>
+              <X size={20} />
+            </button>
+          )}
         </div>
         {children}
       </div>

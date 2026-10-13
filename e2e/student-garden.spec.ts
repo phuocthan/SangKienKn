@@ -141,6 +141,11 @@ test("fenced garden includes everyone with moving icons and separate level-5 hon
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  if (info.project.name === "mobile") {
+    const ranking = page.locator(".community-ranking").first();
+    await expect(ranking).toBeVisible();
+    expect(await ranking.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+  }
   await page.screenshot({
     path: `.local/fenced-garden-${info.project.name}.png`,
     fullPage: true,

@@ -101,11 +101,18 @@ test("teacher starts a multi-lesson online exam; students get a persistent prepa
     await expect(notice).toContainText("Lớp ôn thi · Vật lý");
     await expect(notice).toContainText("45 phút");
     await expect(notice).toContainText("Bắt đầu sau");
+    const popup = student.getByRole("dialog", { name: "Có kiểm tra online từ giáo viên" });
+    await expect(popup).toBeVisible();
+    await student.keyboard.press("Escape");
+    await expect(popup).toBeVisible();
     await expect(
       notice.getByRole("button", { name: "Chờ mở đề" }),
     ).toBeDisabled();
+    await popup.getByRole("button", { name: "Đã hiểu" }).click();
+    await expect(popup).toHaveCount(0);
     await student.reload();
     await expect(notice).toContainText(title);
+    await expect(popup).toHaveCount(0);
     await noOverflow(student);
     await notice.screenshot({
       path: `.local/online-waiting-${info.project.name}.png`,
@@ -167,6 +174,7 @@ test("uploaded online exam notifies and opens a saved room; reload keeps questio
       name: "Thông báo kiểm tra online",
     });
     await expect(notice).toContainText(title);
+    await expect(student.getByRole("dialog", { name: "Có kiểm tra online từ giáo viên" })).toBeVisible();
     await notice.screenshot({
       path: `.local/online-ready-${info.project.name}.png`,
     });
