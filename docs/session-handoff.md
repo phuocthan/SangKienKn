@@ -2,6 +2,8 @@
 
 ## Chốt phạm vi, pull và bàn giao Git — 14/10/2026
 
+**Đã commit và push mã/tài liệu đợt này lên origin/main: `124cb18caf418f421aeba5a667bc8db614e53f08`.** Đã đối chiếu HEAD local với refs/heads/main trên remote, trùng SHA. Working tree chỉ còn file khóa PowerPoint không đưa vào Git. Bản ghi xác nhận này được gửi bằng commit tài liệu tiếp theo; Railway chưa được xác minh triển khai xong.
+
 Người dùng xác nhận danh sách lớp là Danh sách Học sinh, sau đó **yêu cầu skip việc chuyển danh sách** và pull trước khi push toàn bộ phần đã làm. Đã bỏ thay đổi chuyển roster/honorsOnly: Danh sách Học sinh cùng Top10/vườn giữ ở Lớp học của tôi; Quản lý lớp chỉ có Quản lý chương/Quản lý cấp độ. Các mô tả chuyển roster bên dưới có nhãn lịch sử, không áp dụng lại. Giữ tất cả chỉnh submenu/menu, huy chương/Top10, thống kê/nút icon, màu trạng thái, bỏ cột cây ở bảng effort, quyền nộp nhóm/đại diện và archive chương.
 
 Đã stash phần làm dở trong docs/e2e/server/shared/src rồi **pull fast-forward 8dc5aac → bca6afd** (gồm c92409c), khôi phục và xử lý xung đột ba tài liệu cùng portrait-navigation.spec.ts. Giữ nguyên navbar đầy đủ nhãn/hai dòng/icon không dịch và badge đỏ từ remote, không ghi đè Accounts/SidebarNavigation/portrait-navigation.css. Backup stash `7419e713a6db484d1f27d55a610135aaa736933a` giữ để phục hồi, không tự apply lại phần chuyển roster đã hủy. Stash lần pull13/10 và file khóa PowerPoint vẫn giữ.

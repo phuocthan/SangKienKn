@@ -2,6 +2,8 @@
 
 ## Chốt đợt push sau pull — 14/10/2026
 
+Đã push mã và tài liệu trong commit **124cb18** lên **origin/main**, đối chiếu SHA remote/local khớp. Working tree mã sạch; chỉ giữ file khóa PowerPoint bên ngoài commit. Xác nhận này được cập nhật bằng commit tài liệu tiếp theo; chưa xác minh phát hành Railway.
+
 Đã pull bca6afd và giữ navbar/badge mới từ remote khi ghép các chỉnh local. Theo yêu cầu skip mới nhất, **Danh sách Học sinh giữ ở Lớp học của tôi**, không chuyển sang Quản lý lớp. Đợt bàn giao Git gom Top10/huy chương/gọn bảng, các màu/nhãn/icon/menu, quyền nộp mọi thành viên nhóm và archive chương cùng tài liệu; không kèm dữ liệu riêng. Xem commit/trạng thái remote thực tế bằng Git, không dùng các đoạn “chưa push” lịch sử để triển khai lại tính năng.
 
 QA mới: TypeScript/build,127/127 server,6/6 comparator đạt. E2E lượt rộng có lỗi fixture lớp demo; đã tách lớp/API memberships đúng và lượt xác nhận24/24 desktop/mobile đạt. Chi tiết từng lượt ở đầu [session-handoff.md](session-handoff.md). **Triển khai Railway chưa được xác minh từ thao tác push**; không khẳng định backend mới đã phát hành.
