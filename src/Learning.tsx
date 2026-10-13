@@ -1503,7 +1503,11 @@ function ExamRoom({
       if (idle >= 120 && !idleExited) {
         idleExited = true;
         void enqueue(sync);
-        window.dispatchEvent(new Event("greenedu-study-idle"));
+        window.dispatchEvent(
+          new CustomEvent("greenedu-study-exit", {
+            detail: { reason: "idle" },
+          }),
+        );
       } else if (idle >= 105) setIdleWarning(Math.ceil(120 - idle));
     }, 1000);
     const visibility = () => {
@@ -1634,7 +1638,7 @@ function ExamRoom({
       )}
       {idleWarning !== null && (
         <p className="idle-banner" role="alert">
-          Đăng xuất sau {idleWarning} giây nếu không tương tác.
+          Rời bài sau {idleWarning} giây nếu không tương tác.
         </p>
       )}
       <WorkspaceHeading className="learning-heading">

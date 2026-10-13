@@ -29,21 +29,8 @@ for (const role of ["teacher", "student"] as const) {
               label: "Lớp học của tôi",
               items: ["Lớp học của tôi", "Hoạt động nhóm"],
             },
-            {
-              label: "Khu vườn của lớp",
-              items: ["Khu vườn của lớp", "Xếp hạng chăm chỉ"],
-            },
           ]
-        : [
-            {
-              label: "Khu vườn của tôi",
-              items: ["Khu vườn của tôi", "Hành trình của tôi"],
-            },
-            {
-              label: "Khu vườn của lớp",
-              items: ["Khu vườn của lớp", "Xếp hạng chăm chỉ"],
-            },
-          ];
+        : [];
     for (const viewport of [
       { width: 1440, height: 1000 },
       { width: 390, height: 844 },
@@ -121,10 +108,9 @@ for (const role of ["teacher", "student"] as const) {
           "border-top-width",
           "2px",
         );
-        await expect(nav.getByRole("button").first()).toHaveCSS(
-          "color",
-          "rgb(216, 230, 214)",
-        );
+        await expect(
+          nav.locator("button.nav-item:not(.active)").first(),
+        ).toHaveCSS("color", "rgb(216, 230, 214)");
         expect(
           (await page.locator(".sidebar").boundingBox())!.y,
         ).toBeGreaterThan(0);
@@ -143,14 +129,25 @@ for (const role of ["teacher", "student"] as const) {
       ).toHaveCount(0);
     await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
     await expect(
-      page.getByRole("tab", { name: "Xếp hạng chăm chỉ", exact: true }),
-    ).toHaveAttribute("aria-selected", "true");
+      page.getByRole("heading", { name: "Những người chăm vườn" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("tab", { name: "Xếp hạng chăm chỉ" }),
+    ).toHaveCount(0);
     if (role === "student") {
-      await page.goto("/#section=classes");
+      await page.goto("/#section=progress");
       await page.reload();
       await expect(
-        page.getByRole("tab", { name: "Khu vườn của tôi", exact: true }),
-      ).toHaveAttribute("aria-selected", "true");
+        page.getByRole("heading", { name: /hôm nay mình học gì/ }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("tab", { name: "Hành trình của tôi" }),
+      ).toHaveCount(0);
+      await expect(page.locator("#student-journey")).toContainText(
+        "Hành trình của tôi",
+      );
+      await page.getByRole("button", { name: "Xem hành trình" }).click();
+      await expect(page.locator("#student-journey")).toBeInViewport();
       await expect(
         page.getByRole("button", { name: "Tạo lớp mới", exact: true }),
       ).toHaveCount(0);

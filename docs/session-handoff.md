@@ -1,5 +1,17 @@
 # Bàn giao session GreenEdu
 
+## Hành trình học sinh nằm trong Khu vườn của tôi — 13/10/2026
+
+Theo góp ý tiếp theo của người dùng, bỏ tab Hành trình của tôi ở trang học sinh. Trang Khu vườn của tôi hiện thêm section Hành trình của tôi ngay dưới các thẻ/mốc cây hiện có, chứa timeline cấp theo chương; không lặp lại thống kê tổng. Nút Xem hành trình cuộn đến section này. Hash `#section=progress` cũ chuyển về home, menu học sinh không thêm mục. Giáo viên giữ hai tab Lớp học/Hoạt động nhóm. Kiểm tra trên checkout push: build TypeScript/Vite và 12/12 E2E desktop/mobile về tab, vườn, cấp cây và tiêu đề đạt với DB riêng; nguồn tại root vẫn giữ công việc song song chưa commit. Đợt kết thúc phiên/sổ tay/vườn lớp ngay dưới được gộp cùng lần push này.
+
+## Rời phiên học, lịch sử đáp án sai và vườn lớp gộp — 13/10/2026
+
+Theo yêu cầu mới, luyện/ôn/sửa sai kết thúc phiên khi tab ẩn, cửa sổ mất focus, timer gián đoạn do máy ngủ hoặc không tương tác 120 giây. App đưa học sinh về Khu vườn của tôi và mở popup giải thích, **giữ tài khoản đăng nhập**. Đồng hồ dừng, cleanup gửi study/stop active:false; backend hết hạn không cộng đuôi thời gian chưa chứng minh có hoạt động. Cảnh báo từ giây 105 báo kết thúc phiên thay vì đăng xuất. Phòng thi giữ quy tắc cảnh báo rời tab/tự nộp đã chốt; idle 120 giây rời giao diện thi và giữ tài khoản, không thay deadline/đáp án phía server.
+
+Sổ tay xem bởi giáo viên hiển thị các đáp án sai trước đó từ attempts luyện/sửa/ôn và từ bài thi đã công bố, có thời điểm/nguồn, nền đỏ nhạt; route chỉ giáo viên sở hữu lớp và học sinh thuộc lớp. Trang sổ tay học sinh không trả lịch sử này. Khu vườn của lớp hiện khu vườn và hai bảng thành tích trên cùng trang; bỏ tab Xếp hạng riêng, URL cũ dẫn về vườn. Trong khung vườn bỏ tên lớp/dòng sĩ số-môn/đoạn giải thích được khoanh đỏ; biển tên lớp ở cổng vẫn giữ.
+
+Kiểm tra đợt này tại root với server/database riêng: TypeScript/Vite build đạt; 124/124 backend đạt, sau khi bổ sung ca đáp án thi sai thì 4/4 question-types đạt. E2E desktop có hai assertion cũ phải cập nhật (bảng rỗng và màu item active); lượt sau 5/5 parent-tabs/portrait đạt. Mobile 6/6 luồng tập trung đạt (popup rời/idle, sổ tay giáo viên, vườn, menu, sửa sai). Trên checkout push: TypeScript/Vite đạt, 122/122 backend và 10/10 E2E desktop/mobile; 2/2 ca rời tab/idle/ngủ máy chạy lại sau thay đổi cuối đạt. Tất cả dùng DB riêng, không ghi Railway. Công việc song song backend online/Excel/helper trong root được giữ riêng; trạng thái remote và runtime cần đối chiếu Git/health tại thời điểm kiểm tra.
+
 ## Bổ sung góp ý lớp học và lỗi mẫu Câu3 — 13/10/2026
 
 Yêu cầu trong lúc chốt đợt ba dạng câu đã gộp vào cùng thay đổi: bỏ dòng lớp/môn/giáo viên dưới tiêu đề Tổng quan giáo viên; bỏ toàn bộ thẻ lớp trùng bộ chọn lớp ở header; đổi hai section thành **Danh sách Chương** và **Danh sách Học sinh**. Bỏ tab/trang Tiến độ học tập giáo viên vì roster đã có tiến trình; lớp còn2 tab Lớp học/Hoạt động nhóm. Callback/hash progress cũ của giáo viên dẫn về classes, student Hành trình giữ nguyên. Không bỏ bộ chọn lớp, tạo lớp/chương/học sinh hoặc dữ liệu. PageHeading cho phép không có mô tả; bỏ note luyện đang giải thích chính sách130 giây cũ.

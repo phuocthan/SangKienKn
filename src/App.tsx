@@ -25,7 +25,6 @@ import {
   ShieldCheck,
   Sprout,
   TrendingUp,
-  Trophy,
   Users,
   X,
 } from "lucide-react";
@@ -119,6 +118,8 @@ export default function App() {
     if (params.has("learning"))
       return params.get("workspace") === "online" ? "online-exams" : "learning";
     const section = params.get("section") as Page;
+    if (section === "leaderboard") return "garden";
+    if (section === "progress") return "home";
     return [
       "home",
       "classes",
@@ -135,6 +136,7 @@ export default function App() {
   const [entryClassId, setEntryClassId] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [studyExitNotice, setStudyExitNotice] = useState("");
   const [editor, setEditor] = useState<Editor>(null);
   const [accountDialog, setAccountDialog] = useState<
     "avatar" | "password" | null
@@ -161,11 +163,9 @@ export default function App() {
       setQuickLogin(!!health.quickLogin);
       setQuickAccounts(health.quickAccounts ?? []);
       try {
-        if (localStorage.getItem("greenedu-idle-logout")) {
-          await api("/auth/logout", {}).catch(() => {});
-          setUser(null);
-          return;
-        }
+        // An older client logged out on inactivity. Let existing accounts
+        // resume normally after the new study-only exit behavior is deployed.
+        localStorage.removeItem("greenedu-idle-logout");
         const signedIn = await api<User>("/auth/me");
         setUser(signedIn);
         if (signedIn.role === "teacher")
@@ -173,7 +173,11 @@ export default function App() {
             restored === "progress" ? "classes" : restored,
           );
         if (signedIn.role === "student") {
-          setPage((restored) => (restored === "classes" ? "home" : restored));
+          setPage((restored) =>
+            restored === "classes" || restored === "progress"
+              ? "home"
+              : restored,
+          );
         }
       } catch (e) {
         if (!(e instanceof ApiError && e.status === 401)) throw e;
@@ -259,7 +263,9 @@ export default function App() {
   const closeEditor = useCallback(() => setEditor(null), []);
   const closeAccountDialog = useCallback(() => setAccountDialog(null), []);
   function navigate(next: Page, chapterId = "") {
+    if (next === "leaderboard") next = "garden";
     if (user?.role === "teacher" && next === "progress") next = "classes";
+    if (user?.role === "student" && next === "progress") next = "home";
     setEntryRunId("");
     setPage(next);
     setStudy(null);
@@ -274,21 +280,23 @@ export default function App() {
     setPage("home");
     setStudy(null);
     setNotice("");
+    setStudyExitNotice("");
   }
   useEffect(() => {
-    const idleExit = () => {
-      localStorage.setItem("greenedu-idle-logout", "1");
-      void api("/auth/logout", {}).catch(() => {});
-      setUser(null);
-      setClasses([]);
+    const studyExit = (event: Event) => {
+      const reason = (event as CustomEvent<{ reason?: string }>).detail?.reason;
+      setEntryRunId("");
+      setPage("home");
       setStudy(null);
       setError("");
-      window.alert(
-        "Bạn đã không tương tác quá 2 phút. Phiên học đã kết thúc, vui lòng đăng nhập lại.",
+      setStudyExitNotice(
+        reason === "away"
+          ? "Bạn đã rời trang học. Phiên học đã kết thúc và thời gian vắng mặt không được tính."
+          : "Bạn đã không tương tác quá 2 phút. Phiên học đã kết thúc và thời gian không hoạt động không được tính.",
       );
     };
-    window.addEventListener("greenedu-study-idle", idleExit);
-    return () => window.removeEventListener("greenedu-study-idle", idleExit);
+    window.addEventListener("greenedu-study-exit", studyExit);
+    return () => window.removeEventListener("greenedu-study-exit", studyExit);
   }, []);
   async function logout() {
     try {
@@ -423,33 +431,18 @@ export default function App() {
     parent: Page;
     label: string;
     items: WorkspaceTab<Page>[];
-  }[] = [
-    {
-      parent: "garden",
-      label: "Khu vườn của lớp",
-      items: [
-        { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
-        { id: "leaderboard", label: "Xếp hạng chăm chỉ", icon: Trophy },
-      ],
-    },
-    isTeacher
-      ? {
+  }[] = isTeacher
+    ? [
+        {
           parent: "classes",
           label: "Lớp học của tôi",
           items: [
             { id: "classes", label: "Lớp học của tôi", icon: Users },
             { id: "groups", label: "Hoạt động nhóm", icon: Users },
           ],
-        }
-      : {
-          parent: "home",
-          label: "Khu vườn của tôi",
-          items: [
-            { id: "home", label: "Khu vườn của tôi", icon: Sprout },
-            { id: "progress", label: "Hành trình của tôi", icon: TrendingUp },
-          ],
         },
-  ];
+      ]
+    : [];
   const activeTabs =
     !study && current
       ? tabGroups.find((group) => group.parent === parentPage)
@@ -743,7 +736,14 @@ export default function App() {
                             </button>
                             <button
                               className="button outline"
-                              onClick={() => navigate("progress")}
+                              onClick={() =>
+                                document
+                                  .getElementById("student-journey")
+                                  ?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "start",
+                                  })
+                              }
                             >
                               <TrendingUp size={17} /> Xem hành trình
                             </button>
@@ -776,6 +776,24 @@ export default function App() {
                       }
                     />
                     <StudentLevelCard classroom={current} />
+                    <section
+                      id="student-journey"
+                      style={{ scrollMarginTop: 100 }}
+                      aria-label="Hành trình của tôi"
+                    >
+                      <SectionTitle
+                        title="Hành trình của tôi"
+                        description={`Mỗi ${current.levelMinutes ?? 60} phút học có hoạt động trong chương tăng một cấp, tối đa cấp 5.`}
+                      />
+                      <div className="card progress-table">
+                        {current.chapters.map((ch) => (
+                          <article className="chapter-level-card" key={ch.id}>
+                            <h3>{ch.title}</h3>
+                            <ChapterLevelTimeline chapter={ch} />
+                          </article>
+                        ))}
+                      </div>
+                    </section>
                   </div>
                 ))}
               {(page === "learning" || page === "online-exams") && (
@@ -1011,37 +1029,14 @@ export default function App() {
                   user={user}
                 />
               )}
-              {(page === "garden" || page === "leaderboard") && (
+              {page === "garden" && (
                 <ClassCommunity
-                  key={`${current.id}-${page}`}
+                  key={current.id}
                   classroom={current}
-                  page={page}
                   revision={revision}
                   userId={user.id}
                   teacherAvatarId={isTeacher ? user.avatarId : undefined}
                 />
-              )}
-              {page === "progress" && !isTeacher && (
-                <>
-                  <PageHeading
-                    eyebrow="TỪNG BƯỚC ĐỀU ĐÁNG GHI NHẬN"
-                    title="Hành trình của tôi"
-                    text="Không so sánh với người khác. Hãy nhìn những điều bạn đã học được."
-                  />
-                  <StudentStats classroom={current} />
-                  <SectionTitle
-                    title="Tiến độ theo chương"
-                    description={`Mỗi ${current.levelMinutes ?? 60} phút học có hoạt động trong chương tăng một cấp, tối đa cấp 5.`}
-                  />
-                  <div className="card progress-table">
-                    {current.chapters.map((ch) => (
-                      <article className="chapter-level-card" key={ch.id}>
-                        <h3>{ch.title}</h3>
-                        <ChapterLevelTimeline chapter={ch} />
-                      </article>
-                    ))}
-                  </div>
-                </>
               )}
             </>
           )}
@@ -1100,6 +1095,20 @@ export default function App() {
             chapterId={questionChapter}
             onSave={saveEditor}
           />
+        </Modal>
+      )}
+      {studyExitNotice && (
+        <Modal
+          title="Phiên học đã kết thúc"
+          onClose={() => setStudyExitNotice("")}
+        >
+          <p>{studyExitNotice}</p>
+          <button
+            className="button primary"
+            onClick={() => setStudyExitNotice("")}
+          >
+            Đã hiểu
+          </button>
         </Modal>
       )}
     </div>

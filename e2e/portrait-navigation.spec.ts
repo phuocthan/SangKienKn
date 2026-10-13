@@ -145,8 +145,8 @@ for (const role of ["teacher", "student", "admin"] as const) {
           .getByRole("button", { name: "Khu vườn của lớp", exact: true }),
       ).toHaveAttribute("aria-current", "page");
       await expect(
-        page.getByRole("tab", { name: "Xếp hạng chăm chỉ", exact: true }),
-      ).toHaveAttribute("aria-selected", "true");
+        page.getByRole("heading", { name: "Những người chăm vườn" }),
+      ).toBeVisible();
     }
     if (role !== "admin") {
       const feedback = header.getByRole("button", {

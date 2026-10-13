@@ -1,5 +1,9 @@
 # Đối chiếu quy định ôn tập và kiểm tra GreenEdu
 
+## Chỉnh chính sách phiên học — 13/10/2026
+
+Yêu cầu mới thay logout khi idle: luyện/ôn/sửa sai rời tab hoặc máy nghỉ sẽ kết thúc phiên, đưa về trang chính và báo trong popup; idle120 giây cũng vậy, giữ đăng nhập. Không cộng đuôi giờ cho phiên hết hạn. Cảnh báo thi khi rời tab và ngưỡng tự nộp giữ nguyên; idle chỉ rời giao diện thi. Các mô tả logout, pause/resume và đếm tail trong phần lịch sử bên dưới không còn là quyết định hiện hành. Kiểm thử sửa phạm vi này trên server/SQLite riêng, chưa ghi thử Railway hoặc thiết bị thật.
+
 ## Cập nhật xử lý theo yêu cầu mới — 13/10/2026
 
 Đã sửa trong mã: Practice pause khi hidden/blur/gián đoạn timer, không cộng bù sau sleep; cảnh báo105s và đăng xuất120s không tương tác kể cả offline. Backend chặn hồi sinh idle/không cộng gap hoặc stop inactive; thời gian chỉ gắn bài/câu/chương đang làm. ExamRoom dedup blur+hidden cho một lần rời, cảnh báo rõ, khóa chọn ngay tại ngưỡng cả offline và đồng bộ draft có trước ngưỡng rồi nộp. Giữ ngưỡng4 hoặc cấu hình1–10; không tự thêm hình phạt/hoàn vé. Website không thể cấm mở tab ở cấp hệ điều hành, xử lý bằng focus/visibility.

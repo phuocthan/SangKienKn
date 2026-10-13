@@ -1,5 +1,11 @@
 # Cấp độ ôn tập và kiểm tra
 
+## Quyết định mới: rời phiên học thay vì đăng xuất — 13/10/2026
+
+Trong luyện bài/chương, ôn, sửa sai, rời tab/mất focus, timer gián đoạn do ngủ máy hoặc không tương tác đủ120 giây kết thúc phiên ngay, về trang chính và hiện popup. Giữ cookie/tài khoản; không ghi thời gian vắng mặt, stop active:false. Backend khi phiên hết hạn xóa phiên mà không ghi thêm phần đuôi chưa được xác nhận. Cảnh báo từ105 giây đổi thành kết thúc phiên. Phòng thi vẫn có xử lý rời tab theo ngưỡng và deadline riêng; idle rời giao diện chứ không đăng xuất. Quyết định này thay câu “đăng xuất120 giây” phía dưới.
+
+Giáo viên xem đáp án sai cũ của từng câu trong sổ tay từ lịch sử attempts và bài thi đã công bố. Sổ tay học sinh tiếp tục chỉ hiển thị câu cần sửa, không cung cấp lịch sử đáp án sai. Giao diện vườn/xếp hạng gộp dưới Khu vườn của lớp; API tính hạng giữ nguyên.
+
 ## Quyết định hiện hành: thời gian thực và nhiều dạng câu — 13/10/2026
 
 Thời gian cây chỉ phát sinh trong luyện bài/chương, ôn và sửa sai, theo chapterId của câu hiện tại; phòng thi và các trang khác không tính. Start kiểm tra liên kết questionId/chương khi client gửi. Blur/hidden pause ngay, cần Tiếp tục học; timer bị gián đoạn/ngủ máy không cộng bù. Sau105 giây không tương tác cảnh báo,120 giây đăng xuất, kể cả offline và không tự login lại khi reload. Quyết định mới thay cửa sổ120→130/pause trong phần lịch sử. Heartbeat/stop lấy giờ server, gap>30 giây không cộng, activity120 giây/phiên hết hạn không hồi sinh; stop khi đã pause không cộng phần đuôi.

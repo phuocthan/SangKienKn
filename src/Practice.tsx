@@ -140,6 +140,17 @@ export function Practice({
       failed = false;
     let lastTick = performance.now(),
       exited = false;
+    const exitStudy = (reason: "idle" | "away") => {
+      if (exited || disposed) return;
+      exited = true;
+      pausedRef.current = true;
+      setPaused(true);
+      // Unmounting stops the server session with active:false. It must not
+      // credit the period spent in a hidden tab or a sleeping browser.
+      window.dispatchEvent(
+        new CustomEvent("greenedu-study-exit", { detail: { reason } }),
+      );
+    };
     lastInteraction.current = Date.now();
     interacted.current = true;
     pausedRef.current = false;
@@ -228,17 +239,12 @@ export function Practice({
       lastTick = tick;
       const idle = Math.floor((Date.now() - lastInteraction.current) / 1000);
       if (idle >= 120) {
-        if (exited) return;
-        exited = true;
-        pausedRef.current = true;
-        void heartbeat();
-        window.dispatchEvent(new Event("greenedu-study-idle"));
+        exitStudy("idle");
         return;
       }
       if (delta > 2 && !pausedRef.current) {
-        pausedRef.current = true;
-        setPaused(true);
-        void heartbeat();
+        exitStudy("away");
+        return;
       }
       if (
         disposed ||
@@ -262,10 +268,9 @@ export function Practice({
       lastTick = performance.now();
       setHidden(document.hidden);
       if (document.hidden || !document.hasFocus()) {
-        pausedRef.current = true;
-        setPaused(true);
+        exitStudy("away");
+        return;
       }
-      void heartbeat();
     };
     const connection = () => {
       lastTick = performance.now();
@@ -308,7 +313,9 @@ export function Practice({
 
   function resume() {
     if (Date.now() - lastInteraction.current >= 120000) {
-      window.dispatchEvent(new Event("greenedu-study-idle"));
+      window.dispatchEvent(
+        new CustomEvent("greenedu-study-exit", { detail: { reason: "idle" } }),
+      );
       return;
     }
     lastInteraction.current = Date.now();
@@ -522,12 +529,14 @@ export function Practice({
           <Pause size={20} />
           <span>
             {paused
-              ? "Phiên học đã tạm dừng do rời tab, mất focus hoặc máy nghỉ. Quay lại học trong ứng dụng."
-              : `Bạn còn đang học chứ? Đăng xuất sau ${warning} giây nếu không tương tác.`}
+              ? "Phiên học đang kết thúc vì bạn đã rời trang hoặc máy nghỉ."
+              : `Bạn còn đang học chứ? Phiên học kết thúc sau ${warning} giây nếu không tương tác.`}
           </span>
-          <button className="button primary small" onClick={resume}>
-            Tiếp tục học
-          </button>
+          {!paused && (
+            <button className="button primary small" onClick={resume}>
+              Tiếp tục học
+            </button>
+          )}
         </div>
       )}
       <div className="card question-card">

@@ -143,6 +143,14 @@ test("typed questions preserve versions, hide keys until correct and expose note
     f.teacher,
   );
   assert.notEqual(edited.id, a.id);
+  f.advance(1000);
+  const stillWrong = await f.post("/attempts", {
+    questionId: a.id,
+    selected: "00",
+    mode: "correction",
+    requestId: randomUUID(),
+  });
+  assert.equal(stillWrong.correct, false);
   const right = await f.post("/attempts", {
     questionId: a.id,
     selected: "10",
@@ -175,6 +183,22 @@ test("typed questions preserve versions, hide keys until correct and expose note
   assert.ok(notebook.every((q: any) => q.resolved));
   assert.equal(notebook.find((q: any) => q.id === a.id).correctAnswer, "10");
   assert.equal(notebook.find((q: any) => q.id === b.id).chapterId, "chapter-2");
+  assert.deepEqual(
+    notebook
+      .find((q: any) => q.id === a.id)
+      .wrongAnswers.map((a: any) => a.selected),
+    ["11", "00"],
+  );
+  assert.deepEqual(
+    notebook
+      .find((q: any) => q.id === b.id)
+      .wrongAnswers.map((a: any) => a.selected),
+    ["3"],
+  );
+  assert.equal(
+    notebook.find((q: any) => q.id === b.id).wrongAnswers[0].source,
+    "Luyện tập",
+  );
   const roster = (
     await f.request("/classrooms/class-demo/students", undefined, f.teacher)
   ).data;
@@ -262,7 +286,7 @@ test("mixed reviews repeat as a new session, and uploaded exams autosave typed a
   const answers = Object.fromEntries(
     room.questions.map((q: any) => [
       q.id,
-      q.kind === "true-false" ? "10" : "2,0",
+      q.kind === "true-false" ? "11" : "2,0",
     ]),
   );
   const shortId = room.questions.find((q: any) => q.kind === "short-answer").id;
@@ -288,8 +312,25 @@ test("mixed reviews repeat as a new session, and uploaded exams autosave typed a
   const result = (
     await f.request(`/learning/exam-runs/${run.id}`, undefined, f.student)
   ).data;
-  assert.equal(result.score, 10);
-  assert.ok(result.results.every((r: any) => r.correct && r.correctAnswer));
+  assert.equal(result.score, 5);
+  assert.equal(result.results.filter((r: any) => r.correct).length, 1);
+  const notebook = (
+    await f.request(
+      "/classrooms/class-demo/students/student-demo/notebook",
+      undefined,
+      f.teacher,
+    )
+  ).data;
+  assert.deepEqual(
+    notebook
+      .find((q: any) => q.id === truthId)
+      .wrongAnswers.map((entry: any) => entry.selected),
+    ["11"],
+  );
+  assert.equal(
+    notebook.find((q: any) => q.id === truthId).wrongAnswers[0].source,
+    "Kiểm tra",
+  );
 });
 
 test("study credit stays in the question chapter, excludes focus loss and sleep gaps, and cannot revive an expired session", async (t) => {

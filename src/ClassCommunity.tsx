@@ -18,13 +18,11 @@ const studyTime = (seconds: number) =>
 
 export function ClassCommunity({
   classroom,
-  page,
   revision,
   userId,
   teacherAvatarId,
 }: {
   classroom: Classroom;
-  page: "garden" | "leaderboard";
   revision: number;
   userId: string;
   teacherAvatarId?: string | null;
@@ -74,15 +72,9 @@ export function ClassCommunity({
     <>
       <WorkspaceHeading className="page-heading">
         <div>
-          <h1>
-            {page === "garden" ? "Khu vườn của lớp" : "Xếp hạng chăm chỉ"}
-          </h1>
+          <h1>Khu vườn của lớp</h1>
           <span className="eyebrow">CÙNG NHAU LỚN LÊN · {classroom.name}</span>
-          <p>
-            {page === "garden"
-              ? "Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp."
-              : "Ghi nhận thời gian học, cây ra hoa và nỗ lực khắc phục lỗi sai."}
-          </p>
+          <p>Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp.</p>
         </div>
         <button
           className="button outline small"
@@ -132,42 +124,35 @@ export function ClassCommunity({
               <small>Tổng thời gian có hoạt động đã được ghi nhận</small>
             </div>
           </div>
-          {page === "garden" ? (
-            <StudentGarden
-              members={data.members}
-              trees={data.trees}
-              userId={userId}
-              subject={classroom.subject}
-              classroomName={classroom.name}
-              teacherName={data.teacher?.name ?? classroom.teacherName}
-              teacherAvatarId={
-                teacherAvatarId !== undefined
-                  ? teacherAvatarId
-                  : data.teacher?.avatarId
-              }
+          <StudentGarden
+            members={data.members}
+            trees={data.trees}
+            userId={userId}
+            subject={classroom.subject}
+            classroomName={classroom.name}
+            teacherName={data.teacher?.name ?? classroom.teacherName}
+            teacherAvatarId={
+              teacherAvatarId !== undefined
+                ? teacherAvatarId
+                : data.teacher?.avatarId
+            }
+          />
+          <>
+            <SectionTitle
+              title="Những người chăm vườn"
+              description="Ưu tiên thời gian học; cùng thời gian thì xét số cây ra hoa. Thành tích bằng nhau cùng hạng."
             />
-          ) : (
-            <>
-              <SectionTitle
-                title="Những người chăm vườn"
-                description="Ưu tiên thời gian học; cùng thời gian thì xét số cây ra hoa. Thành tích bằng nhau cùng hạng."
-              />
-              <Ranking rows={data.board.effort} userId={userId} kind="effort" />
-              <SectionTitle
-                title="Bác sĩ cây trồng"
-                description="Ghi nhận số câu đang ở trạng thái đã khắc phục trong lớp. Một câu chỉ tính một lần."
-              />
-              <Ranking
-                rows={data.board.repairs}
-                userId={userId}
-                kind="repairs"
-              />
-              <p className="subtle-note">
-                Chỉ hiển thị thành viên đã có hoạt động tương ứng. Thành tích
-                tính trong lớp đang chọn và không dùng điểm số để xếp hạng.
-              </p>
-            </>
-          )}
+            <Ranking rows={data.board.effort} userId={userId} kind="effort" />
+            <SectionTitle
+              title="Bác sĩ cây trồng"
+              description="Ghi nhận số câu đang ở trạng thái đã khắc phục trong lớp. Một câu chỉ tính một lần."
+            />
+            <Ranking rows={data.board.repairs} userId={userId} kind="repairs" />
+            <p className="subtle-note">
+              Chỉ hiển thị thành viên đã có hoạt động tương ứng. Thành tích tính
+              trong lớp đang chọn và không dùng điểm số để xếp hạng.
+            </p>
+          </>
         </>
       )}
     </>

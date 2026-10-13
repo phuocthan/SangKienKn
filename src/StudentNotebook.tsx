@@ -2,14 +2,38 @@ import { useEffect, useState } from "react";
 import { api, errorMessage } from "./api";
 import { Empty, Modal } from "./components";
 import { AnswerFields } from "./AnswerFields";
-import { questionKind } from "../shared/question-types";
+import {
+  questionKind,
+  type AnswerQuestion,
+  type QuestionAnswer,
+} from "../shared/question-types";
+import "./answer-fields.css";
 import type { Classroom, Question, Student } from "./types";
 type Item = Question & {
   chapterTitle: string;
   resolved: boolean;
   updatedAt: number;
   attempts: number;
+  wrongAnswers: {
+    selected: QuestionAnswer;
+    at: number;
+    source: string;
+    question: AnswerQuestion;
+  }[];
 };
+function wrongAnswerText(question: AnswerQuestion, selected: QuestionAnswer) {
+  const kind = questionKind(question);
+  if (kind === "short-answer") return String(selected);
+  if (kind === "true-false")
+    return question.choices
+      .map(
+        (statement, index) =>
+          `${"abcd"[index]}. ${statement}: ${String(selected)[index] === "1" ? "Đúng" : "Sai"}`,
+      )
+      .join("; ");
+  const index = Number(selected);
+  return `${"ABCD"[index] ?? "?"}. ${question.choices[index] ?? ""}`;
+}
 export function StudentNotebook({
   classroom,
   student,
@@ -83,6 +107,24 @@ export function StudentNotebook({
               {q.chapterTitle} · {q.resolved ? "Đã khắc phục" : "Cần sửa"}
             </span>
             <h3>{q.text}</h3>
+            {!!q.wrongAnswers?.length && (
+              <div className="notebook-wrong-history">
+                <strong>Câu trả lời sai trước đó</strong>
+                <ul>
+                  {q.wrongAnswers.map((entry, index) => (
+                    <li key={`${entry.at}-${index}`}>
+                      <small>
+                        {entry.source} ·{" "}
+                        {new Date(entry.at).toLocaleString("vi-VN")}
+                      </small>
+                      <span>
+                        {wrongAnswerText(entry.question, entry.selected)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <AnswerFields
               question={q}
               value={

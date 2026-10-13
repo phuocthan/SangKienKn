@@ -42,3 +42,22 @@
   border-color: #dda2a2;
   color: #9b3f46;
 }
+.notebook-wrong-history {
+  margin-block: 16px;
+  padding: 14px 16px;
+  border: 1px solid #e9b5b0;
+  border-radius: 14px;
+  background: #fff1ef;
+  color: #963f39;
+}
+.notebook-wrong-history ul {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding-left: 20px;
+}
+.notebook-wrong-history li span,
+.notebook-wrong-history li small {
+  display: block;
+  overflow-wrap: anywhere;
+}

@@ -24,7 +24,6 @@ for (const role of ["teacher", "student"] as const) {
             "Ôn tập & kiểm tra",
             "Quản lý kiểm tra online",
             "Khu vườn của lớp",
-            "Xếp hạng chăm chỉ",
             "Quản lý góp ý",
             "Tài khoản",
           ]
@@ -35,9 +34,7 @@ for (const role of ["teacher", "student"] as const) {
             "Kiểm tra online",
             "Hoạt động nhóm",
             "Sổ tay sửa sai",
-            "Hành trình của tôi",
             "Khu vườn của lớp",
-            "Xếp hạng chăm chỉ",
             "Góp ý",
             "Tài khoản",
           ];

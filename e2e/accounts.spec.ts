@@ -144,7 +144,6 @@ test("all teacher/student pages fit desktop/mobile and group filters show real d
     ["Ngân hàng câu hỏi", "questions"],
     ["Tiến độ học tập", "teacher-progress"],
     ["Khu vườn của lớp", "teacher-garden"],
-    ["Xếp hạng chăm chỉ", "teacher-leaderboard"],
     ["Hoạt động nhóm", "groups-empty"],
   ]) {
     await navigateTo(page, { name: label, exact: true });
@@ -190,9 +189,7 @@ test("all teacher/student pages fit desktop/mobile and group filters show real d
     ["Khu vườn của tôi", "student-home"],
     ["Luyện tập", "practice"],
     ["Sổ tay sửa sai", "corrections"],
-    ["Hành trình của tôi", "student-progress"],
     ["Khu vườn của lớp", "student-garden"],
-    ["Xếp hạng chăm chỉ", "student-leaderboard"],
     ["Hoạt động nhóm", "student-groups"],
   ]) {
     await navigateTo(page, { name: label, exact: true });

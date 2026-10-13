@@ -105,14 +105,9 @@ export function StudentGarden({
       >
         <header className="student-garden-heading">
           <div>
-            <span className="eyebrow">
+            <span className="eyebrow" id="student-garden-title">
               <Sprout size={15} /> KHU VƯỜN CHUNG
             </span>
-            <h2 id="student-garden-title">Khu vườn {classroomName}</h2>
-            <p>
-              {members ? `${members.length} học sinh · ` : ""}
-              {subject}
-            </p>
           </div>
           <button
             className="button outline small"
@@ -124,10 +119,6 @@ export function StudentGarden({
             {animated ? "Tắt chuyển động" : "Bật chuyển động"}
           </button>
         </header>
-        <p className="student-garden-explanation">
-          Mỗi bạn một cây với cấp cao nhất đã đạt trong các chương của lớp. Tất
-          cả cùng dạo quanh khu vườn, kể cả những bạn đã Kết Trái.
-        </p>
         <div className="garden-enclosure">
           <div
             className="garden-world"

@@ -1,8 +1,11 @@
 import {
+  answerComplete,
   answerCorrect,
   statementCorrectness,
   storedAnswer,
   validateQuestionAnswer,
+  type AnswerQuestion,
+  type QuestionAnswer,
 } from "../shared/question-types.js";
 import express, {
   type Request,
@@ -175,6 +178,8 @@ export function createApp(
       quickAccounts,
       questionTypes: true,
       studyIdleSeconds: 120,
+      studyExitMode: "home",
+      notebookWrongHistory: true,
     });
   });
 
@@ -1380,12 +1385,93 @@ export function createApp(
           "SELECT q.*,ch.title AS chapterTitle,cr.resolved,cr.updated_at AS updatedAt FROM corrections cr JOIN questions q ON q.id=cr.question_id JOIN chapters ch ON ch.id=q.chapter_id WHERE cr.student_id=? AND ch.classroom_id=? ORDER BY cr.resolved,cr.updated_at DESC",
         )
         .all(studentId, classId) as Row[];
+      const history = new Map<
+        string,
+        {
+          selected: QuestionAnswer;
+          at: number;
+          source: string;
+          question: AnswerQuestion;
+        }[]
+      >();
+      const addWrong = (
+        questionId: string,
+        selected: QuestionAnswer,
+        at: number,
+        source: string,
+        question: AnswerQuestion,
+      ) => {
+        const entries = history.get(questionId) ?? [];
+        entries.push({ selected, at, source, question });
+        history.set(questionId, entries);
+      };
+      const attempts = db
+        .prepare(
+          `SELECT a.question_id,a.selected,a.created_at,a.mode,q.kind,q.choices,q.correct_index,q.correct_answer
+         FROM attempts a JOIN questions q ON q.id=a.question_id JOIN chapters ch ON ch.id=q.chapter_id
+         WHERE a.student_id=? AND ch.classroom_id=? AND a.correct=0 ORDER BY a.created_at,a.id`,
+        )
+        .all(studentId, classId) as Row[];
+      for (const attempt of attempts) {
+        let selected: QuestionAnswer;
+        try {
+          selected =
+            typeof attempt.selected === "number"
+              ? attempt.selected
+              : JSON.parse(String(attempt.selected));
+        } catch {
+          continue;
+        }
+        addWrong(
+          String(attempt.question_id),
+          selected,
+          Number(attempt.created_at),
+          attempt.mode === "correction" ? "Sửa sai" : "Luyện tập",
+          {
+            kind: attempt.kind,
+            choices: JSON.parse(attempt.choices),
+            correctIndex: attempt.correct_index,
+            correctAnswer: attempt.correct_answer,
+          },
+        );
+      }
+      const examRuns = db
+        .prepare(
+          "SELECT questions,answers,submitted_at FROM exam_runs WHERE student_id=? AND classroom_id=? AND released=1 AND status='submitted'",
+        )
+        .all(studentId, classId) as Row[];
+      for (const run of examRuns) {
+        const questions = JSON.parse(run.questions) as (AnswerQuestion & {
+          id: string;
+        })[];
+        const answers = JSON.parse(run.answers) as Record<
+          string,
+          QuestionAnswer
+        >;
+        for (const question of questions) {
+          const selected = answers[question.id];
+          if (
+            answerComplete(question, selected) &&
+            !answerCorrect(question, selected)
+          )
+            addWrong(
+              question.id,
+              selected,
+              Number(run.submitted_at),
+              "Kiểm tra",
+              question,
+            );
+        }
+      }
       res.json(
         items.map((q) => ({
           ...questionView(q, req),
           chapterTitle: q.chapterTitle,
           resolved: !!q.resolved,
           updatedAt: q.updatedAt,
+          wrongAnswers: (history.get(String(q.id)) ?? []).sort(
+            (a, b) => a.at - b.at,
+          ),
           attempts: Number(
             db
               .prepare(
@@ -1448,14 +1534,8 @@ export function createApp(
     const timestamp = now();
     const delta = Math.max(0, timestamp - s.last_received);
     if (timestamp - s.last_activity >= 120000) {
-      const tail =
-        req.body?.active !== false && s.active && delta <= 30000
-          ? Math.max(0, s.last_activity + 120000 - s.last_received) / 1000
-          : 0;
-      db.prepare(
-        "INSERT INTO progress VALUES (?,?,?) ON CONFLICT(student_id,chapter_id) DO UPDATE SET seconds=seconds+excluded.seconds",
-      ).run(req.user!.id, s.chapter_id, tail);
-      grantLearningMilestones(db, req.user!.id, timestamp);
+      // A suspended or closed page cannot prove activity after its last
+      // heartbeat. Ending an expired session must never add idle time.
       db.prepare("DELETE FROM study_sessions WHERE id=?").run(s.id);
       fail(409, "Phiên học đã kết thúc sau 2 phút không tương tác.");
     }

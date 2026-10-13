@@ -566,7 +566,7 @@ test("idle session expires at two minutes, and tree level changes at exact hour 
         "SELECT seconds FROM progress WHERE student_id='student-demo' AND chapter_id='chapter-1'",
       )
       .get()!.seconds,
-    120,
+    105,
   );
   const renewed = await f.request(
     "/study/start",

@@ -1,5 +1,15 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: Hành trình của tôi trong trang vườn cá nhân — 13/10/2026
+
+Học sinh không còn tab Hành trình riêng. Timeline cấp/chương nằm dưới nội dung Khu vườn của tôi; nút Xem hành trình cuộn xuống đúng vùng, URL progress cũ mở trang vườn. Không thay dữ liệu/tính cấp. Giáo viên giữ tab lớp/nhóm. Build và12/12 E2E desktop/mobile trên DB riêng đạt; xem bàn giao. Quyết định thay mô tả home2 tab trong phần lịch sử.
+
+## Hiện hành: kết thúc phiên học và gộp vườn lớp — 13/10/2026
+
+Luyện/ôn/sửa sai: rời tab, mất focus, máy ngủ hoặc idle 120 giây kết thúc phiên, về trang chính và hiện popup trong app, tài khoản vẫn đăng nhập. Không cộng thời gian sau khi rời/ngủ hoặc đuôi phiên quá hạn. Phòng thi giữ quy tắc tab riêng; idle rời giao diện mà không đăng xuất. Giáo viên xem lịch sử đáp án sai trong sổ tay lớp, học sinh không thấy. Khu vườn lớp gồm vườn và xếp hạng cùng trang, bỏ tab xếp hạng; bớt ba dòng khoanh đỏ trong frame vườn. Quyết định này thay quy tắc đăng xuất sau120 giây và tab vườn2 mục ghi trong lịch sử dưới.
+
+QA riêng đợt này: root build/124 backend, sau bổ sung đáp án thi sai4/4 API; checkout push build/122 backend,10/10 E2E desktop/mobile và2/2 ca rời phiên tăng cường. Tất cả dùng DB riêng. Xem bàn giao để đối chiếu scope/push, không coi QA hoặc Git push là bằng chứng dữ liệu Railway đã đổi.
+
 ## Góp ý cuối: lớp gọn và đúng/sai0–4 ý đúng — 13/10/2026
 
 Đã bỏ caption lớp/môn/giáo viên ở Tổng quan, thẻ lớp trùng header và tab Tiến độ giáo viên. Lớp có2 tab Lớp học/Hoạt động nhóm; roster vẫn giữ thống kê/sổ tay, tiêu đề **Danh sách Chương / Danh sách Học sinh**. URL/callback Tiến độ cũ chuyển về lớp; học sinh giữ Hành trình. Đúng/sai nhận đủ16 key4 ý (0–4 ý đúng), không yêu cầu chỉ1 ý đúng.

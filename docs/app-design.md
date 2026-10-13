@@ -1,5 +1,15 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: gộp hành trình vào vườn cá nhân — 13/10/2026
+
+Học sinh vào Khu vườn của tôi thấy phần Hành trình của tôi ở cuối trang, sau những mầm xanh và thẻ cấp độ. Bỏ tab con Hành trình; nút Xem hành trình trong hero cuộn tới phần này. Chỉ một h1 đầu trang; section dùng tiêu đề h2 và timeline chương cũ. URL progress cũ chuyển về home. Quyết định thay mô tả tab home2 mục phía dưới.
+
+## Hiện hành: thông báo kết thúc phiên và vườn lớp một trang — 13/10/2026
+
+Trong luyện/ôn/sửa sai, mất focus/ẩn tab/ngủ máy hoặc idle120 giây kết thúc phiên học, đưa học sinh về Khu vườn của tôi và mở Modal thông báo; không yêu cầu đăng nhập lại. Backend dừng phiên active:false và không cộng đuôi khi phiên quá hạn. Cảnh báo giây105 nói phiên sẽ kết thúc. Phòng thi giữ xử lý vi phạm rời tab riêng, idle chỉ rời giao diện.
+
+Sổ tay giáo viên có khung đỏ nhạt liệt kê từng câu trả lời sai cũ, thời điểm và nguồn, phía trên đáp án chuẩn; trang sổ tay học sinh không hiện lịch sử. Khu vườn lớp không còn tab Xếp hạng: thống kê, vườn, hai bảng thành tích trên một trang. Frame vườn chỉ còn nhãn KHU VƯỜN CHUNG và nút chuyển động trước sân; bỏ h2 tên lớp, sĩ số/môn và đoạn giải thích được khoanh trong ảnh. Tên lớp vẫn trên biển cổng và header.
+
 ## Hiện hành: bỏ lặp thông tin lớp và tab Tiến độ giáo viên — 13/10/2026
 
 Tổng quan giáo viên giữ tiêu đề/slogan, bỏ caption lớp/môn/giáo viên lặp header. Lớp học của tôi bỏ thẻ chọn lớp vì header đã có selector; đi thẳng vào **Danh sách Chương**, rồi **Danh sách Học sinh**. Giữ các nút tạo/chọn lớp/chương/học sinh, thống kê và sổ tay. Tab lớp chỉ còn Lớp học/Hoạt động nhóm; tiến độ xem ở bảng học sinh, hash/callback cũ chuyển về lớp. Học sinh không thay đổi Hành trình. Quyết định này thay3-tab giáo viên trong mục lịch sử bên dưới.

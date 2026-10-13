@@ -445,13 +445,19 @@ test("teacher authors typed questions; student answers, repeats and teacher open
     2,
   );
   await expect(page.getByRole("dialog")).toContainText("Chương hỗn hợp");
+  await expect(
+    page.getByRole("dialog").locator(".notebook-wrong-history"),
+  ).toHaveCount(2);
+  await expect(page.getByRole("dialog")).toContainText(
+    "Câu trả lời sai trước đó",
+  );
   await page.screenshot({
     path: info.outputPath("teacher-notebook.png"),
     fullPage: true,
   });
 });
 
-test("practice loses focus safely, pauses after sleep and logs out at two minutes without interaction", async ({
+test("leaving study or becoming idle ends only the study session and shows an in-app dialog", async ({
   page,
   context,
 }, info) => {
@@ -469,10 +475,13 @@ test("practice loses focus safely, pauses after sleep and logs out at two minute
     })
     .getByRole("button", { name: /Luyện tập/ })
     .click();
-  await start;
+  const started = await start;
+  const sessionId = (await started.json()).sessionId;
   const clock = page.getByLabel("Thời gian phiên học").locator("time");
   await page.clock.runFor(3000);
-  const before = await clock.textContent();
+  const stop = page.waitForResponse(
+    (r) => r.url().endsWith("/api/study/stop") && r.ok(),
+  );
   await page.evaluate(() => {
     Object.defineProperty(document, "hasFocus", {
       configurable: true,
@@ -480,44 +489,76 @@ test("practice loses focus safely, pauses after sleep and logs out at two minute
     });
     window.dispatchEvent(new Event("blur"));
   });
+  await stop;
+  const stopped = await page.request.post("/api/study/heartbeat", {
+    data: { sessionId, active: true, interacted: true },
+  });
+  expect(stopped.status()).toBe(409);
   await expect(
-    page.getByRole("button", { name: "Tiếp tục học", exact: true }),
+    page.getByRole("dialog", { name: "Phiên học đã kết thúc" }),
+  ).toContainText("rời trang học");
+  await expect(
+    page.getByRole("heading", { name: /hôm nay mình học gì/ }),
   ).toBeVisible();
-  await page.clock.runFor(5000);
-  await expect(clock).toHaveText(before!);
+  await expect(
+    page.getByRole("button", { name: "Đăng xuất", exact: true }),
+  ).toBeVisible();
   await page.evaluate(() => {
     delete (document as any).hasFocus;
     window.dispatchEvent(new Event("focus"));
   });
-  await page.getByRole("button", { name: "Tiếp tục học", exact: true }).click();
-  await page.clock.runFor(2000);
-  const preSleep = await clock.textContent();
-  await page.clock.fastForward(60000);
-  await expect(clock).toHaveText(preSleep!);
-  await expect(
-    page.getByRole("button", { name: "Tiếp tục học", exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Tiếp tục học", exact: true }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Đã hiểu" })
+    .click();
+  await navigateTo(page, { name: "Luyện tập", exact: true });
+  await page
+    .locator(".chapter-card")
+    .filter({
+      has: page.getByRole("heading", { name: "Chương ôn I", exact: true }),
+    })
+    .getByRole("button", { name: /Luyện tập/ })
+    .click();
+  await expect(clock).toBeVisible();
   await page.clock.runFor(106000);
-  await expect(page.locator(".idle-banner")).toContainText("Đăng xuất sau");
+  await expect(page.locator(".idle-banner")).toContainText(
+    "Phiên học kết thúc sau",
+  );
   await page.screenshot({
     path: info.outputPath("idle-warning.png"),
     fullPage: true,
   });
   await context.setOffline(true);
-  let alertMessage = "";
-  page.once("dialog", async (dialog) => {
-    alertMessage = dialog.message();
-    await dialog.dismiss();
-  });
   await page.clock.runFor(15000);
-  await expect.poll(() => alertMessage).toContain("2 phút");
+  await expect(
+    page.getByRole("dialog", { name: "Phiên học đã kết thúc" }),
+  ).toContainText("2 phút");
+  await expect(
+    page.getByRole("heading", { name: /hôm nay mình học gì/ }),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Đăng nhập", exact: true }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await context.setOffline(false);
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Đã hiểu" })
+    .click();
   await page.reload();
   await expect(
-    page.getByRole("button", { name: "Đăng nhập", exact: true }),
+    page.getByRole("heading", { name: /hôm nay mình học gì/ }),
   ).toBeVisible();
+  await navigateTo(page, { name: "Luyện tập", exact: true });
+  await page
+    .locator(".chapter-card")
+    .filter({
+      has: page.getByRole("heading", { name: "Chương ôn I", exact: true }),
+    })
+    .getByRole("button", { name: /Luyện tập/ })
+    .click();
+  await expect(page.getByLabel("Thời gian phiên học")).toBeVisible();
+  await page.clock.fastForward(60000);
+  await expect(
+    page.getByRole("dialog", { name: "Phiên học đã kết thúc" }),
+  ).toContainText("thời gian vắng mặt");
 });
