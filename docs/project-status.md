@@ -8,7 +8,7 @@ QA mới: TypeScript/Vite build `.local/duotone-icons-final-build` đạt; **48/
 
 ## Hiện hành: UI/UX gọn hơn và thao tác học tập trực tiếp — 13/10/2026
 
-Theo yêu cầu dùng `redesign-existing-projects` + `web-design-guidelines`, thêm lớp polish cho thẻ/hero/thống kê/thao tác nhanh/bảng/search/focus và responsive, giữ nhận diện khu vườn/Be Vietnam Pro/màu nghiệp vụ. Kế thừa menu **5 mục mỗi vai trò giáo viên/học sinh** và tab Quản lý lớp học trong mã nền `2ab909f`; các mô tả menu 6/7/9 mục/cài đặt ở trang ôn cũ bên dưới không thay cấu trúc này.
+Theo yêu cầu dùng `redesign-existing-projects` + `web-design-guidelines`, thêm lớp polish cho thẻ/hero/thống kê/thao tác nhanh/bảng/search/focus và responsive, giữ nhận diện khu vườn/Be Vietnam Pro/màu nghiệp vụ. Kế thừa menu **5 mục mỗi vai trò giáo viên/học sinh** và tab Quản lý lớp trong mã nền `2ab909f`; các mô tả menu 6/7/9 mục/cài đặt ở trang ôn cũ bên dưới không thay cấu trúc này.
 
 Mục tiêu học tập mở đúng chương có câu; chưa có câu/chương có trạng thái rỗng. Badge sửa sai khôi phục ở menu Luyện tập/tab Sổ tay. Roster tìm tiếng Việt không dấu, xóa lọc và đếm kết quả. Thống kê giáo viên phân biệt tải/lỗi với số 0 và thử lại được. Skip link ba vai trò giữ URL, modal giữ focus với link/controls và reduced-motion. Không thay API, dữ liệu, điểm hoặc quy tắc thi.
 
@@ -172,7 +172,7 @@ Theo yêu cầu push Git, đã gom mã quản lý online/nguồn đề/upload/ph
 
 ## Trang kiểm tra online riêng và hai nguồn đề — 12/10/2026
 
-Đã thêm **Quản lý kiểm tra online** cho giáo viên và **Kiểm tra online** cho học sinh; giữ banner đếm chờ và vào đúng lớp/phòng/reload. Tách khỏi cấp cây/ôn/ma trận/thưởng. Nguồn đề2radio bắt buộc chọn một: Upload file hoặc Chọn từ ngân hàng. Upload chọn chương tại khối file, đọc Word/CSV/cảnh báo thành công/lỗi, không cần checkbox chương trước. Ngân hàng chọn nhiều chương, toàn chương hoặc từng bài độc lập giữa các chương. Đã kiểm tra hai Word15câu thành đề30câu trên testserver.
+Đã thêm **Kiểm tra online** cho giáo viên và **Kiểm tra online** cho học sinh; giữ banner đếm chờ và vào đúng lớp/phòng/reload. Tách khỏi cấp cây/ôn/ma trận/thưởng. Nguồn đề2radio bắt buộc chọn một: Upload file hoặc Chọn từ ngân hàng. Upload chọn chương tại khối file, đọc Word/CSV/cảnh báo thành công/lỗi, không cần checkbox chương trước. Ngân hàng chọn nhiều chương, toàn chương hoặc từng bài độc lập giữa các chương. Đã kiểm tra hai Word15câu thành đề30câu trên testserver.
 
 **118/118 backend,26/26 E2E desktop/mobile, TypeScript/build riêng đạt**, đã xem ảnh; các lỗi lượt đầu thuộc locator/fixture và đã sửa, không gọi gap audit là đã khắc phục. Frontend local5173/HMR đã mở lại, API/DB Railway, kiểm tra login/source/health chỉ đọc đạt. Backend thêm phân loại delivery của lượt thi để lọc lịch sử online, **cần deploy Railway mới có hiệu lực; chưa push/deploy/ghi dữ liệu thật**. Thiết kế [app-design.md](app-design.md), nghiệp vụ [online-exams.md](online-exams.md), bằng chứng [session-handoff.md](session-handoff.md).
 

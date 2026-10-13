@@ -547,6 +547,7 @@ test("teacher creates content and student account; student changes password, lea
     .getByRole("button", { name: "Lưu", exact: true })
     .click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
   await page.getByRole("button", { name: "Thêm chương", exact: true }).click();
   await page.getByLabel("Tên chương").fill("Chương 1 · Đại số");
   await page
@@ -599,6 +600,7 @@ test("teacher creates content and student account; student changes password, lea
   await page.getByLabel("Mật khẩu mới", { exact: true }).fill("OwnPass123!");
   await page.getByLabel("Nhập lại mật khẩu mới").fill("OwnPass123!");
   await page.getByRole("button", { name: "Lưu mật khẩu" }).click();
+  await navigateTo(page, { name: "Luyện tập", exact: true });
   await page
     .getByLabel("Luyện tập theo bài · Chương 1 · Đại số")
     .selectOption("Bài 1 · Phép cộng");
@@ -616,7 +618,7 @@ test("teacher creates content and student account; student changes password, lea
     .getByLabel("Chọn lớp học")
     .selectOption({ label: `${className} · Toán` });
   await navigateTo(page, { name: "Tiến độ học tập" });
-  const row = page.getByRole("row").filter({ hasText: studentName });
+  const row = page.locator(".roster-card").getByRole("row").filter({ hasText: studentName });
   await expect(row).toContainText("100%");
   await expect(row.getByRole("cell").nth(2)).toHaveText("1");
   await page.screenshot({
@@ -640,10 +642,10 @@ test("teacher creates content and student account; student changes password, lea
   await page
     .getByLabel("Chọn lớp học")
     .selectOption({ label: "Lớp 10A1 · Vật lý" });
-  await expect(
-    page
-      .getByRole("table", { name: "Xếp hạng sửa sai" })
-      .getByRole("row")
-      .filter({ hasText: "Trần Hà Linh" }),
-  ).toBeVisible();
+  const selectedClass = await page.getByLabel("Chọn lớp học").inputValue();
+  const gardenResponse = await page.request.get(`/api/classrooms/${selectedClass}/garden`);
+  expect(gardenResponse.ok()).toBeTruthy();
+  const garden = await gardenResponse.json();
+  await expect(page.locator(".garden-student")).toHaveCount(garden.members.length);
+  await expect(page.locator(".garden-frame")).not.toContainText(studentName);
 });

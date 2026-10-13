@@ -25,7 +25,7 @@ for (const role of ["teacher", "student"] as const) {
             ["Lớp học của tôi", "ChalkboardTeacher"],
             ["Ngân hàng câu hỏi", "Books"],
             ["Ôn tập & kiểm tra", "GraduationCap"],
-            ["Quản lý kiểm tra online", "ClipboardText"],
+            ["Kiểm tra online", "ClipboardText"],
           ]
         : [
             ["Khu vườn của tôi", "Plant"],
@@ -110,10 +110,11 @@ for (const role of ["teacher", "student"] as const) {
     } else {
       await navigateTo(page, { name: "Lớp học của tôi", exact: true });
       await expect(
-        page
-          .getByRole("tab", { name: "Khu vườn của lớp", exact: true })
-          .locator("svg"),
-      ).toHaveAttribute("data-icon-name", "Tree");
+        page.getByRole("region", { name: "Khu vườn của lớp", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("tab", { name: "Khu vườn của lớp", exact: true }),
+      ).toHaveCount(0);
       await navigateTo(page, { name: "Tổng quan", exact: true });
     }
     await page.setViewportSize(

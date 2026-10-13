@@ -139,7 +139,7 @@ for (const role of ["teacher", "student", "admin"] as const) {
         const longest = nav.getByRole("button", {
           name:
             role === "teacher"
-              ? "Quản lý kiểm tra online"
+              ? "Kiểm tra online"
               : "Ôn tập & kiểm tra",
           exact: true,
         });

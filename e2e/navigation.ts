@@ -14,7 +14,7 @@ export async function navigateTo(
     ["Hoạt động nhóm", teacher ? "Lớp học của tôi" : "Khu vườn của lớp"],
     ["Sổ tay sửa sai", "Luyện tập"],
     ["Khu vườn của lớp", "Lớp học của tôi"],
-    ["Quản lý lớp học", "Lớp học của tôi"],
+    ["Quản lý lớp", "Lớp học của tôi"],
     ["Tiến độ học tập", "Lớp học của tôi"],
     ["Hành trình của tôi", "Khu vườn của tôi"],
     ["Xếp hạng chăm chỉ", teacher ? "Lớp học của tôi" : "Khu vườn của lớp"],
@@ -29,8 +29,7 @@ export async function navigateTo(
   await navigation.getByRole("button", { name: match[1], exact: true }).click();
   if (match[0] === "Tiến độ học tập" || match[0] === "Hành trình của tôi")
     return;
-  if (match[0] === "Xếp hạng chăm chỉ") {
-    if (teacher) await page.getByRole("tab", { name: "Khu vườn của lớp", exact: true }).click();
+  if (match[0] === "Xếp hạng chăm chỉ" || (teacher && match[0] === "Khu vườn của lớp")) {
     return;
   }
   await page.getByRole("tab", options).click();

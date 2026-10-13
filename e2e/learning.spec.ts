@@ -212,7 +212,7 @@ test("teacher controls chapter access; qualified students wait, opening another 
         })
       ).ok(),
     ).toBeTruthy();
-  await navigateTo(page, { name: "Lớp học của tôi", exact: true });
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
   const permission = page.locator(".chapter-list");
   const studentContext = await browser.newContext({
     viewport: page.viewportSize()!,
@@ -478,7 +478,7 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
   browser,
 }, info) => {
   await login(page, true);
-  await navigateTo(page, { name: "Lớp học của tôi", exact: true });
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
   const permission = page.locator(".chapter-list");
   const openChapter = permission.getByRole("button", {
     name: "Mở kiểm tra · Chương ôn I",

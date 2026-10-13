@@ -57,23 +57,27 @@ test("teacher chapter and roster lists use compact, readable rows", async ({
     .getByRole("navigation", { name: "Điều hướng chính" })
     .getByRole("button", { name: "Lớp học của tôi" })
     .click();
+  await page.getByRole("tab", { name: "Quản lý lớp", exact: true }).click();
   const chapters = page.locator(".chapter-list .chapter-row");
   await expect(chapters.first()).toBeVisible();
   if ((await chapters.count()) > 1) {
     const first = (await chapters.nth(0).boundingBox())!;
     const second = (await chapters.nth(1).boundingBox())!;
     expect(Math.abs(first.y - second.y)).toBeLessThan(2);
-    expect(first.height).toBeLessThan(145);
+    // The compact content now has a separate row for chapter exam access.
+    const access = (await chapters.first().locator(".class-chapter-access").boundingBox())!;
+    expect(first.height - access.height).toBeLessThan(145);
   }
-  const studentRow = page.locator(".roster-card tbody tr").first();
-  await expect(studentRow).toBeVisible();
-  expect((await studentRow.boundingBox())!.height).toBeLessThan(100);
   await expect(
     page.getByRole("heading", { name: "Danh sách Chương" }),
   ).toHaveCSS("font-size", "22px");
   await expect(
-    page.getByRole("heading", { name: "Lớp học của tôi", level: 1 }),
+    page.getByRole("heading", { name: "Quản lý lớp", level: 1 }),
   ).toHaveCSS("font-family", /Be Vietnam Pro/);
+  await page.getByRole("tab", { name: "Lớp học của tôi", exact: true }).click();
+  const studentRow = page.locator(".roster-card tbody tr").first();
+  await expect(studentRow).toBeVisible();
+  expect((await studentRow.boundingBox())!.height).toBeLessThan(100);
   await page.screenshot({
     path: ".local/workspace-density-desktop.png",
     fullPage: true,

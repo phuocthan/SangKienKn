@@ -184,7 +184,9 @@ export default function App() {
         setUser(signedIn);
         if (signedIn.role === "teacher")
           setPage((restored) =>
-            restored === "progress" ? "classes" : restored,
+            ["progress", "garden", "leaderboard"].includes(restored)
+              ? "classes"
+              : restored,
           );
         if (signedIn.role === "student") {
           setPage((restored) =>
@@ -233,8 +235,7 @@ export default function App() {
   const [classLearningError, setClassLearningError] = useState("");
   const [classLearningBusy, setClassLearningBusy] = useState(false);
   useEffect(() => {
-    if (!isTeacher || !current || !["classes", "class-settings"].includes(page))
-      return;
+    if (!isTeacher || !current || page !== "class-settings") return;
     let active = true;
     setClassLearning(null);
     setClassLearningError("");
@@ -326,7 +327,8 @@ export default function App() {
   const closeAccountDialog = useCallback(() => setAccountDialog(null), []);
   function navigate(next: Page, chapterId = "") {
     if (next === "leaderboard") next = "garden";
-    if (user?.role === "teacher" && next === "progress") next = "classes";
+    if (user?.role === "teacher" && ["progress", "garden"].includes(next))
+      next = "classes";
     if (user?.role === "student" && next === "progress") next = "home";
     setEntryRunId("");
     setPage(next);
@@ -468,7 +470,7 @@ export default function App() {
         { id: "learning", label: "Ôn tập & kiểm tra", icon: GraduationCap },
         {
           id: "online-exams",
-          label: "Quản lý kiểm tra online",
+          label: "Kiểm tra online",
           icon: ClipboardList,
         },
       ]
@@ -507,8 +509,7 @@ export default function App() {
           items: [
             { id: "classes", label: "Lớp học của tôi", icon: ClassroomIcon },
             { id: "groups", label: "Hoạt động nhóm", icon: Users },
-            { id: "garden", label: "Khu vườn của lớp", icon: TreeIcon },
-            { id: "class-settings", label: "Quản lý lớp học", icon: Settings },
+            { id: "class-settings", label: "Quản lý lớp", icon: Settings },
           ],
         },
       ]
@@ -939,7 +940,7 @@ export default function App() {
                   <PageHeading
                     eyebrow="CÙNG NHAU GIEO TRI THỨC"
                     title="Lớp học của tôi"
-                    text="Tổ chức lớp, thêm học sinh và chuẩn bị hành trình học tập."
+                    text="Theo dõi học sinh và cùng chăm khu vườn của lớp."
                     action={
                       <button
                         className="button primary"
@@ -949,6 +950,31 @@ export default function App() {
                         Tạo lớp mới
                       </button>
                     }
+                  />
+                  <section aria-label="Khu vườn của lớp">
+                    <ClassCommunity
+                      key={current.id}
+                      classroom={current}
+                      revision={revision}
+                      userId={user.id}
+                      teacherAvatarId={user.avatarId}
+                      embedded
+                    />
+                  </section>
+                  <Roster
+                    classroom={current}
+                    revision={revision}
+                    onAdd={() => setEditor("student")}
+                    onReset={(s) => setEditor({ student: s })}
+                  />
+                </>
+              )}
+              {page === "class-settings" && (
+                <>
+                  <PageHeading
+                    eyebrow="QUẢN LÝ LỚP"
+                    title="Quản lý lớp"
+                    text={`Tổ chức chương học và điều chỉnh nhịp tăng cấp cho ${current.name}.`}
                   />
                   <SectionTitle
                     title="Danh sách Chương"
@@ -962,11 +988,6 @@ export default function App() {
                       </button>
                     }
                   />
-                  {classLearningError && (
-                    <div className="error-banner" role="alert">
-                      {classLearningError}
-                    </div>
-                  )}
                   <div className="chapter-list">
                     {current.chapters.length ? (
                       current.chapters.map((ch, i) => {
@@ -1040,21 +1061,6 @@ export default function App() {
                       />
                     )}
                   </div>
-                  <Roster
-                    classroom={current}
-                    revision={revision}
-                    onAdd={() => setEditor("student")}
-                    onReset={(s) => setEditor({ student: s })}
-                  />
-                </>
-              )}
-              {page === "class-settings" && (
-                <>
-                  <PageHeading
-                    eyebrow="QUẢN LÝ LỚP HỌC"
-                    title="Quản lý lớp học"
-                    text={`Điều chỉnh nhịp tăng cấp cho ${current.name}.`}
-                  />
                   {classLearningError && (
                     <div className="error-banner" role="alert">
                       {classLearningError}
@@ -1194,7 +1200,7 @@ export default function App() {
                   user={user}
                 />
               )}
-              {page === "garden" && (
+              {page === "garden" && !isTeacher && (
                 <ClassCommunity
                   key={current.id}
                   classroom={current}

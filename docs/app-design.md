@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: vườn lớp trong trang lớp, chương trong quản lý — 13/10/2026
+
+Theo yêu cầu mới, **giáo viên** xem Khu vườn của lớp ngay trong tab **Lớp học của tôi**: tiêu đề vườn dùng h2 trong nội dung, kèm thống kê, vinh danh, khu vườn, hai bảng thành tích và danh sách học sinh phía dưới. Chỉ có một h1 Lớp học của tôi; nút Cập nhật vườn vẫn hoạt động. Bỏ tab Khu vườn của lớp riêng; bộ tab giáo viên còn Lớp học của tôi / Hoạt động nhóm / Quản lý lớp.
+
+**Danh sách Chương** cùng Thêm chương, Thêm bài/Xem danh sách bài, Quản lý câu hỏi và Mở/Khóa kiểm tra chuyển sang **Quản lý lớp**, phía trên cài đặt Thời gian tăng cấp. Dùng cùng trạng thái/callback/API hiện có; tổng quan vẫn cho thêm học sinh/tạo chương nhanh. Nhãn Quản lý lớp kế thừa cập nhật từ tác vụ song song. URL giáo viên `section=garden` và `section=leaderboard` cũ khôi phục về `section=classes`, giữ classroom; callback cũ cũng mở trang lớp. Học sinh giữ nguyên trang/tab Khu vườn của lớp. Không đổi dữ liệu, quyền hoặc cách tính cấp/điểm. QA mới xem đầu session-handoff.
+
 ## Hiện hành: GreenEdu Duotone đã áp dụng — 13/10/2026
 
 Người dùng duyệt preview `.local/greenedu-icons-preview.html` và yêu cầu áp dụng. Toàn bộ icon UI trong app chuyển từ Lucide sang **Phosphor Duotone**, dùng màu chữ hiện tại và lớp nền 20% để hợp palette khu vườn, nền sáng và menu xanh đậm. `src/icons.tsx` là nguồn chung, chỉ nhúng SVG Duotone đã duyệt với giấy phép MIT; dùng IconBase từ `@phosphor-icons/react` 2.1.10, không đưa các weight khác vào bundle. Lucide còn phục vụ bản `design-preview` độc lập; không còn import Lucide trong `src`.
@@ -10,7 +16,7 @@ Năm cấp **Mầm → Chồi → Cây Non → Đơm Hoa → Kết Trái** dùng
 
 ## Hiện hành: cải thiện UI/UX bằng hai skill — 13/10/2026
 
-Theo yêu cầu mới, áp dụng `redesign-existing-projects` để rà soát/cải thiện trên React/CSS hiện có và `web-design-guidelines` để kiểm tra thao tác, bàn phím, trạng thái và responsive. Giữ Be Vietnam Pro, nhận diện trường, minh họa cây từ sách, cây cấp theo chương và palette đúng/sai/cảnh báo. Mã nền là `2ab909f`, đã có menu chính 5 mục mỗi vai trò giáo viên/học sinh; tab Quản lý lớp học và cách gom nhóm mới được giữ, không khôi phục menu 6/7/9 mục trong các ghi chú cũ.
+Theo yêu cầu mới, áp dụng `redesign-existing-projects` để rà soát/cải thiện trên React/CSS hiện có và `web-design-guidelines` để kiểm tra thao tác, bàn phím, trạng thái và responsive. Giữ Be Vietnam Pro, nhận diện trường, minh họa cây từ sách, cây cấp theo chương và palette đúng/sai/cảnh báo. Mã nền là `2ab909f`, đã có menu chính 5 mục mỗi vai trò giáo viên/học sinh; tab Quản lý lớp và cách gom nhóm mới được giữ, không khôi phục menu 6/7/9 mục trong các ghi chú cũ.
 
 `src/app-polish.css` nạp sau mobile-density: thẻ nội dung thường nền trắng ấm, viền xanh nhẹ và bóng mềm thay gradient phủ mọi panel; frame vườn/vinh danh/câu hỏi/phòng thi đặc thù giữ riêng. Hero trang chính dùng grid chữ/hình, nền xanh dịu; trên điện thoại hình gọn dưới chữ. Thống kê học sinh desktop gồm hai ô trên và ô sửa sai toàn hàng, lời nhắc vẫn nằm trong cùng ô sửa sai; mobile một cột. Thao tác nhanh giáo viên dạng hàng icon/chữ/mũi tên, xuống một cột trên màn hẹp. Heading cân dòng, số liệu tabular, bảng có header nhẹ/hover, tìm kiếm có focus rõ; không thay thang chữ chung hoặc nội dung học tập.
 
@@ -118,7 +124,7 @@ Người dùng đã chọn **giữ câu “Gieo nỗ lực hôm nay, đón tri t
 
 ## Menu trái gom nhóm và submenu — 12/10/2026
 
-Theo yêu cầu menu trái gọn hơn, giáo viên có **4 mục cấp đầu**: Tổng quan; Lớp học → Lớp học của tôi/Hoạt động nhóm; Dạy học & kiểm tra → Ngân hàng câu hỏi/Ôn tập & kiểm tra/Quản lý kiểm tra online; Khu rừng tri thức → Tiến độ học tập/Khu vườn của lớp/Xếp hạng chăm chỉ. Học sinh có **5 mục cấp đầu**: Khu vườn của tôi/Hành trình của tôi; Học tập → Luyện tập/Sổ tay sửa sai; Kiểm tra → Ôn tập & kiểm tra/Kiểm tra online; Cùng lớp → Hoạt động nhóm/Khu vườn của lớp/Xếp hạng chăm chỉ. Admin giữ mục Quản lý tài khoản riêng vì không có nhiều chức năng để nhóm.
+Theo yêu cầu menu trái gọn hơn, giáo viên có **4 mục cấp đầu**: Tổng quan; Lớp học → Lớp học của tôi/Hoạt động nhóm; Dạy học & kiểm tra → Ngân hàng câu hỏi/Ôn tập & kiểm tra/Kiểm tra online; Khu rừng tri thức → Tiến độ học tập/Khu vườn của lớp/Xếp hạng chăm chỉ. Học sinh có **5 mục cấp đầu**: Khu vườn của tôi/Hành trình của tôi; Học tập → Luyện tập/Sổ tay sửa sai; Kiểm tra → Ôn tập & kiểm tra/Kiểm tra online; Cùng lớp → Hoạt động nhóm/Khu vườn của lớp/Xếp hạng chăm chỉ. Admin giữ mục Quản lý tài khoản riêng vì không có nhiều chức năng để nhóm.
 
 `SidebarNavigation` dùng chung: một nhóm mở mỗi lần, bấm lại để đóng; vào trang từ submenu/nút trong nội dung tự mở nhóm chứa trang hiện tại. Home/tiện ích tài khoản đóng nhóm; chọn lớp giữ trang. Menu cha chỉ mở/đóng, không dẫn ngầm sang trang đầu. Parent có icon Forest và chevron; submenu dùng chấm nhỏ/đường nối, item hiện tại có aria-current và nền xanh nhẹ. Lời nhắc sidebar rút thành một dòng, ba tiện ích Góp ý/Tài khoản/Đăng xuất vẫn dưới cùng. Bộ đếm sửa sai hiện cả trên nhóm Học tập khi đóng và mục con; không tạo hoặc đổi dữ liệu học tập.
 
@@ -142,7 +148,7 @@ Người dùng đã chọn **cho luyện tập và tính giờ ngay sau khi bài
 
 ## Trang kiểm tra online riêng và hai nguồn đề — 12/10/2026
 
-Điều hướng chính bổ sung **Quản lý kiểm tra online** cho giáo viên và **Kiểm tra online** cho học sinh, icon ClipboardList. Giáo viên có form chuẩn bị đề, danh sách buổi/bắt đầu/đóng và lượt thi/kết quả; học sinh xem buổi chờ/đang mở/đã đóng và lượt của mình. Không đưa cấu hình cấp cây, quyền Săn điểm, ma trận ôn hoặc thưởng cây vào trang riêng này. Nút Tạo kiểm tra online ở trang Ôn tập & kiểm tra dẫn sang trang mới. Phòng thi dùng lại luồng hiện có, reload giữ đúng trang online/lớp/lượt bằng workspace trong hash. Lịch kiểm tra theo lịch và Săn điểm tiếp tục ở trang cũ.
+Điều hướng chính bổ sung **Kiểm tra online** cho giáo viên và **Kiểm tra online** cho học sinh, icon ClipboardList. Giáo viên có form chuẩn bị đề, danh sách buổi/bắt đầu/đóng và lượt thi/kết quả; học sinh xem buổi chờ/đang mở/đã đóng và lượt của mình. Không đưa cấu hình cấp cây, quyền Săn điểm, ma trận ôn hoặc thưởng cây vào trang riêng này. Nút Tạo kiểm tra online ở trang Ôn tập & kiểm tra dẫn sang trang mới. Phòng thi dùng lại luồng hiện có, reload giữ đúng trang online/lớp/lượt bằng workspace trong hash. Lịch kiểm tra theo lịch và Săn điểm tiếp tục ở trang cũ.
 
 **Nguồn đề** là fieldset hai radio **Upload file / Chọn từ ngân hàng**, ban đầu chưa chọn; bắt buộc chọn đúng một. Upload chọn chương ngay trong khối file, không cần tích chương ở khối khác trước. Có mẫu Word/CSV, thông báo đọc thành công, xem/bỏ câu và lỗi tại chỗ; Word5MB/CSV512KB, đề tối đa100câu. Ngân hàng hiển thị checkbox chương, xổ danh sách bằng details và chọn toàn chương hoặc các bài riêng; các chương có phạm vi độc lập, hỗ trợ chọn toàn chương này và vài bài chương khác cùng lúc. Checkbox chương có trạng thái chọn một phần, trọng số chỉ hiện các bài thuộc phạm vi được chọn.
 

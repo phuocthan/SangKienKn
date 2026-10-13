@@ -53,7 +53,7 @@ Chế độ 2: "Thi Chính Thức" (Đồng bộ theo lệnh GV)
 Cơ chế kích hoạt: Chế độ này bị khóa mặc định. Giáo viên bật mở thủ công và đặt lịch (Ví dụ: Đúng 20h00 tối thứ Sáu).
 Vận hành: Cả lớp nhận thông báo và cùng vào làm một đề thi duy nhất tại thời điểm đó dưới sự giám sát thời gian thực của app. Điểm số này sẽ lấy làm điểm kiểm tra định kỳ/thường xuyên chính thức.
 5. Phân Hệ Giáo Viên & Xuất Dữ Liệu
-Mục tiêu: Giúp giáo viên quản lý lớp học "nhẹ tênh" chỉ bằng vài cú click.
+Mục tiêu: Giúp giáo viên Quản lý lớp "nhẹ tênh" chỉ bằng vài cú click.
 Bảng điều khiển (Dashboard): Giáo viên theo dõi được thời gian học thực tế của từng em, cấp độ cây của từng học sinh để kịp thời nhắc nhở các em lười học.
 Xuất dữ liệu Excel thông minh: Giáo viên có thể xuất file Excel bất cứ lúc nào với đầy đủ các trường thông tin:
 Điểm trung bình các bài kiểm tra chính thức.

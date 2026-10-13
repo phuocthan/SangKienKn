@@ -1,6 +1,6 @@
 # Kiểm tra online do giáo viên bắt đầu
 
-Cập nhật 12/10/2026. Giáo viên dùng mục riêng **Quản lý kiểm tra online**, học sinh dùng **Kiểm tra online**. Nút Tạo kiểm tra online ở trang Ôn tập & kiểm tra cũng dẫn sang trang riêng. Dùng chung phòng thi/chấm điểm/lưu đáp án hiện có; kiểm tra theo lịch và Săn điểm vẫn ở trang cũ và giữ quy tắc riêng. Thiết kế giao diện chính tại [app-design.md](app-design.md).
+Cập nhật 12/10/2026. Giáo viên dùng mục riêng **Kiểm tra online**, học sinh dùng **Kiểm tra online**. Nút Tạo kiểm tra online ở trang Ôn tập & kiểm tra cũng dẫn sang trang riêng. Dùng chung phòng thi/chấm điểm/lưu đáp án hiện có; kiểm tra theo lịch và Săn điểm vẫn ở trang cũ và giữ quy tắc riêng. Thiết kế giao diện chính tại [app-design.md](app-design.md).
 
 ## Quy trình và thời gian
 

@@ -16,14 +16,14 @@ async function login(page: Page, teacher: boolean) {
   if (teacher)
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
   await navigateTo(page, {
-    name: teacher ? "Quản lý kiểm tra online" : "Kiểm tra online",
+    name: teacher ? "Kiểm tra online" : "Kiểm tra online",
     exact: true,
   });
 }
 
 async function teacherOnline(page: Page) {
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Quản lý kiểm tra online", exact: true });
+  await navigateTo(page, { name: "Kiểm tra online", exact: true });
 }
 
 test("each exam groups counts and runs; tab auto-submit restores practice time before class closes; closed Excel is scoped", async ({

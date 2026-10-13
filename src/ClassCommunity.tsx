@@ -21,11 +21,13 @@ export function ClassCommunity({
   revision,
   userId,
   teacherAvatarId,
+  embedded = false,
 }: {
   classroom: Classroom;
   revision: number;
   userId: string;
   teacherAvatarId?: string | null;
+  embedded?: boolean;
 }) {
   const [data, setData] = useState<{
     trees: ClassTree[];
@@ -70,21 +72,40 @@ export function ClassCommunity({
 
   return (
     <>
-      <WorkspaceHeading className="page-heading">
-        <div>
-          <h1>Khu vườn của lớp</h1>
-          <span className="eyebrow">CÙNG NHAU LỚN LÊN · {classroom.name}</span>
-          <p>Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp.</p>
-        </div>
-        <button
-          className="button outline small"
-          disabled={loading}
-          onClick={() => setRetry((n) => n + 1)}
-        >
-          <RefreshCw size={16} />
-          Cập nhật
-        </button>
-      </WorkspaceHeading>
+      {embedded ? (
+        <SectionTitle
+          title="Khu vườn của lớp"
+          description="Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp."
+          action={
+            <button
+              className="button outline small"
+              disabled={loading}
+              onClick={() => setRetry((n) => n + 1)}
+            >
+              <RefreshCw size={16} />
+              Cập nhật
+            </button>
+          }
+        />
+      ) : (
+        <WorkspaceHeading className="page-heading">
+          <div>
+            <h1>Khu vườn của lớp</h1>
+            <span className="eyebrow">
+              CÙNG NHAU LỚN LÊN · {classroom.name}
+            </span>
+            <p>Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp.</p>
+          </div>
+          <button
+            className="button outline small"
+            disabled={loading}
+            onClick={() => setRetry((n) => n + 1)}
+          >
+            <RefreshCw size={16} />
+            Cập nhật
+          </button>
+        </WorkspaceHeading>
+      )}
       {error ? (
         <div className="error-banner" role="alert">
           {error}

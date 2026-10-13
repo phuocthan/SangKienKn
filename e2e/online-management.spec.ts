@@ -13,12 +13,12 @@ async function login(page: Page, teacher: boolean) {
   if (teacher)
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
   await navigateTo(page, {
-    name: teacher ? "Quản lý kiểm tra online" : "Kiểm tra online",
+    name: teacher ? "Kiểm tra online" : "Kiểm tra online",
     exact: true,
   });
   await expect(
     page.getByRole("heading", {
-      name: teacher ? "Quản lý kiểm tra online" : "Kiểm tra online",
+      name: teacher ? "Kiểm tra online" : "Kiểm tra online",
       exact: true,
     }),
   ).toBeVisible();

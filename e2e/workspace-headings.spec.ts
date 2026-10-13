@@ -22,7 +22,7 @@ for (const role of ["teacher", "student"] as const) {
             "Hoạt động nhóm",
             "Ngân hàng câu hỏi",
             "Ôn tập & kiểm tra",
-            "Quản lý kiểm tra online",
+            "Kiểm tra online",
             "Khu vườn của lớp",
             "Quản lý góp ý",
             "Tài khoản",

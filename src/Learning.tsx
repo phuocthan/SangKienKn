@@ -267,7 +267,7 @@ export function Learning({
           <h1>
             {onlinePage
               ? teacher
-                ? "Quản lý kiểm tra online"
+                ? "Kiểm tra online"
                 : "Kiểm tra online"
               : "Ôn tập & kiểm tra"}
           </h1>
