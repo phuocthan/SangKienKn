@@ -65,6 +65,7 @@ import {
 import { QuestionBank } from "./QuestionBank";
 import { QuestionFields } from "./QuestionFields";
 import type { Chapter, Classroom, Question, Student, User } from "./types";
+import { WorkspaceContent, type WorkspaceTab } from "./WorkspaceTabs";
 import { loginEmail } from "../shared/login-email";
 
 type Page =
@@ -102,16 +103,26 @@ export default function App() {
   const [startupError, setStartupError] = useState("");
   const [classes, setClasses] = useState<Classroom[]>([]);
   const [classId, setClassId] = useState(
-    new URLSearchParams(location.hash.slice(1)).get("learning") ?? "",
+    new URLSearchParams(location.hash.slice(1)).get("learning") ??
+      new URLSearchParams(location.hash.slice(1)).get("classroom") ??
+      "",
   );
-  const [page, setPage] = useState<Page>(
-    location.hash.includes("learning=")
-      ? new URLSearchParams(location.hash.slice(1)).get("workspace") ===
-        "online"
-        ? "online-exams"
-        : "learning"
-      : "home",
-  );
+  const [page, setPage] = useState<Page>(() => {
+    const params = new URLSearchParams(location.hash.slice(1));
+    if (params.has("learning"))
+      return params.get("workspace") === "online" ? "online-exams" : "learning";
+    const section = params.get("section") as Page;
+    return [
+      "home",
+      "classes",
+      "groups",
+      "progress",
+      "garden",
+      "leaderboard",
+    ].includes(section)
+      ? section
+      : "home";
+  });
   const [study, setStudy] = useState<Study | null>(null);
   const [entryRunId, setEntryRunId] = useState("");
   const [entryClassId, setEntryClassId] = useState("");
@@ -143,7 +154,11 @@ export default function App() {
       setQuickLogin(!!health.quickLogin);
       setQuickAccounts(health.quickAccounts ?? []);
       try {
-        setUser(await api<User>("/auth/me"));
+        const signedIn = await api<User>("/auth/me");
+        setUser(signedIn);
+        if (signedIn.role === "student") {
+          setPage((restored) => (restored === "classes" ? "home" : restored));
+        }
       } catch (e) {
         if (!(e instanceof ApiError && e.status === 401)) throw e;
       }
@@ -184,6 +199,38 @@ export default function App() {
   useEffect(() => {
     setQuestionChapter(current?.chapters[0]?.id ?? "");
   }, [current?.id]);
+  useEffect(() => {
+    if (!user || user.role === "admin" || !current || study) return;
+    const params = new URLSearchParams(location.hash.slice(1));
+    if (
+      [
+        "home",
+        "classes",
+        "groups",
+        "progress",
+        "garden",
+        "leaderboard",
+      ].includes(page)
+    ) {
+      const section = new URLSearchParams({
+        section: page,
+        classroom: current.id,
+      });
+      history.replaceState(
+        null,
+        "",
+        `${location.pathname}${location.search}#${section}`,
+      );
+    } else if (params.has("section")) {
+      params.delete("section");
+      params.delete("classroom");
+      history.replaceState(
+        null,
+        "",
+        `${location.pathname}${location.search}${params.size ? `#${params}` : ""}`,
+      );
+    }
+  }, [user, current?.id, page, study]);
   useEffect(() => {
     if (!notice) return;
     const timer = setTimeout(() => setNotice(""), 6000);
@@ -317,7 +364,6 @@ export default function App() {
     ? [
         { id: "home", label: "Tổng quan", icon: LayoutDashboard },
         { id: "classes", label: "Lớp học của tôi", icon: Users },
-        { id: "groups", label: "Hoạt động nhóm", icon: Users },
         { id: "questions", label: "Ngân hàng câu hỏi", icon: BookOpen },
         { id: "learning", label: "Ôn tập & kiểm tra", icon: Clock3 },
         {
@@ -325,9 +371,7 @@ export default function App() {
           label: "Quản lý kiểm tra online",
           icon: ClipboardList,
         },
-        { id: "progress", label: "Tiến độ học tập", icon: TrendingUp },
         { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
-        { id: "leaderboard", label: "Xếp hạng chăm chỉ", icon: Trophy },
       ]
     : [
         { id: "home", label: "Khu vườn của tôi", icon: Sprout },
@@ -336,10 +380,52 @@ export default function App() {
         { id: "online-exams", label: "Kiểm tra online", icon: ClipboardList },
         { id: "groups", label: "Hoạt động nhóm", icon: Users },
         { id: "corrections", label: "Sổ tay sửa sai", icon: CheckCircle2 },
-        { id: "progress", label: "Hành trình của tôi", icon: TrendingUp },
+        { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
+      ];
+  const parentPage: Page =
+    page === "leaderboard"
+      ? "garden"
+      : isTeacher && (page === "groups" || page === "progress")
+        ? "classes"
+        : !isTeacher && page === "progress"
+          ? "home"
+          : page;
+  const tabGroups: {
+    parent: Page;
+    label: string;
+    items: WorkspaceTab<Page>[];
+  }[] = [
+    {
+      parent: "garden",
+      label: "Khu vườn của lớp",
+      items: [
         { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
         { id: "leaderboard", label: "Xếp hạng chăm chỉ", icon: Trophy },
-      ];
+      ],
+    },
+    isTeacher
+      ? {
+          parent: "classes",
+          label: "Lớp học của tôi",
+          items: [
+            { id: "classes", label: "Lớp học của tôi", icon: Users },
+            { id: "groups", label: "Hoạt động nhóm", icon: Users },
+            { id: "progress", label: "Tiến độ học tập", icon: TrendingUp },
+          ],
+        }
+      : {
+          parent: "home",
+          label: "Khu vườn của tôi",
+          items: [
+            { id: "home", label: "Khu vườn của tôi", icon: Sprout },
+            { id: "progress", label: "Hành trình của tôi", icon: TrendingUp },
+          ],
+        },
+  ];
+  const activeTabs =
+    !study && current
+      ? tabGroups.find((group) => group.parent === parentPage)
+      : undefined;
   const totalSeconds =
     current?.chapters.reduce((n, c) => n + c.seconds, 0) ?? 0;
   const openCorrections = classes.reduce(
@@ -360,7 +446,7 @@ export default function App() {
               ? { ...item, count: openCorrections }
               : item,
           )}
-          page={page}
+          page={parentPage}
           onNavigate={navigate}
         />
         <div className="sidebar-bottom">
@@ -436,7 +522,7 @@ export default function App() {
             </div>
           </div>
         </header>
-        <main className="main-content">
+        <WorkspaceContent tabs={activeTabs} page={page} onNavigate={navigate}>
           {!isTeacher && (
             <ExamNotices
               key={user.id}
@@ -989,7 +1075,7 @@ export default function App() {
                 : "Mỗi ngày, một bước tiến"}
             </span>
           </footer>
-        </main>
+        </WorkspaceContent>
       </WorkspaceFrame>
       {accountDialog && (
         <Modal

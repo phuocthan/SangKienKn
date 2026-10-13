@@ -1,0 +1,56 @@
+.workspace-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px;
+  margin: 0 0 22px;
+  border: 1px solid #cadfb9;
+  border-radius: 16px;
+  background: #f3f7ee;
+}
+
+.workspace-tabs > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: #4d6b50;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.workspace-tabs > button[aria-selected="true"] {
+  background: #315d3e;
+  border-color: #315d3e;
+  color: #fff;
+  box-shadow: 0 3px 8px #315d3e16;
+}
+
+.workspace-tabs > button:hover:not([aria-selected="true"]) {
+  background: #e5efda;
+}
+
+.workspace-tabs > button:focus-visible {
+  outline: 2px solid #63884f;
+  outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+  .workspace-tabs {
+    width: 100%;
+    margin-bottom: 18px;
+  }
+
+  .workspace-tabs > button {
+    flex: 1 1 auto;
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+}

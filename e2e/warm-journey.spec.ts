@@ -20,7 +20,9 @@ for (const role of ["teacher", "student"] as const) {
     await page.goto("/");
     await page.setViewportSize({ width: 1440, height: 1000 });
     const nav = page.getByRole("navigation", { name: "Điều hướng chính" });
-    await expect(nav.getByRole("button")).toHaveCount(9);
+    await expect(nav.getByRole("button")).toHaveCount(
+      role === "teacher" ? 6 : 7,
+    );
     await expect(page.locator(".topbar .breadcrumb")).toHaveCount(0);
     await expect(
       page.locator(".workspace-heading-slot > .page-heading"),
@@ -91,10 +93,12 @@ for (const role of ["teacher", "student"] as const) {
       await page.setViewportSize(viewport);
       await expect(page.locator(".workspace-heading-slot")).toBeHidden();
       await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-      await expect(nav.getByRole("button")).toHaveCount(9);
+      await expect(nav.getByRole("button")).toHaveCount(
+        role === "teacher" ? 6 : 7,
+      );
       await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
       await expect(
-        nav.getByRole("button", { name: "Xếp hạng chăm chỉ", exact: true }),
+        nav.getByRole("button", { name: "Khu vườn của lớp", exact: true }),
       ).toHaveAttribute("aria-current", "page");
       expect(
         await page.evaluate(

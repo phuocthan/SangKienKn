@@ -1,5 +1,13 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: tab trong trang cha và menu portrait xanh đậm — 13/10/2026
+
+Yêu cầu mới gom đúng các chức năng đã chọn, dùng tab trong nội dung (không accordion menu trái). **Giáo viên:** Lớp học của tôi có Lớp học của tôi/Hoạt động nhóm/Tiến độ học tập; Khu vườn của lớp có Khu vườn của lớp/Xếp hạng chăm chỉ. Sidebar giáo viên còn6 mục. **Học sinh:** Khu vườn của tôi có Khu vườn của tôi/Hành trình của tôi; Khu vườn của lớp có Khu vườn của lớp/Xếp hạng chăm chỉ; Hoạt động nhóm vẫn là mục chính. Sidebar học sinh còn7 mục.
+
+WorkspaceContent/WorkspaceTabs dùng tablist/tab/tabpanel, aria-selected/controls/labelledby và roving tabindex; phím trái/phải/Home/End chọn và focus đúng tab. Sidebar tô sáng trang cha khi vào mục con; các nút dẫn tới tiến độ/xếp hạng vẫn mở đúng chức năng. Hash section/classroom giữ tab và lớp khi tải lại; luồng hash learning/workspace phòng thi giữ ưu tiên. URL lớp giáo viên được đưa về Home nếu học sinh khôi phục; dữ liệu/quyền API giữ nguyên. Các trang con dùng lại thành phần và trạng thái nghiệp vụ cũ, không tính lại tiến độ hoặc tạo dữ liệu.
+
+Portrait≤1100px dùng nền menu đáy cùng gradient xanh đậm landscape (#19442f→#254d36), chữ/icon xanh trắng, mục active nền xanh nhạt/chữ đậm. Viền trên2px #88a982 phân vùng nội dung và menu; thêm đường chia mảnh giữa các mục. Vị trí fixed, cuộn ngang, chiều cao/safe area, header account/lớp sticky giữ nguyên. Quyết định9 mục phẳng và navbar portrait sáng phía dưới là lịch sử đã thay.
+
 ## Hiện hành: đăng nhập gọn, tiêu đề lớn trước và Quên mật khẩu — 12/10/2026
 
 Theo ảnh đăng nhập: đặt “Kiến thức lớn lên. Bạn cũng vậy.” trước dòng nhỏ “MỖI NỖ LỰC LÀ MỘT HẠT MẦM”; bỏ đoạn “Một nơi để học, để thử, để sửa sai. Và để thấy mình tốt hơn mỗi ngày.”. Trong form, h2 “Mở khu vườn của bạn” trước badge Chào mừng trở lại; giữ mô tả đăng nhập. login.css nạp cuối và scoped theo login: desktop đầu khung nhập căn với đầu tiêu đề chính, không còn margin:auto đẩy khung xuống; mobile bỏ min-height dư và giảm gap, cạnh trái form khớp tiêu đề. Giữ minh họa desktop, mobile vẫn ẩn như cũ.

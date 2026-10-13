@@ -110,9 +110,9 @@
     overscroll-behavior-x: contain;
     scroll-padding-inline: 12px;
     border: 0;
-    border-top: 1px solid var(--border);
+    border-top: 2px solid #88a982;
     border-radius: 18px 18px 0 0;
-    background: #fffef9f7;
+    background: linear-gradient(155deg, #19442f, #254d36);
     backdrop-filter: blur(12px);
     box-shadow: 0 -4px 18px #23422c12;
     scrollbar-width: thin;
@@ -151,7 +151,27 @@
     font-size: var(--text-label);
     line-height: 1.5;
     white-space: nowrap;
-    color: #5b7054;
+    color: #d8e6d6;
+  }
+
+  .sidebar nav .nav-item.active {
+    background: #edf4dd;
+    color: #315d3e;
+  }
+
+  .sidebar nav .nav-item:hover:not(.active) {
+    background: #ffffff14;
+    color: #fff;
+  }
+
+  .sidebar nav .nav-item + .nav-item::after {
+    content: "";
+    position: absolute;
+    left: -3px;
+    top: 18%;
+    bottom: 18%;
+    width: 1px;
+    background: #a8c5a34d;
   }
 
   .sidebar .nav-item svg {

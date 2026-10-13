@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Gom chức năng vào tab và menu portrait xanh — 13/10/2026
+
+Đã gom theo yêu cầu: giáo viên lớp→lớp/nhóm/tiến độ, vườn lớp→vườn/xếp hạng (6 mục chính); học sinh vườn tôi→vườn/hành trình, vườn lớp→vườn/xếp hạng (7 mục chính, nhóm vẫn ở menu). Menu cha active đúng; tab giữ qua reload/lớp, bàn phím/aria đầy đủ. Portrait menu đáy xanh đậm giống landscape, line phân vùng trên và giữa mục, active xanh nhạt; giữ dock/header/safe area.
+
+TypeScript/build đạt. **12/12 UI** sau sửa khôi phục tab đạt trước bước chốt kiểm tra URL theo vai trò; bản cuối **28 ca liên quan đã xác nhận đạt** (22 đạt lượt đầu,6 chạy lại đạt sau cập nhật selector cha/con và dùng reload thật cho ca hash). Gồm tab/role/54 tổ hợp tab×vai trò×viewport, account/portrait/nhóm/cấp cây/ôn-thi/online và hash phòng thi; chỉ DB/server riêng3331. Đã xem ảnh giáo viên desktop/portrait, root HMR phục vụ module200. Push riêng UI/test/ba phần tài liệu; giữ16 file backend/nhóm online/helper local/tài liệu đang làm, runtime Railway chưa xác minh.
+
 ## Đăng nhập gọn và nút Quên mật khẩu — 12/10/2026
 
 Đã đưa chữ lớn lên trước slogan/badge, bỏ mô tả intro được đánh dấu, kéo form lên/căn với tiêu đề trên desktop và cùng cạnh trái trên mobile. Thêm nút Quên mật khẩu mở đúng thông báo liên hệ giáo viên chủ nhiệm hoặc admin theo yêu cầu; đóng bằng nút/Escape, giữ dữ liệu đang nhập và không gửi API reset.

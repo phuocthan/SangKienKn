@@ -1,5 +1,15 @@
 # Bàn giao session GreenEdu
 
+## Tab theo trang cha và navbar portrait xanh đậm — 13/10/2026
+
+Yêu cầu12/10 tiếp tục13/10 đã hoàn tất: giáo viên gom Hoạt động nhóm/Tiến độ vào Lớp học của tôi (3 tab), Xếp hạng vào Khu vườn của lớp (2 tab), còn6 sidebar mục. Học sinh gom Hành trình vào Khu vườn của tôi và Xếp hạng vào Khu vườn của lớp (mỗi2 tab), còn7 sidebar mục; Hoạt động nhóm vẫn riêng. Không accordion. WorkspaceContent/WorkspaceTabs/CSS mới, panel dùng lại nội dung cũ; parentPage làm sidebar active, callback dẫn mục con giữ. Tab có aria/roving tabindex/Left-Right/Home-End. Hash section/classroom lưu tab/lớp và khôi phục khi reload, giữ ưu tiên hash learning/workspace/room; học sinh khôi phục section=classes về Home. Không sửa API/database/nghiệp vụ.
+
+Góp ý portrait trong lúc làm đã gộp: nền nav đáy đúng gradient landscape155deg #19442f→#254d36, chữ/icon sáng/active xanh nhạt, border-top2px #88a982 và line giữa mục. Fixed/height/safe area/scroll ngang/header sticky không đổi. e2e/navigation helper đi trang cha rồi tab con khi mục không còn sidebar; sửa assertions warm/portrait về6/7 mục và parent active + child selected.
+
+**Kiểm tra mới đúng checkout push** .local/forest-push-checkout: TypeScript/Vite build .local/warm-journey-push-build đạt. Lượt đầu UI8/12 đạt,4 reload vềHome vì bản cũ chỉ giữ hash học/thi; đã triển khai hash tab/lớp, chạy lại **12/12 UI đạt** (parent-tabs/warm-journey/workspace-headings) trước bổ sung chặn URL classes cho học sinh. Bản cuối28 regression có **22/28 đạt lượt đầu**:6 còn lại do portrait test còn mong button Xếp hạng ở menu thay vì parent+tab và ca URI dùng goto chỉ đổi fragment cùng document, chưa reload để khôi phục. Cập nhật selector đúng yêu cầu và reload thật; **6/6 chạy lại đạt**. Tổng28 kịch bản cuối đã xác nhận, không báo28/28 cùng lượt. Bao gồm parent-tabs54 tổ hợp tab/role/1440-390-768, reload/class/keyboard/role; account/portrait320-390-768-1024/rotate; tạo-nộp nhóm Word/retry/Canva; cấp cây/roster/xếp hạng; ôn clock/sai không lộ lời giải; thi offline/đóng/Excel và online reload/order/close. Không giảm assertion hay đổi nghiệp vụ để vượt test.
+
+Các lượt đều server/SQLite riêng3331; không ghi Railway/database chính. Đã xem ảnh tab nhóm giáo viên desktop và menu portrait xanh đậm; frontend local module WorkspaceTabs200/HMR. Chỉ push App/main/WorkspaceTabs/CSS portrait + helper/test và ba phần tài liệu.16 file công việc song song (14 trước + scripts/local.ps1/docs/dev-railway.md mới thay đổi) bảo toàn theo .local/parent-tabs-preserved.json; không đưa backend/online/Excel/helper local lên remote. Kết quả push thực tế ghi sau hoàn thành; runtime Railway chưa xác minh.
+
 ## Đăng nhập theo ảnh: tiêu đề trước, form nâng lên, Quên mật khẩu — 12/10/2026
 
 Yêu cầu mới đã hoàn tất: Login đưa h1 trước slogan, h2 form trước badge; xóa hai dòng intro Một nơi để học…/Và để thấy mình… được đánh dấu. Thêm login.css nạp cuối trong main.tsx, chỉ scope login: desktop dùng cùng mốc đầu cho tiêu đề/frame (không margin:auto), mobile bỏ min-height290px/gap dư và căn cạnh trái22px. Giữ mô tả Đăng nhập để tiếp tục…/asset/copyright và luồng auth hiện có.
