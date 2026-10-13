@@ -87,11 +87,12 @@ export function AdminWorkspace({
         <nav aria-label="Điều hướng chính">
           <button
             className={`nav-item ${page === "accounts" ? "active" : ""}`}
+            aria-label="Quản lý tài khoản"
             aria-current={page === "accounts" ? "page" : undefined}
             onClick={() => setPage("accounts")}
           >
             <Users size={20} />
-            Quản lý tài khoản
+            <span className="nav-label">Quản lý tài khoản</span>
           </button>
         </nav>
         <div className="sidebar-bottom">

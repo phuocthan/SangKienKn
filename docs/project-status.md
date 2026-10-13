@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: dock portrait đủ tab, tab chọn nổi bật — 13/10/2026
+
+Phone/PC portrait dàn toàn bộ điểm đến trên thanh dưới, không cần swipe. Chỉ tab được chọn hiện chữ bên dưới icon và nhô lên 5px; tab còn lại là icon với aria-label tên đầy đủ. Kiểm tra kích thước từ 320px đến 1024px, giữ menu desktop/landscape.
+
 ## Hiện hành: menu rộng hơn và thống kê cấp bằng icon — 13/10/2026
 
 Sidebar desktop/landscape rộng hơn một chút, phần nội dung được căn theo mép mới; portrait không đổi. Khu vườn của tôi chỉ có Hành trình của tôi làm nơi xem timeline cấp theo chương, không còn thẻ CẤP ĐỘ CỦA BẠN lặp lại. Trong danh sách học sinh và bảng xếp hạng vườn lớp, cấp từng chương hiển thị bằng icon theo thứ tự chương và vạch ngăn, không hiện tên chương/tên cấp trực tiếp; title/nhãn hỗ trợ vẫn chứa thông tin đó. Không đổi dữ liệu cấp hay thời gian.

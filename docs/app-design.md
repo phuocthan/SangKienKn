@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: tab điều hướng portrait không cuộn — 13/10/2026
+
+Dock đáy trong portrait có một hàng flex rộng đúng viewport: icon mọi điểm đến đều nhìn thấy, không kéo ngang. Mục đang chọn chiếm phần rộng hơn, có icon/chữ, nền sáng và nâng 5px; mục còn lại chỉ icon trên nền xanh. Nhãn button luôn ở aria-label dù chữ bị ẩn; badge sửa sai đặt dưới icon khi mục chưa chọn. Khoảng đệm đáy nội dung và header sticky giữ nguyên. CSS chỉ áp dụng media portrait≤1100px, không đổi sidebar landscape.
+
 ## Hiện hành: sidebar nới rộng và icon cấp theo chương — 13/10/2026
 
 Menu trái desktop nới nhẹ để logo/chữ/note thoáng hơn; main-shell dịch tương ứng, giữ khoảng cách 24px giữa menu và nội dung. Các breakpoint landscape nhỏ nới 12px; dock portrait giữ cấu hình cũ. Trang Khu vườn của tôi bỏ thẻ CẤP ĐỘ CỦA BẠN trùng Hành trình của tôi. Roster giáo viên và bảng xếp hạng trong vườn lớp dùng icon cấp thuần hình, phân cách vạch dọc theo thứ tự chương; nhãn chương/cấp vẫn có ở tooltip và aria-label. Thẻ cấp trong Tài khoản và timeline hành trình vẫn đầy đủ chữ.

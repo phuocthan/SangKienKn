@@ -96,6 +96,53 @@ for (const role of ["teacher", "student", "admin"] as const) {
       await expect(
         dock.getByRole("button", { name: "Đăng xuất", exact: true }),
       ).toHaveCount(0);
+      const nav = dock.getByRole("navigation", { name: "Điều hướng chính" });
+      const destinations = nav.locator("button.nav-item");
+      const navBox = (await nav.boundingBox())!;
+      expect(
+        await nav.evaluate(
+          (element) => element.scrollWidth <= element.clientWidth,
+        ),
+      ).toBe(true);
+      expect(
+        await dock.evaluate(
+          (element) => element.scrollWidth <= element.clientWidth,
+        ),
+      ).toBe(true);
+      for (const item of await destinations.all()) {
+        const itemBox = (await item.boundingBox())!;
+        expect(itemBox.x).toBeGreaterThanOrEqual(navBox.x - 1);
+        expect(itemBox.x + itemBox.width).toBeLessThanOrEqual(
+          navBox.x + navBox.width + 1,
+        );
+        const label = item.locator(".nav-label");
+        if (await item.getAttribute("aria-current"))
+          await expect(label).toBeVisible();
+        else await expect(label).toBeHidden();
+      }
+      const activeItem = nav.locator('button.nav-item[aria-current="page"]');
+      const inactiveItem = nav.locator("button.nav-item:not(.active)").first();
+      if ((await activeItem.count()) && (await inactiveItem.count())) {
+        await expect
+          .poll(async () => (await activeItem.boundingBox())!.y)
+          .toBeLessThan((await inactiveItem.boundingBox())!.y);
+      }
+      if (viewport.width === 320 && role !== "admin") {
+        const longest = nav.getByRole("button", {
+          name:
+            role === "teacher"
+              ? "Quản lý kiểm tra online"
+              : "Ôn tập & kiểm tra",
+          exact: true,
+        });
+        await longest.click();
+        const labelBox = (await longest.locator(".nav-label").boundingBox())!;
+        expect(labelBox.y).toBeGreaterThanOrEqual(dockBox.y);
+        expect(labelBox.y + labelBox.height).toBeLessThanOrEqual(
+          dockBox.y + dockBox.height,
+        );
+        await expect(longest.locator(".nav-label")).toBeVisible();
+      }
       const bottomButton = page.getByRole("button", {
         name: "Cuối nội dung kiểm thử",
       });
@@ -109,6 +156,12 @@ for (const role of ["teacher", "student", "admin"] as const) {
         ),
       ).toBe(true);
       if (viewport.width === 390) {
+        if ((await destinations.count()) > 1) {
+          const lastDestination = destinations.last();
+          await lastDestination.click();
+          await expect(lastDestination.locator(".nav-label")).toBeVisible();
+          await expect(destinations.first().locator(".nav-label")).toBeHidden();
+        }
         await page.evaluate(() => window.scrollTo(0, 0));
         await page.screenshot({
           path: `.local/portrait-navigation-${info.project.name}-${role}.png`,

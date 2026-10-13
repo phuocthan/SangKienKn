@@ -105,18 +105,15 @@
     flex-direction: row;
     align-items: stretch;
     gap: 4px;
-    overflow-x: auto;
+    overflow-x: hidden;
     overflow-y: hidden;
-    overscroll-behavior-x: contain;
-    scroll-padding-inline: 12px;
+    touch-action: pan-y;
     border: 0;
     border-top: 2px solid #88a982;
     border-radius: 18px 18px 0 0;
     background: linear-gradient(155deg, #19442f, #254d36);
     backdrop-filter: blur(12px);
     box-shadow: 0 -4px 18px #23422c12;
-    scrollbar-width: thin;
-    scrollbar-color: #9bb48b transparent;
   }
 
   .sidebar > .logo,
@@ -132,31 +129,51 @@
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    flex: 0 0 auto;
-    gap: 4px;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    gap: 2px;
     margin: 0;
     padding: 0;
     overflow: visible;
   }
 
   .sidebar nav .nav-item {
-    flex: 0 0 auto;
+    flex: 1 1 0;
     flex-direction: column;
     justify-content: center;
-    gap: 5px;
-    width: auto;
-    min-width: 84px;
-    min-height: 64px;
-    padding: 8px 12px;
-    font-size: var(--text-label);
-    line-height: 1.5;
-    white-space: nowrap;
+    gap: 2px;
+    width: 0;
+    min-width: 0;
+    min-height: 0;
+    padding: 5px 2px;
+    text-align: center;
+    font-size: clamp(10px, 2.7vw, 12px);
+    line-height: 1.12;
+    white-space: normal;
     color: #d8e6d6;
   }
 
   .sidebar nav .nav-item.active {
+    flex-grow: 3;
+    transform: translateY(-5px);
+    border: 1px solid #dce9c8;
+    border-radius: 15px;
     background: #edf4dd;
     color: #315d3e;
+    box-shadow: 0 -3px 10px #0c302523;
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .sidebar nav .nav-item:not(.active) .nav-label {
+    display: none;
+  }
+
+  .sidebar nav .nav-label {
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
 
   .sidebar nav .nav-item:hover:not(.active) {
@@ -164,10 +181,10 @@
     color: #fff;
   }
 
-  .sidebar nav .nav-item + .nav-item::after {
+  .sidebar nav .nav-item + .nav-item:not(.active)::after {
     content: "";
     position: absolute;
-    left: -3px;
+    left: -2px;
     top: 18%;
     bottom: 18%;
     width: 1px;
@@ -190,6 +207,22 @@
     right: 4px;
     padding: 1px 4px;
     margin: 0;
+  }
+
+  .sidebar nav .nav-item:not(.active) .nav-count {
+    top: auto;
+    right: 1px;
+    bottom: 1px;
+    min-width: 12px;
+    padding: 1px 2px;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar nav .nav-item.active {
+      transition: none;
+    }
   }
 
   .main-content {

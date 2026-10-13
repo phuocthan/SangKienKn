@@ -23,11 +23,12 @@ export function SidebarNavigation<T extends string>({
           key={item.id}
           type="button"
           className={`nav-item ${page === item.id ? "active" : ""}`}
+          aria-label={item.label}
           aria-current={page === item.id ? "page" : undefined}
           onClick={() => onNavigate(item.id)}
         >
           <item.icon size={20} aria-hidden="true" />
-          <span>{item.label}</span>
+          <span className="nav-label">{item.label}</span>
           {!!item.count && <span className="nav-count">{item.count}</span>}
         </button>
       ))}
