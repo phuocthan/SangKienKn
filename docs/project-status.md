@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Submenu căn trái và thao tác tạo nhóm dưới tìm kiếm — 13/10/2026
+
+Đã căn trái tab và nội dung các trang cha giáo viên/học sinh, bỏ khoảng lệch do main-content tự căn giữa trên màn hình rộng. Portrait có tab xuống dòng bám trái. Nút Tạo hoạt động nằm dưới hàng tìm kiếm/bộ lọc, bên trái toolbar; Cập nhật bên phải. Quyền, điều kiện lớp có học sinh, form và API giữ nguyên.
+
+Kiểm tra mới đúng checkout push: TypeScript/Vite đạt; 12/12 QA tab/bố cục/nghiệp vụ nhóm đạt trước tinh chỉnh portrait, sau đó build cuối và 4/4 QA bố cục đạt (90 tổ hợp trang/vai trò/viewport 320–2200px). Test dùng server/database riêng, không Railway. Bảo toàn các thay đổi backend/ôn-thi/online/helper local song song; push chỉ UI và bổ sung tài liệu. Không suy deploy Railway từ kết quả local/push; chi tiết SHA và kiểm tra tại session-handoff.
+
 ## Gom chức năng vào tab và menu portrait xanh — 13/10/2026
 
 Đã gom theo yêu cầu: giáo viên lớp→lớp/nhóm/tiến độ, vườn lớp→vườn/xếp hạng (6 mục chính); học sinh vườn tôi→vườn/hành trình, vườn lớp→vườn/xếp hạng (7 mục chính, nhóm vẫn ở menu). Menu cha active đúng; tab giữ qua reload/lớp, bàn phím/aria đầy đủ. Portrait menu đáy xanh đậm giống landscape, line phân vùng trên và giữa mục, active xanh nhạt; giữ dock/header/safe area.

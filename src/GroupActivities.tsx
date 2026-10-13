@@ -181,7 +181,6 @@ export function GroupActivities({
               ? "Giao yêu cầu, chia nhóm ngẫu nhiên và theo dõi sản phẩm."
               : "Xem nhóm của bạn, yêu cầu và các sản phẩm đã nộp."}
           </p>
-          {teacher && createButton}
         </div>
         <img
           className="group-heading-illustration"
@@ -273,8 +272,9 @@ export function GroupActivities({
             Danh sách hoạt động
           </button>
         )}
+        {teacher && createButton}
         <button
-          className="button outline"
+          className="button outline group-refresh"
           disabled={loading}
           onClick={() => void refresh(selected)}
         >

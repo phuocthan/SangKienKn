@@ -13,8 +13,17 @@
   max-width: 650px;
 }
 
-.group-heading-copy .button {
-  margin-top: 16px;
+.group-workspace .group-toolbar {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.group-workspace .group-toolbar .text-button {
+  margin-right: 0;
+}
+
+.group-workspace .group-refresh {
+  margin-left: auto;
 }
 
 .group-heading-illustration {

@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: submenu căn trái và nút tạo dưới tìm kiếm — 13/10/2026
+
+Các trang có WorkspaceTabs căn main-content về cạnh trái thay vì tự căn giữa khi chiều rộng vượt max-width1600px. Giữ padding responsive chung với header để tiêu đề desktop, tab và panel cùng trục trái. Chiều rộng tối đa, thứ tự/quyền các tab, keyboard và khôi phục qua reload giữ nguyên. Portrait giữ khung tab đủ chiều rộng; nút không giãn lấp hàng, nội dung nút và hàng tiếp theo căn trái.
+
+Hoạt động nhóm: tiêu đề chỉ gồm tên trang/chữ nhỏ/mô tả/minh họa. Tạo hoạt động chuyển xuống toolbar ngay dưới tìm kiếm/bộ lọc, căn trái; Cập nhật căn phải. Toolbar có thể xuống dòng. Chi tiết vẫn giữ thao tác tạo và quay về danh sách; chỉ giáo viên có nút tạo, lớp chưa có học sinh vẫn disabled. Không đổi nghiệp vụ hoặc palette xanh.
+
 ## Hiện hành: tab trong trang cha và menu portrait xanh đậm — 13/10/2026
 
 Yêu cầu mới gom đúng các chức năng đã chọn, dùng tab trong nội dung (không accordion menu trái). **Giáo viên:** Lớp học của tôi có Lớp học của tôi/Hoạt động nhóm/Tiến độ học tập; Khu vườn của lớp có Khu vườn của lớp/Xếp hạng chăm chỉ. Sidebar giáo viên còn6 mục. **Học sinh:** Khu vườn của tôi có Khu vườn của tôi/Hành trình của tôi; Khu vườn của lớp có Khu vườn của lớp/Xếp hạng chăm chỉ; Hoạt động nhóm vẫn là mục chính. Sidebar học sinh còn7 mục.

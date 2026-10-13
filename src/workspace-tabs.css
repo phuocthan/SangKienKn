@@ -1,3 +1,7 @@
+.main-content:has(> .workspace-tabs) {
+  margin-inline: 0;
+}
+
 .workspace-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -49,7 +53,8 @@
   }
 
   .workspace-tabs > button {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
+    justify-content: flex-start;
     padding-inline: 10px;
     font-size: 12px;
   }

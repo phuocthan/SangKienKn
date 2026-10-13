@@ -1,5 +1,15 @@
 # Bàn giao session GreenEdu
 
+## Căn trái submenu và chuyển nút Tạo hoạt động — 13/10/2026
+
+Góp ý mới đã hoàn tất: các trang có WorkspaceTabs giữ chiều rộng tối đa hiện có nhưng bỏ margin ngang tự căn giữa của main-content, để tab và nội dung bên dưới thẳng cạnh trái với tiêu đề desktop, kể cả màn hình rộng 2200px. Portrait vẫn có khung tab rộng theo nội dung trang; nút tab không giãn lấp hàng, chữ/icon căn trái và hàng xuống dòng bắt đầu từ trái. Áp dụng chung cho các tab giáo viên/học sinh đã gom ở đợt trước.
+
+GroupActivities chuyển nút **Tạo hoạt động** khỏi tiêu đề sang toolbar ngay dưới hàng tìm kiếm/bộ lọc. Nút nằm bên trái, Cập nhật bên phải; toolbar xuống dòng khi cần. Trang chi tiết vẫn có nút tạo và quay về danh sách. Giữ giới hạn giáo viên, trạng thái disabled khi lớp chưa có học sinh, modal và toàn bộ nghiệp vụ/API.
+
+**Kiểm tra mới tại checkout push** .local/forest-push-checkout: TypeScript và Vite build đạt. Lượt đầu **12/12** ca QA bố cục, parent-tabs và groups đạt; sau tinh chỉnh nút tab portrait bám trái, build lại .local/submenu-final-build và **4/4** QA bố cục cuối đạt. QA cuối kiểm tra 90 tổ hợp trang/vai trò/viewport 2200, 1440, 768, 390, 320px trên hai project; cạnh trái tab/panel/tiêu đề desktop, hàng tab xuống dòng, nút tạo dưới filter/mở-đóng modal, học sinh không có nút tạo và không tràn ngang. Regression nhóm đã xác nhận tạo Word/chia nhóm/đổi đại diện, nộp lại/Canva/lịch sử, hết hạn/gia hạn. Đã xem ảnh desktop 2200px và portrait 390px. Server/SQLite riêng cổng3331; không ghi Railway hoặc database chính.
+
+Chỉ push ba file UI GroupActivities/group-activities.css/workspace-tabs.css và phần bổ sung đầu ba tài liệu. 16 file công việc song song được bảo toàn theo .local/submenu-alignment-preserved.json; tài liệu có thay đổi song song giữ phần còn lại. Kết quả push thực tế ghi sau hoàn thành; runtime Railway chưa xác minh.
+
 ## Tab theo trang cha và navbar portrait xanh đậm — 13/10/2026
 
 Yêu cầu12/10 tiếp tục13/10 đã hoàn tất: giáo viên gom Hoạt động nhóm/Tiến độ vào Lớp học của tôi (3 tab), Xếp hạng vào Khu vườn của lớp (2 tab), còn6 sidebar mục. Học sinh gom Hành trình vào Khu vườn của tôi và Xếp hạng vào Khu vườn của lớp (mỗi2 tab), còn7 sidebar mục; Hoạt động nhóm vẫn riêng. Không accordion. WorkspaceContent/WorkspaceTabs/CSS mới, panel dùng lại nội dung cũ; parentPage làm sidebar active, callback dẫn mục con giữ. Tab có aria/roving tabindex/Left-Right/Home-End. Hash section/classroom lưu tab/lớp và khôi phục khi reload, giữ ưu tiên hash learning/workspace/room; học sinh khôi phục section=classes về Home. Không sửa API/database/nghiệp vụ.
