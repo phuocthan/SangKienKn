@@ -1,3 +1,4 @@
+import type { QuestionKind } from "../shared/question-types";
 import type { StudentLevel } from "../shared/student-levels";
 
 export type User = {
@@ -36,6 +37,8 @@ export type Classroom = {
   chapters: Chapter[];
 };
 export type Question = {
+  kind?: QuestionKind;
+  correctAnswer?: string;
   topic?: string;
   id: string;
   chapterId: string;
@@ -51,12 +54,15 @@ export type Question = {
   changedAt?: number | null;
 };
 export type Result = {
+  statementCorrectness?: boolean[];
+  correctAnswer?: string;
   correct: boolean;
   correctIndex?: number;
   explanation: string;
   resolved: boolean;
 };
 export type Student = {
+  answeredQuestions?: number;
   chapterLevels?: (StudentLevel & {
     levelMinutes?: number;
     chapterId: string;

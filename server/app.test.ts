@@ -542,7 +542,7 @@ test("study time uses server clock; hidden tabs, gaps and replaced sessions earn
   );
 });
 
-test("idle time stops after warning window, and tree level changes at exact hour thresholds", async (t) => {
+test("idle session expires at two minutes, and tree level changes at exact hour thresholds", async (t) => {
   const f = await fixture(t),
     cookie = await f.login("student");
   const { data: s } = await f.request(
@@ -559,7 +559,21 @@ test("idle time stops after warning window, and tree level changes at exact hour
       cookie,
     );
   }
-  assert.equal(result!.data.seconds, 130);
+  assert.equal(result!.status, 409);
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT seconds FROM progress WHERE student_id='student-demo' AND chapter_id='chapter-1'",
+      )
+      .get()!.seconds,
+    120,
+  );
+  const renewed = await f.request(
+    "/study/start",
+    { chapterId: "chapter-1" },
+    cookie,
+  );
+  s.sessionId = renewed.data.sessionId;
   f.db
     .prepare(
       "UPDATE progress SET seconds = 3590 WHERE student_id = ? AND chapter_id = ?",
@@ -1353,7 +1367,7 @@ test("bulk import validates all rows before saving, rejects duplicates and is id
 });
 
 test("CSV import understands BOM, semicolons, quoted accents/newlines, and reports errors without discarding good preview rows", () => {
-  assert.equal(parseQuestionCsv(csvTemplate).questions.length, 1);
+  assert.equal(parseQuestionCsv(csvTemplate).questions.length, 3);
   const cells = [
     "Bài, một",
     'Câu "đúng"\nở dòng sau?',
@@ -1383,10 +1397,11 @@ test("CSV import understands BOM, semicolons, quoted accents/newlines, and repor
       .length,
   );
   const duplicate = csvTemplate + csvTemplate.split("\r\n")[1] + "\r\n";
-  assert.equal(parseQuestionCsv(duplicate).questions.length, 1);
+  assert.equal(parseQuestionCsv(duplicate).questions.length, 3);
   assert.match(parseQuestionCsv(duplicate).errors[0], /trùng/);
-  const mixed = csvTemplate + "Bài 2,Câu lỗi,A,A,C,D,Z,Lời giải\r\n";
-  assert.equal(parseQuestionCsv(mixed).questions.length, 1);
+  const mixed =
+    csvTemplate + "Bài 2,Câu lỗi,A,A,C,D,Z,Lời giải,,Trắc nghiệm\r\n";
+  assert.equal(parseQuestionCsv(mixed).questions.length, 3);
   assert.equal(parseQuestionCsv(mixed).errors.length, 1);
 });
 

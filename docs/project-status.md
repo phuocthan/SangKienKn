@@ -1,5 +1,21 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Góp ý cuối: lớp gọn và đúng/sai0–4 ý đúng — 13/10/2026
+
+Đã bỏ caption lớp/môn/giáo viên ở Tổng quan, thẻ lớp trùng header và tab Tiến độ giáo viên. Lớp có2 tab Lớp học/Hoạt động nhóm; roster vẫn giữ thống kê/sổ tay, tiêu đề **Danh sách Chương / Danh sách Học sinh**. URL/callback Tiến độ cũ chuyển về lớp; học sinh giữ Hành trình. Đúng/sai nhận đủ16 key4 ý (0–4 ý đúng), không yêu cầu chỉ1 ý đúng.
+
+Railway health trước push chưa có capability ba dạng câu nên mẫu Câu3 lưu bằng validator cũ. Frontend đã chặn máy chủ cũ bằng thông báo cập nhật rõ ràng trước write dạng mới; backend mới có questionTypes:true/studyIdleSeconds:120. QA mới TypeScript/build và4 API đạt;12/14 UI đạt,2 workflow phụ thuộc fixture chạy lại cùng2 student-practices đạt4/4; Word thử legacy capability không gửi POST, backend mới lưu đủ4 câu. Push/capability thực tế ở session-handoff. Không coi frontend HMR hoặc Git push là deploy Railway đã xác nhận.
+
+## Ba dạng câu hỏi và kiểm soát thời gian học — 13/10/2026
+
+Đã có trắc nghiệm/đúng-sai2–4 ý/trả lời ngắn trong tạo-sửa, nhập Word/CSV, phiên bản, luyện/sửa sai/ôn và đề thi. Mẫu Word có4 câu thuộc3 dạng; mẫu CSV10 cột, nhận file8/9 cột cũ. Ngắn so khớp đáp án, chuẩn hóa số thập phân chính xác, không chấm tự luận/biểu thức tương đương. Đúng/sai chấm cả câu, phản hồi từng ý; lời giải luyện mở khi đúng, đề thi giữ thời điểm công bố.
+
+Giáo viên xem sổ tay từng học sinh trong roster với lọc chương/trạng thái và quyền sở hữu lớp. Số câu đã làm đếm câu practice riêng biệt, không tăng trùng khi làm lại; nút làm lại cuối luyện/ôn giữ lịch sử. Đã gọn các chú thích giải thích dư.
+
+Thời gian theo câu/chương đang học, chỉ trong bài tập; focus loss/hidden/ngủ máy dừng, cảnh báo105s/đăng xuất120s kể cả offline, backend chặn hồi sinh phiên hết hạn và gap/stop khi pause. Phòng thi dedup blur+hidden, cảnh báo và khóa tại ngưỡng cả offline. Không thay ngưỡng thi hoặc chỉnh lại dữ liệu giờ lịch sử. Website xử lý tín hiệu rời tab, không có quyền khóa việc mở tab của trình duyệt.
+
+Kiểm tra mới: TypeScript/build đạt;122/122 backend,20/20 UI chính,6/6 clock/review-repeat và2/2 typed-exam đạt riêng;24 kịch bản UI khác nhau đã xác nhận. Chỉ DB riêng, giữ công việc song song, không suy deploy Railway từ code/test. SHA/capability triển khai xem session-handoff.
+
 ## Submenu căn trái và thao tác tạo nhóm dưới tìm kiếm — 13/10/2026
 
 Đã căn trái tab và nội dung các trang cha giáo viên/học sinh, bỏ khoảng lệch do main-content tự căn giữa trên màn hình rộng. Portrait có tab xuống dòng bám trái. Nút Tạo hoạt động nằm dưới hàng tìm kiếm/bộ lọc, bên trái toolbar; Cập nhật bên phải. Quyền, điều kiện lớp có học sinh, form và API giữ nguyên.

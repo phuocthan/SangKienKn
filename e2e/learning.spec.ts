@@ -179,6 +179,7 @@ test("practice clock advances, pauses while hidden or offline, and wrong answers
   await page.clock.runFor(3000);
   await expect(clock).toHaveText(offlineTime!);
   await context.setOffline(false);
+  await page.getByRole("button", { name: "Tiếp tục học", exact: true }).click();
   await page.locator(".choices .choice").nth(1).click();
   await page.getByRole("button", { name: "Kiểm tra đáp án" }).click();
   await expect(page.locator(".wrong-choice")).toHaveCount(1);
@@ -615,6 +616,13 @@ test("leaving the tab four times submits and warnings survive reload", async ({
 }, info) => {
   await login(page, true);
   const title = `Chuyển tab ${info.project.name} ${Date.now()}`;
+  expect(
+    (
+      await page.request.post("/api/chapters/learning-ch1/exam-access", {
+        data: { enabled: true },
+      })
+    ).ok(),
+  ).toBeTruthy();
   const response = await page.request.post(
     "/api/classrooms/learning-class/exams",
     {
@@ -648,6 +656,7 @@ test("leaving the tab four times submits and warnings survive reload", async ({
         configurable: true,
         value: false,
       });
+      document.dispatchEvent(new Event("visibilitychange"));
     });
   }
   await hiddenEvent();

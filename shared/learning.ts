@@ -1,4 +1,6 @@
+import type { QuestionKind, QuestionAnswer } from "./question-types";
 export type LearningQuestion = {
+  kind?: QuestionKind;
   id: string;
   chapterId: string;
   chapterTitle: string;
@@ -55,13 +57,14 @@ export type ExamRun = {
   warnings: number;
   tabLimit: number;
   questions: LearningQuestion[];
-  answers: Record<string, number>;
+  answers: Record<string, QuestionAnswer>;
   score: number | null;
   reason: string | null;
   results?: {
     questionId: string;
     correct: boolean;
     correctIndex: number;
+    correctAnswer?: string;
     explanation: string;
   }[];
   revision: number;

@@ -1,3 +1,5 @@
+import { AnswerFields } from "./AnswerFields";
+import { answerComplete, type QuestionAnswer } from "../shared/question-types";
 import {
   useCallback,
   useEffect,
@@ -1370,9 +1372,12 @@ function ExamRoom({
   onClose: () => void;
 }) {
   const teacher = user.role === "teacher";
-  const storageKey = `greenedu-exam:${user.id}:${id}`;
+  const [tabWarning, setTabWarning] = useState("");
+  const [idleWarning, setIdleWarning] = useState<number | null>(null);
+  const lastActivity = useRef(Date.now());
+  const storageKey = "greenedu-exam:" + user.id + ":" + id;
   const [initial] = useState<{
-    answers: Record<string, number>;
+    answers: Record<string, QuestionAnswer>;
     tabs: string[];
   }>(() => {
     try {
@@ -1388,14 +1393,14 @@ function ExamRoom({
       return { answers: {}, tabs: [] };
     }
   });
-  const dirty = useRef<Record<string, number>>(initial.answers);
+  const dirty = useRef<Record<string, QuestionAnswer>>(initial.answers);
   const tabs = useRef<string[]>(initial.tabs);
   const current = useRef<ExamRun | null>(null);
   const queue = useRef<Promise<unknown>>(Promise.resolve());
   const mounted = useRef(true);
   const anchor = useRef({ server: 0, elapsed: performance.now() });
   const [run, setRun] = useState<ExamRun | null>(null);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, QuestionAnswer>>({});
   const [now, setNow] = useState(0);
   const [index, setIndex] = useState(0);
   const [error, setError] = useState("");
@@ -1480,20 +1485,53 @@ function ExamRoom({
       });
     void refresh();
     const poll = setInterval(() => void refresh(), 4000);
-    const timer = setInterval(
-      () =>
-        setNow(
-          anchor.current.server + performance.now() - anchor.current.elapsed,
-        ),
-      1000,
-    );
+    let away = false,
+      idleExited = false;
+    lastActivity.current = Date.now();
+    const interaction = (event: Event) => {
+      if (event.isTrusted && !document.hidden && document.hasFocus()) {
+        lastActivity.current = Date.now();
+        setIdleWarning(null);
+      }
+    };
+    const timer = setInterval(() => {
+      setNow(
+        anchor.current.server + performance.now() - anchor.current.elapsed,
+      );
+      if (teacher || current.current?.status !== "active") return;
+      const idle = (Date.now() - lastActivity.current) / 1000;
+      if (idle >= 120 && !idleExited) {
+        idleExited = true;
+        void enqueue(sync);
+        window.dispatchEvent(new Event("greenedu-study-idle"));
+      } else if (idle >= 105) setIdleWarning(Math.ceil(120 - idle));
+    }, 1000);
     const visibility = () => {
-      if (!teacher && document.hidden && current.current?.status === "active") {
+      const left = document.hidden || !document.hasFocus();
+      if (!teacher && left && !away && current.current?.status === "active") {
+        away = true;
         tabs.current.push(crypto.randomUUID());
+        const warnings = current.current.warnings + tabs.current.length;
+        setTabWarning(
+          warnings >= current.current.tabLimit
+            ? "Bài đã khóa do đạt giới hạn rời tab. Đáp án đã lưu sẽ được nộp khi có mạng."
+            : "Không rời tab hoặc mở cửa sổ khác trong khi làm bài.",
+        );
         persist();
         void enqueue(sync);
-      } else if (!document.hidden) void refresh();
+      } else if (!left) {
+        away = false;
+        void refresh();
+      }
     };
+    ["pointerdown", "keydown", "scroll"].forEach((name) =>
+      window.addEventListener(name, interaction, {
+        passive: true,
+        capture: true,
+      }),
+    );
+    window.addEventListener("blur", visibility);
+    window.addEventListener("focus", visibility);
     const online = () => void refresh();
     const beforeUnload = (e: BeforeUnloadEvent) => {
       if (current.current?.status === "active" && !teacher) {
@@ -1508,11 +1546,25 @@ function ExamRoom({
       clearInterval(poll);
       clearInterval(timer);
       document.removeEventListener("visibilitychange", visibility);
+      window.removeEventListener("blur", visibility);
+      window.removeEventListener("focus", visibility);
+      ["pointerdown", "keydown", "scroll"].forEach((name) =>
+        window.removeEventListener(name, interaction, true),
+      );
       window.removeEventListener("online", online);
       window.removeEventListener("beforeunload", beforeUnload);
     };
   }, [id]);
-  function choose(questionId: string, value: number) {
+  function choose(questionId: string, value: QuestionAnswer) {
+    if (
+      !current.current ||
+      current.current.status !== "active" ||
+      current.current.warnings + tabs.current.length >=
+        current.current.tabLimit ||
+      document.hidden ||
+      !document.hasFocus()
+    )
+      return;
     dirty.current[questionId] = value;
     setAnswers((old) => ({ ...old, [questionId]: value }));
     persist();
@@ -1553,6 +1605,8 @@ function ExamRoom({
       </div>
     );
   const active = run.status === "active";
+  const tabLocked =
+    active && run.warnings + tabs.current.length >= run.tabLimit;
   if (!run.questions.length)
     return (
       <div className="card learning-section">
@@ -1573,6 +1627,16 @@ function ExamRoom({
   );
   return (
     <div className="exam-room">
+      {tabWarning && (
+        <p className="error-banner" role="alert">
+          {tabWarning}
+        </p>
+      )}
+      {idleWarning !== null && (
+        <p className="idle-banner" role="alert">
+          Đăng xuất sau {idleWarning} giây nếu không tương tác.
+        </p>
+      )}
       <WorkspaceHeading className="learning-heading">
         <div>
           <span className="eyebrow">
@@ -1601,7 +1665,7 @@ function ExamRoom({
       <div className="info-panel">
         <p>
           {active
-            ? `${Object.keys(answers).length}/${run.questions.length} câu đã chọn · ${pending ? `${pending} thay đổi chưa đồng bộ` : "Đáp án đã lưu"}. Rời tab ${run.warnings}/${run.tabLimit}; đến lần ${run.tabLimit} bài sẽ tự nộp.`
+            ? `${run.questions.filter((question) => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn · ${pending ? `${pending} thay đổi chưa đồng bộ` : "Đáp án đã lưu"}. Rời tab ${run.warnings}/${run.tabLimit}; đến lần ${run.tabLimit} bài sẽ tự nộp.`
             : `Điểm ${run.score?.toFixed(1)} / 10 · ${run.reason === "tabs" ? "Tự nộp do rời tab" : run.reason === "deadline" ? "Tự nộp khi hết giờ" : run.reason === "teacher" ? "Giáo viên đã đóng bài thi" : "Đã hoàn thành"}.`}
         </p>
       </div>
@@ -1619,7 +1683,7 @@ function ExamRoom({
                 key={question.id}
                 aria-label={`Đến câu ${i + 1}`}
                 aria-current={index === i ? "true" : undefined}
-                className={`${index === i ? "current" : ""} ${answers[question.id] !== undefined ? "answered" : ""}`}
+                className={`${index === i ? "current" : ""} ${answerComplete(question, answers[question.id]) ? "answered" : ""}`}
                 onClick={() => setIndex(i)}
               >
                 {i + 1}
@@ -1633,20 +1697,15 @@ function ExamRoom({
             CÂU {index + 1}/{run.questions.length} · {q.chapterTitle}
           </span>
           <h2>{q.text}</h2>
-          <div className="choices">
-            {q.choices.map((choice, i) => (
-              <button
-                key={i}
-                className={`choice ${answers[q.id] === i ? "selected" : ""} ${questionResult?.correctIndex === i ? "correct-choice" : ""} ${questionResult && answers[q.id] === i && !questionResult.correct ? "wrong-choice" : ""}`}
-                aria-pressed={answers[q.id] === i}
-                disabled={!active || teacher || submitting || seconds === 0}
-                onClick={() => choose(q.id, i)}
-              >
-                <span className="choice-letter">{"ABCD"[i]}</span>
-                <span>{choice}</span>
-              </button>
-            ))}
-          </div>
+          <AnswerFields
+            question={q}
+            value={answers[q.id]}
+            result={questionResult}
+            disabled={
+              !active || teacher || submitting || seconds === 0 || tabLocked
+            }
+            onChange={(value) => choose(q.id, value)}
+          />
           {run.results && (
             <div className="explanation" role="status">
               <strong>{questionResult?.correct ? "Đúng" : "Cần ôn lại"}</strong>
@@ -1684,7 +1743,7 @@ function ExamRoom({
               onClick={() => {
                 if (
                   confirm(
-                    `Nộp bài với ${Object.keys(answers).length}/${run.questions.length} câu đã chọn?`,
+                    `Nộp bài với ${run.questions.filter((question) => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn?`,
                   )
                 )
                   void submit();

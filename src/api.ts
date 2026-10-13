@@ -35,3 +35,12 @@ export const duration = (seconds: number) =>
   seconds >= 3600
     ? `${Math.floor(seconds / 3600)} giờ ${Math.floor((seconds % 3600) / 60)} phút`
     : `${Math.floor(seconds / 60)} phút`;
+
+export async function ensureQuestionTypes(questions: { kind?: string }[]) {
+  if (!questions.some((q) => q.kind && q.kind !== "multiple-choice")) return;
+  const health = await api<{ questionTypes?: boolean }>("/health");
+  if (!health.questionTypes)
+    throw new Error(
+      "Máy chủ chưa hỗ trợ câu Đúng/sai và trả lời ngắn. Cần cập nhật máy chủ trước khi lưu bộ câu này.",
+    );
+}

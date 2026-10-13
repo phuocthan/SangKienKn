@@ -1,3 +1,9 @@
+import {
+  answerCorrect,
+  statementCorrectness,
+  storedAnswer,
+  validateQuestionAnswer,
+} from "../shared/question-types.js";
 import express, {
   type Request,
   type Response,
@@ -162,7 +168,14 @@ export function createApp(
           return user ? [{ role, name: user.name }] : [];
         })
       : [];
-    res.json({ ok: true, demo: !!options.demo, quickLogin, quickAccounts });
+    res.json({
+      ok: true,
+      demo: !!options.demo,
+      quickLogin,
+      quickAccounts,
+      questionTypes: true,
+      studyIdleSeconds: 120,
+    });
   });
 
   const cookieOptions = {
@@ -787,6 +800,13 @@ export function createApp(
           summaries.reduce((n, s) => n + s.seconds, 0),
           classroomLevelMinutes(db, classId),
         ),
+        answeredQuestions: Number(
+          db
+            .prepare(
+              "SELECT COUNT(DISTINCT a.question_id) AS n FROM attempts a JOIN questions q ON q.id=a.question_id JOIN chapters ch ON ch.id=q.chapter_id WHERE a.student_id=? AND ch.classroom_id=? AND a.mode='practice'",
+            )
+            .get(u.id, classId)!.n,
+        ),
         total: summaries.reduce((n, s) => n + s.total, 0),
         correct: summaries.reduce((n, s) => n + s.correct, 0),
         openCorrections: summaries.reduce((n, s) => n + s.openCorrections, 0),
@@ -898,7 +918,7 @@ export function createApp(
         "Họ tên",
         "Email",
         "Phút học có hoạt động",
-        "Lượt luyện tập",
+        "Số câu đã làm",
         "Tỷ lệ đúng (%)",
         "Câu cần sửa",
         "Cây cấp 5",
@@ -907,7 +927,7 @@ export function createApp(
         u.name,
         u.email,
         Math.floor(u.seconds / 60),
-        u.total,
+        u.answeredQuestions,
         u.total ? Math.round((u.correct / u.total) * 100) : "",
         u.openCorrections,
         u.trees,
@@ -937,6 +957,9 @@ export function createApp(
       lesson: q.lesson,
       choices: JSON.parse(q.choices),
       correctIndex: q.correct_index,
+      ...(q.kind && q.kind !== "multiple-choice"
+        ? { kind: q.kind, correctAnswer: q.correct_answer }
+        : {}),
       explanation: q.explanation,
       ...(q.topic ? { topic: String(q.topic) } : {}),
     };
@@ -955,8 +978,8 @@ export function createApp(
     const id = randomUUID();
     db.prepare(
       `INSERT INTO questions
-      (id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,family_id,changed_at,topic)
-      VALUES (?,?,?,?,?,?,?,?,1,?,?,?,?)`,
+      (id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,family_id,changed_at,topic,kind,correct_answer)
+      VALUES (?,?,?,?,?,?,?,?,1,?,?,?,?,?,?)`,
     ).run(
       id,
       chapterId,
@@ -970,6 +993,8 @@ export function createApp(
       metadata?.familyId ?? null,
       now(),
       content.topic ?? "",
+      content.kind ?? "multiple-choice",
+      content.correctAnswer ?? null,
     );
     return id;
   }
@@ -990,6 +1015,7 @@ export function createApp(
       text: q.text,
       ...(q.topic ? { topic: String(q.topic) } : {}),
       choices: JSON.parse(q.choices),
+      kind: q.kind ?? "multiple-choice",
       active: !!q.active,
       isCurrent: !!q.is_current,
       version: Number(q.version),
@@ -1000,7 +1026,11 @@ export function createApp(
         )
         .get(q.id, req.user!.id),
       ...(req.user!.role === "teacher"
-        ? { correctIndex: q.correct_index, explanation: q.explanation }
+        ? {
+            correctIndex: q.correct_index,
+            correctAnswer: q.correct_answer ?? undefined,
+            explanation: q.explanation,
+          }
         : {}),
     };
   }
@@ -1254,14 +1284,16 @@ export function createApp(
       .get(questionId) as Row | undefined;
     if (!q) fail(404, "Không tìm thấy câu hỏi.");
     chapter(req, q.chapter_id);
-    const selected = req.body?.selected,
+    const content = questionContent(q);
+    let selected;
+    try {
+      selected = validateQuestionAnswer(content, req.body?.selected);
+    } catch (e) {
+      fail(400, (e as Error).message);
+    }
+    const selectedStored = storedAnswer(selected!),
       mode = req.body?.mode;
-    if (
-      !Number.isInteger(selected) ||
-      selected < 0 ||
-      selected >= JSON.parse(q.choices).length ||
-      !["practice", "correction"].includes(mode)
-    )
+    if (!["practice", "correction"].includes(mode))
       fail(400, "Câu trả lời không hợp lệ.");
     const existing = db
       .prepare("SELECT * FROM attempts WHERE id = ?")
@@ -1270,7 +1302,7 @@ export function createApp(
       existing &&
       (existing.student_id !== req.user!.id ||
         existing.question_id !== questionId ||
-        existing.selected !== selected ||
+        existing.selected !== selectedStored ||
         existing.mode !== mode)
     )
       fail(409, "Mã lượt làm đã được sử dụng.");
@@ -1289,14 +1321,14 @@ export function createApp(
           .get(questionId, req.user!.id)
       )
         fail(409, "Câu hỏi này không còn nằm trong danh sách cần sửa.");
-      const correct = selected === q.correct_index;
+      const correct = answerCorrect(content, selected);
       db.exec("BEGIN");
       try {
         db.prepare("INSERT INTO attempts VALUES (?,?,?,?,?,?,?)").run(
           id,
           req.user!.id,
           questionId,
-          selected,
+          selectedStored,
           Number(correct),
           mode,
           now(),
@@ -1316,19 +1348,61 @@ export function createApp(
       }
     }
     res.json({
-      correct: selected === q.correct_index,
-      ...(selected !== q.correct_index
+      correct: answerCorrect(content, selected),
+      statementCorrectness: statementCorrectness(content, selected!),
+      ...(!answerCorrect(content, selected)
         ? { explanation: "Hãy xem lại kiến thức và tự làm lại câu này." }
-        : { correctIndex: q.correct_index, explanation: q.explanation }),
-      resolved: mode === "correction" && selected === q.correct_index,
+        : {
+            correctIndex: q.correct_index,
+            correctAnswer: q.correct_answer ?? undefined,
+            explanation: q.explanation,
+          }),
+      resolved: mode === "correction" && answerCorrect(content, selected),
     });
   });
+  app.get(
+    "/api/classrooms/:id/students/:studentId/notebook",
+    (req: AppRequest, res) => {
+      teacher(req);
+      const classId = String(req.params.id),
+        studentId = String(req.params.studentId);
+      classroom(req, classId);
+      if (
+        !db
+          .prepare(
+            "SELECT 1 FROM memberships WHERE classroom_id=? AND student_id=?",
+          )
+          .get(classId, studentId)
+      )
+        fail(404, "Học sinh không thuộc lớp.");
+      const items = db
+        .prepare(
+          "SELECT q.*,ch.title AS chapterTitle,cr.resolved,cr.updated_at AS updatedAt FROM corrections cr JOIN questions q ON q.id=cr.question_id JOIN chapters ch ON ch.id=q.chapter_id WHERE cr.student_id=? AND ch.classroom_id=? ORDER BY cr.resolved,cr.updated_at DESC",
+        )
+        .all(studentId, classId) as Row[];
+      res.json(
+        items.map((q) => ({
+          ...questionView(q, req),
+          chapterTitle: q.chapterTitle,
+          resolved: !!q.resolved,
+          updatedAt: q.updatedAt,
+          attempts: Number(
+            db
+              .prepare(
+                "SELECT COUNT(*) AS n FROM attempts WHERE student_id=? AND question_id=?",
+              )
+              .get(studentId, q.id)!.n,
+          ),
+        })),
+      );
+    },
+  );
   app.get("/api/corrections", (req: AppRequest, res) => {
     student(req);
     res.json(
       db
         .prepare(
-          `SELECT q.id,q.chapter_id AS chapterId,q.text,q.choices,ch.title AS chapterTitle,c.name AS className,cr.updated_at AS updatedAt
+          `SELECT q.id,q.kind,q.chapter_id AS chapterId,q.text,q.choices,ch.title AS chapterTitle,c.name AS className,cr.updated_at AS updatedAt
       FROM corrections cr JOIN questions q ON q.id = cr.question_id JOIN chapters ch ON ch.id = q.chapter_id
       JOIN classrooms c ON c.id = ch.classroom_id JOIN memberships m ON m.classroom_id = c.id AND m.student_id = cr.student_id
       WHERE cr.student_id = ? AND cr.resolved = 0 ORDER BY cr.updated_at DESC`,
@@ -1346,6 +1420,12 @@ export function createApp(
       fail(409, "Thời gian thi không tính vào thời gian chăm cây.");
     const id = text(req.body?.chapterId, "Chương");
     chapter(req, id);
+    if (req.body?.questionId !== undefined) {
+      const q = db
+        .prepare("SELECT * FROM questions WHERE id=? AND chapter_id=?")
+        .get(text(req.body.questionId, "Câu hỏi"), id) as Row | undefined;
+      if (!q) fail(400, "Câu hỏi không thuộc chương đang học.");
+    }
     const sessionId = randomUUID();
     db.prepare(
       "INSERT INTO study_sessions VALUES (?,?,?,?,?,1) ON CONFLICT(student_id) DO UPDATE SET id = excluded.id, chapter_id = excluded.chapter_id, last_received = excluded.last_received, last_activity = excluded.last_activity, active = 1",
@@ -1367,8 +1447,20 @@ export function createApp(
     chapter(req, s.chapter_id);
     const timestamp = now();
     const delta = Math.max(0, timestamp - s.last_received);
+    if (timestamp - s.last_activity >= 120000) {
+      const tail =
+        req.body?.active !== false && s.active && delta <= 30000
+          ? Math.max(0, s.last_activity + 120000 - s.last_received) / 1000
+          : 0;
+      db.prepare(
+        "INSERT INTO progress VALUES (?,?,?) ON CONFLICT(student_id,chapter_id) DO UPDATE SET seconds=seconds+excluded.seconds",
+      ).run(req.user!.id, s.chapter_id, tail);
+      grantLearningMilestones(db, req.user!.id, timestamp);
+      db.prepare("DELETE FROM study_sessions WHERE id=?").run(s.id);
+      fail(409, "Phiên học đã kết thúc sau 2 phút không tương tác.");
+    }
     // Server time only. Do not credit disconnection gaps, hidden tabs, or stale activity.
-    const end = Math.min(timestamp, s.last_activity + 130000);
+    const end = Math.min(timestamp, s.last_activity + 120000);
     const seconds =
       req.body.active && s.active && delta <= 30000
         ? Math.max(0, end - s.last_received) / 1000
@@ -1400,10 +1492,10 @@ export function createApp(
       const timestamp = now(),
         delta = Math.max(0, timestamp - s.last_received);
       const seconds =
-        s.active && delta <= 30000
+        req.body?.active !== false && s.active && delta <= 30000
           ? Math.max(
               0,
-              Math.min(timestamp, s.last_activity + 130000) - s.last_received,
+              Math.min(timestamp, s.last_activity + 120000) - s.last_received,
             ) / 1000
           : 0;
       db.prepare(
@@ -1432,7 +1524,14 @@ export function createApp(
     student,
     classroom,
   });
-  registerFeedbackRoutes(app, db, { now, text, fail, teacher, student, classroom });
+  registerFeedbackRoutes(app, db, {
+    now,
+    text,
+    fail,
+    teacher,
+    student,
+    classroom,
+  });
   app.use("/api", (_req, _res, next) =>
     next(new ApiError(404, "Không tìm thấy chức năng.")),
   );

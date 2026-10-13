@@ -1,5 +1,17 @@
 # Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
+## Lưu dạng mới trên máy chủ và số ý đúng — 13/10/2026
+
+Một câu đúng/sai4 ý có thể có từ0 đến4 ý đúng; tất cả Sai (key0000) hoặc tất cả Đúng (1111) đều hợp lệ. Nếu xem trước Word mẫu có4 câu hợp lệ nhưng Câu3 báo Chọn một đáp án đúng khi lưu, cần cập nhật API hỗ trợ dạng mới; validator cũ chỉ biết A–D. Client kiểm tra health.questionTypes trước write nhập/tạo/sửa dạng mới, chặn máy chủ cũ với thông báo rõ ràng và giữ bản xem trước. Không sửa key đúng/sai thành một đáp án trắc nghiệm để vượt validation. Capability thực tế Railway và SHA ở session-handoff.
+
+## Hiện hành: ba dạng câu hỏi — 13/10/2026
+
+Ngân hàng, form tạo/sửa và nhập file hỗ trợ Trắc nghiệm, Đúng/sai và Trả lời ngắn. Dạng cũ không có nhãn được hiểu là trắc nghiệm. Đúng/sai gồm2–4 khẳng định A–D liên tiếp và key đủ từng ý; cả câu đúng khi tất cả ý đúng. Trả lời ngắn không có phương án, đáp án tối đa100 ký tự; so khớp văn bản chuẩn hóa/hoa-thường/khoảng trắng, số thập phân nhận dấu chấm/phẩy mà không ép qua floating point. Không suy diễn đáp án đại số hoặc chấm tự luận.
+
+Word thêm nhãn **Loại câu hỏi: Đúng/sai** hoặc **Loại câu hỏi: Trả lời ngắn** (cũng nhận Dạng:). Đúng/sai ghi A.–D. và Đáp án: Đ S Đ Đ theo thứ tự; ngắn bỏ A–D, ghi Đáp án: 2. Giữ Bài học:/Câu n:/Lời giải:; Chủ đề: tùy chọn. Mẫu Word có hai câu trắc nghiệm cũ + hai câu mới; nguồn cập nhật tại scripts/update-question-template.mjs. Mẫu CSV thêm Chủ đề và Loại câu hỏi vào cuối (10 cột), nhận8/9 cột cũ. Với ngắn để trống A–D; với đúng/sai ghi các khẳng định và key Đ/S theo thứ tự. Không bỏ trống ý giữa hai ý có nội dung.
+
+Migration thêm kind/correct_answer; câu cũ/default là multiple-choice. Phiên bản, nhập transaction/retry/trùng/quyền và snapshot giữ nguyên. Trắc nghiệm lưu selected số, dạng mới lưu chuỗi JSON trong cột selected để không bị SQLite ép số. Student không nhận key trước làm; ngắn sai không lộ key/lời giải, đúng/sai có phản hồi từng ý sau trả lời nhưng lời giải chỉ mở khi cả câu đúng. Đề thi giữ thời điểm công bố. Đặc tả nhập trắc nghiệm phía dưới tiếp tục áp dụng cho dạng cũ.
+
 ## Chọn nhiều câu và xóa cả bài — 11/10/2026
 
 Giáo viên sở hữu lớp chọn checkbox ở từng câu hoặc **Chọn tất cả trong bài/đang hiển thị**, xem số đã chọn, Bỏ chọn và bấm **Xóa các câu đã chọn**. Popup liệt kê các câu và số lượng, có Hủy/Xác nhận. Đổi chương/bài/bộ lọc hoặc tải lại dữ liệu xóa lựa chọn cũ để không tác động nhầm phạm vi. Chỉ chọn các phiên bản hiện tại đang dùng; tối đa 5000 câu mỗi lần. Câu đã ẩn không chọn lại, dùng Hiện lại khi cần.

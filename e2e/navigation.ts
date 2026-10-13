@@ -23,5 +23,6 @@ export async function navigateTo(
   if (!match)
     throw new Error(`Không có mục điều hướng: ${String(options.name)}`);
   await navigation.getByRole("button", { name: match[1], exact: true }).click();
+  if (match[0] === "Tiến độ học tập") return;
   await page.getByRole("tab", options).click();
 }

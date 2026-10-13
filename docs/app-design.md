@@ -1,5 +1,19 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: bỏ lặp thông tin lớp và tab Tiến độ giáo viên — 13/10/2026
+
+Tổng quan giáo viên giữ tiêu đề/slogan, bỏ caption lớp/môn/giáo viên lặp header. Lớp học của tôi bỏ thẻ chọn lớp vì header đã có selector; đi thẳng vào **Danh sách Chương**, rồi **Danh sách Học sinh**. Giữ các nút tạo/chọn lớp/chương/học sinh, thống kê và sổ tay. Tab lớp chỉ còn Lớp học/Hoạt động nhóm; tiến độ xem ở bảng học sinh, hash/callback cũ chuyển về lớp. Học sinh không thay đổi Hành trình. Quyết định này thay3-tab giáo viên trong mục lịch sử bên dưới.
+
+Đúng/sai cho phép0–4 ý đúng khi4 ý, không coi một phương án duy nhất là đáp án. Nhập/tạo/sửa dạng mới kiểm tra capability máy chủ và báo cần cập nhật nếu API cũ, giữ xem trước file/mã retry; không âm thầm chuyển dạng hoặc gửi write không hỗ trợ.
+
+## Hiện hành: câu đúng/sai, trả lời ngắn và sổ tay lớp — 13/10/2026
+
+Form câu hỏi chọn Loại câu hỏi trước bài/nội dung. Trắc nghiệm giữ4 phương án; đúng/sai có2–4 khẳng định với đáp án từng ý; ngắn có một ô đáp án. Dạng bài dùng AnswerFields chung trong luyện/ôn/sửa sai/thi: đúng/sai là nhóm chọn Đúng/Sai theo từng ý, ngắn là input; chưa chọn đủ ý không cho kiểm tra. Chấm đúng/sai cả câu, màu phản hồi từng ý; lời giải luyện chỉ mở khi đúng. Thi lưu cả draft chưa hoàn thành và giữ công bố theo lịch. Tên chương/progress/panel/icon cũ giữ theme đã chốt.
+
+Roster đổi Lượt luyện tập thành Số câu đã làm (câu practice riêng biệt), thêm Xem sổ tay ở cột Câu cần sửa. Modal chỉ đọc, lọc chương/trạng thái, xem câu phiên bản gốc/đáp án/lời giải. Cuối luyện/ôn có Làm lại bài, bắt đầu vòng mới và giữ lịch sử. Bỏ ghi chú phụ chủ đề/roster/CSV/note cuối phiên, giữ nội dung giải bài và cảnh báo.
+
+Clock pause ngay khi blur/hidden/timer gián đoạn; người học cần Tiếp tục học. Cảnh báo sau105 giây, đăng xuất sau120 giây không click/keydown/scroll, cả offline; vào app ở trang khác không cộng giờ. Phòng thi cảnh báo rời tab, đếm một lần cho blur+hidden và khóa chọn tại ngưỡng cả offline. Tín hiệu focus/visibility có giới hạn trình duyệt, không mô tả website có quyền cấm mở tab ở cấp hệ điều hành.
+
 ## Hiện hành: submenu căn trái và nút tạo dưới tìm kiếm — 13/10/2026
 
 Các trang có WorkspaceTabs căn main-content về cạnh trái thay vì tự căn giữa khi chiều rộng vượt max-width1600px. Giữ padding responsive chung với header để tiêu đề desktop, tab và panel cùng trục trái. Chiều rộng tối đa, thứ tự/quyền các tab, keyboard và khôi phục qua reload giữ nguyên. Portrait giữ khung tab đủ chiều rộng; nút không giãn lấp hàng, nội dung nút và hàng tiếp theo căn trái.

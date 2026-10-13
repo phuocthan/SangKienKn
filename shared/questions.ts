@@ -1,4 +1,12 @@
+import {
+  parseQuestionKind,
+  parseTruthKey,
+  normalizeShortAnswer,
+  type QuestionKind,
+} from "./question-types";
 export type QuestionInput = {
+  kind?: QuestionKind;
+  correctAnswer?: string;
   text: string;
   lesson: string;
   choices: string[];
@@ -23,17 +31,39 @@ export function questionInput(value: unknown): QuestionInput {
     return value.trim();
   }
   if (!row || typeof row !== "object") throw new Error("Câu hỏi không hợp lệ.");
-  if (!Array.isArray(row.choices) || row.choices.length !== 4)
-    throw new Error("Cần đúng 4 phương án trả lời.");
-  const choices = row.choices.map((c) => field(c, "Phương án", 1000));
-  if (new Set(choices).size !== 4)
-    throw new Error("Các phương án phải khác nhau.");
-  if (
-    !Number.isInteger(row.correctIndex) ||
-    row.correctIndex! < 0 ||
-    row.correctIndex! > 3
-  )
-    throw new Error("Chọn một đáp án đúng.");
+  const kind = parseQuestionKind(row.kind);
+  if (!Array.isArray(row.choices))
+    throw new Error("Các phương án không hợp lệ.");
+  const choices = row.choices.map((c) =>
+    field(c, "Phương án/khẳng định", 1000),
+  );
+  let correctAnswer: string | undefined;
+  if (kind === "multiple-choice") {
+    if (choices.length !== 4) throw new Error("Cần đúng 4 phương án trả lời.");
+    if (new Set(choices).size !== 4)
+      throw new Error("Các phương án phải khác nhau.");
+    if (
+      !Number.isInteger(row.correctIndex) ||
+      row.correctIndex! < 0 ||
+      row.correctIndex! > 3
+    )
+      throw new Error("Chọn một đáp án đúng.");
+  } else if (kind === "true-false") {
+    if (
+      choices.length < 2 ||
+      choices.length > 4 ||
+      new Set(choices).size !== choices.length
+    )
+      throw new Error("Cần 2–4 khẳng định khác nhau.");
+    correctAnswer = parseTruthKey(field(row.correctAnswer, "Đáp án", 100));
+    if (correctAnswer.length !== choices.length)
+      throw new Error("Đáp án cần đủ từng ý đúng/sai.");
+  } else {
+    if (choices.length) throw new Error("Câu trả lời ngắn không có phương án.");
+    correctAnswer = normalizeShortAnswer(
+      field(row.correctAnswer, "Đáp án", 100),
+    );
+  }
   return {
     text: field(row.text, "Nội dung câu hỏi", 3000),
     lesson:
@@ -41,7 +71,8 @@ export function questionInput(value: unknown): QuestionInput {
         ? "Bài luyện tập chung"
         : field(row.lesson, "Bài học", 120),
     choices,
-    correctIndex: row.correctIndex!,
+    correctIndex: kind === "multiple-choice" ? row.correctIndex! : -1,
+    ...(kind === "multiple-choice" ? {} : { kind, correctAnswer }),
     explanation: field(row.explanation, "Lời giải", 3000),
     ...(row.topic === undefined ||
     (typeof row.topic === "string" && !row.topic.trim())
@@ -62,9 +93,11 @@ export const csvHeaders = [
 ];
 export const csvTemplate =
   "\uFEFF" +
-  csvHeaders.join(",") +
+  [...csvHeaders, "Chủ đề", "Loại câu hỏi"].join(",") +
   "\r\n" +
-  "Bài 1 · Đơn vị đo,Đơn vị cơ bản của độ dài trong hệ SI?,Mét,Centimét,Kilômét,Milimét,A,Mét là đơn vị cơ bản của độ dài trong hệ SI.\r\n";
+  "Bài 1,Đơn vị độ dài trong hệ SI?,Mét,Centimét,Kilômét,Milimét,A,Mét là đơn vị cơ bản.,,Trắc nghiệm\r\n" +
+  "Bài 1,Xác định tính đúng sai về Trái đất.,Trái đất gần hình cầu.,Trái đất có đại dương.,Trái đất là ngôi sao.,Trái đất quay quanh Mặt trời.,Đ Đ S Đ,Trái đất là hành tinh có đại dương.,,Đúng/sai\r\n" +
+  "Bài 1,Cho y = x^3 - 3x^2 + 2. Tìm giá trị cực đại.,,,,,2,Đạo hàm bằng 0 tại x=0 và x=2. Giá trị cực đại tại x=0 là 2.,,Trả lời ngắn\r\n";
 
 export function parseQuestionCsv(source: string): {
   questions: QuestionInput[];
@@ -126,9 +159,11 @@ export function parseQuestionCsv(source: string): {
   if (cell || row.length || closed) endRow();
   if (
     !rows.length ||
-    ![8, 9].includes(rows[0].length) ||
+    ![8, 9, 10].includes(rows[0].length) ||
     rows[0].some(
-      (cell, i) => cell.trim() !== (i === 8 ? "Chủ đề" : csvHeaders[i]),
+      (cell, i) =>
+        cell.trim() !==
+        (i === 8 ? "Chủ đề" : i === 9 ? "Loại câu hỏi" : csvHeaders[i]),
     )
   )
     return {
@@ -146,16 +181,26 @@ export function parseQuestionCsv(source: string): {
     try {
       if (cells.length !== rows[0].length)
         throw new Error(`Cần đúng ${rows[0].length} cột.`);
+      const kind = parseQuestionKind(cells[9]);
+      if (kind === "true-false" && cells[5].trim() && !cells[4].trim())
+        throw new Error("Thiếu khẳng định C.");
       const correctIndex = ["A", "B", "C", "D"].indexOf(
         cells[6].trim().toUpperCase(),
       );
       const question = questionInput({
         lesson: cells[0],
         text: cells[1],
-        choices: cells.slice(2, 6),
+        kind,
+        choices:
+          kind === "short-answer"
+            ? []
+            : kind === "true-false"
+              ? cells.slice(2, 6).filter((c) => c.trim())
+              : cells.slice(2, 6),
+        correctAnswer: cells[6],
         correctIndex,
         explanation: cells[7],
-        ...(cells.length === 9 ? { topic: cells[8] } : {}),
+        ...(cells.length >= 9 ? { topic: cells[8] } : {}),
       });
       const key = questionContentKey(question);
       if (seen.has(key))

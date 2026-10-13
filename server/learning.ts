@@ -1,3 +1,11 @@
+import {
+  answerCorrect,
+  statementCorrectness,
+  storedAnswer,
+  validateQuestionAnswer,
+  type QuestionKind,
+  type QuestionAnswer,
+} from "../shared/question-types.js";
 import type { Express } from "express";
 import type { DatabaseSync } from "node:sqlite";
 import { randomInt, randomUUID, createHash } from "node:crypto";
@@ -18,6 +26,8 @@ type Context = {
   classroom: (req: AppRequest, id: string) => Row;
 };
 type Snapshot = {
+  kind?: QuestionKind;
+  correctAnswer?: string;
   topic?: string;
   id: string;
   chapterId: string;
@@ -37,10 +47,15 @@ const shuffle = <T>(values: T[]) => {
   }
   return result;
 };
-const cleanQuestion = ({ correctIndex: _c, explanation: _e, ...q }: Snapshot) =>
-  q;
+const cleanQuestion = ({
+  correctIndex: _c,
+  correctAnswer: _a,
+  explanation: _e,
+  ...q
+}: Snapshot) => q;
 const studyFeedback = (answer: {
-  selected: number;
+  selected: QuestionAnswer;
+  statementCorrectness?: boolean[];
   correct: boolean;
   correctIndex?: number;
   explanation?: string;
@@ -49,6 +64,7 @@ const studyFeedback = (answer: {
     ? answer
     : {
         selected: answer.selected,
+        statementCorrectness: answer.statementCorrectness,
         correct: false,
         explanation: "Hãy xem lại kiến thức và tự làm lại câu này.",
       };
@@ -95,9 +111,9 @@ export function grantLearningMilestones(
 function releaseCorrections(db: DatabaseSync, run: Row, timestamp: number) {
   if (run.released) return;
   const questions = json<Snapshot[]>(run.questions),
-    answers = json<Record<string, number>>(run.answers);
+    answers = json<Record<string, QuestionAnswer>>(run.answers);
   for (const q of questions)
-    if (answers[q.id] !== q.correctIndex)
+    if (!answerCorrect(q, answers[q.id]))
       db.prepare(
         `INSERT INTO corrections VALUES(?,?,0,?) ON CONFLICT(student_id,question_id)
       DO UPDATE SET resolved=0,updated_at=excluded.updated_at`,
@@ -113,9 +129,9 @@ function finalize(
 ) {
   if (run.status !== "active") return;
   const questions = json<Snapshot[]>(run.questions),
-    answers = json<Record<string, number>>(run.answers);
-  const correct = questions.filter(
-    (q) => answers[q.id] === q.correctIndex,
+    answers = json<Record<string, QuestionAnswer>>(run.answers);
+  const correct = questions.filter((q) =>
+    answerCorrect(q, answers[q.id]),
   ).length;
   const score = questions.length
     ? Math.round((correct / questions.length) * 100) / 10
@@ -218,6 +234,13 @@ export function registerLearningRoutes(
         fail(403, "Chương không thuộc lớp này.");
     return value as string[];
   }
+  function answerValue(q: Snapshot, value: unknown, partial = false) {
+    try {
+      return validateQuestionAnswer(q, value, partial);
+    } catch (e) {
+      return fail(400, (e as Error).message);
+    }
+  }
   function bank(ids: string[]): Snapshot[] {
     return db
       .prepare(
@@ -233,6 +256,8 @@ export function registerLearningRoutes(
         text: String(q.text),
         choices: json<string[]>(q.choices),
         correctIndex: Number(q.correct_index),
+        kind: String(q.kind ?? "multiple-choice") as QuestionKind,
+        correctAnswer: q.correct_answer ? String(q.correct_answer) : undefined,
         explanation: String(q.explanation),
         ...(q.topic ? { topic: String(q.topic) } : {}),
       }));
@@ -418,7 +443,7 @@ export function registerLearningRoutes(
       .prepare("SELECT * FROM exam_runs WHERE id=?")
       .get(run.id) as Row;
     const questions = json<Snapshot[]>(fresh.questions),
-      answers = json<Record<string, number>>(fresh.answers);
+      answers = json<Record<string, QuestionAnswer>>(fresh.answers);
     const definition = fresh.exam_id
       ? db
           .prepare("SELECT * FROM exam_definitions WHERE id=?")
@@ -460,8 +485,9 @@ export function registerLearningRoutes(
         ? {
             results: questions.map((q) => ({
               questionId: q.id,
-              correct: answers[q.id] === q.correctIndex,
+              correct: answerCorrect(q, answers[q.id]),
               correctIndex: q.correctIndex,
+              correctAnswer: q.correctAnswer,
               explanation: q.explanation,
             })),
           }
@@ -726,6 +752,44 @@ export function registerLearningRoutes(
     classroom(req, String(r.classroom_id));
     return r;
   }
+  app.post("/api/learning/reviews/:id/repeat", (req: AppRequest, res) => {
+    const original = review(req);
+    if (!original.completed) fail(409, "Hoàn thành bộ ôn trước khi làm lại.");
+    if (learningAnswersLocked(db, req.user!.id, now()))
+      fail(409, "Hãy nộp bài thi trước khi ôn tập.");
+    const requestId = text(req.body?.requestId, "Mã phiên", 100);
+    const existing = db
+      .prepare("SELECT * FROM review_sessions WHERE request_id=?")
+      .get(requestId);
+    if (existing) {
+      if (
+        existing.student_id !== req.user!.id ||
+        existing.classroom_id !== original.classroom_id
+      )
+        fail(409, "Mã phiên đã dùng.");
+      return res.json({ id: existing.id });
+    }
+    const old = json<Snapshot[]>(original.questions);
+    const available = bank([...new Set(old.map((q) => q.chapterId))]);
+    const questions = old
+      .map((q) => available.find((current) => current.id === q.id))
+      .filter((q): q is Snapshot => !!q);
+    if (!questions.length)
+      fail(409, "Bộ ôn đã được cập nhật. Hãy chọn lại bộ ôn.");
+    const id = randomUUID();
+    db.prepare(
+      "INSERT INTO review_sessions(id,student_id,classroom_id,title,questions,request_id,created_at) VALUES(?,?,?,?,?,?,?)",
+    ).run(
+      id,
+      req.user!.id,
+      original.classroom_id,
+      original.title,
+      JSON.stringify(shuffle(questions)),
+      requestId,
+      now(),
+    );
+    res.status(201).json({ id });
+  });
   app.get("/api/learning/reviews/:id", (req: AppRequest, res) => {
     const r = review(req);
     if (learningAnswersLocked(db, req.user!.id, now()))
@@ -752,7 +816,7 @@ export function registerLearningRoutes(
         Record<
           string,
           {
-            selected: number;
+            selected: QuestionAnswer;
             correct: boolean;
             correctIndex: number;
             explanation: string;
@@ -761,18 +825,20 @@ export function registerLearningRoutes(
       >(r.answers);
     const q = qs.find((q) => q.id === req.body?.questionId);
     if (!q) fail(400, "Câu không thuộc bộ ôn.");
-    const selected = number(req.body?.selected, "Đáp án", 0, 3);
+    const selected = answerValue(q, req.body?.selected);
     if (answers[q.id]) {
       if (answers[q.id].selected !== selected) fail(409, "Câu đã trả lời.");
       return res.json(studyFeedback(answers[q.id]));
     }
     if (r.completed || qs[Number(r.current_index)]?.id !== q.id)
       fail(409, "Hãy tiếp tục từ câu đang làm.");
-    const correct = selected === q.correctIndex,
+    const correct = answerCorrect(q, selected),
       result = {
         selected,
         correct,
+        statementCorrectness: statementCorrectness(q, selected),
         correctIndex: q.correctIndex,
+        correctAnswer: q.correctAnswer,
         explanation: q.explanation,
       };
     answers[q.id] = result;
@@ -782,7 +848,7 @@ export function registerLearningRoutes(
         `review:${r.id}:${q.id}`,
         req.user!.id,
         q.id,
-        selected,
+        storedAnswer(selected),
         Number(correct),
         now(),
       );
@@ -931,8 +997,8 @@ export function registerLearningRoutes(
         const questionId = randomUUID();
         // Private exam questions support grading/notebook without publishing to practice.
         db.prepare(
-          `INSERT INTO questions(id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,changed_at,topic)
-          VALUES(?,?,?,?,?,?,?,0,1,1,?,?)`,
+          `INSERT INTO questions(id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,changed_at,topic,kind,correct_answer)
+          VALUES(?,?,?,?,?,?,?,0,1,1,?,?,?,?)`,
         ).run(
           questionId,
           chapterId,
@@ -943,6 +1009,8 @@ export function registerLearningRoutes(
           content.lesson,
           now(),
           content.topic ?? "",
+          content.kind ?? "multiple-choice",
+          content.correctAnswer ?? null,
         );
         questions.push({
           ...content,
@@ -1243,10 +1311,11 @@ export function registerLearningRoutes(
     if (!incoming || typeof incoming !== "object" || Array.isArray(incoming))
       fail(400, "Đáp án không hợp lệ.");
     const ids = new Set(json<Snapshot[]>(r.questions).map((q) => q.id)),
-      answers = json<Record<string, number>>(r.answers);
+      answers = json<Record<string, QuestionAnswer>>(r.answers);
     for (const [id, value] of Object.entries(incoming)) {
       if (!ids.has(id)) fail(400, "Câu không thuộc đề thi.");
-      answers[id] = number(value, "Đáp án", 0, 3);
+      const q = json<Snapshot[]>(r.questions).find((q) => q.id === id)!;
+      answers[id] = answerValue(q, value, true);
     }
     db.prepare(
       "UPDATE exam_runs SET answers=?,revision=revision+1 WHERE id=?",

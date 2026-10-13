@@ -1,5 +1,13 @@
 # Cấp độ ôn tập và kiểm tra
 
+## Quyết định hiện hành: thời gian thực và nhiều dạng câu — 13/10/2026
+
+Thời gian cây chỉ phát sinh trong luyện bài/chương, ôn và sửa sai, theo chapterId của câu hiện tại; phòng thi và các trang khác không tính. Start kiểm tra liên kết questionId/chương khi client gửi. Blur/hidden pause ngay, cần Tiếp tục học; timer bị gián đoạn/ngủ máy không cộng bù. Sau105 giây không tương tác cảnh báo,120 giây đăng xuất, kể cả offline và không tự login lại khi reload. Quyết định mới thay cửa sổ120→130/pause trong phần lịch sử. Heartbeat/stop lấy giờ server, gap>30 giây không cộng, activity120 giây/phiên hết hạn không hồi sinh; stop khi đã pause không cộng phần đuôi.
+
+Đúng/sai2–4 ý và trả lời ngắn dùng cùng luồng luyện/review/correction/exam snapshot. Đúng/sai cần đủ ý, chấm cả câu và phản hồi từng ý; ngắn so khớp văn bản/số chuẩn hóa. Lời giải luyện/ôn/sửa sai mở khi đúng; thi vẫn công bố theo lịch. Draft ngắn/ý chưa chọn lưu qua reload và không được tính là câu đã hoàn thành. Làm lại bài cuối luyện/ôn tạo vòng mới/id mới cho review, giữ lịch sử cũ và requestId chống retry lặp.
+
+Giáo viên xem sổ tay học sinh từ roster, lọc đúng lớp/chương/trạng thái và xem phiên bản gốc; API không cho giáo viên khác/học sinh truy cập. Số câu đã làm trong roster/CSV là câu practice riêng biệt, tỷ lệ/điều kiện dùng lượt như trước. Không chỉnh lại giờ đã lưu trên Railway khi thiếu chứng cứ. Trạng thái triển khai/QA mới ở session-handoff; phần130 giây/gap focus trong báo cáo cũ là lịch sử đã được thay ở phạm vi này.
+
 Cập nhật 11/10/2026. Kế hoạch và phạm vi: [learning-implementation-plan.md](learning-implementation-plan.md). Thiết kế: [app-design.md](app-design.md).
 
 **Bổ sung 12/10/2026:** có chế độ **Kiểm tra online cả lớp**. Giáo viên chuẩn bị nguồn/ngân hàng/nhiều chương-bài, cài X phút chờ và Y phút làm bài. Bấm bắt đầu chốt đề chung và thông báo trong ứng dụng, giờ thi thật T+X, hạn chung T+X+Y. Câu đảo riêng mỗi học sinh/giữ qua reload, vào muộn không được cộng giờ. Chi tiết và trạng thái triển khai tại [online-exams.md](online-exams.md); thời lượng20 phút phía dưới chỉ còn áp dụng Săn điểm/thi theo lịch cũ.

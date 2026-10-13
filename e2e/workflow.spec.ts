@@ -72,7 +72,7 @@ test("teacher downloads and imports a real Word template with preview, format sw
   };
   await file.setInputFiles(validFile);
   await expect(
-    dialog.getByRole("heading", { name: "Xem trước · 2 câu hợp lệ" }),
+    dialog.getByRole("heading", { name: "Xem trước · 4 câu hợp lệ" }),
   ).toBeVisible();
   expect(await storedQuestions()).toHaveLength(0);
   await dialog.locator(".import-preview summary").first().click();
@@ -91,7 +91,7 @@ test("teacher downloads and imports a real Word template with preview, format sw
   await expect(file).toHaveValue("");
   await file.setInputFiles(validFile);
   await expect(
-    dialog.getByRole("heading", { name: "Xem trước · 2 câu hợp lệ" }),
+    dialog.getByRole("heading", { name: "Xem trước · 4 câu hợp lệ" }),
   ).toBeVisible();
   expect(
     await page.evaluate(
@@ -102,13 +102,33 @@ test("teacher downloads and imports a real Word template with preview, format sw
     path: info.outputPath("word-import-preview.png"),
     fullPage: true,
   });
-  await dialog.getByRole("button", { name: "Xác nhận nhập 2 câu" }).click();
+  let legacyWrites = 0;
+  const countLegacyWrites = (request: import("@playwright/test").Request) => {
+    if (
+      request.method() === "POST" &&
+      request.url().endsWith("/questions/import")
+    )
+      legacyWrites++;
+  };
+  page.on("request", countLegacyWrites);
+  await page.route("**/api/health", (route) =>
+    route.fulfill({ json: { ok: true, demo: false, questionTypes: false } }),
+  );
+  await dialog.getByRole("button", { name: "Xác nhận nhập 4 câu" }).click();
+  await expect(dialog.getByRole("alert")).toContainText(
+    "Máy chủ chưa hỗ trợ câu Đúng/sai",
+  );
+  expect(legacyWrites).toBe(0);
+  expect(await storedQuestions()).toHaveLength(0);
+  await page.unroute("**/api/health");
+  page.off("request", countLegacyWrites);
+  await dialog.getByRole("button", { name: "Xác nhận nhập 4 câu" }).click();
   await expect(dialog).toHaveCount(0);
-  await expect(page.locator(".bank-question")).toHaveCount(2);
+  await expect(page.locator(".bank-question")).toHaveCount(4);
   const questions = await storedQuestions();
   expect(
     questions.map((q: { correctIndex: number }) => q.correctIndex).sort(),
-  ).toEqual([0, 1]);
+  ).toEqual([-1, -1, 0, 1]);
   expect(
     questions.some((q: { explanation: string }) =>
       q.explanation.includes("\nCentimét, kilômét"),
@@ -116,11 +136,11 @@ test("teacher downloads and imports a real Word template with preview, format sw
   ).toBeTruthy();
   await page.getByRole("button", { name: "Nhập file Word" }).click();
   await file.setInputFiles(validFile);
-  await dialog.getByRole("button", { name: "Xác nhận nhập 2 câu" }).click();
+  await dialog.getByRole("button", { name: "Xác nhận nhập 4 câu" }).click();
   await expect(dialog.getByRole("alert")).toContainText(
     "đã có trong ngân hàng",
   );
-  expect(await storedQuestions()).toHaveLength(2);
+  expect(await storedQuestions()).toHaveLength(4);
 });
 
 async function demoLogin(page: Page, role: "Học sinh" | "Giáo viên") {

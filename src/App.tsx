@@ -1,3 +1,4 @@
+import { StudentNotebook } from "./StudentNotebook";
 import {
   useCallback,
   useEffect,
@@ -28,7 +29,13 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { api, ApiError, duration, errorMessage } from "./api";
+import {
+  api,
+  ApiError,
+  duration,
+  errorMessage,
+  ensureQuestionTypes,
+} from "./api";
 import {
   Empty,
   GardenIllustration,
@@ -63,7 +70,7 @@ import {
   WorkspaceHeadingSlot,
 } from "./WorkspaceHeading";
 import { QuestionBank } from "./QuestionBank";
-import { QuestionFields } from "./QuestionFields";
+import { QuestionFields, readQuestionForm } from "./QuestionFields";
 import type { Chapter, Classroom, Question, Student, User } from "./types";
 import { WorkspaceContent, type WorkspaceTab } from "./WorkspaceTabs";
 import { loginEmail } from "../shared/login-email";
@@ -154,8 +161,17 @@ export default function App() {
       setQuickLogin(!!health.quickLogin);
       setQuickAccounts(health.quickAccounts ?? []);
       try {
+        if (localStorage.getItem("greenedu-idle-logout")) {
+          await api("/auth/logout", {}).catch(() => {});
+          setUser(null);
+          return;
+        }
         const signedIn = await api<User>("/auth/me");
         setUser(signedIn);
+        if (signedIn.role === "teacher")
+          setPage((restored) =>
+            restored === "progress" ? "classes" : restored,
+          );
         if (signedIn.role === "student") {
           setPage((restored) => (restored === "classes" ? "home" : restored));
         }
@@ -243,6 +259,7 @@ export default function App() {
   const closeEditor = useCallback(() => setEditor(null), []);
   const closeAccountDialog = useCallback(() => setAccountDialog(null), []);
   function navigate(next: Page, chapterId = "") {
+    if (user?.role === "teacher" && next === "progress") next = "classes";
     setEntryRunId("");
     setPage(next);
     setStudy(null);
@@ -250,6 +267,7 @@ export default function App() {
     setCorrectionChapterId(next === "corrections" ? chapterId : "");
   }
   function login(u: User) {
+    localStorage.removeItem("greenedu-idle-logout");
     setUser(u);
     setClasses([]);
     setClassId("");
@@ -257,6 +275,21 @@ export default function App() {
     setStudy(null);
     setNotice("");
   }
+  useEffect(() => {
+    const idleExit = () => {
+      localStorage.setItem("greenedu-idle-logout", "1");
+      void api("/auth/logout", {}).catch(() => {});
+      setUser(null);
+      setClasses([]);
+      setStudy(null);
+      setError("");
+      window.alert(
+        "Bạn đã không tương tác quá 2 phút. Phiên học đã kết thúc, vui lòng đăng nhập lại.",
+      );
+    };
+    window.addEventListener("greenedu-study-idle", idleExit);
+    return () => window.removeEventListener("greenedu-study-idle", idleExit);
+  }, []);
   async function logout() {
     try {
       await api("/auth/logout", {});
@@ -287,13 +320,9 @@ export default function App() {
         data,
       );
     } else if (editor === "question" && current) {
-      await api(`/chapters/${data.chapterId}/questions`, {
-        text: data.text,
-        explanation: data.explanation,
-        lesson: data.lesson,
-        choices: [data.a, data.b, data.c, data.d],
-        correctIndex: Number(data.correctIndex),
-      });
+      const content = readQuestionForm(event.currentTarget);
+      await ensureQuestionTypes([content]);
+      await api(`/chapters/${data.chapterId}/questions`, content);
       setQuestionChapter(String(data.chapterId));
       setQuestionLesson("");
     } else if (typeof editor === "object" && editor && current) {
@@ -410,7 +439,6 @@ export default function App() {
           items: [
             { id: "classes", label: "Lớp học của tôi", icon: Users },
             { id: "groups", label: "Hoạt động nhóm", icon: Users },
-            { id: "progress", label: "Tiến độ học tập", icon: TrendingUp },
           ],
         }
       : {
@@ -783,14 +811,6 @@ export default function App() {
                       setStudy({ chapter: ch, mode: "practice", lesson })
                     }
                   />
-                  <div className="info-panel">
-                    <Clock3 size={20} />
-                    <p>
-                      Thời gian được ghi nhận khi trang hiển thị và bạn có tương
-                      tác. Sau 2 phút không tương tác, ứng dụng nhắc bạn tiếp
-                      tục trước khi tạm dừng tính giờ.
-                    </p>
-                  </div>
                 </>
               )}
               {page === "corrections" && (
@@ -818,32 +838,8 @@ export default function App() {
                       </button>
                     }
                   />
-                  <div className="class-cards">
-                    {classes.map((c) => (
-                      <button
-                        key={c.id}
-                        className={`card class-card ${c.id === current.id ? "selected" : ""}`}
-                        onClick={() => setClassId(c.id)}
-                      >
-                        <span className="class-icon">
-                          <Users size={25} />
-                        </span>
-                        <h3>{c.name}</h3>
-                        <p>
-                          {c.subject} · Khối {c.grade}
-                        </p>
-                        <span>
-                          {c.studentCount} học sinh <span>·</span>{" "}
-                          {c.chapters.length} chương
-                        </span>
-                        {c.id === current.id && (
-                          <span className="pill">Đang chọn</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
                   <SectionTitle
-                    title={`Chương học · ${current.name}`}
+                    title="Danh sách Chương"
                     action={
                       <button
                         className="button outline small"
@@ -1025,43 +1021,28 @@ export default function App() {
                   teacherAvatarId={isTeacher ? user.avatarId : undefined}
                 />
               )}
-              {page === "progress" &&
-                (isTeacher ? (
-                  <>
-                    <PageHeading
-                      eyebrow="NHÌN THẤY NỖ LỰC, HỖ TRỢ ĐÚNG LÚC"
-                      title="Tiến độ học tập"
-                      text="Theo dõi thời gian có hoạt động, kết quả luyện tập và các câu cần sửa."
-                    />
-                    <Roster
-                      classroom={current}
-                      revision={revision}
-                      onAdd={() => setEditor("student")}
-                      onReset={(s) => setEditor({ student: s })}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <PageHeading
-                      eyebrow="TỪNG BƯỚC ĐỀU ĐÁNG GHI NHẬN"
-                      title="Hành trình của tôi"
-                      text="Không so sánh với người khác. Hãy nhìn những điều bạn đã học được."
-                    />
-                    <StudentStats classroom={current} />
-                    <SectionTitle
-                      title="Tiến độ theo chương"
-                      description={`Mỗi ${current.levelMinutes ?? 60} phút học có hoạt động trong chương tăng một cấp, tối đa cấp 5.`}
-                    />
-                    <div className="card progress-table">
-                      {current.chapters.map((ch) => (
-                        <article className="chapter-level-card" key={ch.id}>
-                          <h3>{ch.title}</h3>
-                          <ChapterLevelTimeline chapter={ch} />
-                        </article>
-                      ))}
-                    </div>
-                  </>
-                ))}
+              {page === "progress" && !isTeacher && (
+                <>
+                  <PageHeading
+                    eyebrow="TỪNG BƯỚC ĐỀU ĐÁNG GHI NHẬN"
+                    title="Hành trình của tôi"
+                    text="Không so sánh với người khác. Hãy nhìn những điều bạn đã học được."
+                  />
+                  <StudentStats classroom={current} />
+                  <SectionTitle
+                    title="Tiến độ theo chương"
+                    description={`Mỗi ${current.levelMinutes ?? 60} phút học có hoạt động trong chương tăng một cấp, tối đa cấp 5.`}
+                  />
+                  <div className="card progress-table">
+                    {current.chapters.map((ch) => (
+                      <article className="chapter-level-card" key={ch.id}>
+                        <h3>{ch.title}</h3>
+                        <ChapterLevelTimeline chapter={ch} />
+                      </article>
+                    ))}
+                  </div>
+                </>
+              )}
             </>
           )}
           <footer className="page-footer">
@@ -1134,7 +1115,7 @@ function PageHeading({
 }: {
   eyebrow: string;
   title: string;
-  text: string;
+  text?: string;
   action?: ReactNode;
   className?: string;
 }) {
@@ -1143,7 +1124,7 @@ function PageHeading({
       <div>
         <h1>{title}</h1>
         <span className="eyebrow">{eyebrow}</span>
-        <p>{text}</p>
+        {text && <p>{text}</p>}
       </div>
       {action}
     </WorkspaceHeading>
@@ -1590,7 +1571,6 @@ function TeacherHome({
       <PageHeading
         eyebrow="CÙNG HỌC SINH GIEO NHỮNG MẦM XANH"
         title="Một lớp học, nhiều cơ hội lớn lên."
-        text={`${classroom.name} · ${classroom.subject} · Giáo viên ${classroom.teacherName}`}
       />
       <div className="teacher-hero garden-hero">
         <div className="hero-copy">
@@ -1832,6 +1812,7 @@ function Roster({
   onAdd: () => void;
   onReset: (s: Student) => void;
 }) {
+  const [notebookStudent, setNotebookStudent] = useState<Student | null>(null);
   const [rows, setRows] = useState<Student[]>([]),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true),
@@ -1885,8 +1866,8 @@ function Roster({
   return (
     <>
       <SectionTitle
-        title={`Học sinh · ${classroom.name}`}
-        description="Tỷ lệ đúng tính từ lượt luyện tập; các lượt sửa sai được theo dõi riêng."
+        title="Danh sách Học sinh"
+
         action={
           <div className="button-group">
             <button
@@ -1928,7 +1909,7 @@ function Roster({
                 <tr>
                   <th>Học sinh</th>
                   <th>Thời gian học</th>
-                  <th>Lượt luyện tập</th>
+                  <th>Số câu đã làm</th>
                   <th>Tỷ lệ đúng</th>
                   <th>Câu cần sửa</th>
                   <th>Tài khoản</th>
@@ -1961,7 +1942,7 @@ function Roster({
                       </div>
                     </td>
                     <td>{duration(s.seconds)}</td>
-                    <td>{s.total}</td>
+                    <td>{s.answeredQuestions ?? s.total}</td>
                     <td>
                       {s.total
                         ? `${Math.round((s.correct / s.total) * 100)}%`
@@ -1973,6 +1954,12 @@ function Roster({
                       >
                         {s.openCorrections}
                       </span>
+                      <button
+                        className="text-button"
+                        onClick={() => setNotebookStudent(s)}
+                      >
+                        Xem sổ tay
+                      </button>
                     </td>
                     <td>
                       <button
@@ -2000,10 +1987,13 @@ function Roster({
           />
         )}
       </div>
-      <p className="subtle-note">
-        CSV có thể mở bằng Excel. Báo cáo MVP chưa bao gồm điểm kiểm tra chính
-        thức hoặc điểm thưởng.
-      </p>
+      {notebookStudent && (
+        <StudentNotebook
+          classroom={classroom}
+          student={notebookStudent}
+          onClose={() => setNotebookStudent(null)}
+        />
+      )}
     </>
   );
 }

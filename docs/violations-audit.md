@@ -1,5 +1,11 @@
 # Đối chiếu quy định ôn tập và kiểm tra GreenEdu
 
+## Cập nhật xử lý theo yêu cầu mới — 13/10/2026
+
+Đã sửa trong mã: Practice pause khi hidden/blur/gián đoạn timer, không cộng bù sau sleep; cảnh báo105s và đăng xuất120s không tương tác kể cả offline. Backend chặn hồi sinh idle/không cộng gap hoặc stop inactive; thời gian chỉ gắn bài/câu/chương đang làm. ExamRoom dedup blur+hidden cho một lần rời, cảnh báo rõ, khóa chọn ngay tại ngưỡng cả offline và đồng bộ draft có trước ngưỡng rồi nộp. Giữ ngưỡng4 hoặc cấu hình1–10; không tự thêm hình phạt/hoàn vé. Website không thể cấm mở tab ở cấp hệ điều hành, xử lý bằng focus/visibility.
+
+QA mới đạt backend và trình duyệt riêng: blur→hidden không tăng đôi, offline4 lần khóa/đáp án sau ngưỡng không nhập, reload lưu warnings; idle105→120/offline/reload yêu cầu login, gap sleep không catch-up; API questionId khác chương bị từ chối và không cộng giờ chương khác. Kết quả đầy đủ/triển khai ở session-handoff. Các gap offline/focus/idle bên dưới là lịch sử trước sửa; nhật ký chi tiết sự kiện/ngoại lệ giáo viên và AI sai lặp lại vẫn chưa triển khai. Không coi QA mô phỏng là nghiệm thu thiết bị thật hoặc Railway.
+
 Ngày kiểm tra: 11/10/2026. Kết luận: cơ chế chính đã có trong mã, nhưng **chưa đầy đủ ở tình huống mất mạng/rời cửa sổ và hỗ trợ học sinh sai nhiều lần**. Đây là báo cáo kiểm tra, không thay đổi quy chế, code runtime hoặc dữ liệu học sinh.
 
 ## Nguồn và phạm vi

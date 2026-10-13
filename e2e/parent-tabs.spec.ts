@@ -27,7 +27,7 @@ for (const role of ["teacher", "student"] as const) {
         ? [
             {
               label: "Lớp học của tôi",
-              items: ["Lớp học của tôi", "Hoạt động nhóm", "Tiến độ học tập"],
+              items: ["Lớp học của tôi", "Hoạt động nhóm"],
             },
             {
               label: "Khu vườn của lớp",

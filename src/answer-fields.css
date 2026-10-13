@@ -1,0 +1,44 @@
+.truth-statements {
+  display: grid;
+  gap: 16px;
+}
+.truth-statements fieldset {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #dfe8d8;
+  border-radius: 14px;
+}
+.truth-statements legend {
+  padding-inline: 6px;
+  line-height: 1.7;
+  font-weight: 600;
+}
+.truth-statements fieldset > div {
+  display: flex;
+  gap: 12px;
+}
+.truth-statements .choice {
+  flex: 1;
+  justify-content: center;
+  padding: 12px;
+}
+.short-answer {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #dfe8d8;
+  border-radius: 14px;
+  padding: 16px;
+}
+.short-answer input {
+  width: 100%;
+  min-width: 0;
+}
+.short-answer.correct-choice {
+  background: #eff8e8;
+  border-color: #8ab16c;
+}
+.short-answer.wrong-choice {
+  background: #fff0f0;
+  border-color: #dda2a2;
+  color: #9b3f46;
+}

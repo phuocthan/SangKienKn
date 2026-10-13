@@ -1,3 +1,4 @@
+import { answerLabel, questionKind } from "../shared/question-types";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   CheckCircle2,
@@ -9,7 +10,7 @@ import {
   Upload,
   Trash2,
 } from "lucide-react";
-import { api, errorMessage } from "./api";
+import { api, ensureQuestionTypes, errorMessage } from "./api";
 import { Empty, Modal } from "./components";
 import { QuestionFields, readQuestionForm } from "./QuestionFields";
 import {
@@ -501,10 +502,20 @@ function QuestionCard({
           >
             <span>{"ABCD"[index]}</span>
             {choice}
+            {questionKind(q) === "true-false" && (
+              <strong>
+                {q.correctAnswer?.[index] === "1" ? "Đúng" : "Sai"}
+              </strong>
+            )}
             {index === q.correctIndex && <CheckCircle2 size={16} />}
           </div>
         ))}
       </div>
+      {questionKind(q) === "short-answer" && (
+        <p>
+          Đáp án: <strong>{answerLabel(q)}</strong>
+        </p>
+      )}
       <div className="bank-explanation">
         <strong>Lời giải</strong>
         <p>{q.explanation}</p>
@@ -532,8 +543,10 @@ function EditForm({
     setBusy(true);
     setError("");
     try {
+      const content = readQuestionForm(form);
+      await ensureQuestionTypes([content]);
       await api(`/questions/${question.id}/edit`, {
-        ...readQuestionForm(form),
+        ...content,
         topic: new FormData(form).get("topic") ?? question.topic ?? "",
       });
       onSaved();
@@ -717,6 +730,7 @@ function ImportForm({
     setBusy(true);
     setSaveError("");
     try {
+      await ensureQuestionTypes(mappedQuestions);
       await api(`/chapters/${chapterId}/questions/import`, {
         requestId: requestId.current,
         questions: mappedQuestions,
@@ -732,7 +746,8 @@ function ImportForm({
     <div className="question-import">
       <p>
         Nhập câu hỏi vào chương đang chọn. Tải mẫu, điền nội dung rồi chọn file
-        để xem trước. Chọn đáp án A, B, C hoặc D. Mỗi file tối đa 100 câu.
+        để xem trước. Hỗ trợ trắc nghiệm, đúng/sai và trả lời ngắn. Tối đa 100
+        câu.
       </p>
       <label>
         Bài nhận câu hỏi
@@ -787,8 +802,8 @@ function ImportForm({
             Tải mẫu Word (.docx)
           </a>
           <p className="subtle-note">
-            Mỗi câu bắt đầu bằng “Câu 1: …”, kèm nhãn Bài học, A–D, Đáp án và
-            Lời giải như mẫu. File tối đa 5 MB; hỗ trợ câu hỏi văn bản.
+            Mỗi câu có nhãn Loại câu hỏi, Bài học, Đáp án và Lời giải như mẫu.
+            File tối đa 5 MB.
           </p>
         </>
       ) : (
@@ -847,9 +862,14 @@ function ImportForm({
                     <li key={i}>
                       {choice}
                       {i === q.correctIndex && " ✓"}
+                      {questionKind(q) === "true-false" &&
+                        (q.correctAnswer?.[i] === "1" ? " · Đúng" : " · Sai")}
                     </li>
                   ))}
                 </ol>
+                {questionKind(q) === "short-answer" && (
+                  <p>Đáp án: {answerLabel(q)}</p>
+                )}
                 <p>{q.explanation}</p>
               </details>
             ))}

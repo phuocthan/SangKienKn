@@ -1,3 +1,4 @@
+import { parseQuestionKind } from "./question-types";
 import { Unzip, UnzipInflate } from "fflate";
 import {
   questionInput,
@@ -77,6 +78,7 @@ export function readWordDocument(data: Uint8Array): string {
 }
 
 type Field =
+  | "kind"
   | "text"
   | "lesson"
   | "topic"
@@ -87,6 +89,7 @@ type Field =
   | "answer"
   | "explanation";
 const fieldNames: Record<Field, string> = {
+  kind: "Loại câu hỏi",
   text: "Câu hỏi",
   lesson: "Bài học",
   topic: "Chủ đề",
@@ -123,7 +126,7 @@ export function parseQuestionWordText(source: string): {
     }
     if (!current) continue; // Introductory instructions precede the first question.
     const label =
-      /^(Bài\s+học|Chủ\s+đề|Đáp\s+án(?:\s+đúng)?|Lời\s+giải)\s*:\s*(.*)$/iu.exec(
+      /^((?:Loại\s+câu\s+hỏi|Dạng)|Bài\s+học|Chủ\s+đề|Đáp\s+án(?:\s+đúng)?|Lời\s+giải)\s*:\s*(.*)$/iu.exec(
         line,
       );
     const choice = /^([ABCD])\s*[.):]\s*(.*)$/iu.exec(line);
@@ -131,13 +134,16 @@ export function parseQuestionWordText(source: string): {
       value = "";
     if (label) {
       const key = label[1].toLocaleLowerCase("vi");
-      field = key.startsWith("bài")
-        ? "lesson"
-        : key.startsWith("chủ")
-          ? "topic"
-          : key.startsWith("đáp")
-            ? "answer"
-            : "explanation";
+      field =
+        key.startsWith("loại") || key.startsWith("dạng")
+          ? "kind"
+          : key.startsWith("bài")
+            ? "lesson"
+            : key.startsWith("chủ")
+              ? "topic"
+              : key.startsWith("đáp")
+                ? "answer"
+                : "explanation";
       value = label[2];
     } else if (choice) {
       field = choice[1].toUpperCase() as Field;
@@ -163,9 +169,27 @@ export function parseQuestionWordText(source: string): {
     errors: string[] = [],
     seen = new Set<string>();
   blocks.forEach(({ fields, errors: blockErrors }, index) => {
-    const missing = (Object.keys(fieldNames) as Field[]).filter(
-      (field) => field !== "topic" && !fields[field]?.trim(),
-    );
+    let kind;
+    try {
+      kind = parseQuestionKind(fields.kind);
+    } catch (e) {
+      errors.push("Câu " + (index + 1) + ": " + (e as Error).message);
+      return;
+    }
+    const required: Field[] = [
+      "text",
+      "lesson",
+      "answer",
+      "explanation",
+      ...(kind === "multiple-choice"
+        ? (["A", "B", "C", "D"] as Field[])
+        : kind === "true-false"
+          ? (["A", "B"] as Field[])
+          : []),
+    ];
+    if (kind === "true-false" && fields.D?.trim() && !fields.C?.trim())
+      required.push("C");
+    const missing = required.filter((field) => !fields[field]?.trim());
     if (missing.length)
       blockErrors.push(
         `Thiếu nội dung: ${missing.map((field) => fieldNames[field]).join(", ")}.`,
@@ -176,12 +200,17 @@ export function parseQuestionWordText(source: string): {
     }
     try {
       const answer = fields.answer!.trim().toUpperCase();
-      if (!/^[ABCD]$/.test(answer))
+      if (kind === "multiple-choice" && !/^[ABCD]$/.test(answer))
         throw new Error("Đáp án phải là một chữ A, B, C hoặc D.");
       const question = questionInput({
         text: fields.text,
         lesson: fields.lesson,
-        choices: [fields.A, fields.B, fields.C, fields.D],
+        kind,
+        correctAnswer: fields.answer,
+        choices:
+          kind === "short-answer"
+            ? []
+            : [fields.A, fields.B, fields.C, fields.D].filter((v) => v?.trim()),
         correctIndex: "ABCD".indexOf(answer),
         explanation: fields.explanation,
         ...(fields.topic !== undefined ? { topic: fields.topic } : {}),

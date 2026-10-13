@@ -1,3 +1,5 @@
+import { AnswerFields } from "./AnswerFields";
+import { answerComplete, type QuestionAnswer } from "../shared/question-types";
 import { WorkspaceHeading } from "./WorkspaceHeading";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -20,7 +22,7 @@ export function Practice({
   mode,
   questionId,
   lesson,
-  reviewId,
+  reviewId: initialReviewId,
   onFinish,
   onProgress,
 }: {
@@ -32,11 +34,13 @@ export function Practice({
   onFinish: () => void;
   onProgress: () => void;
 }) {
+  const [reviewId, setReviewId] = useState(initialReviewId);
+  const repeatRequest = useRef(crypto.randomUUID());
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [index, setIndex] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<QuestionAnswer | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -69,7 +73,7 @@ export function Practice({
         questions: Question[];
         currentIndex: number;
         completed: boolean;
-        answers: Record<string, Result & { selected: number }>;
+        answers: Record<string, Result & { selected: QuestionAnswer }>;
       }>(`/learning/reviews/${reviewId}`)
         .then((r) => {
           if (!alive) return;
@@ -79,17 +83,18 @@ export function Practice({
           setScore(Object.values(r.answers).filter((a) => a.correct).length);
           const answer = r.answers[r.questions[r.currentIndex]?.id];
           setResult(answer ?? null);
-          const draft = Number(
-            localStorage.getItem(
-              `greenedu-review:${reviewId}:${r.questions[r.currentIndex]?.id}`,
-            ) ?? -1,
-          );
-          setSelected(
-            answer?.selected ??
-              (Number.isInteger(draft) && draft >= 0 && draft < 4
-                ? draft
-                : null),
-          );
+          let draft: QuestionAnswer | null = null;
+          try {
+            draft = JSON.parse(
+              localStorage.getItem(
+                "greenedu-review:" +
+                  reviewId +
+                  ":" +
+                  r.questions[r.currentIndex]?.id,
+              ) ?? "null",
+            );
+          } catch {}
+          setSelected(answer?.selected ?? draft);
         })
         .catch((e) => {
           if (alive) setError(errorMessage(e));
@@ -133,7 +138,8 @@ export function Practice({
       disposed = false,
       sending = false,
       failed = false;
-    let lastTick = performance.now();
+    let lastTick = performance.now(),
+      exited = false;
     lastInteraction.current = Date.now();
     interacted.current = true;
     pausedRef.current = false;
@@ -142,6 +148,10 @@ export function Practice({
     setSessionError("");
     async function heartbeat() {
       if (!sessionId || sending || disposed) return;
+      if (performance.now() - lastTick > 2000) {
+        pausedRef.current = true;
+        setPaused(true);
+      }
       sending = true;
       const activity = interacted.current;
       interacted.current = false;
@@ -150,7 +160,12 @@ export function Practice({
           "/study/heartbeat",
           {
             sessionId,
-            active: !document.hidden && !pausedRef.current && !doneRef.current,
+            active:
+              !document.hidden &&
+              document.hasFocus() &&
+              !pausedRef.current &&
+              !doneRef.current &&
+              Date.now() - lastInteraction.current < 120000,
             interacted: activity,
           },
         );
@@ -178,16 +193,27 @@ export function Practice({
       }
     }
     function activity(event: Event) {
-      if (event.isTrusted && !pausedRef.current && !document.hidden) {
+      if (
+        event.isTrusted &&
+        !pausedRef.current &&
+        !document.hidden &&
+        document.hasFocus()
+      ) {
         lastInteraction.current = Date.now();
         interacted.current = true;
         setWarning(null);
       }
     }
-    api<{ sessionId: string }>("/study/start", { chapterId: studyChapterId })
+    api<{ sessionId: string }>("/study/start", {
+      chapterId: studyChapterId,
+      questionId: questions[index]?.id,
+    })
       .then((s) => {
         if (disposed) {
-          void api("/study/stop", { sessionId: s.sessionId }).catch(() => {});
+          void api("/study/stop", {
+            sessionId: s.sessionId,
+            active: false,
+          }).catch(() => {});
           return;
         }
         sessionId = s.sessionId;
@@ -200,10 +226,25 @@ export function Practice({
       const tick = performance.now();
       const delta = (tick - lastTick) / 1000;
       lastTick = tick;
+      const idle = Math.floor((Date.now() - lastInteraction.current) / 1000);
+      if (idle >= 120) {
+        if (exited) return;
+        exited = true;
+        pausedRef.current = true;
+        void heartbeat();
+        window.dispatchEvent(new Event("greenedu-study-idle"));
+        return;
+      }
+      if (delta > 2 && !pausedRef.current) {
+        pausedRef.current = true;
+        setPaused(true);
+        void heartbeat();
+      }
       if (
         disposed ||
         pausedRef.current ||
         document.hidden ||
+        !document.hasFocus() ||
         doneRef.current ||
         !sessionId ||
         failed ||
@@ -214,18 +255,16 @@ export function Practice({
       // A suspended browser must not catch up wall-clock time on wake.
       if (delta > 0 && delta <= 2)
         setElapsedSeconds((seconds) => seconds + delta);
-      const idle = Math.floor((Date.now() - lastInteraction.current) / 1000);
-      if (idle >= 130) {
-        pausedRef.current = true;
-        setPaused(true);
-        setWarning(null);
-        void heartbeat();
-      } else if (idle >= 120) setWarning(130 - idle);
+      if (idle >= 105) setWarning(120 - idle);
     }, 1000);
     const pulse = window.setInterval(() => void heartbeat(), 15000);
     const visibility = () => {
       lastTick = performance.now();
       setHidden(document.hidden);
+      if (document.hidden || !document.hasFocus()) {
+        pausedRef.current = true;
+        setPaused(true);
+      }
       void heartbeat();
     };
     const connection = () => {
@@ -238,6 +277,8 @@ export function Practice({
       window.addEventListener(name, activity, { passive: true, capture: true }),
     );
     document.addEventListener("visibilitychange", visibility);
+    window.addEventListener("blur", visibility);
+    window.addEventListener("focus", visibility);
     window.addEventListener("online", connection);
     window.addEventListener("offline", connection);
     return () => {
@@ -248,14 +289,28 @@ export function Practice({
         window.removeEventListener(name, activity, true),
       );
       document.removeEventListener("visibilitychange", visibility);
+      window.removeEventListener("blur", visibility);
+      window.removeEventListener("focus", visibility);
       window.removeEventListener("online", connection);
       window.removeEventListener("offline", connection);
-      if (sessionId) void api("/study/stop", { sessionId }).catch(() => {});
+      if (sessionId)
+        void api("/study/stop", {
+          sessionId,
+          active:
+            !pausedRef.current &&
+            !document.hidden &&
+            document.hasFocus() &&
+            navigator.onLine,
+        }).catch(() => {});
       onProgressRef.current();
     };
   }, [studyChapterId, canStudy]);
 
   function resume() {
+    if (Date.now() - lastInteraction.current >= 120000) {
+      window.dispatchEvent(new Event("greenedu-study-idle"));
+      return;
+    }
     lastInteraction.current = Date.now();
     interacted.current = true;
     pausedRef.current = false;
@@ -263,7 +318,15 @@ export function Practice({
     setWarning(null);
   }
   async function submit() {
-    if (selected === null || busy || result || paused) return;
+    if (
+      !answerComplete(questions[index], selected) ||
+      busy ||
+      result ||
+      paused ||
+      document.hidden ||
+      !document.hasFocus()
+    )
+      return;
     setBusy(true);
     setError("");
     try {
@@ -283,6 +346,37 @@ export function Practice({
         );
       if (r.correct) setScore((s) => s + 1);
       onProgress();
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function repeat() {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      if (reviewId) {
+        const r = await api<{ id: string }>(
+          "/learning/reviews/" + reviewId + "/repeat",
+          { requestId: repeatRequest.current },
+        );
+        setLoading(true);
+        setReviewId(r.id);
+        repeatRequest.current = crypto.randomUUID();
+      } else {
+        setLoading(true);
+        setRetryKey((k) => k + 1);
+      }
+      setDone(false);
+      setIndex(0);
+      setSelected(null);
+      setResult(null);
+      setScore(0);
+      setElapsedSeconds(0);
+      setRecordedSeconds(null);
+      requestId.current = crypto.randomUUID();
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -371,7 +465,17 @@ export function Practice({
             ? `${questions.length - score} câu chưa đúng đã được giữ trong sổ tay sửa sai.`
             : "Tất cả câu trả lời đều chính xác. Làm tốt lắm!"}
         </p>
-        <button className="button primary" onClick={onFinish}>
+        {error && <p role="alert">{error}</p>}
+        {mode === "practice" && (
+          <button
+            className="button primary"
+            disabled={busy}
+            onClick={() => void repeat()}
+          >
+            Làm lại bài <RotateCcw size={17} />
+          </button>
+        )}
+        <button className="button secondary" onClick={onFinish}>
           Về khu vườn
           <ArrowRight size={18} />
         </button>
@@ -418,8 +522,8 @@ export function Practice({
           <Pause size={20} />
           <span>
             {paused
-              ? "Thời gian học đang tạm dừng do không có tương tác."
-              : `Bạn còn đang học chứ? Tạm dừng tính giờ sau ${warning} giây.`}
+              ? "Phiên học đã tạm dừng do rời tab, mất focus hoặc máy nghỉ. Quay lại học trong ứng dụng."
+              : `Bạn còn đang học chứ? Đăng xuất sau ${warning} giây nếu không tương tác.`}
           </span>
           <button className="button primary small" onClick={resume}>
             Tiếp tục học
@@ -441,33 +545,21 @@ export function Practice({
           <span style={{ width: `${(index / questions.length) * 100}%` }} />
         </div>
         <h2>{q.text}</h2>
-        <div className="choices">
-          {q.choices.map((choice, i) => (
-            <button
-              key={i}
-              disabled={!!result || busy || paused}
-              onClick={() => {
-                setSelected(i);
-                if (reviewId)
-                  localStorage.setItem(
-                    `greenedu-review:${reviewId}:${q.id}`,
-                    String(i),
-                  );
-                requestId.current = crypto.randomUUID();
-              }}
-              className={`choice ${selected === i ? "selected" : ""} ${result?.correct && i === result.correctIndex ? "correct-choice" : ""} ${result && selected === i && !result.correct ? "wrong-choice" : ""}`}
-              aria-pressed={selected === i}
-            >
-              <span className="choice-letter">{"ABCD"[i]}</span>
-              <span>{choice}</span>
-              {result?.correct && i === result.correctIndex ? (
-                <Check size={20} />
-              ) : result && selected === i && !result.correct ? (
-                <X size={20} />
-              ) : null}
-            </button>
-          ))}
-        </div>
+        <AnswerFields
+          question={q}
+          value={selected}
+          result={result}
+          disabled={!!result || busy || paused}
+          onChange={(value) => {
+            setSelected(value);
+            if (reviewId)
+              localStorage.setItem(
+                "greenedu-review:" + reviewId + ":" + q.id,
+                JSON.stringify(value),
+              );
+            requestId.current = crypto.randomUUID();
+          }}
+        />
         {error && (
           <div className="error-banner" role="alert">
             {error}
@@ -520,7 +612,7 @@ export function Practice({
           ) : (
             <button
               className="button primary"
-              disabled={selected === null || busy || paused}
+              disabled={!answerComplete(q, selected) || busy || paused}
               onClick={() => void submit()}
             >
               {busy ? "Đang kiểm tra…" : "Kiểm tra đáp án"}
@@ -528,11 +620,6 @@ export function Practice({
             </button>
           )}
         </div>
-      </div>
-      <div className="practice-note">
-        <RotateCcw size={16} />
-        Đây là phiên luyện tập. Bạn có thể học lại và sửa sai theo nhịp của
-        mình.
       </div>
     </div>
   );
