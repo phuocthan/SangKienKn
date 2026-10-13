@@ -1,5 +1,9 @@
 # Bàn giao session GreenEdu
 
+## Bỏ nhãn môn lặp trên thẻ chương luyện tập — 13/10/2026
+
+Thẻ chương trong trang luyện tập học sinh không còn dòng nhãn môn viết hoa (ví dụ “TEST”) phía trên tên chương. Tên chương, cấp cây, tiến độ và thao tác giữ nguyên. Thay đổi chỉ ở giao diện, không đụng dữ liệu môn/lớp. Build TypeScript/Vite đạt; ca E2E hành trình cấp học sinh đạt trên server/SQLite thử riêng, không ghi Railway.
+
 ## Tab con neo khi cuộn, danh sách lớp gọn hơn — 13/10/2026
 
 Trong portrait ≤1100px, WorkspaceTabs neo ngay dưới header tài khoản/lớp theo chiều cao header đo bằng ResizeObserver; nền kem và tab chọn nâu ấm phân biệt với dock đáy xanh. Chuyển điểm đến ở menu hoặc tab con đưa trang về đầu; vẫn giữ aria/điều hướng bàn phím. Landscape giữ palette và vị trí tab cũ.

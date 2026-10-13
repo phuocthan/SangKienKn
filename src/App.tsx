@@ -1461,7 +1461,6 @@ function ChapterGrid({
             <StudentLevelIcon level={ch.level} />
           </div>
           <div className="chapter-body">
-            <span className="eyebrow">{classroom.subject.toUpperCase()}</span>
             <h3>{ch.title}</h3>
             <div className="chapter-meta">
               <span>

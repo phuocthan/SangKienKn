@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: thẻ luyện tập bớt nhãn trùng — 13/10/2026
+
+Bỏ nhãn môn viết hoa phía trên tên chương trong các thẻ luyện tập học sinh; vẫn giữ môn trong thông tin lớp, tên chương, cấp và tiến độ. Xem bản bàn giao ở đầu `docs/session-handoff.md`.
+
 ## Hiện hành: tab con portrait neo cố định và danh sách lớp gọn — 13/10/2026
 
 Tab con của các trang cha giáo viên/học sinh bám dưới header sticky khi cuộn portrait, dùng nền kem/mục chọn nâu để tách dock đáy xanh. Đổi tab/menu đưa trang về đầu. Danh sách Chương giáo viên gọn thành hàng, hai cột ở desktop rộng; roster giảm khoảng đệm. Hệ chữ Be Vietnam Pro giữ nguyên, các heading, section, caption, nút và form dùng cỡ/nhịp dòng chung. Build đạt, 14/14 E2E giao diện liên quan trên DB riêng đạt. Chi tiết bàn giao ở đầu `docs/session-handoff.md`.
