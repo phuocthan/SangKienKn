@@ -123,9 +123,17 @@ for (const role of ["teacher", "student", "admin"] as const) {
       const activeItem = nav.locator('button.nav-item[aria-current="page"]');
       const inactiveItem = nav.locator("button.nav-item:not(.active)").first();
       if ((await activeItem.count()) && (await inactiveItem.count())) {
+        await expect(activeItem).toHaveCSS("transform", "none");
         await expect
-          .poll(async () => (await activeItem.boundingBox())!.y)
-          .toBeLessThan((await inactiveItem.boundingBox())!.y);
+          .poll(async () => {
+            const selectedBox = (await activeItem.boundingBox())!;
+            const otherBox = (await inactiveItem.boundingBox())!;
+            return Math.abs(selectedBox.y - otherBox.y);
+          })
+          .toBeLessThan(1);
+        expect((await activeItem.boundingBox())!.height).toBeLessThanOrEqual(
+          64,
+        );
       }
       if (viewport.width === 320 && role !== "admin") {
         const longest = nav.getByRole("button", {

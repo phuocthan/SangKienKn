@@ -2,7 +2,7 @@
 
 ## Hiện hành: dock portrait đủ tab, tab chọn nổi bật — 13/10/2026
 
-Phone/PC portrait dàn toàn bộ điểm đến trên thanh dưới, không cần swipe. Chỉ tab được chọn hiện chữ bên dưới icon và nhô lên 5px; tab còn lại là icon với aria-label tên đầy đủ. Kiểm tra kích thước từ 320px đến 1024px, giữ menu desktop/landscape.
+Phone/PC portrait dàn toàn bộ điểm đến trên thanh dưới, không cần swipe. Chỉ tab được chọn hiện chữ bên dưới icon; tab còn lại là icon với aria-label tên đầy đủ. Tab cùng trục, không nhảy lên; ô chọn hẹp hơn và chuyển màu/kích thước mượt. Kiểm tra kích thước từ 320px đến 1024px, giữ menu desktop/landscape. Heading Hoạt động nhóm ẩn ảnh trang trí ở landscape, giữ ảnh ở portrait.
 
 ## Hiện hành: menu rộng hơn và thống kê cấp bằng icon — 13/10/2026
 

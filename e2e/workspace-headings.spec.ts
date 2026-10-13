@@ -59,6 +59,12 @@ for (const role of ["teacher", "student"] as const) {
         const heading = page.getByRole("heading", { level: 1 });
         await expect(heading).toHaveCount(1);
         await expect(heading).toBeVisible();
+        if (name === "Hoạt động nhóm") {
+          const illustration = page.locator(".group-heading-illustration");
+          if (viewport.width > viewport.height)
+            await expect(illustration).toBeHidden();
+          else await expect(illustration).toBeVisible();
+        }
         const slot = page.locator(".workspace-heading-slot");
         if (desktop) {
           await expect(slot.getByRole("heading", { level: 1 })).toHaveCount(1);

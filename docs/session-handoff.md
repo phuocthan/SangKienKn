@@ -1,5 +1,9 @@
 # Bàn giao session GreenEdu
 
+## Dock portrait êm hơn, ẩn ảnh nhóm ở landscape — 13/10/2026
+
+Theo góp ý mới, tab portrait không còn translateY/nảy lên. Mọi tab cao 64px và căn giữa cùng trục; tab chọn thu tỷ lệ rộng từ3 xuống2.3, viền/bóng nhẹ hơn, chuyển flex-grow/màu/nền trong220ms và tắt transition khi reduced-motion. Vẫn đủ tab, chỉ mục chọn hiện chữ. Ảnh nhóm học sinh ở heading Hoạt động nhóm ẩn khi orientation landscape, vẫn hiện portrait; heading landscape về một cột, không chừa khoảng ảnh. TypeScript/Vite trên checkout sạch đạt; 10/10 E2E portrait và heading desktop/mobile đạt trên DB riêng, ảnh chụp đã xem. Localhost5173 là frontend Vite dùng API/database Railway theo cấu hình hiện hành; không tạo SQLite local mới.
+
 ## Dock portrait hiện đủ mục, chỉ mục chọn có chữ — 13/10/2026
 
 Yêu cầu mới: thanh điều hướng đáy ở phone và cửa sổ PC portrait luôn dàn đủ mục trong một hàng, không cuộn ngang. Các mục chưa chọn chỉ hiện icon; mục chọn hiện icon + chữ và nhô lên 5px trên nền sáng. Tên đầy đủ vẫn ở aria-label để đọc màn hình và automation gọi được nút. Badge Sổ tay sửa sai ở góc dưới icon chưa chọn. Cấu trúc header tài khoản/lớp và menu desktop/landscape không đổi. CSS/markup dùng chung giáo viên, học sinh và nút quản trị. Kiểm tra build/E2E ở checkout push bằng DB riêng; không dùng Railway để ghi dữ liệu.

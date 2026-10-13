@@ -140,31 +140,36 @@
 
   .sidebar nav .nav-item {
     flex: 1 1 0;
+    align-self: center;
     flex-direction: column;
     justify-content: center;
     gap: 2px;
+    height: 64px;
     width: 0;
     min-width: 0;
     min-height: 0;
-    padding: 5px 2px;
+    padding: 3px 2px;
+    border: 1px solid transparent;
     text-align: center;
     font-size: clamp(10px, 2.7vw, 12px);
     line-height: 1.12;
     white-space: normal;
     color: #d8e6d6;
+    transition:
+      flex-grow 220ms ease,
+      background-color 220ms ease,
+      border-color 220ms ease,
+      color 220ms ease,
+      box-shadow 220ms ease;
   }
 
   .sidebar nav .nav-item.active {
-    flex-grow: 3;
-    transform: translateY(-5px);
-    border: 1px solid #dce9c8;
-    border-radius: 15px;
+    flex-grow: 2.3;
+    border-color: #dce9c8;
+    border-radius: 13px;
     background: #edf4dd;
     color: #315d3e;
-    box-shadow: 0 -3px 10px #0c302523;
-    transition:
-      transform 160ms ease,
-      box-shadow 160ms ease;
+    box-shadow: 0 1px 6px #0c302518;
   }
 
   .sidebar nav .nav-item:not(.active) .nav-label {
@@ -220,7 +225,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .sidebar nav .nav-item.active {
+    .sidebar nav .nav-item {
       transition: none;
     }
   }

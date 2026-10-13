@@ -2,7 +2,7 @@
 
 ## Hiện hành: tab điều hướng portrait không cuộn — 13/10/2026
 
-Dock đáy trong portrait có một hàng flex rộng đúng viewport: icon mọi điểm đến đều nhìn thấy, không kéo ngang. Mục đang chọn chiếm phần rộng hơn, có icon/chữ, nền sáng và nâng 5px; mục còn lại chỉ icon trên nền xanh. Nhãn button luôn ở aria-label dù chữ bị ẩn; badge sửa sai đặt dưới icon khi mục chưa chọn. Khoảng đệm đáy nội dung và header sticky giữ nguyên. CSS chỉ áp dụng media portrait≤1100px, không đổi sidebar landscape.
+Dock đáy trong portrait có một hàng flex rộng đúng viewport: icon mọi điểm đến đều nhìn thấy, không kéo ngang. Mục đang chọn có icon/chữ và nền sáng gọn hơn; tất cả tab cao64px cùng trục, không nâng lên. Chuyển độ rộng/màu/nền trong220ms, tắt khi reduced-motion. Mục còn lại chỉ icon trên nền xanh. Nhãn button luôn ở aria-label dù chữ bị ẩn; badge sửa sai đặt dưới icon khi mục chưa chọn. Khoảng đệm đáy nội dung và header sticky giữ nguyên. CSS chỉ áp dụng media portrait≤1100px. Heading Hoạt động nhóm không hiện minh họa ở landscape và không chừa cột ảnh; portrait vẫn giữ hình.
 
 ## Hiện hành: sidebar nới rộng và icon cấp theo chương — 13/10/2026
 
