@@ -493,7 +493,7 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
     .check();
   await page.getByLabel("Số câu", { exact: true }).fill("4");
   await page.getByRole("button", { name: "Lưu ma trận" }).click();
-  await expect(page.getByRole("status")).toContainText("Đã lưu ma trận");
+  await expect(page.locator('.learning-notice[role="status"]')).toContainText("Đã lưu ma trận");
   await page.getByLabel("Loại bộ câu").selectOption("exam");
   await page
     .getByRole("radio", { name: "Chọn từ ngân hàng", exact: true })
@@ -502,7 +502,7 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
   const title = `Thi ${info.project.name} ${Date.now()}`;
   await page.getByLabel("Tên bộ câu").fill(title);
   await page.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
-  await expect(page.getByRole("status")).toContainText("Đã tạo kiểm tra");
+  await expect(page.locator('.learning-notice[role="status"]')).toContainText("Đã tạo kiểm tra");
   await page
     .locator(".learning-row")
     .filter({ has: page.getByText(title, { exact: true }) })

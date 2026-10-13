@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Flower2, Leaf, Pause, Play, Sprout, Trophy } from "lucide-react";
+import { Flower2, Leaf, Pause, Play, Sprout, Trophy } from "./icons";
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { Avatar } from "./Avatars";
 import { StudentLevelIcon } from "./StudentLevel";

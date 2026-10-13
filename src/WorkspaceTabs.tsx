@@ -4,12 +4,13 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import type { LucideIcon } from "lucide-react";
+import type { AppIcon } from "./icons";
 
 export type WorkspaceTab<T extends string> = {
   id: T;
   label: string;
-  icon: LucideIcon;
+  icon: AppIcon;
+  count?: number;
 };
 
 export function WorkspaceContent<T extends string>({
@@ -43,7 +44,12 @@ export function WorkspaceContent<T extends string>({
   }, [tabs?.label]);
 
   return (
-    <main className="main-content" ref={mainRef}>
+    <main
+      className="main-content"
+      id="workspace-content"
+      tabIndex={-1}
+      ref={mainRef}
+    >
       {tabs && (
         <WorkspaceTabs
           label={tabs.label}
@@ -100,6 +106,7 @@ export function WorkspaceTabs<T extends string>({
         <button
           type="button"
           role="tab"
+          aria-label={item.label}
           id={`workspace-tab-${item.id}`}
           key={item.id}
           aria-selected={page === item.id}
@@ -110,6 +117,11 @@ export function WorkspaceTabs<T extends string>({
         >
           <item.icon size={18} aria-hidden="true" />
           {item.label}
+          {!!item.count && (
+            <span className="workspace-tab-count" aria-hidden="true">
+              {item.count}
+            </span>
+          )}
         </button>
       ))}
     </div>

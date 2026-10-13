@@ -11,7 +11,7 @@ import {
   RefreshCw,
   CheckCircle2,
   RotateCcw,
-} from "lucide-react";
+} from "./icons";
 import { api, ApiError, errorMessage } from "./api";
 import { Empty, Modal } from "./components";
 import { WorkspaceHeading } from "./WorkspaceHeading";

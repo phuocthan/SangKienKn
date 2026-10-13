@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Check, LockKeyhole } from "lucide-react";
+import { Check, LockKeyhole } from "./icons";
 import { STUDENT_LEVEL_NAMES, studentLevel } from "../shared/student-levels";
 import type { Chapter, Classroom, Student } from "./types";
 import { duration } from "./api";
@@ -14,201 +14,115 @@ export function StudentLevelIcon({
   label?: string;
 }) {
   const stage = Math.max(1, Math.min(5, Math.floor(level)));
-  const gradient = useId();
   return (
     <svg
       viewBox="0 0 80 80"
       className={`student-level-icon ${className}`}
       role="img"
       aria-label={label ?? `Cấp ${stage} · ${STUDENT_LEVEL_NAMES[stage - 1]}`}
+      data-icon-family="greenedu-duotone"
+      data-level={stage}
     >
-      <defs>
-        <linearGradient id={gradient} x1="0" y1="0" x2="1" y2="1">
-          <stop stopColor={stage === 5 ? "#377f52" : "#a2d878"} />
-          <stop offset="1" stopColor={stage === 5 ? "#164b35" : "#38865a"} />
-        </linearGradient>
-      </defs>
-      <circle
-        cx="40"
-        cy="40"
-        r="37"
-        fill={stage === 5 ? "#f3f0dc" : "#eef6e9"}
+      <path
+        d="M21 68h38"
+        stroke="currentColor"
+        opacity=".25"
+        strokeWidth="3.4"
+        strokeLinecap="round"
       />
-      <ellipse cx="40" cy="65" rx="23" ry="5" fill="#d4e4c7" />
       {stage === 1 && (
         <>
+          <ellipse
+            cx="39"
+            cy="49"
+            rx="12"
+            ry="16"
+            transform="rotate(30 39 49)"
+            fill="#b68b57"
+            fillOpacity=".25"
+            stroke="#916d40"
+            strokeWidth="3.4"
+          />
           <path
-            d="M41 52q-2 9-9 12m9-12q6 8 10 10"
-            stroke="#aa7a47"
-            strokeWidth="2"
-            fill="none"
+            d="M40 35q-2-15 13-19-1 14-13 19m-2 17 5-11"
+            fill="currentColor"
+            fillOpacity=".25"
+            stroke="currentColor"
+            strokeWidth="3.4"
             strokeLinecap="round"
           />
-          <path
-            d="M28 48c-1-14 9-22 21-18 13 4 10 24-1 28-8 3-17-2-20-10Z"
-            fill="#bd8a53"
-            stroke="#966439"
-            strokeWidth="2"
-          />
-          <path
-            d="M35 40q4-6 11-5"
-            stroke="#e7c799"
-            strokeWidth="3"
-            fill="none"
-            strokeLinecap="round"
-          />
-          <path d="M44 30q-1-9 8-12-1 10-8 12Z" fill={`url(#${gradient})`} />
         </>
       )}
       {stage === 2 && (
         <>
           <path
-            d="M40 64V39q0-8 6-14"
-            stroke="#397c4b"
-            strokeWidth="3"
-            fill="none"
+            d="M40 66V39"
+            stroke="currentColor"
+            strokeWidth="3.4"
             strokeLinecap="round"
           />
           <path
-            d="M40 45C26 45 18 35 20 26c14-1 23 8 20 19Z"
-            fill={`url(#${gradient})`}
-            stroke="#4d9256"
-            strokeWidth="1.5"
-          />
-          <path
-            d="M40 39c-2-13 7-21 21-19 1 12-8 20-21 19Z"
-            fill="#67af65"
-            stroke="#4d9256"
-            strokeWidth="1.5"
-          />
-          <path
-            d="m27 33 13 12m0-6 13-12"
-            stroke="#c5e6aa"
-            strokeWidth="1.5"
-            fill="none"
+            d="M40 47C24 47 19 35 20 27c14-1 23 7 20 20Zm0-8c-2-14 7-23 22-22 2 14-7 24-22 22Z"
+            fill="currentColor"
+            fillOpacity=".22"
+            stroke="currentColor"
+            strokeWidth="3.4"
+            strokeLinejoin="round"
           />
         </>
       )}
-      {stage === 3 && (
+      {stage >= 3 && (
         <>
           <path
-            d="M40 64V35m0 12L29 37m11 8 11-12"
-            stroke="#ad7d4c"
-            strokeWidth="4"
+            d="M40 66V41m0 13-10-10m10 5 10-11"
             fill="none"
+            stroke="currentColor"
+            strokeWidth="3.4"
             strokeLinecap="round"
+            strokeLinejoin="round"
           />
-          <circle cx="29" cy="33" r="12" fill="#7fbd6d" />
-          <circle cx="50" cy="33" r="12" fill="#539e60" />
-          <circle cx="40" cy="23" r="14" fill={`url(#${gradient})`} />
           <path
-            d="M34 20q3-4 8-3"
-            stroke="#cae7ac"
-            strokeWidth="2.5"
-            fill="none"
-            strokeLinecap="round"
+            d="M22 47C11 46 10 32 20 28C18 17 29 11 37 17C43 6 58 11 58 23C71 22 75 37 64 43C66 54 53 59 45 51C38 60 24 57 22 47Z"
+            fill="currentColor"
+            fillOpacity=".19"
+            stroke="currentColor"
+            strokeWidth="3.4"
           />
         </>
       )}
-      {stage >= 4 && (
-        <>
-          <path
-            d={stage === 5 ? "M34 67l3-28h7l3 28-7-3Z" : "M37 65l1-25h5l1 25Z"}
-            fill="#ad7d4c"
-            stroke="#865d37"
-            strokeWidth="1.5"
-          />
-          <path
-            d="M40 50 29 38m11 9 12-12"
-            stroke="#865d37"
-            strokeWidth={stage === 5 ? 4 : 3}
-            fill="none"
-            strokeLinecap="round"
-          />
-          {stage === 5 ? (
-            <>
-              <path
-                d="M13 38c-7-9 1-22 12-21C27 3 48 4 52 16c14-1 22 10 15 20 5 13-10 20-20 14-6 8-18 8-23 0-10 3-17-4-11-12Z"
-                fill={`url(#${gradient})`}
-                stroke="#29663f"
-                strokeWidth="2"
-              />
-              <path
-                d="M23 26q5-5 11-4m12-4q6-1 10 4M21 40q3 5 9 4"
-                stroke="#86b76b"
-                strokeWidth="2.5"
-                fill="none"
-                strokeLinecap="round"
-              />
-              <path
-                d="M37 62l-7 5m14-5 9 5"
-                stroke="#865d37"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              {[
-                [24, 32],
-                [46, 24],
-                [54, 43],
-              ].map(([x, y]) => (
-                <g key={`${x}-${y}`} transform={`translate(${x} ${y})`}>
-                  <path
-                    d="M0-3v-5"
-                    stroke="#865d37"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                  <path d="M0-6q2-5 6-3-1 4-6 3Z" fill="#a8d67a" />
-                  <circle
-                    r="5.5"
-                    fill="#efaa3f"
-                    stroke="#cd7f2d"
-                    strokeWidth="1"
-                  />
-                  <path
-                    d="M-3-1q1-2 3-2"
-                    stroke="#ffe4a0"
-                    strokeWidth="1.5"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                </g>
-              ))}
-            </>
-          ) : (
-            <>
-              <circle cx="29" cy="33" r="14" fill="#7fbd6d" />
-              <circle cx="51" cy="33" r="14" fill="#539e60" />
-              <circle cx="40" cy="23" r="17" fill={`url(#${gradient})`} />
-              <path
-                d="M32 20q4-5 10-4"
-                stroke="#cae7ac"
-                strokeWidth="2.5"
-                fill="none"
-                strokeLinecap="round"
-              />
-              {[
-                [25, 34],
-                [41, 21],
-                [54, 37],
-              ].map(([x, y]) => (
-                <g key={`${x}-${y}`} transform={`translate(${x} ${y})`}>
-                  {[
-                    [0, -4],
-                    [4, -1],
-                    [2.5, 3.5],
-                    [-2.5, 3.5],
-                    [-4, -1],
-                  ].map(([px, py], index) => (
-                    <circle key={index} cx={px} cy={py} r="3" fill="#f3b8bb" />
-                  ))}
-                  <circle r="2.5" fill="#f7d16b" />
-                </g>
-              ))}
-            </>
-          )}
-        </>
-      )}
+      {stage === 4 &&
+        [
+          [27, 32],
+          [48, 24],
+          [55, 42],
+        ].map(([x, y]) => (
+          <g key={x} transform={`translate(${x} ${y})`}>
+            <path
+              d="M0-5C8-10 11 1 5 4C3 12-9 8-6 2C-12-4-3-11 0-5Z"
+              fill="#f3d5bb"
+              stroke="#a5673e"
+              strokeWidth="2"
+            />
+            <circle r="2" fill="#a5673e" />
+          </g>
+        ))}
+      {stage === 5 &&
+        [
+          [26, 32],
+          [49, 23],
+          [54, 43],
+        ].map(([x, y]) => (
+          <g key={x} transform={`translate(${x} ${y})`}>
+            <path
+              d="M0-6v-4m0 1 5-3"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+            />
+            <circle r="5.3" fill="#e6b455" stroke="#9a7130" strokeWidth="2" />
+          </g>
+        ))}
     </svg>
   );
 }

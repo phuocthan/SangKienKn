@@ -9,7 +9,7 @@ import {
   Pencil,
   Upload,
   Trash2,
-} from "lucide-react";
+} from "./icons";
 import { api, ensureQuestionTypes, errorMessage } from "./api";
 import { Empty, Modal } from "./components";
 import { QuestionFields, readQuestionForm } from "./QuestionFields";

@@ -16,7 +16,7 @@ import {
   CheckCircle2,
   FileText,
   Users,
-} from "lucide-react";
+} from "./icons";
 import { api, errorMessage } from "./api";
 import { Avatar } from "./Avatars";
 import { Empty, Modal, SectionTitle } from "./components";

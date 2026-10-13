@@ -9,7 +9,7 @@ import {
   Pause,
   Play,
   Sun,
-} from "lucide-react";
+} from "./icons";
 
 const notes = [
   {

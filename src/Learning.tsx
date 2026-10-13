@@ -10,12 +10,13 @@ import {
 import {
   ArrowLeft,
   BookOpen,
+  Notebook,
   Clock3,
   Download,
   RefreshCw,
   Trophy,
   Ticket,
-} from "lucide-react";
+} from "./icons";
 import { api, ApiError, duration, errorMessage } from "./api";
 import { WorkspaceHeading } from "./WorkspaceHeading";
 import { StudentLevelIcon } from "./StudentLevel";
@@ -387,7 +388,7 @@ export function Learning({
                                     aria-label={`Mở sổ tay · ${ch.title}`}
                                     onClick={() => onCorrections(ch.id)}
                                   >
-                                    <BookOpen size={16} /> Mở sổ tay
+                                    <Notebook size={16} /> Mở sổ tay
                                   </button>
                                 )}
                             </li>

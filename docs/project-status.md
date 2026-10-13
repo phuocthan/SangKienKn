@@ -1,5 +1,19 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: áp dụng bộ GreenEdu Duotone đã duyệt — 13/10/2026
+
+Theo yêu cầu “áp dụng đề xuất”, đã chuyển toàn bộ icon UI trong `src` sang Phosphor Duotone và thay5 SVG cấp cây bằng bộ đã duyệt trong `.local/greenedu-icons-preview.html`. Icon lớp/ngân hàng/ôn/online/vườn/nhóm/sổ tay/tài khoản/cài đặt phân biệt theo chức năng; giữ nhãn accessibility và hành vi. Tập trung SVG trong `src/icons.tsx`, chỉ dùng weight Duotone; JS chính474998 byte, không còn cảnh báo chunk500KB của bản thử dùng mọi weight. Avatar/logo/minh họa và dữ liệu giữ nguyên.
+
+QA mới: TypeScript/Vite build `.local/duotone-icons-final-build` đạt; **48/48 E2E desktop/mobile đạt** trên server/SQLite riêng, gồm4 ca icon mới cùng hồi quy UI, account, menu/tab, heading, sidebar note, cấp cây và vườn lớp. Icon menu vừa khung tại320/390/768/1440px. Frontend local5173/HMR phục vụ module mới200; kiểm tra trang login bằng Chromium không có lỗi JS/request. Chỉ frontend, không ghi thử Railway, chưa push/deploy. Xem đầu [app-design.md](app-design.md) và [session-handoff.md](session-handoff.md).
+
+## Hiện hành: UI/UX gọn hơn và thao tác học tập trực tiếp — 13/10/2026
+
+Theo yêu cầu dùng `redesign-existing-projects` + `web-design-guidelines`, thêm lớp polish cho thẻ/hero/thống kê/thao tác nhanh/bảng/search/focus và responsive, giữ nhận diện khu vườn/Be Vietnam Pro/màu nghiệp vụ. Kế thừa menu **5 mục mỗi vai trò giáo viên/học sinh** và tab Quản lý lớp học trong mã nền `2ab909f`; các mô tả menu 6/7/9 mục/cài đặt ở trang ôn cũ bên dưới không thay cấu trúc này.
+
+Mục tiêu học tập mở đúng chương có câu; chưa có câu/chương có trạng thái rỗng. Badge sửa sai khôi phục ở menu Luyện tập/tab Sổ tay. Roster tìm tiếng Việt không dấu, xóa lọc và đếm kết quả. Thống kê giáo viên phân biệt tải/lỗi với số 0 và thử lại được. Skip link ba vai trò giữ URL, modal giữ focus với link/controls và reduced-motion. Không thay API, dữ liệu, điểm hoặc quy tắc thi.
+
+TypeScript/build riêng đạt, **34/34 E2E hồi quy mới đạt** trên server/SQLite riêng; sau sửa icon mobile cuối, TypeScript/build và **10/10 E2E app-polish đạt**, có kiểm tra khoảng cách icon/chữ320/768/1440px. Chi tiết từng lượt tại đầu session-handoff. Local5173/HMR đã phục vụ CSS mới200; API/DB Railway không ghi thử, chưa push/deploy. Thiết kế cập nhật ở đầu [app-design.md](app-design.md).
+
 ## Hiện hành: nút hoạt động khác màu nút vô hiệu hóa — 13/10/2026
 
 Nút phụ dùng xanh lá nhạt thay màu xám trình duyệt, nút mở kiểm tra xanh đậm, nút khóa/đóng thi nâu đỏ và nút xóa/bỏ câu nâu đỏ theo mức nhấn. Chỉ nút không bấm được dùng xám nhạt nhất quán ở mọi trang. Build và 4/4 E2E học/thi đạt trên DB thử riêng; chưa push. Xem phần đầu `docs/session-handoff.md`.

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { Check, RotateCcw, Upload } from "lucide-react";
+import { Check, RotateCcw, Upload } from "./icons";
 import {
   AVATARS,
   AVATAR_COLLECTIONS,

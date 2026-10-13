@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clock3, Download } from "lucide-react";
+import { Clock3, Download } from "./icons";
 import type { ExamDefinition, LearningOverview } from "../shared/learning";
 import { api, errorMessage } from "./api";
 

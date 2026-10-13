@@ -103,6 +103,8 @@ test("teacher starts a multi-lesson online exam; students get a persistent prepa
     await expect(notice).toContainText("Bắt đầu sau");
     const popup = student.getByRole("dialog", { name: "Có kiểm tra online từ giáo viên" });
     await expect(popup).toBeVisible();
+    await expect(student.locator(".exam-notices .modal-backdrop")).toHaveCSS("background-color", "rgba(27, 54, 43, 0.4)");
+    await student.screenshot({ path: `.local/online-popup-${info.project.name}.png` });
     await student.keyboard.press("Escape");
     await expect(popup).toBeVisible();
     await expect(

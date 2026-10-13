@@ -208,7 +208,10 @@ for (const role of ["teacher", "student", "admin"] as const) {
       await expect(
         page
           .getByRole("navigation")
-          .getByRole("button", { name: "Khu vườn của lớp", exact: true }),
+          .getByRole("button", {
+            name: role === "teacher" ? "Lớp học của tôi" : "Khu vườn của lớp",
+            exact: true,
+          }),
       ).toHaveAttribute("aria-current", "page");
       await expect(
         page.getByRole("heading", { name: "Những người chăm vườn" }),

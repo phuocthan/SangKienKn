@@ -1,34 +1,54 @@
-import { ArrowRight, Flower2, Target } from "lucide-react";
+import { ArrowRight, Flower2, Target } from "./icons";
 import { studentLevel, STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { duration } from "./api";
 import { StudentLevelIcon } from "./StudentLevel";
-import type { Classroom } from "./types";
+import type { Chapter, Classroom } from "./types";
 
 export function GardenGoal({
   classroom,
   onPractice,
 }: {
   classroom: Classroom;
-  onPractice: () => void;
+  onPractice: (chapter: Chapter) => void;
 }) {
-  const chapter = [...classroom.chapters].sort((a, b) => {
-    const left = studentLevel(a.seconds, a.levelMinutes),
-      right = studentLevel(b.seconds, b.levelMinutes);
-    return (
-      Number(left.level === 5) - Number(right.level === 5) ||
-      left.remainingSeconds - right.remainingSeconds
-    );
-  })[0];
+  const chapter = classroom.chapters
+    .filter((item) => item.questionCount > 0)
+    .sort((a, b) => {
+      const left = studentLevel(a.seconds, a.levelMinutes),
+        right = studentLevel(b.seconds, b.levelMinutes);
+      return (
+        Number(left.level === 5) - Number(right.level === 5) ||
+        left.remainingSeconds - right.remainingSeconds
+      );
+    })[0];
   const seconds = chapter?.seconds ?? 0;
   const stage = studentLevel(seconds, chapter?.levelMinutes);
   const flowers = classroom.chapters.filter(
     (chapter) => chapter.level === 5,
   ).length;
+  if (!chapter) {
+    return (
+      <section
+        className="card garden-goal garden-goal-empty"
+        aria-label="Mục tiêu học tập kế tiếp"
+      >
+        <span className="goal-symbol">
+          <Target size={24} aria-hidden="true" />
+        </span>
+        <h2>Những hạt mầm đang được chuẩn bị</h2>
+        <p>
+          {classroom.chapters.length
+            ? "Giáo viên đang chuẩn bị câu hỏi. Khi có bài luyện tập, mục tiêu tiếp theo sẽ xuất hiện ở đây."
+            : "Giáo viên sẽ thêm chương và câu hỏi để bạn bắt đầu hành trình."}
+        </p>
+      </section>
+    );
+  }
   return (
     <section className="card garden-goal" aria-label="Mục tiêu học tập kế tiếp">
       <div className="garden-goal-heading">
         <span className="goal-symbol">
-          <Target size={24} />
+          <Target size={24} aria-hidden="true" />
         </span>
         <span className="eyebrow">TỪNG CHÚT MỖI NGÀY</span>
       </div>
@@ -64,11 +84,11 @@ export function GardenGoal({
         {duration(seconds)} đã học · {chapter?.title ?? "Chưa có chương học"}
       </small>
       <div className="garden-goal-flowers">
-        <Flower2 size={17} /> {flowers}/{classroom.chapters.length} cây đã Kết
-        Trái
+        <Flower2 size={17} aria-hidden="true" /> {flowers}/
+        {classroom.chapters.length} cây đã Kết Trái
       </div>
-      <button className="text-button" onClick={onPractice} disabled={!chapter}>
-        Bắt đầu một bước nhỏ <ArrowRight size={17} />
+      <button className="text-button" onClick={() => onPractice(chapter)}>
+        Luyện tập chương này <ArrowRight size={17} aria-hidden="true" />
       </button>
     </section>
   );

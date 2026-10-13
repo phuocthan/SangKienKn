@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageSquare, RefreshCw } from "lucide-react";
+import { MessageSquare, RefreshCw } from "./icons";
 import { api, errorMessage } from "./api";
 import { Modal } from "./components";
 import { MessageComposer, conversationDate } from "./Conversation";

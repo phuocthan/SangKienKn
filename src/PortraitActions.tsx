@@ -1,4 +1,4 @@
-import { LogOut, MessageSquare, Settings } from "lucide-react";
+import { LogOut, MessageSquare, UserCircle } from "./icons";
 
 export function PortraitActions({
   page,
@@ -39,7 +39,7 @@ export function PortraitActions({
         aria-current={page === "settings" ? "page" : undefined}
         onClick={onAccount}
       >
-        <Settings size={20} aria-hidden="true" />
+        <UserCircle size={20} aria-hidden="true" />
       </button>
       <button
         type="button"

@@ -12,7 +12,7 @@ import {
   RotateCcw,
   Sparkles,
   X,
-} from "lucide-react";
+} from "./icons";
 import { api, errorMessage } from "./api";
 import { Empty } from "./components";
 import type { Chapter, Question, Result } from "./types";

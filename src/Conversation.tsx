@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from "react";
-import { Send } from "lucide-react";
+import { Send } from "./icons";
 import { errorMessage } from "./api";
 import "./conversation.css";
 

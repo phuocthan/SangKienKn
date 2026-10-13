@@ -9,6 +9,12 @@ import {
 import {
   ArrowRight,
   BookOpen,
+  Books,
+  ClassroomIcon,
+  GraduationCap,
+  Notebook,
+  TreeIcon,
+  UserCircle,
   CheckCircle2,
   ChevronDown,
   Clock3,
@@ -27,7 +33,7 @@ import {
   TrendingUp,
   Users,
   X,
-} from "lucide-react";
+} from "./icons";
 import {
   api,
   ApiError,
@@ -42,6 +48,7 @@ import {
   Logo,
   Modal,
   SectionTitle,
+  SkipLink,
 } from "./components";
 import { Practice } from "./Practice";
 import { Lessons } from "./Lessons";
@@ -62,6 +69,7 @@ import {
 } from "./StudentLevel";
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { GardenGoal } from "./GardenGoal";
+import { searchText } from "./search";
 import { GardenNote } from "./GardenNote";
 import type { LearningOverview } from "../shared/learning";
 import { ClassLevelSettings } from "./ClassLevelSettings";
@@ -180,7 +188,9 @@ export default function App() {
           );
         if (signedIn.role === "student") {
           setPage((restored) =>
-            restored === "classes" || restored === "class-settings" || restored === "progress"
+            restored === "classes" ||
+            restored === "class-settings" ||
+            restored === "progress"
               ? "home"
               : restored,
           );
@@ -217,7 +227,9 @@ export default function App() {
       setError(errorMessage(e));
     }
   }, [user]);
-  const [classLearning, setClassLearning] = useState<LearningOverview | null>(null);
+  const [classLearning, setClassLearning] = useState<LearningOverview | null>(
+    null,
+  );
   const [classLearningError, setClassLearningError] = useState("");
   const [classLearningBusy, setClassLearningBusy] = useState(false);
   useEffect(() => {
@@ -237,13 +249,19 @@ export default function App() {
       active = false;
     };
   }, [isTeacher, current?.id, page, revision]);
-  async function updateClassLearning(path: string, body: object, message: string) {
+  async function updateClassLearning(
+    path: string,
+    body: object,
+    message: string,
+  ) {
     if (!current || classLearningBusy) return;
     setClassLearningBusy(true);
     setClassLearningError("");
     try {
       await api(path, body);
-      setClassLearning(await api<LearningOverview>(`/classrooms/${current.id}/learning`));
+      setClassLearning(
+        await api<LearningOverview>(`/classrooms/${current.id}/learning`),
+      );
       await reload();
       setNotice(message);
     } catch (error) {
@@ -445,9 +463,9 @@ export default function App() {
   const nav: NavigationItem<Page>[] = isTeacher
     ? [
         { id: "home", label: "Tổng quan", icon: LayoutDashboard },
-        { id: "classes", label: "Lớp học của tôi", icon: Users },
-        { id: "questions", label: "Ngân hàng câu hỏi", icon: BookOpen },
-        { id: "learning", label: "Ôn tập & kiểm tra", icon: Clock3 },
+        { id: "classes", label: "Lớp học của tôi", icon: ClassroomIcon },
+        { id: "questions", label: "Ngân hàng câu hỏi", icon: Books },
+        { id: "learning", label: "Ôn tập & kiểm tra", icon: GraduationCap },
         {
           id: "online-exams",
           label: "Quản lý kiểm tra online",
@@ -457,9 +475,9 @@ export default function App() {
     : [
         { id: "home", label: "Khu vườn của tôi", icon: Sprout },
         { id: "practice", label: "Luyện tập", icon: BookOpen },
-        { id: "learning", label: "Ôn tập & kiểm tra", icon: Clock3 },
+        { id: "learning", label: "Ôn tập & kiểm tra", icon: GraduationCap },
         { id: "online-exams", label: "Kiểm tra online", icon: ClipboardList },
-        { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
+        { id: "garden", label: "Khu vườn của lớp", icon: TreeIcon },
       ];
   const parentPage: Page =
     page === "leaderboard"
@@ -474,9 +492,9 @@ export default function App() {
           ? "practice"
           : !isTeacher && page === "groups"
             ? "garden"
-        : !isTeacher && page === "progress"
-          ? "home"
-          : page;
+            : !isTeacher && page === "progress"
+              ? "home"
+              : page;
   const tabGroups: {
     parent: Page;
     label: string;
@@ -487,9 +505,9 @@ export default function App() {
           parent: "classes",
           label: "Lớp học của tôi",
           items: [
-            { id: "classes", label: "Lớp học của tôi", icon: Users },
+            { id: "classes", label: "Lớp học của tôi", icon: ClassroomIcon },
             { id: "groups", label: "Hoạt động nhóm", icon: Users },
-            { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
+            { id: "garden", label: "Khu vườn của lớp", icon: TreeIcon },
             { id: "class-settings", label: "Quản lý lớp học", icon: Settings },
           ],
         },
@@ -500,14 +518,23 @@ export default function App() {
           label: "Luyện tập",
           items: [
             { id: "practice", label: "Luyện tập", icon: BookOpen },
-            { id: "corrections", label: "Sổ tay sửa sai", icon: CheckCircle2 },
+            {
+              id: "corrections",
+              label: "Sổ tay sửa sai",
+              icon: Notebook,
+              count:
+                current?.chapters.reduce(
+                  (sum, chapter) => sum + chapter.openCorrections,
+                  0,
+                ) ?? 0,
+            },
           ],
         },
         {
           parent: "garden",
           label: "Khu vườn của lớp",
           items: [
-            { id: "garden", label: "Khu vườn của lớp", icon: Flower2 },
+            { id: "garden", label: "Khu vườn của lớp", icon: TreeIcon },
             { id: "groups", label: "Hoạt động nhóm", icon: Users },
           ],
         },
@@ -525,6 +552,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <SkipLink target="workspace-content" />
       <aside className="sidebar">
         <Logo school />
         <div className="workspace-label">
@@ -532,7 +560,7 @@ export default function App() {
         </div>
         <SidebarNavigation
           items={nav.map((item) =>
-            item.id === "corrections"
+            !isTeacher && item.id === "practice"
               ? { ...item, count: openCorrections }
               : item,
           )}
@@ -555,7 +583,7 @@ export default function App() {
             aria-current={page === "settings" ? "page" : undefined}
             onClick={() => navigate("settings")}
           >
-            <Settings size={19} />
+            <UserCircle size={19} />
             Tài khoản
           </button>
           <button className="nav-item" onClick={() => void logout()}>
@@ -578,7 +606,7 @@ export default function App() {
           <div className="topbar-right">
             {current && (
               <label className="class-switch">
-                <Users size={16} />
+                <ClassroomIcon size={16} />
                 <select
                   aria-label="Chọn lớp học"
                   value={current.id}
@@ -771,6 +799,7 @@ export default function App() {
               {page === "home" &&
                 (isTeacher ? (
                   <TeacherHome
+                    key={current.id}
                     classroom={current}
                     revision={revision}
                     onPage={navigate}
@@ -810,7 +839,11 @@ export default function App() {
                                 document
                                   .getElementById("student-journey")
                                   ?.scrollIntoView({
-                                    behavior: "smooth",
+                                    behavior: window.matchMedia(
+                                      "(prefers-reduced-motion: reduce)",
+                                    ).matches
+                                      ? "auto"
+                                      : "smooth",
                                     block: "start",
                                   })
                               }
@@ -823,7 +856,9 @@ export default function App() {
                       </div>
                       <GardenGoal
                         classroom={current}
-                        onPractice={() => navigate("practice")}
+                        onPractice={(chapter) =>
+                          setStudy({ chapter, mode: "practice" })
+                        }
                       />
                     </div>
                     <StudentStats
@@ -840,6 +875,12 @@ export default function App() {
                         description={`Mỗi ${current.levelMinutes ?? 60} phút học có hoạt động trong chương tăng một cấp, tối đa cấp 5.`}
                       />
                       <div className="card progress-table">
+                        {!current.chapters.length && (
+                          <Empty
+                            title="Hành trình đang chờ những hạt mầm"
+                            text="Các mốc tăng cấp sẽ xuất hiện khi giáo viên thêm chương học."
+                          />
+                        )}
                         {current.chapters.map((ch) => (
                           <article className="chapter-level-card" key={ch.id}>
                             <h3>{ch.title}</h3>
@@ -922,58 +963,76 @@ export default function App() {
                     }
                   />
                   {classLearningError && (
-                    <div className="error-banner" role="alert">{classLearningError}</div>
+                    <div className="error-banner" role="alert">
+                      {classLearningError}
+                    </div>
                   )}
                   <div className="chapter-list">
                     {current.chapters.length ? (
                       current.chapters.map((ch, i) => {
-                        const access = classLearning?.chapters.find((row) => row.id === ch.id);
+                        const access = classLearning?.chapters.find(
+                          (row) => row.id === ch.id,
+                        );
                         return (
-                        <div className="card chapter-row" key={ch.id}>
-                          <span className="chapter-index">
-                            {String(i + 1).padStart(2, "0")}
-                          </span>
-                          <div className="chapter-row-main">
-                            <div className="chapter-row-copy">
-                              <h3>{ch.title}</h3>
-                              <p>
-                                {ch.lessons.length} bài · {ch.questionCount} câu
-                                hỏi
-                              </p>
+                          <div className="card chapter-row" key={ch.id}>
+                            <span className="chapter-index">
+                              {String(i + 1).padStart(2, "0")}
+                            </span>
+                            <div className="chapter-row-main">
+                              <div className="chapter-row-copy">
+                                <h3>{ch.title}</h3>
+                                <p>
+                                  {ch.lessons.length} bài · {ch.questionCount}{" "}
+                                  câu hỏi
+                                </p>
+                              </div>
+                              <Lessons
+                                chapter={ch}
+                                onChange={async () => {
+                                  await reload();
+                                  setRevision((value) => value + 1);
+                                }}
+                              />
                             </div>
-                            <Lessons
-                              chapter={ch}
-                              onChange={async () => {
-                                await reload();
-                                setRevision((value) => value + 1);
+                            <LinkButton
+                              onClick={() => {
+                                setQuestionChapter(ch.id);
+                                navigate("questions");
                               }}
-                            />
-                          </div>
-                          <LinkButton
-                            onClick={() => {
-                              setQuestionChapter(ch.id);
-                              navigate("questions");
-                            }}
-                          >
-                            Quản lý câu hỏi
-                          </LinkButton>
-                          <div className="class-chapter-access">
-                            <span>{access?.examAllowed ? "Kiểm tra đang mở" : "Kiểm tra đang khóa"}</span>
-                            <button
-                              className={`button ${access?.examAllowed ? "danger" : "primary"} small`}
-                              disabled={classLearningBusy || typeof access?.examAllowed !== "boolean"}
-                              aria-label={`${access?.examAllowed ? "Khóa" : "Mở"} kiểm tra · ${ch.title}`}
-                              onClick={() => void updateClassLearning(
-                                `/chapters/${ch.id}/exam-access`,
-                                { enabled: !access?.examAllowed },
-                                access?.examAllowed ? "Đã khóa kiểm tra chương." : "Đã mở kiểm tra chương.",
-                              )}
                             >
-                              {access?.examAllowed ? "Khóa kiểm tra" : "Mở kiểm tra"}
-                            </button>
+                              Quản lý câu hỏi
+                            </LinkButton>
+                            <div className="class-chapter-access">
+                              <span>
+                                {access?.examAllowed
+                                  ? "Kiểm tra đang mở"
+                                  : "Kiểm tra đang khóa"}
+                              </span>
+                              <button
+                                className={`button ${access?.examAllowed ? "danger" : "primary"} small`}
+                                disabled={
+                                  classLearningBusy ||
+                                  typeof access?.examAllowed !== "boolean"
+                                }
+                                aria-label={`${access?.examAllowed ? "Khóa" : "Mở"} kiểm tra · ${ch.title}`}
+                                onClick={() =>
+                                  void updateClassLearning(
+                                    `/chapters/${ch.id}/exam-access`,
+                                    { enabled: !access?.examAllowed },
+                                    access?.examAllowed
+                                      ? "Đã khóa kiểm tra chương."
+                                      : "Đã mở kiểm tra chương.",
+                                  )
+                                }
+                              >
+                                {access?.examAllowed
+                                  ? "Khóa kiểm tra"
+                                  : "Mở kiểm tra"}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      );})
+                        );
+                      })
                     ) : (
                       <Empty
                         title="Thêm chương học đầu tiên"
@@ -997,7 +1056,9 @@ export default function App() {
                     text={`Điều chỉnh nhịp tăng cấp cho ${current.name}.`}
                   />
                   {classLearningError && (
-                    <div className="error-banner" role="alert">{classLearningError}</div>
+                    <div className="error-banner" role="alert">
+                      {classLearningError}
+                    </div>
                   )}
                   {classLearning ? (
                     <ClassLevelSettings
@@ -1005,11 +1066,13 @@ export default function App() {
                       minutes={classLearning.levelMinutes ?? 60}
                       enabled={classLearning.canConfigureLevels === true}
                       busy={classLearningBusy}
-                      onSave={(minutes) => updateClassLearning(
-                        `/classrooms/${current.id}/level-settings`,
-                        { minutes },
-                        "Đã lưu thời gian tăng cấp cho lớp.",
-                      )}
+                      onSave={(minutes) =>
+                        updateClassLearning(
+                          `/classrooms/${current.id}/level-settings`,
+                          { minutes },
+                          "Đã lưu thời gian tăng cấp cho lớp.",
+                        )
+                      }
                     />
                   ) : !classLearningError ? (
                     <div className="loading-panel">Đang tải cài đặt lớp…</div>
@@ -1484,7 +1547,7 @@ function StudentStats({
         color="blue"
       />
       <Stat
-        icon={<BookOpen size={21} />}
+        icon={<Notebook size={21} />}
         label="Câu cần sửa sai"
         value={String(open)}
         note="Mỗi lỗi sai là một cơ hội"
@@ -1658,10 +1721,13 @@ function TeacherHome({
   onEditor: (e: Editor) => void;
 }) {
   const [students, setStudents] = useState<Student[]>([]),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [loading, setLoading] = useState(true),
+    [retry, setRetry] = useState(0);
   useEffect(() => {
     let alive = true;
     setError("");
+    setLoading(true);
     setStudents([]);
     api<Student[]>(`/classrooms/${classroom.id}/students`)
       .then((s) => {
@@ -1669,15 +1735,18 @@ function TeacherHome({
       })
       .catch((e) => {
         if (alive) setError(errorMessage(e));
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
       });
     return () => {
       alive = false;
     };
-  }, [classroom.id, revision]);
+  }, [classroom.id, revision, retry]);
   const total = students.reduce((n, s) => n + s.total, 0),
     correct = students.reduce((n, s) => n + s.correct, 0);
   return (
-    <>
+    <div className="teacher-home">
       <PageHeading
         eyebrow="CÙNG HỌC SINH GIEO NHỮNG MẦM XANH"
         title="Một lớp học, nhiều cơ hội lớn lên."
@@ -1710,9 +1779,16 @@ function TeacherHome({
       {error && (
         <div className="error-banner" role="alert">
           {error}
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => setRetry((value) => value + 1)}
+          >
+            Thử lại thống kê
+          </button>
         </div>
       )}
-      <div className="stats-grid">
+      <div className="stats-grid" aria-busy={loading} aria-live="polite">
         <Stat
           icon={<Users size={21} />}
           label="Học sinh"
@@ -1731,15 +1807,35 @@ function TeacherHome({
         <Stat
           icon={<CheckCircle2 size={21} />}
           label="Tỷ lệ đúng của lớp"
-          value={total ? `${Math.round((correct / total) * 100)}%` : "—"}
-          note={`${total} lượt luyện tập`}
+          value={
+            !loading && !error && total
+              ? `${Math.round((correct / total) * 100)}%`
+              : "—"
+          }
+          note={
+            loading
+              ? "Đang tải thống kê…"
+              : error
+                ? "Chưa tải được thống kê"
+                : `${total} lượt luyện tập`
+          }
           color="amber"
         />
         <Stat
           icon={<Flower2 size={21} />}
           label="Cây đã ra hoa"
-          value={String(students.reduce((n, s) => n + s.trees, 0))}
-          note="Nỗ lực chung của cả lớp"
+          value={
+            loading || error
+              ? "—"
+              : String(students.reduce((n, s) => n + s.trees, 0))
+          }
+          note={
+            loading
+              ? "Đang tải thống kê…"
+              : error
+                ? "Chưa tải được thống kê"
+                : "Nỗ lực chung của cả lớp"
+          }
           color="rose"
         />
       </div>
@@ -1773,7 +1869,7 @@ function TeacherHome({
           <ArrowRight size={18} />
         </button>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -1968,10 +2064,9 @@ function Roster({
       setExporting(false);
     }
   }
+  const query = searchText(search);
   const filtered = rows.filter((s) =>
-    `${s.name} ${s.email}`
-      .toLocaleLowerCase("vi")
-      .includes(search.toLocaleLowerCase("vi")),
+    searchText(`${s.name} ${s.email}`).includes(query),
   );
   return (
     <>
@@ -1996,15 +2091,34 @@ function Roster({
         }
       />
       <div className="card roster-card">
-        <label className="search-input">
-          <Search size={18} />
-          <input
-            aria-label="Tìm học sinh"
-            placeholder="Tìm theo tên hoặc email…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </label>
+        <div className="roster-search-toolbar">
+          <label className="search-input">
+            <Search size={18} aria-hidden="true" />
+            <input
+              type="search"
+              name="student-search"
+              autoComplete="off"
+              aria-label="Tìm học sinh"
+              placeholder="Tìm theo tên hoặc email…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
+          {search && (
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => setSearch("")}
+            >
+              Xóa tìm kiếm
+            </button>
+          )}
+          {!loading && !error && (
+            <span className="search-result-count" role="status">
+              {filtered.length}/{rows.length} học sinh
+            </span>
+          )}
+        </div>
         {error ? (
           <div className="error-banner" role="alert">
             {error}

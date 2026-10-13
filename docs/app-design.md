@@ -1,5 +1,23 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: GreenEdu Duotone đã áp dụng — 13/10/2026
+
+Người dùng duyệt preview `.local/greenedu-icons-preview.html` và yêu cầu áp dụng. Toàn bộ icon UI trong app chuyển từ Lucide sang **Phosphor Duotone**, dùng màu chữ hiện tại và lớp nền 20% để hợp palette khu vườn, nền sáng và menu xanh đậm. `src/icons.tsx` là nguồn chung, chỉ nhúng SVG Duotone đã duyệt với giấy phép MIT; dùng IconBase từ `@phosphor-icons/react` 2.1.10, không đưa các weight khác vào bundle. Lucide còn phục vụ bản `design-preview` độc lập; không còn import Lucide trong `src`.
+
+Ẩn icon trang trí khỏi trình đọc màn hình; nút/tab giữ nhãn, kích thước và thao tác cũ. Icon theo chức năng: Tổng quan SquaresFour; lớp ChalkboardTeacher; ngân hàng Books; ôn tập GraduationCap; online ClipboardText; vườn cá nhân Plant; vườn lớp Tree; nhóm UsersThree; sổ tay Notebook; tài khoản UserCircle; quản lý lớp GearSix. Đồng hồ vẫn dùng cho thời gian, tránh trùng biểu tượng ôn tập.
+
+Năm cấp **Mầm → Chồi → Cây Non → Đơm Hoa → Kết Trái** dùng SVG riêng cùng phong cách: nét xanh rừng, nền màu nhẹ, hoa/quả nhấn màu ấm; bỏ gradient/nền tròn bên trong hình. Giữ nhãn cấp/chương, viewBox, kích thước24px trong roster và geometry roadmap/mốc hiện hành; vòng trạng thái trên timeline vẫn do component hiện có quản lý. Avatar, logo và minh họa khu rừng/sách giữ hệ minh họa riêng. Không đổi cách tính cấp, dữ liệu hay API. QA mới tại đầu session-handoff.
+
+## Hiện hành: cải thiện UI/UX bằng hai skill — 13/10/2026
+
+Theo yêu cầu mới, áp dụng `redesign-existing-projects` để rà soát/cải thiện trên React/CSS hiện có và `web-design-guidelines` để kiểm tra thao tác, bàn phím, trạng thái và responsive. Giữ Be Vietnam Pro, nhận diện trường, minh họa cây từ sách, cây cấp theo chương và palette đúng/sai/cảnh báo. Mã nền là `2ab909f`, đã có menu chính 5 mục mỗi vai trò giáo viên/học sinh; tab Quản lý lớp học và cách gom nhóm mới được giữ, không khôi phục menu 6/7/9 mục trong các ghi chú cũ.
+
+`src/app-polish.css` nạp sau mobile-density: thẻ nội dung thường nền trắng ấm, viền xanh nhẹ và bóng mềm thay gradient phủ mọi panel; frame vườn/vinh danh/câu hỏi/phòng thi đặc thù giữ riêng. Hero trang chính dùng grid chữ/hình, nền xanh dịu; trên điện thoại hình gọn dưới chữ. Thống kê học sinh desktop gồm hai ô trên và ô sửa sai toàn hàng, lời nhắc vẫn nằm trong cùng ô sửa sai; mobile một cột. Thao tác nhanh giáo viên dạng hàng icon/chữ/mũi tên, xuống một cột trên màn hẹp. Heading cân dòng, số liệu tabular, bảng có header nhẹ/hover, tìm kiếm có focus rõ; không thay thang chữ chung hoặc nội dung học tập.
+
+Mục tiêu học tập chỉ chọn chương có câu hỏi, ưu tiên chưa Kết Trái và gần mốc tiếp theo; **Luyện tập chương này** mở đúng chương đó. Không có câu/chương thì thông báo đang chuẩn bị, không vẽ tiến độ hoặc mục tiêu thời gian giả. Hành trình rỗng có lời hướng dẫn. Thống kê giáo viên dùng dấu — khi tải/lỗi, có Thử lại thống kê; số 0 chỉ xuất hiện sau đọc dữ liệu thành công.
+
+Menu Luyện tập có badge tổng câu cần sửa, tab Sổ tay sửa sai có badge trong lớp hiện tại. Roster tìm tên/email không phân biệt dấu tiếng Việt, đ/d, hoa/thường, khoảng trắng dư; có số kết quả và Xóa tìm kiếm. Bổ sung link Đến nội dung chính cho ba vai trò, chuyển focus mà không đổi hash trang; modal giữ Tab/Shift+Tab cả với link tải/help, bỏ qua control disabled/inert, trả focus khi đóng. Cuộn Xem hành trình tôn trọng reduced-motion. Không thêm nghiệp vụ điểm/AI hoặc sửa API/database. QA mới và trạng thái local xem đầu session-handoff.
+
 ## Hiện hành: trạng thái màu của nút — 13/10/2026
 
 Nút chính đang hoạt động xanh đậm; nút phụ đang hoạt động xanh lá nhạt có viền xanh. Khóa kiểm tra/đóng bài thi và xác nhận xóa dùng nâu đỏ đậm; nút mở thao tác xóa/bỏ câu dùng nền nâu đỏ rất nhạt. Nút disabled của tất cả các nhóm dùng chung nền xám nhạt, viền/chữ xám, không giữ màu hành động. Áp dụng bằng lớp `.button` chung trên các trang giáo viên/học sinh; kích thước và nhịp chữ không đổi.

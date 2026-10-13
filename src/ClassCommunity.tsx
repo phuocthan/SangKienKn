@@ -1,6 +1,6 @@
 import { WorkspaceHeading } from "./WorkspaceHeading";
 import { useEffect, useState } from "react";
-import { Clock3, Flower2, RefreshCw, Users } from "lucide-react";
+import { Clock3, Flower2, RefreshCw, Users } from "./icons";
 import { api, duration, errorMessage } from "./api";
 import { Empty, SectionTitle } from "./components";
 import { ChapterLevelIcons } from "./StudentLevel";

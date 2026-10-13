@@ -1,9 +1,9 @@
-import type { LucideIcon } from "lucide-react";
+import type { AppIcon } from "./icons";
 
 export type NavigationItem<T extends string> = {
   id: T;
   label: string;
-  icon: LucideIcon;
+  icon: AppIcon;
   count?: number;
 };
 

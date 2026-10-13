@@ -145,6 +145,11 @@ test("fenced garden includes everyone with moving icons and separate level-5 hon
     const ranking = page.locator(".community-ranking").first();
     await expect(ranking).toBeVisible();
     expect(await ranking.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+    const originalSize = page.viewportSize()!;
+    await page.setViewportSize({ width: 320, height: 700 });
+    expect(await ranking.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.setViewportSize(originalSize);
   }
   await page.screenshot({
     path: `.local/fenced-garden-${info.project.name}.png`,

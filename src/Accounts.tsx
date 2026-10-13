@@ -11,14 +11,14 @@ import {
   Plus,
   RefreshCw,
   Search,
-  Settings,
+  UserCircle,
   ShieldCheck,
   Users,
-} from "lucide-react";
+} from "./icons";
 import { api, errorMessage } from "./api";
 import { Avatar } from "./Avatars";
 import { PortraitActions } from "./PortraitActions";
-import { Empty, GardenIllustration, Logo, Modal } from "./components";
+import { Empty, GardenIllustration, Logo, Modal, SkipLink } from "./components";
 import type { User } from "./types";
 
 type Account = User & { classCount: number };
@@ -81,6 +81,7 @@ export function AdminWorkspace({
   );
   return (
     <div className="app-shell">
+      <SkipLink target="admin-content" />
       <aside className="sidebar">
         <Logo school />
         <div className="workspace-label">TRANG QUẢN TRỊ</div>
@@ -106,7 +107,7 @@ export function AdminWorkspace({
             aria-current={page === "settings" ? "page" : undefined}
             onClick={() => setPage("settings")}
           >
-            <Settings size={19} />
+            <UserCircle size={19} />
             Tài khoản
           </button>
           <button className="nav-item" onClick={() => void onLogout()}>
@@ -136,7 +137,7 @@ export function AdminWorkspace({
             </div>
           </div>
         </header>
-        <main className="main-content">
+        <main className="main-content" id="admin-content" tabIndex={-1}>
           {(sessionError || error) && (
             <div className="error-banner" role="alert">
               {sessionError || error}

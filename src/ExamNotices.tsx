@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { BellRing, Clock3 } from "lucide-react";
+import { BellRing, Clock3 } from "./icons";
 import type { ExamNotice } from "../shared/learning";
 import { api, ApiError, errorMessage } from "./api";
 import { Modal } from "./components";

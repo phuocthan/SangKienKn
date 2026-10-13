@@ -1,9 +1,26 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
-import { X, Leaf, Sprout, ArrowRight } from "lucide-react";
+import { X, Leaf, Sprout, ArrowRight } from "./icons";
+
+export function SkipLink({ target }: { target: string }) {
+  return (
+    <a
+      className="skip-link"
+      href={`#${target}`}
+      onClick={(event) => {
+        event.preventDefault();
+        const content = document.getElementById(target);
+        content?.focus({ preventScroll: true });
+        content?.scrollIntoView({ behavior: "auto", block: "start" });
+      }}
+    >
+      Đến nội dung chính
+    </a>
+  );
+}
 
 export function Logo({ school = false }: { school?: boolean }) {
   return (
-    <div className={`logo ${school ? "school-logo" : ""}`}>
+    <div className={`logo ${school ? "school-logo" : ""}`} translate="no">
       <span className={school ? "school-crest" : "logo-mark"}>
         {school ? (
           <img
@@ -176,19 +193,37 @@ export function Modal({
     const elements = () =>
       [
         ...(ref.current?.querySelectorAll<HTMLElement>(
-          'button, input, textarea, select, [tabindex="0"]',
+          'a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])',
         ) ?? []),
       ].filter(
-        (e) => !e.hasAttribute("disabled") && e.getClientRects().length > 0,
+        (e) =>
+          e.tabIndex >= 0 &&
+          !e.matches(":disabled") &&
+          !e.closest("[inert]") &&
+          e.getClientRects().length > 0,
       );
     const initial = elements();
-    (initial.find((e) => e.tagName !== "BUTTON") ?? initial[0])?.focus();
+    (
+      initial.find((e) => e.tagName !== "BUTTON") ??
+      initial[0] ??
+      ref.current
+    )?.focus();
     function key(event: KeyboardEvent) {
       if (event.key === "Escape" && dismissible) onCloseRef.current();
       if (event.key === "Tab") {
         const all = elements(),
           first = all[0],
           last = all.at(-1);
+        if (!first) {
+          event.preventDefault();
+          ref.current?.focus();
+          return;
+        }
+        if (!ref.current?.contains(document.activeElement)) {
+          event.preventDefault();
+          (event.shiftKey ? last : first)?.focus();
+          return;
+        }
         if (event.shiftKey && document.activeElement === first) {
           event.preventDefault();
           last?.focus();
@@ -218,12 +253,13 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
       >
         <div className="modal-head">
           <h2 id={titleId}>{title}</h2>
           {dismissible && (
             <button className="icon-button" aria-label="Đóng" onClick={onClose}>
-              <X size={20} />
+              <X size={20} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -245,7 +281,7 @@ export function Empty({
   return (
     <div className="empty">
       <span className="empty-icon">
-        <Leaf size={27} />
+        <Leaf size={27} aria-hidden="true" />
       </span>
       <h3>{title}</h3>
       <p>{text}</p>
