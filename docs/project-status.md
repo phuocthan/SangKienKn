@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Navbar mobile đủ tên và badge câu sai
+
+Đã áp dụng preview được duyệt: năm ô bằng nhau, mọi icon/tên luôn hiện, chọn mục chỉ đổi màu và không làm icon dịch chuyển. Nhãn dài xuống dòng, dock tăng chiều cao và đệm/submenu theo kích thước thật. Badge Luyện tập/Sổ tay đổi chữ trắng, nền đỏ tròn; giữ số câu và nghiệp vụ. Chỉ frontend, sẽ push remote theo yêu cầu; kết quả/bằng chứng tại [session-handoff.md](session-handoff.md), hình thức tại [app-design.md](app-design.md).
+
 ## Hiện hành: hoàn tất redesign với hai skill — 13/10/2026
 
 Đã cài/đọc `redesign-existing-projects` làm chính và `web-design-guidelines` kiểm tra; [nguồn/đường dẫn](design-skills.md). Hoàn tất yêu cầu gửi lại: submenu một hàng trên navbar đáy portrait/không che nội dung, header và thẻ có sắc vườn, bộ5 cấp mới/cây ra hoa có+, ôn/online hai vai trò, form tạo online mở bằng nút rồi lưu vào danh sách, metadata có icon/màu, căn controls, bỏ chữ phụ nhóm và thay rào vườn. Bỏ các nút refresh thừa sau khi có poll/focus/reconnect; giữ Thử lại và thao tác Lưu/Cập nhật mật khẩu thật.

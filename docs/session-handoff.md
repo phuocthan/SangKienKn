@@ -1,5 +1,15 @@
 # Bàn giao session GreenEdu
 
+## Navbar hiện đầy đủ tên, ổn định icon và badge câu sai đỏ — tiếp tục sau preview
+
+Người dùng gửi ảnh mobile navbar chỉ hiện tên mục active; đã xem ảnh và tạo preview5ô đều nhau/all labels bằng ImageGen, chưa sửa code ở bước preview. Sau khi duyệt, người dùng yêu cầu icon không đổi vị trí khi chuyển, badge số câu sai ở Luyện tập chữ trắng/nền tròn đỏ, rồi **push cả thay đổi navbar lên Git remote**.
+
+Checkout cloud đã pull fast-forward24commit lên8dc5aac trước preview, giữ redesign/upstream và năm menu/phụ trên dock. Theo AGENTS đã tải/đọc hai skill thiết kế từ nguồn được ghi trong docs/design-skills.md vì đường dẫn Windows không có trên cloud. Đợt này chỉ đổi src/portrait-navigation.css: giữ flex-grow1 cho cả active/inactive, tất cả tên đều hiện, vùng nhãn52px/font13, nút88px/dock112px + safe area; bỏ flex-grow animation/fade nhãn. Badge nav-count và workspace-tab-count tròn24px, trắng trên đỏ#c62828, giữ vị trí khi chọn. Không thay số câu, dữ liệu, quyền hay API; submenu/đệm dùng cơ chế ResizeObserver hiện có.
+
+Build/test riêng `.local/navbar-full-build`, không sửa dist/production. E2E portrait được cập nhật từ kỳ vọng ẩn tên inactive sang đầy đủ nhãn, kiểm tra tọa độ icon/độ rộng không đổi qua mọi mục. Badge fixture chỉ sửa phản hồi GET trong trình duyệt để kiểm tra103, không ghi tiến độ hoặc câu sai giả vào database. Đợt này sẽ commit/push origin/main theo yêu cầu; push không đồng nghĩa Railway đã deploy thành công.
+
+Kết quả mới: TypeScript/Vite build và diff check đạt; **8/8 portrait-navigation**, **4/4 parent-tabs**, **6/6 redesign** desktop/mobile đạt trên DB riêng. Lượt rộng đầu16/18 đạt, hai ca Admin dừng vì markup Admin không có span nav-label-text; sửa locator theo span nav-label sẵn có và chạy lại toàn bộ8ca portrait đạt. Mã CSS không đổi giữa các lượt. Kiểm tra đủ320/390/768/1024, mọi nhãn không bị cắt, tọa độ icon/độ rộng ô ổn định qua5mục, badge103 tròn/trắng–đỏ ở navbar và submenu, đệm focus/cuối trang/submenu, modal và landscape/desktop. Đã xem ảnh giáo viên và Luyện tập có badge tại390px. Chưa QA Safari/thiết bị thật hoặc xác minh deployment Railway.
+
 ## Hoàn tất redesign theo yêu cầu gửi lại — 13/10/2026
 
 Tiếp tục từ bản pull3bb7fcf, giữ tài liệu local về lần xóa Chủ đề1 và các chức năng upstream. Đã cài/đọc `redesign-existing-projects` chính và `web-design-guidelines` kiểm tra, theo nguồn skills.sh; thông tin máy/repo/path trong [design-skills.md](design-skills.md), AGENTS đã dẫn tới. Hai skill đã có, không tiếp tục hỏi người dùng đường dẫn hoặc dùng trạng thái “chưa tìm thấy” của đợt pull.

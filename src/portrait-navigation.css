@@ -3,10 +3,30 @@
   display: none;
 }
 
+.sidebar .nav-count,
+.workspace-tabs .workspace-tab-count {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #c62828;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  box-shadow: none;
+}
+
 @media (max-width: 1100px) and (orientation: portrait) {
   .app-shell {
     display: block;
-    --portrait-nav-height: 88px;
+    --portrait-nav-height: 112px;
   }
 
   .main-shell {
@@ -143,20 +163,20 @@
     align-self: center;
     flex-direction: column;
     justify-content: center;
-    gap: 2px;
-    height: 64px;
+    gap: 4px;
+    height: 88px;
     width: 0;
     min-width: 0;
     min-height: 0;
     padding: 3px 2px;
     border: 1px solid transparent;
     text-align: center;
-    font-size: clamp(10px, 2.7vw, 12px);
-    line-height: 1.12;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
     white-space: normal;
     color: #d8e6d6;
     transition:
-      flex-grow 220ms ease,
       background-color 220ms ease,
       border-color 220ms ease,
       color 220ms ease,
@@ -164,7 +184,8 @@
   }
 
   .sidebar nav .nav-item.active {
-    flex-grow: 2.3;
+    flex-grow: 1;
+    font-weight: 600;
     border-color: #dce9c8;
     border-radius: 13px;
     background: #edf4dd;
@@ -172,34 +193,21 @@
     box-shadow: 0 1px 6px #0c302518;
   }
 
-  .sidebar nav .nav-item:not(.active) .nav-label {
-    display: none;
-  }
-
   .sidebar nav .nav-label {
     display: flex;
-    flex: 0 0 34px;
+    flex: 0 0 52px;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 34px;
+    height: 52px;
     max-width: 100%;
-    animation: portrait-label-reveal 120ms ease-out 240ms both;
+    text-wrap: balance;
   }
 
   .sidebar nav .nav-label-text {
     min-width: 0;
     max-width: 100%;
     overflow-wrap: anywhere;
-  }
-
-  @keyframes portrait-label-reveal {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
   }
 
   .sidebar nav .nav-item:hover:not(.active) {
@@ -229,20 +237,10 @@
 
   .sidebar .nav-count {
     position: absolute;
-    top: 2px;
-    right: 4px;
-    padding: 1px 4px;
+    top: 0;
+    right: 2px;
+    padding: 0;
     margin: 0;
-  }
-
-  .sidebar nav .nav-item:not(.active) .nav-count {
-    top: auto;
-    right: 1px;
-    bottom: 1px;
-    min-width: 12px;
-    padding: 1px 2px;
-    font-size: 9px;
-    line-height: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {

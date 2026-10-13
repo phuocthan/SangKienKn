@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: navbar đủ tên, icon không dịch chuyển và badge đỏ
+
+Theo ảnh preview đã được người dùng duyệt, navbar portrait giữ **năm ô rộng bằng nhau**, luôn hiện cả icon và tên đầy đủ của mọi mục. Tên dài xuống dòng trong vùng chữ cao52px, font13px; ô cao88px và dock112px + safe area. Active chỉ đổi màu nền/viền/chữ, **không tăng chiều rộng, không dịch chuyển icon và không chạy hiệu ứng nới ô/fade nhãn**. Giữ màu rừng và active nền kem đã duyệt. Quyết định này thay navbar chỉ hiện tên mục active, flex-grow2.3 và vùng chữ34px trong lịch sử.
+
+Badge số câu cần sửa ở Luyện tập và Sổ tay sửa sai dùng **chữ trắng, nền đỏ #c62828, hình tròn24×24px**, không khung vuông vàng/nâu. Badge navbar giữ cùng vị trí ở góc trên phải của ô dù active hay inactive; không đổi giá trị/tính toán số câu. Submenu vẫn nằm ngay trên dock, khoảng đệm/focus theo chiều cao thật đã đo; header account/lớp/top-right icons giữ nguyên. Áp dụng CSS sẵn có, không đổi API/DB hoặc framework.
+
 ## Hiện hành: hoàn tất yêu cầu redesign, submenu trên dock — 13/10/2026
 
 Áp dụng `redesign-existing-projects` chính + `web-design-guidelines` kiểm tra; [nguồn và đường dẫn skill](design-skills.md). Giữ React/CSS, Be Vietnam Pro, năm mục menu, Phosphor Duotone cho icon chức năng và màu nút nghiệp vụ.

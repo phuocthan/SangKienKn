@@ -116,9 +116,19 @@ for (const role of ["teacher", "student", "admin"] as const) {
           navBox.x + navBox.width + 1,
         );
         const label = item.locator(".nav-label");
-        if (await item.getAttribute("aria-current"))
-          await expect(label).toBeVisible();
-        else await expect(label).toBeHidden();
+        await expect(label).toBeVisible();
+        const nestedText = item.locator(".nav-label-text");
+        const text = (await nestedText.count()) ? nestedText : label;
+        expect(await text.textContent()).toBe(
+          (await item.getAttribute("aria-label")) ?? "Quản lý tài khoản",
+        );
+        expect(
+          await text.evaluate(
+            (node) =>
+              node.scrollHeight <= node.clientHeight &&
+              node.scrollWidth <= node.clientWidth,
+          ),
+        ).toBe(true);
       }
       const activeItem = nav.locator('button.nav-item[aria-current="page"]');
       const inactiveItem = nav.locator("button.nav-item:not(.active)").first();
@@ -132,15 +142,12 @@ for (const role of ["teacher", "student", "admin"] as const) {
           })
           .toBeLessThan(1);
         expect((await activeItem.boundingBox())!.height).toBeLessThanOrEqual(
-          64,
+          88,
         );
       }
       if (viewport.width === 320 && role !== "admin") {
         const longest = nav.getByRole("button", {
-          name:
-            role === "teacher"
-              ? "Kiểm tra online"
-              : "Ôn tập & kiểm tra",
+          name: role === "teacher" ? "Kiểm tra online" : "Ôn tập & kiểm tra",
           exact: true,
         });
         await longest.click();
@@ -170,10 +177,44 @@ for (const role of ["teacher", "student", "admin"] as const) {
       ).toBe(true);
       if (viewport.width === 390) {
         if ((await destinations.count()) > 1) {
-          const lastDestination = destinations.last();
-          await lastDestination.click();
-          await expect(lastDestination.locator(".nav-label")).toBeVisible();
-          await expect(destinations.first().locator(".nav-label")).toBeHidden();
+          const originalIcons = await destinations.evaluateAll((items) =>
+            items.map((item) => {
+              const box = item.querySelector("svg")!.getBoundingClientRect();
+              return {
+                x: box.x,
+                y: box.y,
+                width: item.getBoundingClientRect().width,
+              };
+            }),
+          );
+          for (const destination of await destinations.all()) {
+            await destination.click();
+            await expect(destination).toHaveAttribute("aria-current", "page");
+            await expect
+              .poll(async () =>
+                destinations.evaluateAll(
+                  (items, originals) =>
+                    items.every((item, index) => {
+                      const box = item
+                        .querySelector("svg")!
+                        .getBoundingClientRect();
+                      return (
+                        Math.abs(box.x - originals[index].x) < 1 &&
+                        Math.abs(box.y - originals[index].y) < 1 &&
+                        Math.abs(
+                          item.getBoundingClientRect().width -
+                            originals[index].width,
+                        ) < 1
+                      );
+                    }),
+                  originalIcons,
+                ),
+              )
+              .toBe(true);
+          }
+          await expect(
+            destinations.first().locator(".nav-label"),
+          ).toBeVisible();
         }
         await page.evaluate(() => window.scrollTo(0, 0));
         await page.screenshot({
@@ -206,12 +247,10 @@ for (const role of ["teacher", "student", "admin"] as const) {
     if (role !== "admin") {
       await navigateTo(page, { name: "Xếp hạng chăm chỉ" });
       await expect(
-        page
-          .getByRole("navigation")
-          .getByRole("button", {
-            name: role === "teacher" ? "Lớp học của tôi" : "Khu vườn của lớp",
-            exact: true,
-          }),
+        page.getByRole("navigation").getByRole("button", {
+          name: role === "teacher" ? "Lớp học của tôi" : "Khu vườn của lớp",
+          exact: true,
+        }),
       ).toHaveAttribute("aria-current", "page");
       await expect(
         page.getByRole("heading", { name: "Những người chăm vườn" }),
@@ -272,3 +311,60 @@ for (const role of ["teacher", "student", "admin"] as const) {
     expect(errors).toEqual([]);
   });
 }
+
+test("student wrong-answer badges are white on red circles and stay in place when practice is selected", async ({
+  page,
+}, info) => {
+  const login = await page.request.post("/api/auth/login", {
+    data: accounts.student,
+  });
+  expect(login.ok()).toBeTruthy();
+  // Only the GET presentation fixture is changed; no study progress/database writes.
+  await page.route("**/api/classrooms", async (route) => {
+    const response = await route.fetch();
+    const classrooms = await response.json();
+    classrooms[0].chapters[0].openCorrections = 103;
+    await route.fulfill({ response, json: classrooms });
+  });
+  await page.goto("/");
+  const practice = page
+    .getByRole("navigation", { name: "Điều hướng chính" })
+    .getByRole("button", { name: "Luyện tập", exact: true });
+  const badge = practice.locator(".nav-count");
+  for (const viewport of [
+    { width: 320, height: 640 },
+    { width: 390, height: 844 },
+    { width: 1440, height: 1000 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect(badge).toHaveText("103");
+    for (const element of [badge]) {
+      await expect(element).toHaveCSS("color", "rgb(255, 255, 255)");
+      await expect(element).toHaveCSS("background-color", "rgb(198, 40, 40)");
+      await expect(element).toHaveCSS("border-radius", "50%");
+      const box = (await element.boundingBox())!;
+      expect(box.width).toBeCloseTo(box.height, 0);
+    }
+    const before = (await badge.boundingBox())!;
+    await practice.click();
+    await expect(practice).toHaveAttribute("aria-current", "page");
+    if (viewport.width < 1100) {
+      const after = (await badge.boundingBox())!;
+      expect(after.x).toBeCloseTo(before.x, 0);
+      expect(after.y).toBeCloseTo(before.y, 0);
+    }
+    const notebook = page.getByRole("tab", {
+      name: "Sổ tay sửa sai",
+      exact: true,
+    });
+    const tabBadge = notebook.locator(".workspace-tab-count");
+    await expect(tabBadge).toHaveText("103");
+    await expect(tabBadge).toHaveCSS("color", "rgb(255, 255, 255)");
+    await expect(tabBadge).toHaveCSS("background-color", "rgb(198, 40, 40)");
+    await expect(tabBadge).toHaveCSS("border-radius", "50%");
+    await page.screenshot({
+      path: `.local/navbar-full-badge-${info.project.name}-${viewport.width}.png`,
+    });
+    await page.getByRole("navigation").getByRole("button").first().click();
+  }
+});
