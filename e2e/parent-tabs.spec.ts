@@ -47,6 +47,21 @@ for (const role of ["teacher", "student"] as const) {
           exact: true,
         });
         await expect(tabs.getByRole("tab")).toHaveCount(group.items.length);
+        if (viewport.width < 1100) {
+          const boxes = await tabs.getByRole("tab").evaluateAll((nodes) =>
+            nodes.map((node) => {
+              const box = node.getBoundingClientRect();
+              return { width: box.width, height: box.height, y: box.y };
+            }),
+          );
+          for (const box of boxes) {
+            expect(box.width).toBeCloseTo(boxes[0].width, 0);
+            expect(box.height).toBe(44);
+            expect(box.y).toBeCloseTo(boxes[0].y, 0);
+          }
+          for (const tab of await tabs.getByRole("tab").all())
+            await expect(tab).toHaveCSS("justify-content", "center");
+        }
         for (const name of group.items) {
           await tabs.getByRole("tab", { name, exact: true }).click();
           await expect(

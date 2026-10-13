@@ -1,10 +1,12 @@
 # Thiết kế giao diện GreenEdu
 
-## Hiện hành: navbar đủ tên, icon không dịch chuyển và badge đỏ
+## Hiện hành: navbar gọn, tối đa hai dòng và submenu căn đều
 
-Theo ảnh preview đã được người dùng duyệt, navbar portrait giữ **năm ô rộng bằng nhau**, luôn hiện cả icon và tên đầy đủ của mọi mục. Tên dài xuống dòng trong vùng chữ cao52px, font13px; ô cao88px và dock112px + safe area. Active chỉ đổi màu nền/viền/chữ, **không tăng chiều rộng, không dịch chuyển icon và không chạy hiệu ứng nới ô/fade nhãn**. Giữ màu rừng và active nền kem đã duyệt. Quyết định này thay navbar chỉ hiện tên mục active, flex-grow2.3 và vùng chữ34px trong lịch sử.
+Navbar portrait giữ **năm ô rộng bằng nhau**, luôn hiện cả icon và tên đầy đủ của mọi mục. Theo yêu cầu tinh chỉnh sau preview, tên dài **tối đa hai dòng** trong vùng chữ cao32px, font thích ứng11–13px; ô cao64px và dock84px + safe area, thay bản88/112px trước đó. Ở màn hình≤350px bỏ khoảng cách giữa ô và padding ngang nút để nhãn Ngân hàng câu hỏi vẫn đủ chữ trong hai dòng. Icon Luyện tập16px, có khoảng đệm giữ cùng hàng icon20px ở các mục còn lại. Active chỉ đổi màu nền/viền/chữ, **không tăng chiều rộng, không dịch chuyển icon và không chạy hiệu ứng nới ô/fade nhãn**. Giữ màu rừng và active nền kem đã duyệt. Quyết định này thay navbar chỉ hiện tên mục active, flex-grow2.3 và vùng chữ34px trong lịch sử.
 
 Badge số câu cần sửa ở Luyện tập và Sổ tay sửa sai dùng **chữ trắng, nền đỏ #c62828, hình tròn24×24px**, không khung vuông vàng/nâu. Badge navbar giữ cùng vị trí ở góc trên phải của ô dù active hay inactive; không đổi giá trị/tính toán số câu. Submenu vẫn nằm ngay trên dock, khoảng đệm/focus theo chiều cao thật đã đo; header account/lớp/top-right icons giữ nguyên. Áp dụng CSS sẵn có, không đổi API/DB hoặc framework.
+
+Submenu portrait của Luyện tập, Khu vườn lớp và các trang dùng chung chia ô bằng nhau, cùng chiều cao44px; căn giữa cả cụm icon/nhãn/badge theo chiều ngang và dọc. Badge không co, nhãn cân dòng. Desktop/landscape giữ bố cục cũ; ResizeObserver cập nhật vị trí submenu và đệm cuối trang theo dock mới.
 
 ## Hiện hành: hoàn tất yêu cầu redesign, submenu trên dock — 13/10/2026
 

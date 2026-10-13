@@ -1,8 +1,10 @@
 # Tiến độ và lộ trình GreenEdu
 
-## Navbar mobile đủ tên và badge câu sai
+## Hiện hành: navbar mobile gọn và submenu căn đều
 
-Đã áp dụng preview được duyệt: năm ô bằng nhau, mọi icon/tên luôn hiện, chọn mục chỉ đổi màu và không làm icon dịch chuyển. Nhãn dài xuống dòng, dock tăng chiều cao và đệm/submenu theo kích thước thật. Badge Luyện tập/Sổ tay đổi chữ trắng, nền đỏ tròn; giữ số câu và nghiệp vụ. Chỉ frontend, sẽ push remote theo yêu cầu; kết quả/bằng chứng tại [session-handoff.md](session-handoff.md), hình thức tại [app-design.md](app-design.md).
+Sau preview đã push `c92409c`, tiếp tục tinh chỉnh theo ảnh mới: dock portrait84px + safe area, ô64px, tên đầy đủ tối đa hai dòng/font11–13px, icon Luyện tập16px. Năm ô đều và icon giữ vị trí khi chọn; submenu Luyện tập/Khu vườn lớp và các trang chung căn giữa icon/nhãn/badge trong ô đều44px. Giữ badge câu sai trắng/đỏ tròn và đệm nội dung theo kích thước thật. Chỉ frontend, push remote theo yêu cầu đã chốt; kết quả/bằng chứng tại [session-handoff.md](session-handoff.md), hình thức tại [app-design.md](app-design.md). Git push không chứng minh Railway đã deploy thành công.
+
+QA mới: TypeScript/Vite build và **18/18 E2E desktop/mobile** đạt trên server/SQLite riêng; đã kiểm tra hai dòng đủ chữ từ320px, icon không dịch chuyển, submenu/badge căn giữa và đệm nội dung/focus. Chưa nghiệm thu Safari/thiết bị thật hoặc deployment Railway.
 
 ## Hiện hành: hoàn tất redesign với hai skill — 13/10/2026
 

@@ -23,6 +23,7 @@ export function SidebarNavigation<T extends string>({
           key={item.id}
           type="button"
           className={`nav-item ${page === item.id ? "active" : ""}`}
+          data-page={item.id}
           aria-label={item.label}
           aria-current={page === item.id ? "page" : undefined}
           onClick={() => onNavigate(item.id)}

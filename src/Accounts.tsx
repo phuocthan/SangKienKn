@@ -93,7 +93,9 @@ export function AdminWorkspace({
             onClick={() => setPage("accounts")}
           >
             <Users size={20} />
-            <span className="nav-label">Quản lý tài khoản</span>
+            <span className="nav-label">
+              <span className="nav-label-text">Quản lý tài khoản</span>
+            </span>
           </button>
         </nav>
         <div className="sidebar-bottom">

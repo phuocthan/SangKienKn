@@ -1,6 +1,16 @@
 # Bàn giao session GreenEdu
 
-## Navbar hiện đầy đủ tên, ổn định icon và badge câu sai đỏ — tiếp tục sau preview
+## Hiện hành: thu gọn navbar và căn giữa submenu mobile
+
+Theo ảnh mobile mới, submenu Luyện tập và Khu vườn lớp cần căn đều, icon sách nhỏ hơn, navbar tối đa hai dòng và thấp hơn. Tiếp tục trên commit `c92409c` đã push origin/main của đợt preview; không khôi phục menu chỉ hiện tên active.
+
+Dock portrait giảm112→84px + safe area; ô88→64px, vùng chữ52→32px, font thích ứng11–13px và giới hạn hai dòng. Ở≤350px bỏ gap/padding ngang ô để tên Ngân hàng câu hỏi đủ chữ ở320px, không giảm font dưới11px. Icon sách Luyện tập16px + đệm giữ cùng hàng20px; năm ô vẫn đều, icon không dịch chuyển khi chọn. Admin dùng cùng span chữ để áp dụng giới hạn hai dòng nhất quán. Submenu portrait chia ô bằng nhau, cao44px, căn giữa toàn bộ cụm icon/nhãn/badge; giữ badge câu sai trắng/đỏ tròn24px. Cơ chế đo dock/submenu hiện có tiếp tục dự phòng nội dung và focus.
+
+Chỉ frontend và kiểm tra giao diện, không đổi API/DB/số câu. Build riêng `.local/navbar-compact-build`, browser test dùng server/SQLite thử riêng, không ghi dữ liệu Railway. Tiếp tục push theo yêu cầu đã chốt cho đợt chỉnh navbar; cần xác minh Railway triển khai riêng. Thiết kế hiện hành ở đầu [app-design.md](app-design.md).
+
+QA bản cuối: TypeScript/Vite build và diff check đạt; **18/18 E2E portrait-navigation + parent-tabs + redesign desktop/mobile đạt (2 phút)**. Kiểm tra nhãn đủ chữ/tối đa hai dòng ở320/390/768/1024px, dock84px, icon sách16px, tọa độ icon ổn định khi chuyển mọi mục, submenu ô đều44px/căn giữa cả cụm nhãn-badge103, keyboard/deep-link và khoảng đệm/focus/desktop-landscape. Lượt đầu14/18: nhãn Ngân hàng câu hỏi bị cắt tại320px và phép đo Admin dùng vùng chữ thay nội dung; đã nới vùng chữ và đồng bộ span Admin rồi build/chạy lại toàn bộ18ca đạt. Đã xem ảnh mới390px của giáo viên, Luyện tập có badge và Hoạt động nhóm trong Khu vườn lớp. Chưa kiểm tra Safari/thiết bị thật hoặc xác minh deploy Railway.
+
+## Lịch sử: navbar hiện đầy đủ tên, ổn định icon và badge câu sai đỏ — tiếp tục sau preview
 
 Người dùng gửi ảnh mobile navbar chỉ hiện tên mục active; đã xem ảnh và tạo preview5ô đều nhau/all labels bằng ImageGen, chưa sửa code ở bước preview. Sau khi duyệt, người dùng yêu cầu icon không đổi vị trí khi chuyển, badge số câu sai ở Luyện tập chữ trắng/nền tròn đỏ, rồi **push cả thay đổi navbar lên Git remote**.
 

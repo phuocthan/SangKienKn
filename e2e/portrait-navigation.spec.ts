@@ -128,6 +128,15 @@ for (const role of ["teacher", "student", "admin"] as const) {
               node.scrollHeight <= node.clientHeight &&
               node.scrollWidth <= node.clientWidth,
           ),
+          `${role} at ${viewport.width}px: ${await text.textContent()} must fit without clipping`,
+        ).toBe(true);
+        expect(
+          await text.evaluate((node) => {
+            const lineHeight = Number.parseFloat(
+              getComputedStyle(node).lineHeight,
+            );
+            return node.getBoundingClientRect().height <= lineHeight * 2 + 1;
+          }),
         ).toBe(true);
       }
       const activeItem = nav.locator('button.nav-item[aria-current="page"]');
@@ -142,8 +151,16 @@ for (const role of ["teacher", "student", "admin"] as const) {
           })
           .toBeLessThan(1);
         expect((await activeItem.boundingBox())!.height).toBeLessThanOrEqual(
-          88,
+          64,
         );
+      }
+      expect(dockBox.height).toBeLessThanOrEqual(84);
+      if (role === "student") {
+        const book = nav
+          .getByRole("button", { name: "Luyện tập", exact: true })
+          .locator("svg");
+        expect((await book.boundingBox())!.width).toBe(16);
+        expect((await book.boundingBox())!.height).toBe(16);
       }
       if (viewport.width === 320 && role !== "admin") {
         const longest = nav.getByRole("button", {
@@ -362,6 +379,26 @@ test("student wrong-answer badges are white on red circles and stay in place whe
     await expect(tabBadge).toHaveCSS("color", "rgb(255, 255, 255)");
     await expect(tabBadge).toHaveCSS("background-color", "rgb(198, 40, 40)");
     await expect(tabBadge).toHaveCSS("border-radius", "50%");
+    if (viewport.width < 1100) {
+      const tabs = notebook.locator("..");
+      for (const tab of await tabs.getByRole("tab").all()) {
+        await expect(tab).toHaveCSS("justify-content", "center");
+        expect(
+          await tab.evaluate((node) => {
+            const children = Array.from(node.children)
+              .map((child) => child.getBoundingClientRect())
+              .filter((box) => box.width > 0);
+            const left = Math.min(...children.map((box) => box.left));
+            const right = Math.max(...children.map((box) => box.right));
+            const button = node.getBoundingClientRect();
+            return (
+              Math.abs((left + right) / 2 - (button.left + button.right) / 2) <
+              1
+            );
+          }),
+        ).toBe(true);
+      }
+    }
     await page.screenshot({
       path: `.local/navbar-full-badge-${info.project.name}-${viewport.width}.png`,
     });

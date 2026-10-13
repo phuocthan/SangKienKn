@@ -516,6 +516,19 @@
     min-width: 0;
     padding: 10px 12px;
     font-size: 12px;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    min-height: 44px;
+    padding-block: 6px;
+  }
+  .workspace-tabs .workspace-tab-label {
+    min-width: 0;
+    text-align: center;
+    text-wrap: balance;
+  }
+  .workspace-tabs .workspace-tab-count {
+    flex-shrink: 0;
   }
   .main-content {
     padding-bottom: calc(
