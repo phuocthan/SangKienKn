@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: neo submenu portrait, mật độ danh sách và thang chữ — 13/10/2026
+
+Trong portrait ≤1100px, tab con WorkspaceTabs sticky ngay dưới header tài khoản/lớp; offset theo chiều cao header thực tế khi đổi lớp, thiết bị hoặc tên dài. Tab có nền kem, viền be và mục chọn nâu ấm, khác menu đáy xanh đậm. Đổi tab hoặc mục menu cuộn về đầu nội dung. Landscape/desktop giữ tab con thường và palette xanh.
+
+Danh sách Chương giáo viên: thẻ có index 36px, tiêu đề/metadata ở trái, Thêm bài/Xem danh sách bài cạnh nhau, Quản lý câu hỏi ở hàng dưới; từ viewport1600px dàn hai cột, màn hẹp xuống hàng. Roster giảm padding header/dòng và icon cấp còn24px, giữ cột/nhãn/tooltips. Toàn workspace giữ Be Vietnam Pro, thống nhất heading trang 24–30px, section22px, body15px, nút/nhãn14px, caption13px với line-height phù hợp; giữ kích thước riêng cho điểm số và hình minh họa.
+
 ## Hiện hành: tab điều hướng portrait không cuộn — 13/10/2026
 
 Dock đáy trong portrait có một hàng flex rộng đúng viewport: icon mọi điểm đến đều nhìn thấy, không kéo ngang. Mục đang chọn có icon/chữ và nền sáng gọn hơn; tất cả tab cao64px cùng trục, không nâng lên. Chuyển độ rộng/màu/nền trong220ms, tắt khi reduced-motion. Mục còn lại chỉ icon trên nền xanh. Nhãn button luôn ở aria-label dù chữ bị ẩn; badge sửa sai đặt dưới icon khi mục chưa chọn. Khoảng đệm đáy nội dung và header sticky giữ nguyên. CSS chỉ áp dụng media portrait≤1100px. Heading Hoạt động nhóm không hiện minh họa ở landscape và không chừa cột ảnh; portrait vẫn giữ hình.

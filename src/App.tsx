@@ -271,6 +271,7 @@ export default function App() {
     setStudy(null);
     setError("");
     setCorrectionChapterId(next === "corrections" ? chapterId : "");
+    if (next !== page) requestAnimationFrame(() => window.scrollTo(0, 0));
   }
   function login(u: User) {
     localStorage.removeItem("greenedu-idle-logout");
@@ -874,12 +875,14 @@ export default function App() {
                           <span className="chapter-index">
                             {String(i + 1).padStart(2, "0")}
                           </span>
-                          <div>
-                            <h3>{ch.title}</h3>
-                            <p>
-                              {ch.lessons.length} bài · {ch.questionCount} câu
-                              hỏi
-                            </p>
+                          <div className="chapter-row-main">
+                            <div className="chapter-row-copy">
+                              <h3>{ch.title}</h3>
+                              <p>
+                                {ch.lessons.length} bài · {ch.questionCount} câu
+                                hỏi
+                              </p>
+                            </div>
                             <Lessons
                               chapter={ch}
                               onChange={async () => {

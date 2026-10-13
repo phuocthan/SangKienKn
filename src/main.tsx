@@ -15,6 +15,7 @@ import "./forest-theme.css";
 import "./learning-journey.css";
 import "./login.css";
 import "./workspace-tabs.css";
+import "./ui-refinement.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

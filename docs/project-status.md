@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: tab con portrait neo cố định và danh sách lớp gọn — 13/10/2026
+
+Tab con của các trang cha giáo viên/học sinh bám dưới header sticky khi cuộn portrait, dùng nền kem/mục chọn nâu để tách dock đáy xanh. Đổi tab/menu đưa trang về đầu. Danh sách Chương giáo viên gọn thành hàng, hai cột ở desktop rộng; roster giảm khoảng đệm. Hệ chữ Be Vietnam Pro giữ nguyên, các heading, section, caption, nút và form dùng cỡ/nhịp dòng chung. Build đạt, 14/14 E2E giao diện liên quan trên DB riêng đạt. Chi tiết bàn giao ở đầu `docs/session-handoff.md`.
+
 ## Hiện hành: dock portrait đủ tab, tab chọn nổi bật — 13/10/2026
 
 Phone/PC portrait dàn toàn bộ điểm đến trên thanh dưới, không cần swipe. Chỉ tab được chọn hiện chữ bên dưới icon; tab còn lại là icon với aria-label tên đầy đủ. Tab cùng trục, không nhảy lên; ô chọn hẹp hơn và chuyển màu/kích thước mượt. Kiểm tra kích thước từ 320px đến 1024px, giữ menu desktop/landscape. Heading Hoạt động nhóm ẩn ảnh trang trí ở landscape, giữ ảnh ở portrait.

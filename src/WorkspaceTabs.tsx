@@ -1,4 +1,9 @@
-import type { KeyboardEvent, ReactNode } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import type { LucideIcon } from "lucide-react";
 
 export type WorkspaceTab<T extends string> = {
@@ -18,8 +23,27 @@ export function WorkspaceContent<T extends string>({
   page: T;
   onNavigate: (page: T) => void;
 }) {
+  const mainRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    if (!tabs) return;
+    const header = document.querySelector<HTMLElement>(".workspace-topbar");
+    const main = mainRef.current;
+    if (!header || !main) return;
+    const updateOffset = () => {
+      main.style.setProperty(
+        "--workspace-sticky-offset",
+        `${header.getBoundingClientRect().height}px`,
+      );
+    };
+    updateOffset();
+    const observer = new ResizeObserver(updateOffset);
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, [tabs?.label]);
+
   return (
-    <main className="main-content">
+    <main className="main-content" ref={mainRef}>
       {tabs && (
         <WorkspaceTabs
           label={tabs.label}

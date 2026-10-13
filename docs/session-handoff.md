@@ -1,5 +1,11 @@
 # Bàn giao session GreenEdu
 
+## Tab con neo khi cuộn, danh sách lớp gọn hơn — 13/10/2026
+
+Trong portrait ≤1100px, WorkspaceTabs neo ngay dưới header tài khoản/lớp theo chiều cao header đo bằng ResizeObserver; nền kem và tab chọn nâu ấm phân biệt với dock đáy xanh. Chuyển điểm đến ở menu hoặc tab con đưa trang về đầu; vẫn giữ aria/điều hướng bàn phím. Landscape giữ palette và vị trí tab cũ.
+
+Danh sách Chương giáo viên dùng thẻ thấp hơn, nút Thêm bài/Xem danh sách bài cùng hàng; từ1600px dàn hai cột. Bảng học sinh giảm padding, icon cấp thu nhỏ nhẹ nhưng giữ nhãn hỗ trợ và thao tác. Rà soát CSS toàn workspace: font Be Vietnam Pro hiện có được giữ; heading, mục section, caption, nút và form dùng thang chữ/line-height nhất quán, không ép cỡ minh họa/điểm số. Kiểm tra TypeScript/Vite build đạt ở root và checkout sạch; 14/14 E2E trên checkout/DB riêng đạt sau cập nhật ca portrait cho yêu cầu cuộn về đầu. Không ghi dữ liệu Railway trong QA.
+
 ## Dock portrait êm hơn, ẩn ảnh nhóm ở landscape — 13/10/2026
 
 Theo góp ý mới, tab portrait không còn translateY/nảy lên. Mọi tab cao 64px và căn giữa cùng trục; tab chọn thu tỷ lệ rộng từ3 xuống2.3, viền/bóng nhẹ hơn, chuyển flex-grow/màu/nền trong220ms và tắt transition khi reduced-motion. Vẫn đủ tab, chỉ mục chọn hiện chữ. Ảnh nhóm học sinh ở heading Hoạt động nhóm ẩn khi orientation landscape, vẫn hiện portrait; heading landscape về một cột, không chừa khoảng ảnh. TypeScript/Vite trên checkout sạch đạt; 10/10 E2E portrait và heading desktop/mobile đạt trên DB riêng, ảnh chụp đã xem. Localhost5173 là frontend Vite dùng API/database Railway theo cấu hình hiện hành; không tạo SQLite local mới.

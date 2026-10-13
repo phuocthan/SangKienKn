@@ -151,6 +151,11 @@ for (const role of ["teacher", "student", "admin"] as const) {
         );
         await expect(longest.locator(".nav-label")).toBeVisible();
       }
+      // Switching destinations intentionally returns to the top; revisit the
+      // fixture's end before checking that it clears the fixed dock.
+      await page.evaluate(() =>
+        window.scrollTo(0, document.documentElement.scrollHeight),
+      );
       const bottomButton = page.getByRole("button", {
         name: "Cuối nội dung kiểm thử",
       });
