@@ -31,7 +31,91 @@ async function openGroups(page: Page) {
   await navigateTo(page, { name: "Hoạt động nhóm", exact: true });
 }
 
-test("teacher creates a Word group activity, changes representative; student uploads and retries, then sends Canva and teacher sees history", async ({
+test("older server keeps representative first and blocks unsupported member submissions until updated", async ({
+  page,
+}) => {
+  await page.request.post("/api/auth/login", {
+    data: { email: "giaovien@greenedu.nk", password: "GreenEdu123!" },
+  });
+  // Keep random groups independent of students added by other suites.
+  const { id: classroomId } = await post(page, "/classrooms", {
+    name: `Lớp quyền nộp ${crypto.randomUUID().slice(0, 8)}`,
+    subject: "Vật lý",
+    grade: "10",
+  });
+  for (const email of [
+    "hocsinh@greenedu.nk",
+    "minhkhoi@greenedu.nk",
+    "baongan@greenedu.nk",
+  ]) {
+    await post(page, `/classrooms/${classroomId}/memberships`, { email });
+  }
+  const response = await page.request.post(
+    `/api/classrooms/${classroomId}/group-activities`,
+    {
+      data: {
+        title: `Quyền nộp nhóm ${Date.now()}`,
+        instructions: "Cùng hoàn thành sản phẩm",
+        groupCount: 2,
+        deadlineAt: Date.now() + 360000,
+        requestId: crypto.randomUUID(),
+      },
+    },
+  );
+  expect(response.ok()).toBe(true);
+  const activity: GroupActivity = await response.json();
+  const group = activity.groups.find((entry) => entry.members.length === 2)!;
+  const member = group.members.find(
+    (entry) => entry.id !== group.representativeId,
+  )!;
+  const email: Record<string, string> = {
+    "student-demo": "hocsinh@greenedu.nk",
+    "student-2": "minhkhoi@greenedu.nk",
+    "student-3": "baongan@greenedu.nk",
+  };
+  const endpoint = `**/api/group-activities/${activity.id}`;
+  await page.route(endpoint, async (route) => {
+    const data: GroupActivity = await (await route.fetch()).json();
+    delete data.memberSubmissions;
+    for (const entry of data.groups)
+      entry.members.sort(
+        (a, b) =>
+          Number(a.id === entry.representativeId) -
+          Number(b.id === entry.representativeId),
+      );
+    await route.fulfill({ json: data });
+  });
+  const loggedIn = await page.request.post("/api/auth/login", {
+    data: { email: email[member.id], password: "GreenEdu123!" },
+  });
+  expect(loggedIn.ok()).toBe(true);
+  await page.goto("/");
+  await page.getByLabel("Chọn lớp học").selectOption(classroomId);
+  await openGroups(page);
+  await page
+    .locator(".group-activity-card")
+    .filter({ hasText: activity.title })
+    .click();
+  await expect(page.locator(".group-members li").first()).toContainText(
+    group.members.find((entry) => entry.id === group.representativeId)!.name,
+  );
+  await expect(
+    page.getByRole("button", { name: "Nộp bài nhóm", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText(
+      "Quyền nộp cho tất cả thành viên đang chờ cập nhật hệ thống.",
+      { exact: false },
+    ),
+  ).toBeVisible();
+  await page.unroute(endpoint);
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(
+    page.getByRole("button", { name: "Nộp bài nhóm", exact: true }),
+  ).toBeVisible();
+});
+
+test("teacher changes representative to first; another member uploads and retries, then sends Canva and teacher sees history", async ({
   page,
   browser,
 }, info) => {
@@ -114,16 +198,34 @@ test("teacher creates a Word group activity, changes representative; student upl
     .getByRole("button", { name: "Lưu đại diện" })
     .click();
   await expect(page.getByText("Đã cập nhật đại diện nhóm.")).toBeVisible();
+  const representativeName = group.members.find(
+    (member) => member.id === nextId,
+  )!.name;
+  const teacherGroup = page.locator(".group-roster").filter({
+    has: page.getByRole("heading", {
+      name: `Nhóm ${group.number}`,
+      exact: true,
+    }),
+  });
+  await expect(teacherGroup.locator(".group-members li").first()).toContainText(
+    representativeName,
+  );
   const context = await browser.newContext(info.project.use);
   const student = await context.newPage();
   try {
-    await studentLogin(student, students.find((s) => s.id === nextId)!.email);
+    await studentLogin(
+      student,
+      students.find((s) => s.id === group.representativeId)!.email,
+    );
     await openGroups(student);
     await student
       .locator(".group-activity-card")
       .filter({ hasText: "Thiết kế năng lượng xanh" })
       .click();
     await expect(student.locator(".group-roster")).toHaveCount(1);
+    await expect(student.locator(".group-members li").first()).toContainText(
+      representativeName,
+    );
     await expect(
       student.getByRole("button", { name: "Nộp bài nhóm" }),
     ).toBeVisible();

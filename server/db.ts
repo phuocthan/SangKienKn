@@ -8,6 +8,7 @@ import { ensureLessonSchema } from "./lesson-catalog.js";
 import { ensureLevelSettingsSchema } from "./level-settings.js";
 import { ensureFeedbackSchema } from "./feedback.js";
 import { ensureGroupDiscussionSchema } from "./group-discussion.js";
+import { ensureChapterArchiveSchema } from "./chapter-archive.js";
 
 export function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -187,6 +188,7 @@ export function openDatabase(path: string) {
       question_ids TEXT NOT NULL
     );`);
   ensureLearningSchema(db);
+  ensureChapterArchiveSchema(db);
   ensureLevelSettingsSchema(db);
   ensureLessonSchema(db);
   ensureWelcomeSchema(db);

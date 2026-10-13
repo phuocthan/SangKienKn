@@ -1,5 +1,113 @@
 # Bàn giao session GreenEdu
 
+## Chốt phạm vi, pull và bàn giao Git — 14/10/2026
+
+Người dùng xác nhận danh sách lớp là Danh sách Học sinh, sau đó **yêu cầu skip việc chuyển danh sách** và pull trước khi push toàn bộ phần đã làm. Đã bỏ thay đổi chuyển roster/honorsOnly: Danh sách Học sinh cùng Top10/vườn giữ ở Lớp học của tôi; Quản lý lớp chỉ có Quản lý chương/Quản lý cấp độ. Các mô tả chuyển roster bên dưới có nhãn lịch sử, không áp dụng lại. Giữ tất cả chỉnh submenu/menu, huy chương/Top10, thống kê/nút icon, màu trạng thái, bỏ cột cây ở bảng effort, quyền nộp nhóm/đại diện và archive chương.
+
+Đã stash phần làm dở trong docs/e2e/server/shared/src rồi **pull fast-forward 8dc5aac → bca6afd** (gồm c92409c), khôi phục và xử lý xung đột ba tài liệu cùng portrait-navigation.spec.ts. Giữ nguyên navbar đầy đủ nhãn/hai dòng/icon không dịch và badge đỏ từ remote, không ghi đè Accounts/SidebarNavigation/portrait-navigation.css. Backup stash `7419e713a6db484d1f27d55a610135aaa736933a` giữ để phục hồi, không tự apply lại phần chuyển roster đã hủy. Stash lần pull13/10 và file khóa PowerPoint vẫn giữ.
+
+QA trước commit: TypeScript/build riêng `.local/push-final-20261014` đạt; **127/127 kiểm thử server và6/6 comparator Top10 đạt**. E2E sau pull có lượt64/66 rồi62/66: hai fixture nhóm dùng lớp demo có học sinh do ca search thêm, sau tách lớp thử đã sửa sang đúng API memberships cho tài khoản có sẵn. **Lượt xác nhận cuối24/24 desktop/mobile đạt (1,4phút)**, chạy cả ca tạo thêm học sinh gây ảnh hưởng, phản biện, nộp nhóm và bảng chăm vườn ba cột. Các ca còn lại trong lượt rộng đạt, bao gồm navbar mới/badge, menu/keyboard, Top10/roster giữ vị trí, cấp cây, popup xóa và modal online. Không báo lượt62/66 là66/66 hoặc toàn bộ E2E repository đã xanh; ca timer cũ ngoài phạm vi vẫn ở báo cáo QA cũ. Không thay dữ liệu thật để làm test xanh; tất cả test trên DB/server riêng.
+
+Đợt này được gom để commit/push **origin/main** theo yêu cầu, không đưa `.local`, database/CSV/file học sinh/secrets hoặc `~$...pptx` vào Git. Push không đồng nghĩa Railway đã deploy: cần xác minh backend mới trước khi báo quyền nộp mọi thành viên/xóa chương đã hoạt động trên production. Không chạy deploy offline hoặc khởi động API SQLite local mặc định.
+
+## Bỏ cột Cây ra hoa trong bảng chăm vườn — 14/10/2026
+
+Theo cột khoanh/gạch trong ảnh, bảng **Những người chăm vườn** chỉ còn Hạng/Học sinh/Thời gian học. Bỏ header/cell Cây ra hoa của bảng effort; bảng sửa sai và thống kê cây/vườn/Top10 giữ nguyên. Không thay comparator/API/dữ liệu; tiêu chí phụ số cây ra hoa khi cùng thời gian vẫn giữ. CSS mobile giới hạn nhãn Cây: cho bảng repairs để ô thời gian sau khi bỏ cột không bị gắn nhãn sai, ô thời gian effort dùng phần còn lại của hàng.
+
+TypeScript/build `.local/ranking-columns-20261014` đạt; **2/2 E2E desktop/mobile mới đạt (6,3giây)**, kiểm tra header bị bỏ/thời gian giữ đúng/nhãn mobile/ties/vườn và không overflow. Test server/DB riêng, không ghi Railway. Chỉ HMR local5173, chưa commit/push; giữ các chỉnh trước và backend Xóa chương còn chờ triển khai.
+
+## Lịch sử trước yêu cầu skip: chuyển roster, đổi tiêu đề và xóa chương — 14/10/2026
+
+Yêu cầu mới “đẩy danh sách lớp sang quản lý lớp” được hiểu là **Danh sách Học sinh/roster** đang ở Lớp học của tôi (đã hỏi phân biệt với danh sách các lớp và thông báo giả định khi chưa có trả lời). Chuyển roster cùng tìm kiếm/CSV/sổ tay/reset mật khẩu/Thêm học sinh xuống tab Quản lý lớp, sau Quản lý cấp độ. **Khu vườn và Vinh danh Top10 giữ ở tab Khu vườn của lớp**, không chuyển bảng vinh danh. Roster tách chế độ honorsOnly; ở trang quản lý tự tải leaderboard cho Câu đã khắc phục, poll30giây/focus/reconnect/visibility và Thử lại riêng khi nguồn lỗi, không giả0. Không thêm bảng danh sách các lớp hoặc chuyển dropdown chọn lớp trên header.
+
+Đổi **Danh sách Chương → Quản lý chương**, **Thời gian tăng cấp → Quản lý cấp độ**. Mỗi chương có nút Xóa chương cạnh Quản lý câu hỏi; modal ghi tên, số bài/câu và hỏi “Bạn có chắc chắn muốn xóa chương … không?”, Hủy/Xóa chương, chặn gửi lại khi busy, lỗi giữ popup, thành công tải lại/thông báo. Quyền canDeleteChapter do API trả; máy chủ cũ chưa có flag thì nút disabled với title chờ cập nhật, không thử gửi endpoint chưa hỗ trợ. Xóa chương đang chọn làm bộ lọc ngân hàng chuyển về chương còn tồn tại.
+
+Backend mới: migration bổ sung bảng archived_chapters, **POST /api/chapters/:id/delete {confirm:true}**, chỉ giáo viên sở hữu lớp. Transaction idempotent giữ audit lần đầu, archive chương, tắt active câu hỏi/khóa mở thi. Không DELETE chapters/questions/lessons/progress/attempts/corrections/tickets/rewards/run/snapshot; không đổi ID hoặc schema chapters3cột. Lọc chương archive khỏi classrooms/learning/ma trận/chọn chương cho bộ ôn/bank mới; chặn thêm/sửa bài/câu và mở kiểm tra lại bằng API. Giữ lịch sử/phiên ôn/thi đã lưu, sổ tay vẫn sửa được; GET /api/chapters/:id trả metadata/summary đúng quyền cho frontend mở sửa sai của chương không còn trong danh sách. GET history câu hỏi vẫn đọc được, không phục hồi câu đã ngừng dùng. Vườn/thành tích lịch sử vẫn giữ. Không có UI khôi phục chương trong đợt này.
+
+QA mới: TypeScript/build `.local/class-management-20261014` đạt; **30/30 kiểm thử API liên quan** đạt (gồm3 ca archive mới: quyền/xác nhận/retry, giữ lịch sử/correction/snapshot, migration/rollback), **32/32 E2E desktop/mobile lượt cuối đạt (1,2phút)**. Kiểm tra roster đúng tab/Top10 giữ chỗ, Hủy/xác nhận/chương đã chọn/capability API cũ, nguồn counts lỗi/Thử lại, search/CSV controls, menu/keyboard/density và không overflow320/390/768/1440/1920px. Đã xem ảnh quản lý lớp, local App.tsx/HMR200, diff check đạt. Kiểm thử ghi dữ liệu chỉ trên server/DB riêng; chưa xóa chương thật Railway hoặc thay database local cũ.
+
+**Chưa commit/push/deploy đợt này. Backend Railway cần triển khai bản mới để Xóa chương dùng được; đổi tiêu đề/chuyển roster đã hiệu lực frontend local5173.** Giữ các chỉnh trước, stash/backup và file khóa PowerPoint; không báo Railway đã cập nhật chỉ vì mã/test có sẵn.
+
+## Thu gọn Top3, huy chương mới và chống tràn bục — 14/10/2026
+
+Theo bốn ảnh mới, thu gọn avatar/tên/cấp/chỉ số của Top3 sát bục, bỏ chiều cao tên cố định gây khoảng trống và giữ tên dài tối đa2dòng/title. Khoảng cuối chỉ số tới bục8px mobile/10px desktop; khung Vinh danh có khoảng24px với vườn phía trên. Dãy chip tiêu chí bị gạch trong ảnh bỏ khỏi phần nhìn thấy, giữ thứ tự dưới dạng văn bản trợ năng; comparator không đổi.
+
+Riêng Top3, ba chỉ số Câu đã làm/Tỷ lệ đúng/Đã khắc phục chỉ hiện icon và số, cùng một hàng; nhãn vẫn có cho trình đọc màn hình và title khi hover. Cột tỷ lệ rộng hơn để97,4% không xuống dòng tại320px, font số thích ứng. Thay glyph Medal nhỏ bằng SVG huy chương riêng có dải ruy băng/vòng viền và số hạng ở tâm: lớn trong bục, nhỏ bên avatar, màu vàng/bạc/đồng đồng bộ bục. Không dùng ảnh bitmap hoặc thư viện mới. Medal/số nằm trọn bục đồng thấp nhất; giữ ba bục cùng chân. **Danh sách hạng4–10 (bao gồm4–7 người dùng yêu cầu giữ) và nhãn/chỉ số của các dòng đó giữ bố cục cũ**; không giảm Top10 hoặc đổi thứ tự/dữ liệu/quyền.
+
+Áp dụng hai skill thiết kế đã có, kiểm tra guideline mới từ nguồn chính thức. TypeScript/build riêng `.local/honors-layout-20261014` đạt; **4/4 E2E desktop/mobile lượt cuối đạt (14,8giây)** trên server/SQLite riêng, tại320/360/390/768/1024/1440/1920px. Đo huy chương trong khung, ba chỉ số cùng hàng/số không wrap, khoảng sát bục, chân/vị trí/độ cao và document không overflow; tên dài, tỷ lệ thập phân, số4chữ số, ít người/rỗng/thiếu metrics/focus đổi hạng đều kiểm tra. Lượt đầu phát hiện97,4% bị wrap ở320px, đã tăng độ rộng cột; khi tăng fixture số4chữ số đã chỉnh dữ liệu ca refresh cho đúng comparator trước lượt cuối. Đã xem ảnh mobile/desktop, HMR ClassHonors.tsx200/diff check đạt. Ảnh export dài vẫn có thể hiện submenu cố định giữa ảnh như các lượt trước; không thay nav thực để xử lý ảnh export. Chưa commit/push/deploy, không ghi dữ liệu Railway, giữ thay đổi trước/file khóa PowerPoint.
+
+## Tách số bài/câu và màu trạng thái chương — 14/10/2026
+
+Danh sách Chương trong Quản lý lớp tách số bài và số câu thành hai nhãn: số bài nền kem/vàng, số câu nền xanh, số đậm hơn chữ. Nhãn Kiểm tra đang mở nền xanh đậm hơn (#cad9c7/chữ #285438), Kiểm tra đang khóa nền đỏ nhạt/chữ đỏ (#fff0ec/#a14c3b), giữ thông tin trạng thái bằng chữ. Giữ số thật, quyền/logic mở khóa và màu nút thao tác; không API/migration mới.
+
+TypeScript/build riêng `.local/chapter-metadata-20261014` đạt; **4/4 E2E desktop/mobile mới đạt (14,6giây)** về mở/khóa chương, điều hướng/density roster và không overflow. Đã xem ảnh viewport desktop/mobile của trang giáo viên, xác nhận nhãn số và hai màu trạng thái. HMR App.tsx200/diff check đạt. Test server/DB riêng, không ghi thử Railway. Local5173 cập nhật, chưa commit/push; giữ thay đổi trước.
+
+## Xóa bài chỉ bằng icon trước tên — 14/10/2026
+
+Danh sách bài trong Quản lý lớp bỏ chữ Xóa bài khỏi từng hàng; nút Trash Duotone đặt trước tên bài, giữ màu/viền danger-outline. Hàng dùng grid44px + phần tên linh hoạt, icon không xuống dưới tên dài; vùng bấm44×44px, aria-label/title chứa tên bài. Giữ số thứ tự/số câu, quyền canManageLessons/busy và modal Hủy/Xóa bài, không đổi API hoặc cách bảo toàn lịch sử.
+
+TypeScript/build riêng `.local/lesson-delete-icon-20261014` đạt; **2/2 E2E desktop/mobile mới đạt (6,7giây)**: icon không có chữ/nằm trước tên/vùng chạm, thêm/trùng/hủy/xóa/khôi phục. Đã xem ảnh mobile; HMR Lessons.tsx200/diff check đạt. Test tạo/xóa trên DB/server riêng, không dữ liệu Railway. Local5173 cập nhật, chưa commit/push; giữ toàn bộ thay đổi trước.
+
+## Màu nhãn quyền kiểm tra của học sinh — 14/10/2026
+
+Nhãn “Chờ giáo viên mở kiểm tra” trong thẻ Săn điểm dùng đỏ nhạt #fff0ec/viền #f4d3c8/chữ #a14c3b, cùng palette thông báo đỏ hiện có và giữ kiểu pill. “Giáo viên đã mở kiểm tra” giữ xanh, tăng độ đậm nền bằng pha20% xanh #497349 vào nền #eaf3e7, chữ xanh đậm #315b3e. Chỉ đổi nhãn theo examAllowed; không đổi nền toàn thẻ, quyền mở/khóa, điều kiện dự thi hoặc API.
+
+TypeScript/build riêng `.local/exam-access-colors-20261014` đạt; **2/2 E2E desktop/mobile mới đạt (12,1giây)**, kiểm tra màu hai trạng thái cùng mở/khóa đúng chương và server từ chối lượt bắt đầu cũ. Đã xem ảnh desktop; HMR CSS200, diff check đạt. Test trên server/SQLite riêng, không ghi thử Railway. Local5173 đã cập nhật; chưa commit/push đợt chỉnh nhỏ này, giữ các thay đổi trước.
+
+## Đổi tên menu lớp và bỏ heading vườn lặp — 14/10/2026
+
+Theo hai ảnh mới: menu chính học sinh đổi **Khu vườn của lớp → Lớp học của tôi**; tab đầu giáo viên đổi **Lớp học của tôi → Khu vườn của lớp**. Giữ tên menu chính/h1 Lớp học của tôi của giáo viên, các route/ID và tab Hoạt động nhóm/Quản lý lớp. Bỏ h2 Khu vườn của lớp cùng dòng “Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp.” trong ClassCommunity embedded của giáo viên; thống kê nằm ngay dưới submenu. Heading/mô tả vườn độc lập của học sinh vẫn giữ. Điều chỉnh này thay tên tab/h2 trong mô tả lịch sử bên dưới.
+
+TypeScript/build riêng `.local/class-labels-20261013` đạt; **16/16 E2E desktop/mobile mới đạt (1,1phút)** về menu/tab, URL/reload/keyboard, icon, heading và bố cục. Đã xem ảnh teacher desktop/student mobile; HMR App.tsx trả200. Test trên server/DB riêng, không ghi thử Railway. Cập nhật helper điều hướng để nhận diện giáo viên bằng menu Ngân hàng câu hỏi vì cả hai vai trò nay có Lớp học của tôi. Chỉ local5173, chưa commit/push đợt này; giữ toàn bộ thay đổi trước và file khóa PowerPoint.
+
+## Vinh danh Top10 trong Lớp học của tôi — 13/10/2026
+
+Theo yêu cầu mới và lựa chọn1 đã trả lời, thêm bảng **Vinh danh Top10** của giáo viên giữa vườn lớp và Danh sách Học sinh: ba bục riêng **bạc/hạng2 bên trái, vàng/hạng1 cao nhất ở giữa, đồng/hạng3 bên phải thấp hơn**; bên dưới là **hạng4–10 (7 học sinh)**. Nếu lớp ít người chỉ hiện người thật, không dựng học sinh/tiến độ để đủ10. Mỗi vị trí có tên/avatar/cấp cây/số câu đã làm/tỷ lệ đúng/câu khắc phục.
+
+Comparator tập trung ở `shared/class-honors.ts`: **MAX cấp chương trong lớp → answeredQuestions (câu practice riêng biệt) → correct/total chưa làm tròn → resolvedCorrections của đúng lớp**; tất cả giảm dần, so từng tiêu chí chỉ khi tiêu chí trước bằng nhau. Cấp không cộng các chương hoặc dùng cấp tổng lớp. Tỷ lệ dùng cùng dữ liệu tổng/correct của roster, không lấy điểm thi. Nếu cả4 bằng nhau, theo tên tiếng Việt rồi ID để ổn định, đánh vị trí1–10. Giao diện nêu rõ quy tắc và thứ tự ưu tiên. Search roster không làm đổi Top10 toàn lớp.
+
+Chỉ frontend, dùng GET students/leaderboard đã có, không migration/API mới hoặc ghi dữ liệu thật. Roster tự tải lại30giây khi visible/online và khi focus/reconnect/visibility; không chồng request hoặc chớp loading ở mỗi poll. Chưa tải đủ counts/cấp thì báo chờ dữ liệu, không lấy total lượt thay answeredQuestions để đoán. Học sinh giữ hai bảng xếp hạng cũ theo yêu cầu trước; không đổi quyền, điểm, cấp hoặc thưởng.
+
+QA mới: TypeScript/build `.local/class-honors-20261013` đạt, **6/6 unit comparator và18/18 E2E desktop/mobile đạt (30giây)**, gồm ưu tiên từng tiêu chí/không làm tròn/MAX chương/ties/Top10, bục cùng chân/đúng độ cao và vị trí, danh sách4–10,320/390/768/1440px không overflow, ít người/rỗng/thiếu metrics, focus cập nhật hạng và tìm roster không lọc vinh danh. Lượt đầu15/16 do fixture class-roster để lại lỗi của chương2 cho test badge mobile; đã thêm cleanup câu fixture riêng rồi chạy lượt18/18 mới. Ảnh private `test-results/class-honors-*/honors-*.png` đã xem, ảnh QA ẩn stickybars chỉ lúc chụp để đánh giá nội dung đầy đủ, không ẩn thanh điều hướng trong app.
+
+Local5173/HMR cập nhật ngay, không thay dist/SQLite thật; test dùng server/DB riêng. Đợt này chưa commit/push, giữ các chỉnh trước và file khóa PowerPoint. Quyền nộp nhóm đang chờ backend Railway như mục bàn giao kế tiếp; Top10 không cần backend mới nếu server hiện có đủ metrics.
+
+## Mọi thành viên nhóm được nộp; đại diện đứng đầu — 13/10/2026
+
+Theo yêu cầu mới, mọi học sinh **hiện còn thuộc lớp và đã được phân vào nhóm** được nộp file/link cho nhóm mình trước hạn. Đại diện không còn là người duy nhất nộp; đổi đại diện không thu hồi quyền của thành viên cũ. Người đã rời lớp, chưa có nhóm, giáo viên hoặc người ngoài lớp vẫn bị chặn. Giữ transaction/version, submitted_by thật, deadline, giới hạn file và idempotency; một thành viên khác dùng lại requestId của người nộp cũ bị409. Không sửa schema/dữ liệu/lịch sử nhóm.
+
+API detail thêm `memberSubmissions: true`; server/UI dùng helper representativeFirst để đưa đại diện lên đầu, giữ thứ tự các thành viên còn lại. Frontend cũng sắp xếp khi API Railway cũ chưa đổi thứ tự, nên phần vị trí hiệu lực ngay qua HMR. Chỉ nhóm mình/đang thuộc lớp thấy form khi còn hạn; nhóm khác trong phản biện không có form. API cũ thiếu capability vẫn cho đại diện nộp, báo quyền mọi thành viên đang chờ cập nhật hệ thống, không gửi thao tác không được hỗ trợ.
+
+TypeScript/build riêng `.local/group-member-submit-20261013` và9/9 kiểm thử server nhóm đạt trên DB riêng. **12/12 E2E nhóm/góp ý/phản biện desktop/mobile đạt (1,1phút)**, gồm thành viên không còn là đại diện nộp file/link, retry, đại diện đầu danh sách sau đổi và tương thích server cũ/khôi phục form khi có capability. Không ghi thử Railway, không tự push/deploy hoặc bật API offline mặc định. **Backend Railway cần triển khai bản mới để quyền nộp mọi thành viên có hiệu lực**; local5173 vẫn dùng backend thật cũ đến khi triển khai. Giữ các chỉnh giao diện trước đó chưa commit.
+
+## Thêm huy chương cho ba hạng đầu — 13/10/2026
+
+Thêm glyph Medal chính thức Phosphor Duotone vào bộ icon chung, hiển thị huy chương vàng/bạc/đồng cho rank1/2/3 trong bảng xếp hạng học sinh. Giữ số hạng ở tâm huy chương, nhãn hover và nền hàng đã chỉnh; rank từ4 vẫn dạng số. Không phục hồi hai bảng giáo viên đã bỏ. TypeScript đạt; Chromium render glyph SVG lấy từ mã icon tại390/1440px xác nhận ba màu khác nhau, icon/số vừa khung. Chỉ HMR local5173, không đổi API/DB; các chỉnh giao diện tiếp theo8dc5aac vẫn chưa commit/push.
+
+## Gọn trang lớp và chuyển câu đã khắc phục vào roster — 13/10/2026
+
+Theo yêu cầu mới, giáo viên **Lớp học của tôi** bỏ hai bảng Những người chăm vườn/Bác sĩ cây trồng và chú thích của chúng. Giữ khu vườn/khung Kết Trái cấp5; bảng xếp hạng ở trang vườn của học sinh vẫn có màu vàng/bạc/đồng đã chỉnh. Danh sách học sinh thêm cột **Câu đã khắc phục**, tiêu đề **Thời gian học** thay bằng Clock Duotone có aria-label/title, số giờ giữ nguyên/căn giữa.
+
+ClassCommunity chuyển kết quả leaderboard đang tải/poll sẵn có lên App theo classroomId, Roster lấy resolvedCorrections từ repairs theo studentId. Không thêm GET hoặc sửa backend: repairs trả mọi thành viên có resolved>0 của lớp, không có trong danh sách là0; trước khi tải thành công hiện—, không giả số0 khi lỗi. Retry của vườn cập nhật cột này; xóa cache khi đổi tài khoản, giữ scope lớp. Không sửa corrections, dữ liệu hoặc CSV.
+
+TypeScript/build riêng `.local/class-roster-20261013` đạt. Kiểm thử hồi quy liên quan22 ca đạt; ca mới đã chỉnh fixture retry cùng requestId (sửa sai đã xong không cho tạo lần sửa mới) và chạy xác nhận riêng. **4/4 ca mới desktop/mobile xác nhận đạt** sau sửa fixture, gồm resolved theo lớp/không tính retry trùng, icon header/ẩn bảng teacher/giữ bảng student và lỗi nguồn dữ liệu không giả0. Có22 ca hồi quy đạt cùng4 ca xác nhận mới (26 ca khác nhau); không báo lượt đầu26/26 vì hai ca fixture lúc đầu thất bại. Local5173/HMR → Railway hiệu lực ngay; test tạo lỗi/khắc phục chỉ trên SQLite/server riêng. Các thay đổi submenu/màu huy chương và đợt này chưa commit/push.
+
+## Nhập 34 học sinh lớp 11/6 Vật lí trên Railway — 13/10/2026
+
+Theo danh sách mới của người dùng, đã tạo **34 tài khoản student mới** và **34 membership** trong lớp có sẵn **Lớp 11/6 · Vật lí**, ID `5f3f9f29-3765-4f1d-bc7f-ff45528132c3`, thuộc cùng giáo viên đang quản lý lớp11/2. Đối chiếu toàn bộ56 tài khoản trước nhập theo email dự kiến và họ tên bỏ dấu: **không có tên/email trùng**. Tên đăng nhập là toàn bộ họ tên viết thường, không dấu/không khoảng trắng, đuôi **@greenedu.nk**; dùng mật khẩu tạm người dùng chỉ định, bắt buộc đổi lần đầu. Không đổi mật khẩu tài khoản cũ hoặc thêm học sinh vào nhóm đã chốt.
+
+Đúng Railway zooming-light/production/SangKienKn, SQLite /data/greenedu.sqlite. Backup WAL-safe **/data/backups/pre-import-11-6-1791908246953.sqlite**, audit **/data/backups/import-11-6-1791908249237.json**. Nhập trong transaction, xác nhận giữ nguyên56 users cũ/tất cả membership cũ và nội dung35 bảng còn lại. Kiểm tra3/3 ca script trên DB riêng đạt; kết nối production mới chỉ đọc xác nhận34 ID duy nhất,34 membership,34 hash mật khẩu tạm đúng và34 cờ must_change=1. Chạy lại kế hoạch:0 tài khoản/0 membership mới; tổng users90, lớp11/6 có34 thành viên, quick_check ok/không vi phạm FK, health200/demo:false/quickLogin:false.
+
+CSV riêng **.local/tai-khoan-lop-11-6.csv** chứa thông tin đăng nhập; script/roster/kết quả ở **.local/import-11-6/**, không Git/public. Không đăng nhập thử học sinh, tạo tiến độ, gửi email, deploy/restart hoặc push trong đợt này. Giữ các chỉnh UI/tài liệu chưa commit có sẵn. Lớp11/2 hiện có48 thành viên theo preflight mới; mô tả Railway chỉ còn một lớp/51 tài khoản ở nhật ký cũ là lịch sử.
+
+## Màu vàng/bạc/đồng cho ba hạng đầu — 13/10/2026
+
+Theo yêu cầu mới, badge và nền hàng/thẻ xếp hạng1/2/3 dùng vàng/bạc/đồng, áp dụng cả bảng chăm vườn và sửa sai, teacher/student và mobile/desktop. Màu dựa `member.rank` qua data-rank, không dựa vị trí hàng; giữ số hạng và nhãn Bạn. TypeScript đạt; Chromium kiểm tra CSS tại390/1440px, ba màu phân biệt và tương phản số ≥4,5:1. Chỉ frontend/HMR local5173, không ghi DB hoặc commit/push; giữ các chỉnh submenu chưa commit trước đó.
+
+## Căn giữa nội dung submenu — 13/10/2026
+
+Theo ảnh người dùng gửi sau redesign, mỗi nút submenu căn giữa cụm chữ/badge bằng `justify-content: center` và `text-align: center` trong `src/redesign.css`, thay căn trái ở mobile. Kiểm tra Chromium với CSS hiện tại tại320/390/768/1440px đạt: cụm chữ/badge nằm giữa nút, lệch dưới1px. Thay đổi CSS cập nhật qua HMR local5173; đợt chỉnh nhỏ này chưa commit/push, không ghi dữ liệu Railway. Commit redesign trước đó8dc5aac đã push origin/main.
+
 ## Hiện hành: thu gọn navbar và căn giữa submenu mobile
 
 Theo ảnh mobile mới, submenu Luyện tập và Khu vườn lớp cần căn đều, icon sách nhỏ hơn, navbar tối đa hai dòng và thấp hơn. Tiếp tục trên commit `c92409c` đã push origin/main của đợt preview; không khôi phục menu chỉ hiện tên active.

@@ -9,15 +9,15 @@ export async function navigateTo(
   await navigation.waitFor({ state: "visible" });
   const direct = navigation.getByRole("button", options);
   if (await direct.count()) return direct.click();
-  const teacher = await navigation.getByRole("button", { name: "Lớp học của tôi", exact: true }).count() > 0;
+  const teacher = await navigation.getByRole("button", { name: "Ngân hàng câu hỏi", exact: true }).count() > 0;
   const destinations = [
-    ["Hoạt động nhóm", teacher ? "Lớp học của tôi" : "Khu vườn của lớp"],
+    ["Hoạt động nhóm", "Lớp học của tôi"],
     ["Sổ tay sửa sai", "Luyện tập"],
     ["Khu vườn của lớp", "Lớp học của tôi"],
     ["Quản lý lớp", "Lớp học của tôi"],
     ["Tiến độ học tập", "Lớp học của tôi"],
     ["Hành trình của tôi", "Khu vườn của tôi"],
-    ["Xếp hạng chăm chỉ", teacher ? "Lớp học của tôi" : "Khu vườn của lớp"],
+    ["Xếp hạng chăm chỉ", "Lớp học của tôi"],
   ];
   const match = destinations.find(([name]) =>
     typeof options.name === "string"

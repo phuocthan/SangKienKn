@@ -32,7 +32,7 @@ for (const role of ["teacher", "student"] as const) {
             ["Luyện tập", "BookOpenText"],
             ["Ôn tập & kiểm tra", "GraduationCap"],
             ["Kiểm tra online", "ClipboardText"],
-            ["Khu vườn của lớp", "Tree"],
+            ["Lớp học của tôi", "Tree"],
           ];
     for (const [label, icon] of destinations) {
       const button = navigation.getByRole("button", {
@@ -114,7 +114,7 @@ for (const role of ["teacher", "student"] as const) {
       ).toBeVisible();
       await expect(
         page.getByRole("tab", { name: "Khu vườn của lớp", exact: true }),
-      ).toHaveCount(0);
+      ).toHaveCount(1);
       await navigateTo(page, { name: "Tổng quan", exact: true });
     }
     await page.setViewportSize(

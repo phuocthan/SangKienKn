@@ -1,5 +1,73 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Chốt đợt push sau pull — 14/10/2026
+
+Đã pull bca6afd và giữ navbar/badge mới từ remote khi ghép các chỉnh local. Theo yêu cầu skip mới nhất, **Danh sách Học sinh giữ ở Lớp học của tôi**, không chuyển sang Quản lý lớp. Đợt bàn giao Git gom Top10/huy chương/gọn bảng, các màu/nhãn/icon/menu, quyền nộp mọi thành viên nhóm và archive chương cùng tài liệu; không kèm dữ liệu riêng. Xem commit/trạng thái remote thực tế bằng Git, không dùng các đoạn “chưa push” lịch sử để triển khai lại tính năng.
+
+QA mới: TypeScript/build,127/127 server,6/6 comparator đạt. E2E lượt rộng có lỗi fixture lớp demo; đã tách lớp/API memberships đúng và lượt xác nhận24/24 desktop/mobile đạt. Chi tiết từng lượt ở đầu [session-handoff.md](session-handoff.md). **Triển khai Railway chưa được xác minh từ thao tác push**; không khẳng định backend mới đã phát hành.
+
+## Bảng chăm vườn bỏ cột cây — 14/10/2026
+
+Bảng Những người chăm vườn bỏ cột Cây ra hoa theo ảnh, chỉ còn hạng/tên/thời gian. Không đổi thứ hạng/quy tắc/API hoặc các bảng khác. TypeScript/build và2/2 E2E desktop/mobile mới đạt; local5173/HMR, chưa push. Chi tiết ở đầu [session-handoff.md](session-handoff.md).
+
+## Hiện hành: Quản lý chương/cấp độ, giữ danh sách học sinh — 14/10/2026
+
+Theo yêu cầu mới nhất bỏ qua việc chuyển danh sách, Roster/Danh sách Học sinh **giữ tại Lớp học của tôi cùng vườn/Top10**. Giữ đổi tiêu đề Quản lý chương/Quản lý cấp độ và nút Xóa chương + popup tên/count/Hủy/Xóa, server archive có xác nhận/quyền sở hữu/transaction/retry; giữ lịch sử và sửa sai, không xóa vật lý dữ liệu. API trả canDeleteChapter, máy chủ cũ giữ nút chờ cập nhật. Không tạo danh sách các lớp mới hoặc đổi header chọn lớp.
+
+TypeScript/build,30/30 kiểm thử API và32/32 E2E desktop/mobile mới đạt,320–1920px không overflow. Frontend local5173/HMR đã cập nhật. **Chưa push/deploy: cần triển khai backend Railway mới để nút Xóa chương hoạt động.** Không ghi thử dữ liệu thật. Chi tiết/giả định “danh sách lớp” và cách archive ở đầu [session-handoff.md](session-handoff.md), [question-bank.md](question-bank.md).
+
+## Top3 sát bục, icon chỉ số và huy chương mới — 14/10/2026
+
+Vinh danh thu gọn khoảng cách Top3, ba chỉ số chỉ icon/số trên một hàng, bỏ dãy chip tiêu chí khỏi phần nhìn thấy. Huy chương SVG vàng/bạc/đồng có số hạng lớn và ruy băng, nằm gọn trong bục cả mobile/desktop. Hạng4–10 giữ bố cục/nhãn; không đổi comparator hoặc dữ liệu. TypeScript/build và4/4 E2E mới đạt, kiểm tra320–1920px/tên dài/tỷ lệ thập phân/số4chữ số/không spillout. Frontend local5173/HMR, chưa push/deploy. Chi tiết và giới hạn ảnh QA ở đầu [session-handoff.md](session-handoff.md).
+
+## Nhãn số lượng và trạng thái chương — 14/10/2026
+
+Quản lý lớp tách số bài/số câu thành hai nhãn vàng kem/xanh, số in đậm; trạng thái kiểm tra mở xanh đậm hơn, khóa đỏ. Không đổi số liệu hoặc thao tác mở/khóa. TypeScript/build và4/4 E2E desktop/mobile mới đạt, đã xem ảnh hai kích thước; local5173/HMR, chưa commit/push. Chi tiết ở đầu [session-handoff.md](session-handoff.md).
+
+## Nút xóa bài dạng icon — 14/10/2026
+
+Danh sách bài Quản lý lớp dùng nút thùng rác trước tên, bỏ chữ Xóa bài trên hàng; giữ tooltip/nhãn trợ năng và modal xác nhận. Grid giữ icon cạnh tên dài, vùng chạm44px. TypeScript/build và2/2 E2E desktop/mobile mới đạt; local5173, chưa commit/push. Xem đầu [session-handoff.md](session-handoff.md).
+
+## Màu chờ/mở kiểm tra — 14/10/2026
+
+Thẻ Săn điểm học sinh: nhãn chờ giáo viên mở kiểm tra màu đỏ nhạt cùng style pill; nhãn đã mở màu xanh với nền pha20% xanh đậm hơn. Không đổi quyền hoặc điều kiện dự thi. TypeScript/build và2/2 E2E desktop/mobile mới đạt; frontend local5173/HMR, chưa push/deploy. Chi tiết QA ở đầu [session-handoff.md](session-handoff.md).
+
+## Tên menu lớp và tab khu vườn — 14/10/2026
+
+Menu học sinh hiện là **Lớp học của tôi**; tab đầu giáo viên hiện là **Khu vườn của lớp**, phía dưới không còn heading/mô tả vườn lặp. Giữ menu/h1 giáo viên Lớp học của tôi, route và dữ liệu. TypeScript/build và16/16 E2E desktop/mobile mới đạt; local5173/HMR đã cập nhật, chưa commit/push. Chi tiết ở đầu [session-handoff.md](session-handoff.md).
+
+## Vinh danh Top10 theo cây và thành tích — 13/10/2026
+
+Lớp học của tôi giáo viên có3 bục vàng/bạc/đồng và hạng4–10 phía dưới (lựa chọn người dùng1). Ưu tiên **cấp cây cao nhất trong chương của lớp → số câu practice đã làm riêng biệt → tỷ lệ đúng chưa làm tròn → câu đã khắc phục**. Bằng cả4 dùng tên/ID để giữ vị trí ổn định. Dùng dữ liệu roster/leaderboard thật, không thêm số liệu để đủ10; thiếu metric báo chờ. Refresh30giây/focus/reconnect, search học sinh không ảnh hưởng Top10.
+
+TypeScript/build,6/6 unit và18/18 E2E desktop/mobile mới đạt; đã xem bố cục320/1440px và kiểm tra cả390/768px. Chỉ frontend local5173/HMR, chưa push/deploy đợt này. Chi tiết/giới hạn QA ở đầu [session-handoff.md](session-handoff.md); không dùng trạng thái này để khẳng định backend nộp nhóm đã được triển khai.
+
+## Quyền nộp nhóm mở cho mọi thành viên — 13/10/2026
+
+Mã server/frontend đã cho mọi thành viên hiện tại, được phân vào nhóm, nộp sản phẩm cho nhóm mình trước hạn; giữ người nộp/version/idempotency và các kiểm tra lớp/hạn/file. Đại diện đứng đầu danh sách và selector, vai trò đại diện do giáo viên đổi như cũ. Không có migration/reset dữ liệu. TypeScript/build,9/9 kiểm thử API nhóm và12/12 E2E desktop/mobile mới đạt; QA browser/giới hạn ở [session-handoff.md](session-handoff.md).
+
+**Chưa push/deploy backend Railway trong đợt này.** Sắp xếp đại diện đã hiệu lực local; quyền mọi thành viên cần backend mới. Frontend thiếu capability `memberSubmissions` báo chờ cập nhật và chỉ giữ quyền đại diện của API cũ, không hứa chức năng chưa triển khai.
+
+## Huy chương vàng/bạc/đồng — 13/10/2026
+
+Ba hạng đầu trong xếp hạng học sinh có huy chương Phosphor Duotone, màu vàng/bạc/đồng và số1/2/3 ở tâm. TypeScript/kiểm tra render390/1440px đạt, local5173 đã cập nhật. Giữ phạm vi trang giáo viên/roster theo yêu cầu trước; không thêm dữ liệu hoặc push.
+
+## Lớp học gọn hơn, thống kê khắc phục trong danh sách học sinh — 13/10/2026
+
+Trang Lớp học của tôi giáo viên bỏ hai bảng xếp hạng chăm vườn/sửa sai; vẫn giữ vườn/khung Kết Trái. Roster thêm Câu đã khắc phục, header thời gian dùng icon đồng hồ có nhãn trợ năng. Dùng leaderboard đã tải của đúng lớp để lấy số câu trạng thái resolved; không thêm API/backend/migration. Chưa có số liệu hiện—, tải xong người chưa khắc phục câu nào hiện0. Xếp hạng học sinh và màu huy chương vẫn có. QA mới và trạng thái local/chưa push tại đầu [session-handoff.md](session-handoff.md).
+
+## Hiện hành: tài khoản học sinh lớp 11/6 Vật lí — 13/10/2026
+
+Đã nhập **34 học sinh mới** vào lớp **11/6 · Vật lí** có sẵn trên Railway. Đối chiếu56 tài khoản trước nhập: **0 trùng tên/email**. Đăng nhập họ tên viết liền không dấu + **@greenedu.nk**, mật khẩu tạm theo yêu cầu và bắt buộc đổi lần đầu. Xác minh kết nối mới:34 tài khoản/34 membership, hash/cờ đổi đúng; tổng90 tài khoản. Giữ56 tài khoản cũ, membership cũ và35 bảng khác; backup/integrity/FK/health đạt.3/3 ca script nhập bằng DB riêng đạt. CSV riêng **.local/tai-khoan-lop-11-6.csv**; chi tiết/backup tại đầu [session-handoff.md](session-handoff.md). Chỉ cập nhật dữ liệu được yêu cầu, không deploy/push hoặc tạo tiến độ giả. Các ghi chép Railway chỉ có lớp11/2/51 tài khoản phía dưới là lịch sử.
+
+## Ba hạng đầu vàng/bạc/đồng — 13/10/2026
+
+Hạng1/2/3 có badge và nền hàng/thẻ tương ứng vàng/bạc/đồng trong cả hai bảng xếp hạng. Dùng rank thật từ API, giữ số/nhãn Bạn và dữ liệu. TypeScript và kiểm tra CSS Chromium390/1440px đạt, tương phản số ≥4,5:1. Hiệu lực local5173/HMR; thay đổi này và căn giữa submenu chưa commit/push.
+
+## Căn giữa submenu theo ảnh — 13/10/2026
+
+Đã căn giữa chữ và badge trong từng tab submenu, cả mục đang chọn và chưa chọn. Kiểm tra hình học bằng Chromium tại320/390/768/1440px đạt, giữ submenu một hàng trên dock. CSS hiệu lực qua local5173/HMR; chỉnh nhỏ này chưa commit/push. Bản redesign8dc5aac trước đó đã push origin/main.
+
 ## Hiện hành: navbar mobile gọn và submenu căn đều
 
 Sau preview đã push `c92409c`, tiếp tục tinh chỉnh theo ảnh mới: dock portrait84px + safe area, ô64px, tên đầy đủ tối đa hai dòng/font11–13px, icon Luyện tập16px. Năm ô đều và icon giữ vị trí khi chọn; submenu Luyện tập/Khu vườn lớp và các trang chung căn giữa icon/nhãn/badge trong ô đều44px. Giữ badge câu sai trắng/đỏ tròn và đệm nội dung theo kích thước thật. Chỉ frontend, push remote theo yêu cầu đã chốt; kết quả/bằng chứng tại [session-handoff.md](session-handoff.md), hình thức tại [app-design.md](app-design.md). Git push không chứng minh Railway đã deploy thành công.

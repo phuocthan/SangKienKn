@@ -426,7 +426,9 @@ export function Learning({
                           <dd>{ch.openCorrections}</dd>
                         </div>
                       </dl>
-                      <span className="pill">
+                      <span
+                        className={`pill learning-exam-access ${ch.examAllowed ? "open" : "waiting"}`}
+                      >
                         {ch.examAllowed
                           ? "Giáo viên đã mở kiểm tra"
                           : "Chờ giáo viên mở kiểm tra"}

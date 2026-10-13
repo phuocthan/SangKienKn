@@ -1,6 +1,7 @@
 import { answerCorrect, statementCorrectness, storedAnswer, validateQuestionAnswer, type QuestionKind, type QuestionAnswer } from "../shared/question-types.js";
 import type { Express } from "express";
 import type { DatabaseSync } from "node:sqlite";
+import { chapterIsArchived } from "./chapter-archive.js";
 import { randomInt, randomUUID, createHash } from "node:crypto";
 import { questionInput } from "../shared/questions.js";
 import { sampleByTopic } from "../shared/question-topics.js";
@@ -215,7 +216,7 @@ export function registerLearningRoutes(
     for (const id of value)
       if (
         !db
-          .prepare("SELECT 1 FROM chapters WHERE id=? AND classroom_id=?")
+          .prepare("SELECT 1 FROM chapters WHERE id=? AND classroom_id=? AND id NOT IN (SELECT chapter_id FROM archived_chapters)")
           .get(id, classId)
       )
         fail(403, "Chương không thuộc lớp này.");
@@ -228,7 +229,7 @@ export function registerLearningRoutes(
     return db
       .prepare(
         `SELECT q.*,ch.title AS chapterTitle FROM questions q JOIN chapters ch ON ch.id=q.chapter_id
-      WHERE q.active=1 AND q.is_current=1 AND q.chapter_id IN (${ids.map(() => "?").join(",")}) ORDER BY q.rowid`,
+      WHERE q.active=1 AND q.is_current=1 AND ch.id NOT IN (SELECT chapter_id FROM archived_chapters) AND q.chapter_id IN (${ids.map(() => "?").join(",")}) ORDER BY q.rowid`,
       )
       .all(...ids)
       .map((q) => ({
@@ -249,7 +250,7 @@ export function registerLearningRoutes(
     return db
       .prepare(
         `SELECT q.chapter_id AS chapterId,ch.title AS chapterTitle,q.lesson,COUNT(*) AS available
-      FROM questions q JOIN chapters ch ON ch.id=q.chapter_id WHERE ch.classroom_id=? AND q.active=1 AND q.is_current=1
+      FROM questions q JOIN chapters ch ON ch.id=q.chapter_id WHERE ch.classroom_id=? AND q.active=1 AND q.is_current=1 AND ch.id NOT IN (SELECT chapter_id FROM archived_chapters)
       GROUP BY q.chapter_id,q.lesson ORDER BY MIN(q.rowid)`,
       )
       .all(classId)
@@ -521,7 +522,7 @@ export function registerLearningRoutes(
     if (req.user!.role === "student")
       grantLearningMilestones(db, req.user!.id, now());
     const chapters = db
-      .prepare("SELECT * FROM chapters WHERE classroom_id=? ORDER BY rowid")
+      .prepare("SELECT * FROM chapters WHERE classroom_id=? AND id NOT IN (SELECT chapter_id FROM archived_chapters) ORDER BY rowid")
       .all(c.id)
       .map((ch) => eligibility(ch, req.user!.id));
     const own = req.user!.role === "teacher" ? "" : " AND r.student_id=?";
@@ -792,6 +793,7 @@ export function registerLearningRoutes(
       .get(String(req.params.id));
     if (!ch) fail(404, "Không tìm thấy chương.");
     classroom(req, String(ch.classroom_id));
+    if (chapterIsArchived(db, String(ch.id))) fail(409, "Chương đã được xóa khỏi danh sách đang dùng.");
     if (typeof req.body?.enabled !== "boolean")
       fail(400, "Trạng thái không hợp lệ.");
     db.prepare(
@@ -808,6 +810,7 @@ export function registerLearningRoutes(
       .get(String(req.params.id));
     if (!ch) fail(404, "Không tìm thấy chương.");
     classroom(req, String(ch.classroom_id));
+    if (chapterIsArchived(db, String(ch.id))) fail(409, "Chương đã được xóa khỏi danh sách đang dùng.");
     const semester =
       req.body?.semester === "" ? "" : text(req.body?.semester, "Học kỳ", 80);
     const basis = req.body?.accuracyBasis ?? "all";
@@ -1355,7 +1358,7 @@ export function registerLearningRoutes(
       examId = String(e.id);
     } else {
       const ch = db
-        .prepare("SELECT * FROM chapters WHERE id=? AND classroom_id=?")
+        .prepare("SELECT * FROM chapters WHERE id=? AND classroom_id=? AND id NOT IN (SELECT chapter_id FROM archived_chapters)")
         .get(req.body?.chapterId, c.id);
       if (!ch) fail(404, "Không tìm thấy chương.");
       grantLearningMilestones(db, req.user!.id, now());

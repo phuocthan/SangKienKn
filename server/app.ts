@@ -38,6 +38,7 @@ import {
 } from "./lesson-catalog.js";
 import { loginEmail } from "../shared/login-email.js";
 import { registerFeedbackRoutes } from "./feedback.js";
+import { archiveChapter, chapterIsArchived } from "./chapter-archive.js";
 
 export type Row = Record<string, any>;
 export type AppRequest = Request & { user?: Row; tokenHash?: string };
@@ -418,11 +419,12 @@ export function createApp(
       fail(403, "Bạn không có quyền truy cập lớp học này.");
     return row;
   }
-  function chapter(req: AppRequest, id: string) {
+  function chapter(req: AppRequest, id: string, historical = false) {
     const row = db.prepare("SELECT * FROM chapters WHERE id = ?").get(id) as
       Row | undefined;
     if (!row) fail(404, "Không tìm thấy chương.");
     classroom(req, row.classroom_id);
+    if (!historical && chapterIsArchived(db, id)) fail(409, "Chương đã được xóa khỏi danh sách đang dùng.");
     return row;
   }
   function summary(chapterId: string, userId: string) {
@@ -495,13 +497,14 @@ export function createApp(
         chapters: (
           db
             .prepare(
-              "SELECT id,title FROM chapters WHERE classroom_id = ? ORDER BY rowid",
+              "SELECT id,title FROM chapters WHERE classroom_id = ? AND id NOT IN (SELECT chapter_id FROM archived_chapters) ORDER BY rowid",
             )
             .all(c.id) as Row[]
         ).map((ch) => ({
           ...ch,
           lessons: chapterLessons(db, ch.id),
           canManageLessons: req.user!.role === "teacher",
+          canDeleteChapter: req.user!.role === "teacher",
           canDeleteQuestions: req.user!.role === "teacher",
           canTagQuestions: true,
           questionCount: (
@@ -562,6 +565,10 @@ export function createApp(
     }
     res.status(201).json({ id });
   });
+  app.get("/api/chapters/:id", (req: AppRequest, res) => {
+    const ch = chapter(req, String(req.params.id), true);
+    res.json({ id: ch.id, title: ch.title, lessons: chapterLessons(db, ch.id), questionCount: Number(db.prepare("SELECT COUNT(*) AS n FROM questions WHERE chapter_id=? AND active=1 AND is_current=1").get(ch.id)!.n), ...summary(ch.id, req.user!.id) });
+  });
   app.post("/api/chapters/:id/lessons", (req: AppRequest, res) => {
     teacher(req);
     const ch = chapter(req, String(req.params.id));
@@ -593,6 +600,12 @@ export function createApp(
       if (error instanceof LessonError) fail(error.status, error.message);
       throw error;
     }
+  });
+  app.post("/api/chapters/:id/delete", (req: AppRequest, res) => {
+    teacher(req);
+    const ch = chapter(req, String(req.params.id), true);
+    if (req.body?.confirm !== true) fail(400, "Vui lòng xác nhận xóa chương.");
+    res.json(archiveChapter(db, ch.id, req.user!.id, now()));
   });
   app.post("/api/classrooms/:id/chapters", (req: AppRequest, res) => {
     teacher(req);
@@ -978,13 +991,13 @@ export function createApp(
     );
     return id;
   }
-  function ownedQuestion(req: AppRequest) {
+  function ownedQuestion(req: AppRequest, historical = false) {
     teacher(req);
     const q = db
       .prepare("SELECT * FROM questions WHERE id = ?")
       .get(String(req.params.id)) as Row | undefined;
     if (!q) fail(404, "Không tìm thấy câu hỏi.");
-    chapter(req, q.chapter_id);
+    chapter(req, q.chapter_id, historical);
     return q;
   }
   function questionView(q: Row, req: AppRequest) {
@@ -1011,7 +1024,7 @@ export function createApp(
     };
   }
   app.get("/api/chapters/:id/questions", (req: AppRequest, res) => {
-    chapter(req, String(req.params.id));
+    chapter(req, String(req.params.id), req.query.mode === "correction" || (req.user!.role === "teacher" && req.query.showHidden === "1"));
     const lesson =
       req.query.lesson === undefined
         ? undefined
@@ -1161,7 +1174,7 @@ export function createApp(
     res.json({ ok: true, active: req.body.active });
   });
   app.get("/api/questions/:id/history", (req: AppRequest, res) => {
-    const q = ownedQuestion(req);
+    const q = ownedQuestion(req, true);
     const rows = db
       .prepare(
         "SELECT * FROM questions WHERE COALESCE(family_id,id) = ? ORDER BY version DESC",
@@ -1262,7 +1275,7 @@ export function createApp(
       .prepare("SELECT * FROM questions WHERE id = ?")
       .get(questionId) as Row | undefined;
     if (!q) fail(404, "Không tìm thấy câu hỏi.");
-    chapter(req, q.chapter_id);
+    chapter(req, q.chapter_id, true);
     const content = questionContent(q);
     let selected;
     try { selected = validateQuestionAnswer(content, req.body?.selected); } catch (e) { fail(400, (e as Error).message); }
@@ -1398,7 +1411,7 @@ export function createApp(
     if (learningAnswersLocked(db, req.user!.id, now()))
       fail(409, "Thời gian thi không tính vào thời gian chăm cây.");
     const id = text(req.body?.chapterId, "Chương");
-    chapter(req, id);
+    chapter(req, id, true);
     if (req.body?.questionId !== undefined) {
       const q = db.prepare("SELECT * FROM questions WHERE id=? AND chapter_id=?").get(text(req.body.questionId, "Câu hỏi"), id) as Row | undefined;
       if (!q) fail(400, "Câu hỏi không thuộc chương đang học.");
@@ -1421,7 +1434,7 @@ export function createApp(
       .get(text(req.body?.sessionId, "Phiên học"), req.user!.id) as
       Row | undefined;
     if (!s) fail(409, "Phiên học đã kết thúc hoặc đang mở ở cửa sổ khác.");
-    chapter(req, s.chapter_id);
+    chapter(req, s.chapter_id, true);
     const timestamp = now();
     const delta = Math.max(0, timestamp - s.last_received);
     if (timestamp - s.last_activity >= 120000) {

@@ -10,7 +10,7 @@ test("teacher adds an empty lesson, duplicate is rejected, delete can be cancell
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Lớp học của tôi", exact: true });
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
   const chapter = page.locator(".chapter-row").filter({
     has: page.getByRole("heading", { name: "Chương ôn I", exact: true }),
   });
@@ -29,6 +29,15 @@ test("teacher adds an empty lesson, duplicate is rejected, delete can be cancell
   const lesson = chapter.locator(".lesson-row").filter({ hasText: title });
   await expect(lesson).toHaveCount(1);
   await expect(lesson).toContainText("Chưa có câu hỏi");
+  const deleteButton = lesson.getByRole("button", { name: `Xóa bài · ${title}`, exact: true });
+  await expect(deleteButton).toHaveText("");
+  await expect(deleteButton.locator("svg")).toHaveCount(1);
+  expect(await lesson.evaluate((row) => {
+    const icon = row.querySelector("button")!.getBoundingClientRect();
+    const name = row.querySelector("span")!.getBoundingClientRect();
+    return icon.right <= name.left && icon.width >= 44 && icon.height >= 44;
+  })).toBe(true);
+  await chapter.screenshot({ path: info.outputPath("lesson-delete-icon.png") });
   await add(`  ${title.toLocaleLowerCase("vi")}  `);
   await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
     "đã có bài cùng tên",

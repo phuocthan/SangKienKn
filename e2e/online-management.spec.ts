@@ -23,7 +23,7 @@ async function login(page: Page, teacher: boolean) {
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Thời gian tăng cấp", exact: true }),
+    page.getByRole("heading", { name: "Quản lý cấp độ", exact: true }),
   ).toHaveCount(0);
   if (teacher) {
     await expect(page.locator(".learning-form")).toHaveCount(0);

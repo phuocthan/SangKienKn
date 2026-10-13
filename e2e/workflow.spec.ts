@@ -515,6 +515,12 @@ test("community honors earned students once with old API and keeps tied ranks wi
   );
   await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
   const table = page.getByRole("table", { name: "Xếp hạng chăm vườn" });
+  await expect(table.getByRole("columnheader", { name: "Cây ra hoa", exact: true })).toHaveCount(0);
+  await expect(table.locator("thead th")).toHaveCount(3);
+  const studyTime = table.locator("tbody tr").first().locator("td").last();
+  await expect(studyTime).toHaveText("10 giờ 0 phút");
+  if (page.viewportSize()!.width <= 700)
+    expect(await studyTime.evaluate((node) => getComputedStyle(node, "::before").content)).toBe('"Thời gian: "');
   await expect(table.getByRole("row")).toHaveCount(4);
   const positions = await table
     .locator("tbody .community-rank")

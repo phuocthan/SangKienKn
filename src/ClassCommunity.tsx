@@ -1,6 +1,6 @@
 import { WorkspaceHeading } from "./WorkspaceHeading";
 import { useEffect, useState } from "react";
-import { Clock3, Users } from "./icons";
+import { Clock3, Medal, Users } from "./icons";
 import { api, duration, errorMessage } from "./api";
 import { Empty, SectionTitle } from "./components";
 import { BloomingTreeIcon, ChapterLevelIcons } from "./StudentLevel";
@@ -22,12 +22,14 @@ export function ClassCommunity({
   userId,
   teacherAvatarId,
   embedded = false,
+  onLeaderboardChange,
 }: {
   classroom: Classroom;
   revision: number;
   userId: string;
   teacherAvatarId?: string | null;
   embedded?: boolean;
+  onLeaderboardChange?: (classroomId: string, board: ClassLeaderboard) => void;
 }) {
   const [data, setData] = useState<{
     trees: ClassTree[];
@@ -57,6 +59,7 @@ export function ClassCommunity({
         .then(([garden, board]) => {
           if (alive) {
             setError("");
+            onLeaderboardChange?.(classroom.id, board);
             setData({
               trees: garden.trees,
               members: garden.members,
@@ -88,16 +91,11 @@ export function ClassCommunity({
       window.removeEventListener("online", update);
       document.removeEventListener("visibilitychange", update);
     };
-  }, [classroom.id, revision, retry]);
+  }, [classroom.id, revision, retry, onLeaderboardChange]);
 
   return (
     <>
-      {embedded ? (
-        <SectionTitle
-          title="Khu vườn của lớp"
-          description="Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp."
-        />
-      ) : (
+      {!embedded && (
         <WorkspaceHeading className="page-heading">
           <div>
             <h1>Khu vườn của lớp</h1>
@@ -160,22 +158,28 @@ export function ClassCommunity({
                 : data.teacher?.avatarId
             }
           />
-          <>
-            <SectionTitle
-              title="Những người chăm vườn"
-              description="Ưu tiên thời gian học; cùng thời gian thì xét số cây ra hoa. Thành tích bằng nhau cùng hạng."
-            />
-            <Ranking rows={data.board.effort} userId={userId} kind="effort" />
-            <SectionTitle
-              title="Bác sĩ cây trồng"
-              description="Ghi nhận số câu đang ở trạng thái đã khắc phục trong lớp. Một câu chỉ tính một lần."
-            />
-            <Ranking rows={data.board.repairs} userId={userId} kind="repairs" />
-            <p className="subtle-note">
-              Chỉ hiển thị thành viên đã có hoạt động tương ứng. Thành tích tính
-              trong lớp đang chọn và không dùng điểm số để xếp hạng.
-            </p>
-          </>
+          {!embedded && (
+            <>
+              <SectionTitle
+                title="Những người chăm vườn"
+                description="Ưu tiên thời gian học; cùng thời gian thì xét số cây ra hoa. Thành tích bằng nhau cùng hạng."
+              />
+              <Ranking rows={data.board.effort} userId={userId} kind="effort" />
+              <SectionTitle
+                title="Bác sĩ cây trồng"
+                description="Ghi nhận số câu đang ở trạng thái đã khắc phục trong lớp. Một câu chỉ tính một lần."
+              />
+              <Ranking
+                rows={data.board.repairs}
+                userId={userId}
+                kind="repairs"
+              />
+              <p className="subtle-note">
+                Chỉ hiển thị thành viên đã có hoạt động tương ứng. Thành tích
+                tính trong lớp đang chọn và không dùng điểm số để xếp hạng.
+              </p>
+            </>
+          )}
         </>
       )}
     </>
@@ -220,20 +224,35 @@ function Ranking({
             <th scope="col">
               {kind === "effort" ? "Thời gian học" : "Câu đã khắc phục"}
             </th>
-            <th scope="col">Cây ra hoa</th>
+            {kind === "repairs" && <th scope="col">Cây ra hoa</th>}
           </tr>
         </thead>
         <tbody>
           {rows.map((member) => (
             <tr
               key={member.id}
+              data-rank={member.rank}
               className={member.id === userId ? "community-mine" : ""}
             >
               <td>
                 <span
-                  className={`community-rank ${member.rank <= 3 ? "community-top" : ""}`}
+                  className={`community-rank ${member.rank <= 3 ? "community-top community-medal" : ""}`}
+                  title={
+                    member.rank <= 3
+                      ? `Huy chương ${["vàng", "bạc", "đồng"][member.rank - 1]} · Hạng ${member.rank}`
+                      : undefined
+                  }
                 >
-                  {member.rank}
+                  {member.rank <= 3 ? (
+                    <>
+                      <Medal size={40} />
+                      <span className="community-medal-number">
+                        {member.rank}
+                      </span>
+                    </>
+                  ) : (
+                    member.rank
+                  )}
                 </span>
               </td>
               <th scope="row">
@@ -252,7 +271,7 @@ function Ranking({
                   ? studyTime(member.seconds)
                   : member.resolvedCorrections}
               </td>
-              <td>{member.bloomedTrees}</td>
+              {kind === "repairs" && <td>{member.bloomedTrees}</td>}
             </tr>
           ))}
         </tbody>

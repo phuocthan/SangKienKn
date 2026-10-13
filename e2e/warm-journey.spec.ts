@@ -98,7 +98,7 @@ for (const role of ["teacher", "student"] as const) {
       );
       await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
       await expect(
-        nav.getByRole("button", { name: "Khu vườn của lớp", exact: true }),
+        nav.getByRole("button", { name: "Lớp học của tôi", exact: true }),
       ).toHaveAttribute("aria-current", "page");
       expect(
         await page.evaluate(

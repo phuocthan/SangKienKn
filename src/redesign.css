@@ -12,6 +12,8 @@
 }
 .workspace-tabs [role="tab"] {
   flex: 0 0 auto;
+  justify-content: center;
+  text-align: center;
   white-space: nowrap;
   min-height: 44px;
 }
@@ -20,9 +22,92 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.roster-card .roster-time-heading,
+.roster-card .roster-time-cell,
+.roster-card .roster-resolved-cell {
+  text-align: center;
+}
+.roster-time-heading svg {
+  vertical-align: middle;
+}
+.roster-time-cell {
+  white-space: nowrap;
+}
+.roster-resolved-count {
+  font-variant-numeric: tabular-nums;
+}
+.community-ranking tr[data-rank="1"] {
+  --medal-surface: #fff7df;
+  --medal-fill: #f4d773;
+  --medal-border: #d7b353;
+  --medal-ink: #6b4c10;
+}
+.app-shell .community-ranking tbody th {
+  background: transparent;
+}
+.community-ranking tr[data-rank="2"] {
+  --medal-surface: #f0f3f5;
+  --medal-fill: #dfe7ec;
+  --medal-border: #b7c5ce;
+  --medal-ink: #405462;
+}
+.community-ranking tr[data-rank="3"] {
+  --medal-surface: #f8eee5;
+  --medal-fill: #e9ba91;
+  --medal-border: #c99365;
+  --medal-ink: #713f22;
+}
+.app-shell
+  .community-ranking
+  tbody
+  tr:is([data-rank="1"], [data-rank="2"], [data-rank="3"]) {
+  background: var(--medal-surface);
+  border-color: var(--medal-border);
+}
+.community-ranking
+  tr:is([data-rank="1"], [data-rank="2"], [data-rank="3"])
+  .community-rank {
+  background: var(--medal-fill);
+  color: var(--medal-ink);
+  border: 1px solid var(--medal-border);
+  box-shadow: inset 0 1px 0 #ffffff80;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
 .workspace-tabs [role="tab"]:focus-visible {
   outline: 2px solid #326145;
   outline-offset: -3px;
+}
+.community-ranking tr .community-rank.community-medal {
+  position: relative;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.community-medal > svg {
+  color: var(--medal-border);
+}
+.community-medal > svg path:first-child {
+  fill: var(--medal-fill);
+  opacity: 1;
+}
+.community-medal-number {
+  position: absolute;
+  left: 50%;
+  top: 37.5%;
+  transform: translate(-50%, -50%);
+  color: var(--medal-ink);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+@media (max-width: 600px) {
+  .community-ranking tbody tr {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+  }
 }
 .app-shell .main-content .stat-card.card {
   background: #f0f5e8;
@@ -85,12 +170,70 @@
 .chapter-row-copy :is(h3, p) {
   margin-bottom: 0;
 }
+.chapter-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chapter-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.chapter-count.lessons {
+  background: #fcf3df;
+  border-color: #e8d6af;
+  color: #805c23;
+}
+.chapter-count.questions {
+  background: #eaf3e7;
+  border-color: #c5d9ba;
+  color: #315b3e;
+}
+.chapter-exam-status {
+  padding: 5px 9px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.chapter-exam-status.open {
+  background: #cad9c7;
+  border-color: #a9c19d;
+  color: #285438;
+}
+.chapter-exam-status.locked {
+  background: #fff0ec;
+  border-color: #f4d3c8;
+  color: #a14c3b;
+}
 .chapter-list .chapter-row > .text-button {
   justify-self: start;
 }
 .class-chapter-access {
   align-items: center;
   gap: 12px;
+}
+.chapter-row-actions {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.class-management-card + .section-title {
+  margin-top: 26px;
+}
+.chapter-row-actions .text-button {
+  margin-left: 0;
+}
+.chapter-list + .class-management-card {
+  margin-top: 24px;
 }
 .blooming-tree-icon {
   position: relative;
@@ -184,6 +327,28 @@
 }
 .app-shell .main-content .student-learning .learning-chapter:nth-child(2n) {
   background: #fcf3e3;
+}
+.learning-exam-access.waiting {
+  background: #fff0ec;
+  border-color: #f4d3c8;
+  color: #a14c3b;
+}
+.lesson-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+.lesson-row .lesson-delete {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+.learning-exam-access.open {
+  background: color-mix(in srgb, #eaf3e7 80%, #497349 20%);
+  border-color: #a9c19d;
+  color: #315b3e;
 }
 .student-learning .learning-chapter > .button {
   width: 100%;

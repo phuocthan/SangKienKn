@@ -244,6 +244,9 @@ test("teacher controls chapter access; qualified students wait, opening another 
       .first();
     const hunt = chapter.getByRole("button", { name: "Săn điểm", exact: true });
     await expect(chapter).toContainText("Chờ giáo viên mở kiểm tra");
+    await expect(chapter.locator(".learning-exam-access.waiting")).toHaveCSS(
+      "background-color", "rgb(255, 240, 236)",
+    );
     await expect(hunt).toBeDisabled();
     await permission
       .getByRole("button", { name: "Mở kiểm tra · Chương ôn II", exact: true })
@@ -269,6 +272,12 @@ test("teacher controls chapter access; qualified students wait, opening another 
     await student.bringToFront();
     await student.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(hunt).toBeEnabled();
+    await expect(chapter.locator(".learning-exam-access.open")).toHaveText(
+      "Giáo viên đã mở kiểm tra",
+    );
+    await expect(chapter.locator(".learning-exam-access.open")).toHaveCSS(
+      "background-color", "color(srgb 0.791373 0.852549 0.781961)",
+    );
     await student.reload();
     await navigateTo(student, { name: "Ôn tập & kiểm tra" });
     await expect(hunt).toBeEnabled();

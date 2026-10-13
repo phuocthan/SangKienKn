@@ -77,6 +77,19 @@ export function Lessons({
             {chapter.lessons.map((lesson) => (
               <li key={lesson.title}>
                 <div className="lesson-row">
+                  <button
+                    className="button danger-outline small lesson-delete"
+                    disabled={busy || !chapter.canManageLessons}
+                    aria-label={`Xóa bài · ${lesson.title}`}
+                    title={`Xóa bài · ${lesson.title}`}
+                    onClick={() => {
+                      setDeleting(lesson.title);
+                      setError("");
+                      setNotice("");
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
                   <div>
                     <span>{lesson.title}</span>
                     <small>
@@ -85,18 +98,6 @@ export function Lessons({
                         : "Chưa có câu hỏi"}
                     </small>
                   </div>
-                  <button
-                    className="button danger-outline small"
-                    disabled={busy || !chapter.canManageLessons}
-                    aria-label={`Xóa bài · ${lesson.title}`}
-                    onClick={() => {
-                      setDeleting(lesson.title);
-                      setError("");
-                      setNotice("");
-                    }}
-                  >
-                    <Trash2 size={15} /> Xóa bài
-                  </button>
                 </div>
               </li>
             ))}

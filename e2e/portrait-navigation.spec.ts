@@ -265,13 +265,15 @@ for (const role of ["teacher", "student", "admin"] as const) {
       await navigateTo(page, { name: "Xếp hạng chăm chỉ" });
       await expect(
         page.getByRole("navigation").getByRole("button", {
-          name: role === "teacher" ? "Lớp học của tôi" : "Khu vườn của lớp",
+          name: "Lớp học của tôi",
           exact: true,
         }),
       ).toHaveAttribute("aria-current", "page");
-      await expect(
-        page.getByRole("heading", { name: "Những người chăm vườn" }),
-      ).toBeVisible();
+      const ranking = page.getByRole("heading", {
+        name: "Những người chăm vườn",
+      });
+      if (role === "teacher") await expect(ranking).toHaveCount(0);
+      else await expect(ranking).toBeVisible();
     }
     if (role !== "admin") {
       const feedback = header.getByRole("button", {

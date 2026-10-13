@@ -35,6 +35,7 @@ export type GroupActivitySummary = {
   hasSubmitted: boolean;
 };
 export type GroupActivity = {
+  memberSubmissions?: boolean;
   discussionOpen?: boolean;
   canDiscuss?: boolean;
   myGroupId?: string | null;
@@ -59,6 +60,16 @@ export type GroupActivity = {
   }[];
   serverNow: number;
 };
+
+export function representativeFirst(
+  group: Pick<ActivityGroup, "representativeId" | "members">,
+) {
+  return [...group.members].sort(
+    (a, b) =>
+      Number(b.id === group.representativeId) -
+      Number(a.id === group.representativeId),
+  );
+}
 export type GroupDiscussionPost = {
   id: string;
   parentId: string | null;

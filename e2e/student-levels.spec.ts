@@ -106,7 +106,7 @@ test("student switches independent subject icons, sees all five stages and retai
   expect(errors).toEqual([]);
 });
 
-test("teacher roster and class leaderboard show the same student stage for the selected subject", async ({
+test("teacher roster stages match class data while teacher overview omits ranking tables", async ({
   page,
 }) => {
   await page.goto("/");
@@ -132,17 +132,17 @@ test("teacher roster and class leaderboard show the same student stage for the s
     );
     await expect(row.locator(".chapter-level-icons")).not.toContainText("Cấp");
     await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
-    const boardRow = page
-      .getByRole("table", { name: "Xếp hạng chăm vườn" })
-      .getByRole("row")
-      .filter({ hasText: "Học sinh cấp độ" });
-    const boardIcons = boardRow.locator(".chapter-level-icon-item");
-    await expect(boardIcons).toHaveCount(2);
-    await expect(boardIcons.first()).toHaveAttribute("data-level", level);
-    await expect(boardIcons.first()).toHaveAttribute("title", /Chương 1.*Cấp/);
-    await expect(boardRow.locator(".chapter-level-icons")).not.toContainText(
-      "Chương",
+    await expect(
+      page.getByRole("table", { name: "Xếp hạng chăm vườn" }),
+    ).toHaveCount(0);
+    const board = await (
+      await page.request.get(`/api/classrooms/${id}/leaderboard`)
+    ).json();
+    const member = board.effort.find(
+      (entry: { name: string }) => entry.name === "Học sinh cấp độ",
     );
+    expect(member.chapterLevels).toHaveLength(2);
+    expect(String(member.chapterLevels[0].level)).toBe(level);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,

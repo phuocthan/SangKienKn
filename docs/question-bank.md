@@ -1,5 +1,13 @@
 # Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
+## Xóa chương khỏi danh sách đang dùng — 14/10/2026
+
+Quản lý lớp → Quản lý chương → Xóa chương mở popup xác nhận tên chương/số bài/câu. Hủy không ghi dữ liệu. Xác nhận gọi POST `/api/chapters/:id/delete` với `confirm:true`; chỉ giáo viên sở hữu lớp, giáo viên khác/học sinh bị403. canDeleteChapter từ API bảo vệ client tương thích máy chủ cũ. Backend Railway cần bản mới; mã local không chứng minh đã triển khai.
+
+Xóa là archive trong bảng archived_chapters có người/thời điểm, tắt active câu hỏi và khóa kiểm tra, không DELETE chương/bài/câu hoặc dữ liệu học sinh. Transaction atomic và retry giữ audit lần đầu. Chương không còn ở danh sách/matrix/nguồn ôn mới; thêm/sửa bài/câu hoặc mở thi lại trên chương archive bị chặn. Phiên ôn/thi/snapshot/attempts/progress/sổ tay/vé/điểm đã lưu vẫn giữ; sửa sai của câu cũ và đọc history vẫn được. GET metadata chương kiểm tra quyền lớp để frontend mở sửa sai khi chương đã ra khỏi danh sách. Chương khác không đổi. Chưa có UI khôi phục chương trong phạm vi yêu cầu này.
+
+Sau xóa, danh sách tải lại; nếu ngân hàng đang chọn chương vừa xóa thì chuyển sang chương còn lại, không gửi nhầm ID cũ. Theo yêu cầu skip mới nhất, Danh sách Học sinh giữ ở Lớp học của tôi cùng Vinh danh Top10/vườn. QA mới/trạng thái deployment tại đầu [session-handoff.md](session-handoff.md).
+
 ## Lưu dạng mới trên máy chủ và số ý đúng — 13/10/2026
 
 Một câu đúng/sai4 ý có thể có từ0 đến4 ý đúng; tất cả Sai (key0000) hoặc tất cả Đúng (1111) đều hợp lệ. Nếu xem trước Word mẫu có4 câu hợp lệ nhưng Câu3 báo Chọn một đáp án đúng khi lưu, cần cập nhật API hỗ trợ dạng mới; validator cũ chỉ biết A–D. Client kiểm tra health.questionTypes trước write nhập/tạo/sửa dạng mới, chặn máy chủ cũ với thông báo rõ ràng và giữ bản xem trước. Không sửa key đúng/sai thành một đáp án trắc nghiệm để vượt validation. Capability thực tế Railway và SHA ở session-handoff.

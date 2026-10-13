@@ -1,4 +1,5 @@
 import { WorkspaceHeading } from "./WorkspaceHeading";
+import { representativeFirst } from "../shared/group-activities";
 import {
   useCallback,
   useEffect,
@@ -472,8 +473,8 @@ export function GroupActivities({
                   detail.discussionOpen
                     ? "Cùng đọc sản phẩm và trao đổi sau thời gian nộp bài. Nhóm của bạn được đánh dấu riêng."
                     : teacher
-                      ? "Nhóm được chia ngẫu nhiên và giữ cố định. Mỗi nhóm có một đại diện nộp bài."
-                      : "Cùng chuẩn bị sản phẩm; đại diện nộp bài cho cả nhóm trước hạn."
+                      ? "Nhóm được chia ngẫu nhiên và giữ cố định. Đại diện đứng đầu danh sách thành viên."
+                      : "Cùng chuẩn bị sản phẩm và nộp bài cho nhóm trước hạn."
                 }
               />
               {teacher && (
@@ -530,7 +531,7 @@ export function GroupActivities({
                       </span>
                     </div>
                     <ul className="group-members">
-                      {group.members.map((member) => (
+                      {representativeFirst(group).map((member) => (
                         <li key={member.id}>
                           <Avatar
                             name={member.name}
@@ -558,30 +559,33 @@ export function GroupActivities({
                         group={group}
                         onUpdate={() => updated("Đã cập nhật đại diện nhóm.")}
                       />
-                    ) : group.representativeId === user.id ? (
+                    ) : group.id === ownGroup?.id &&
+                      group.members.some(
+                        (member) => member.id === user.id && member.active,
+                      ) ? (
                       now < detail.deadlineAt ? (
-                        <SubmissionForm
-                          activity={detail}
-                          group={group}
-                          onUpdate={() => updated("Đã nhận bài nộp của nhóm.")}
-                          onRefresh={() => refresh(selected, true)}
-                        />
+                        detail.memberSubmissions ||
+                        group.representativeId === user.id ? (
+                          <SubmissionForm
+                            activity={detail}
+                            group={group}
+                            onUpdate={() =>
+                              updated("Đã nhận bài nộp của nhóm.")
+                            }
+                            onRefresh={() => refresh(selected, true)}
+                          />
+                        ) : (
+                          <p className="subtle-note" role="status">
+                            Hiện tại chỉ đại diện nộp được. Quyền nộp cho tất cả
+                            thành viên đang chờ cập nhật hệ thống.
+                          </p>
+                        )
                       ) : (
                         <p className="subtle-note" role="status">
                           Đã hết hạn nộp bài. Giáo viên cần gia hạn để nhóm nộp
                           thêm.
                         </p>
                       )
-                    ) : group.id === ownGroup?.id ? (
-                      <p className="subtle-note">
-                        Đại diện{" "}
-                        {
-                          group.members.find(
-                            (member) => member.id === group.representativeId,
-                          )?.name
-                        }{" "}
-                        sẽ nộp sản phẩm cho nhóm.
-                      </p>
                     ) : null}
                     <h4 className="group-products-title">
                       Sản phẩm đã nộp <span>{group.submissions.length}</span>
@@ -591,8 +595,7 @@ export function GroupActivities({
                         <FileText size={22} />
                         <p>Chưa có sản phẩm.</p>
                         <small>
-                          File hoặc link sẽ xuất hiện tại đây khi đại diện nộp
-                          bài.
+                          File hoặc link sẽ xuất hiện tại đây khi nhóm nộp bài.
                         </small>
                       </div>
                     )}
@@ -853,7 +856,7 @@ function Representative({
               Đại diện đã rời lớp
             </option>
           )}
-          {group.members
+          {representativeFirst(group)
             .filter((member) => member.active)
             .map((member) => (
               <option value={member.id} key={member.id}>

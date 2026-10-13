@@ -17,6 +17,7 @@ export type Chapter = {
   questionCount: number;
   lessons: { title: string; questionCount: number }[];
   canManageLessons?: boolean;
+  canDeleteChapter?: boolean;
   canDeleteQuestions?: boolean;
   canTagQuestions?: boolean;
   seconds: number;

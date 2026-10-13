@@ -19,7 +19,7 @@ export function ClassLevelSettings({
   return (
     <section className="card class-management-card" aria-labelledby="class-level-title">
       <div>
-        <h2 id="class-level-title">Thời gian tăng cấp</h2>
+        <h2 id="class-level-title">Quản lý cấp độ</h2>
         <p>Mỗi chương tăng một cấp sau số phút học có hoạt động bạn chọn.</p>
       </div>
       <form

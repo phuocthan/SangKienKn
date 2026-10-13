@@ -11,6 +11,7 @@ import type {
   GroupActivity,
   GroupSubmission,
 } from "../shared/group-activities.js";
+import { representativeFirst } from "../shared/group-activities.js";
 
 export const isGroupUploadPath = (path: string) =>
   /^\/(?:api\/)?(?:classrooms\/[^/]+\/group-activities|group-activities\/[^/]+\/submissions)\/?$/.test(
@@ -156,12 +157,15 @@ export function registerGroupRoutes(
         id: group.id,
         number: group.number,
         representativeId: group.representative_id,
-        members: members.map((member) => ({
-          id: member.id,
-          name: member.name,
-          avatarId: member.avatarId ?? null,
-          active: !!member.active,
-        })),
+        members: representativeFirst({
+          representativeId: group.representative_id,
+          members: members.map((member) => ({
+            id: member.id,
+            name: member.name,
+            avatarId: member.avatarId ?? null,
+            active: !!member.active,
+          })),
+        }),
         submissions: rows.map((entry): GroupSubmission => ({
           id: entry.id,
           version: entry.version,
@@ -184,6 +188,7 @@ export function registerGroupRoutes(
       )
       .all(row.id) as Row[];
     return {
+      memberSubmissions: true,
       canDiscuss: true,
       discussionOpen: groupDiscussionOpen(
         db,
@@ -521,11 +526,6 @@ export function registerGroupRoutes(
           submittedAt: old.created_at,
         });
       }
-      if (group.representative_id !== req.user!.id)
-        fail(
-          403,
-          "Chỉ đại diện nhóm được nộp bài. Nhờ giáo viên đổi đại diện nếu cần.",
-        );
       const id = randomUUID();
       let version: number, timestamp: number;
       db.exec("BEGIN");

@@ -112,14 +112,17 @@
     content: "Đã sửa: ";
   }
 
-  .community-ranking tbody td:last-child {
+  .community-ranking.repairs tbody td:last-child {
     grid-column: 3;
     text-align: right;
     font-size: var(--text-caption);
   }
 
-  .community-ranking tbody td:last-child::before {
+  .community-ranking.repairs tbody td:last-child::before {
     content: "Cây: ";
+  }
+  .community-ranking.effort tbody td:nth-child(3) {
+    grid-column: 2 / -1;
   }
 
   .community-student-line {

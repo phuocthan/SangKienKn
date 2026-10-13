@@ -8,7 +8,10 @@ import { zipSync, strToU8 } from "fflate";
 import { createApp } from "./app.js";
 import { hashPassword, openDatabase, seedDemo } from "./db.js";
 import { requirementWordText } from "./activity-files.js";
-import type { GroupActivity } from "../shared/group-activities.js";
+import type {
+  ActivityGroup,
+  GroupActivity,
+} from "../shared/group-activities.js";
 
 const word = (xml: string) =>
   Buffer.from(zipSync({ "word/document.xml": strToU8(xml) }));
@@ -558,7 +561,7 @@ test("activity permissions restrict classes, student view and submission files t
   );
 });
 
-test("only a current group representative submits; teacher can change representative but cannot move students across groups", async (t) => {
+test("every current assigned member submits; representative sorts first and only teacher changes it", async (t) => {
   const f = await fixture(t),
     teacher = await f.login("teacher-demo");
   const activity: GroupActivity = (
@@ -577,9 +580,17 @@ test("only a current group representative submits; teacher can change representa
     oldRep = await f.login(group.representativeId);
   const path = `/group-activities/${activity.id}`,
     change = `${path}/groups/${group.id}/representative`;
+  assert.equal(activity.memberSubmissions, true);
+  for (const entry of activity.groups)
+    assert.equal(entry.members[0].id, entry.representativeId);
+  const memberRequest = linkSubmission();
   assert.equal(
-    (await f.request(`${path}/submissions`, linkSubmission(), member)).status,
-    403,
+    (await f.request(`${path}/submissions`, memberRequest, member)).status,
+    201,
+  );
+  assert.equal(
+    (await f.request(`${path}/submissions`, memberRequest, oldRep)).status,
+    409,
   );
   assert.equal(
     (
@@ -635,17 +646,30 @@ test("only a current group representative submits; teacher can change representa
   );
   assert.equal(
     (await f.request(`${path}/submissions`, linkSubmission(), oldRep)).status,
+    201,
+  );
+  assert.equal(
+    (await f.request(`${path}/submissions`, linkSubmission(), member)).status,
+    201,
+  );
+  const updatedGroup = (
+    await f.request(path, undefined, teacher)
+  ).data.groups.find((entry: ActivityGroup) => entry.id === group.id);
+  assert.equal(updatedGroup.members[0].id, otherMember.id);
+  assert.equal(updatedGroup.submissions.length, 3);
+  f.db
+    .prepare(
+      "DELETE FROM memberships WHERE student_id=? AND classroom_id='class-demo'",
+    )
+    .run(group.representativeId);
+  assert.equal(
+    (await f.request(`${path}/submissions`, linkSubmission(), oldRep)).status,
     403,
   );
   assert.equal(
     (await f.request(`${path}/submissions`, linkSubmission(), member)).status,
     201,
   );
-  f.db
-    .prepare(
-      "DELETE FROM memberships WHERE student_id=? AND classroom_id='class-demo'",
-    )
-    .run(group.representativeId);
   assert.equal(
     (
       await f.request(

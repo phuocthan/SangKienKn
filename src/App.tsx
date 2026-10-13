@@ -1,4 +1,6 @@
 import { StudentNotebook } from "./StudentNotebook";
+import { ClassHonors } from "./ClassHonors";
+import { ChapterDelete } from "./ChapterDelete";
 import {
   useCallback,
   useEffect,
@@ -80,7 +82,14 @@ import {
 } from "./WorkspaceHeading";
 import { QuestionBank } from "./QuestionBank";
 import { QuestionFields, readQuestionForm } from "./QuestionFields";
-import type { Chapter, Classroom, Question, Student, User } from "./types";
+import type {
+  Chapter,
+  Classroom,
+  ClassLeaderboard,
+  Question,
+  Student,
+  User,
+} from "./types";
 import { WorkspaceContent, type WorkspaceTab } from "./WorkspaceTabs";
 import { loginEmail } from "../shared/login-email";
 
@@ -150,6 +159,19 @@ export default function App() {
   const [entryClassId, setEntryClassId] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [classLeaderboards, setClassLeaderboards] = useState<
+    Record<string, ClassLeaderboard>
+  >({});
+  const rememberClassLeaderboard = useCallback(
+    (classroomId: string, board: ClassLeaderboard) => {
+      setClassLeaderboards((previous) => ({
+        ...previous,
+        [classroomId]: board,
+      }));
+    },
+    [],
+  );
+  useEffect(() => setClassLeaderboards({}), [user?.id]);
   const [studyExitNotice, setStudyExitNotice] = useState("");
   const [editor, setEditor] = useState<Editor>(null);
   const [accountDialog, setAccountDialog] = useState<
@@ -279,6 +301,14 @@ export default function App() {
   useEffect(() => {
     setQuestionChapter(current?.chapters[0]?.id ?? "");
   }, [current?.id]);
+  useEffect(() => {
+    if (
+      questionChapter && current &&
+      !current.chapters.some((chapter) => chapter.id === questionChapter)
+    ) {
+      setQuestionChapter(current.chapters[0]?.id ?? "");
+    }
+  }, [current?.chapters, questionChapter]);
   useEffect(() => {
     if (!user || user.role === "admin" || !current || study) return;
     const params = new URLSearchParams(location.hash.slice(1));
@@ -479,7 +509,7 @@ export default function App() {
         { id: "practice", label: "Luyện tập", icon: BookOpen },
         { id: "learning", label: "Ôn tập & kiểm tra", icon: GraduationCap },
         { id: "online-exams", label: "Kiểm tra online", icon: ClipboardList },
-        { id: "garden", label: "Khu vườn của lớp", icon: TreeIcon },
+        { id: "garden", label: "Lớp học của tôi", icon: TreeIcon },
       ];
   const parentPage: Page =
     page === "leaderboard"
@@ -507,7 +537,7 @@ export default function App() {
           parent: "classes",
           label: "Lớp học của tôi",
           items: [
-            { id: "classes", label: "Lớp học của tôi", icon: ClassroomIcon },
+            { id: "classes", label: "Khu vườn của lớp", icon: ClassroomIcon },
             { id: "groups", label: "Hoạt động nhóm", icon: Users },
             { id: "class-settings", label: "Quản lý lớp", icon: Settings },
           ],
@@ -958,10 +988,13 @@ export default function App() {
                       userId={user.id}
                       teacherAvatarId={user.avatarId}
                       embedded
+                      onLeaderboardChange={rememberClassLeaderboard}
                     />
                   </section>
                   <Roster
+                    key={current.id}
                     classroom={current}
+                    leaderboard={classLeaderboards[current.id]}
                     revision={revision}
                     onAdd={() => setEditor("student")}
                     onReset={(s) => setEditor({ student: s })}
@@ -976,7 +1009,7 @@ export default function App() {
                     text={`Tổ chức chương học và điều chỉnh nhịp tăng cấp cho ${current.name}.`}
                   />
                   <SectionTitle
-                    title="Danh sách Chương"
+                    title="Quản lý chương"
                     action={
                       <button
                         className="button outline small"
@@ -1001,9 +1034,13 @@ export default function App() {
                             <div className="chapter-row-main">
                               <div className="chapter-row-copy">
                                 <h3>{ch.title}</h3>
-                                <p>
-                                  {ch.lessons.length} bài · {ch.questionCount}{" "}
-                                  câu hỏi
+                                <p className="chapter-counts">
+                                  <span className="chapter-count lessons">
+                                    <strong>{ch.lessons.length}</strong> bài
+                                  </span>
+                                  <span className="chapter-count questions">
+                                    <strong>{ch.questionCount}</strong> câu hỏi
+                                  </span>
                                 </p>
                               </div>
                               <Lessons
@@ -1014,6 +1051,7 @@ export default function App() {
                                 }}
                               />
                             </div>
+                            <div className="chapter-row-actions">
                             <LinkButton
                               onClick={() => {
                                 setQuestionChapter(ch.id);
@@ -1022,8 +1060,19 @@ export default function App() {
                             >
                               Quản lý câu hỏi
                             </LinkButton>
+                            <ChapterDelete
+                              chapter={ch}
+                              onChange={async () => {
+                                await reload();
+                                setRevision((value) => value + 1);
+                                setNotice("Đã xóa chương khỏi danh sách đang dùng.");
+                              }}
+                            />
+                            </div>
                             <div className="class-chapter-access">
-                              <span>
+                              <span
+                                className={`chapter-exam-status ${access?.examAllowed ? "open" : "locked"}`}
+                              >
                                 {access?.examAllowed
                                   ? "Kiểm tra đang mở"
                                   : "Kiểm tra đang khóa"}
@@ -1993,6 +2042,11 @@ function Corrections({
                     const chapter = classes
                       .flatMap((c) => c.chapters)
                       .find((c) => c.id === q.chapterId);
+                    if (!chapter) {
+                      void api<Chapter>(`/chapters/${q.chapterId}`)
+                        .then((archived) => onStudy({ chapter: archived, mode: "correction", questionId: q.id }))
+                        .catch((e) => setError(errorMessage(e)));
+                    }
                     if (chapter)
                       onStudy({
                         chapter,
@@ -2014,11 +2068,13 @@ function Corrections({
 }
 function Roster({
   classroom,
+  leaderboard,
   revision,
   onAdd,
   onReset,
 }: {
   classroom: Classroom;
+  leaderboard?: ClassLeaderboard;
   revision: number;
   onAdd: () => void;
   onReset: (s: Student) => void;
@@ -2032,20 +2088,41 @@ function Roster({
     [exporting, setExporting] = useState(false);
   useEffect(() => {
     let alive = true;
+    let inFlight = false;
     setLoading(true);
     setError("");
-    api<Student[]>(`/classrooms/${classroom.id}/students`)
-      .then((r) => {
-        if (alive) setRows(r);
-      })
-      .catch((e) => {
-        if (alive) setError(errorMessage(e));
-      })
-      .finally(() => {
-        if (alive) setLoading(false);
-      });
+    const refresh = () => {
+      if (!alive || inFlight) return;
+      inFlight = true;
+      api<Student[]>(`/classrooms/${classroom.id}/students`)
+        .then((r) => {
+          if (alive) {
+            setRows(r);
+            setError("");
+          }
+        })
+        .catch((e) => {
+          if (alive) setError(errorMessage(e));
+        })
+        .finally(() => {
+          inFlight = false;
+          if (alive) setLoading(false);
+        });
+    };
+    const update = () => {
+      if (document.visibilityState === "visible" && navigator.onLine) refresh();
+    };
+    refresh();
+    const timer = window.setInterval(update, 30000);
+    window.addEventListener("focus", update);
+    window.addEventListener("online", update);
+    document.addEventListener("visibilitychange", update);
     return () => {
       alive = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", update);
+      window.removeEventListener("online", update);
+      document.removeEventListener("visibilitychange", update);
     };
   }, [classroom.id, revision, retry]);
   async function exportCsv() {
@@ -2070,11 +2147,23 @@ function Roster({
     }
   }
   const query = searchText(search);
+  const resolvedCounts = new Map(
+    leaderboard?.repairs.map((member) => [
+      member.id,
+      member.resolvedCorrections,
+    ]),
+  );
   const filtered = rows.filter((s) =>
     searchText(`${s.name} ${s.email}`).includes(query),
   );
   return (
     <>
+      <ClassHonors
+        students={rows}
+        leaderboard={leaderboard}
+        loading={loading}
+        error={error}
+      />
       <SectionTitle
         title="Danh sách Học sinh"
 
@@ -2133,14 +2222,22 @@ function Roster({
           <div className="loading-panel">Đang tải tiến độ…</div>
         ) : rows.length ? (
           <div className="table-scroll">
-            <table>
+            <table aria-label="Danh sách học sinh">
               <thead>
                 <tr>
                   <th>Học sinh</th>
-                  <th>Thời gian học</th>
+                  <th
+                    className="roster-time-heading"
+                    scope="col"
+                    aria-label="Thời gian học"
+                    title="Thời gian học"
+                  >
+                    <Clock3 size={20} />
+                  </th>
                   <th>Số câu đã làm</th>
                   <th>Tỷ lệ đúng</th>
                   <th>Câu cần sửa</th>
+                  <th>Câu đã khắc phục</th>
                   <th>Tài khoản</th>
                 </tr>
               </thead>
@@ -2157,7 +2254,7 @@ function Roster({
                         </div>
                       </div>
                     </td>
-                    <td>{duration(s.seconds)}</td>
+                    <td className="roster-time-cell">{duration(s.seconds)}</td>
                     <td>{s.answeredQuestions ?? s.total}</td>
                     <td>
                       {s.total
@@ -2176,6 +2273,18 @@ function Roster({
                       >
                         Xem sổ tay
                       </button>
+                    </td>
+                    <td className="roster-resolved-cell">
+                      <span
+                        className="pill roster-resolved-count"
+                        title={
+                          leaderboard
+                            ? "Số câu đã khắc phục trong lớp; mỗi câu tính một lần"
+                            : "Chưa tải được số câu đã khắc phục"
+                        }
+                      >
+                        {leaderboard ? (resolvedCounts.get(s.id) ?? 0) : "—"}
+                      </span>
                     </td>
                     <td>
                       <button

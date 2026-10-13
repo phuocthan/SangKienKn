@@ -1,5 +1,69 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: bảng chăm vườn ba cột — 14/10/2026
+
+Những người chăm vườn chỉ hiện Hạng/Học sinh/Thời gian học; bỏ Cây ra hoa theo ảnh. Mobile nhãn thời gian vẫn đúng và chiếm phần còn lại hàng; cây cấp ở cạnh tên/huy chương/nền hàng giữ nguyên. Bảng sửa sai, thống kê cây và Top10 giữ nguyên; việc ẩn cột không thay tiêu chí phụ của thứ hạng.
+
+## Hiện hành: quản lý chương/cấp độ, roster giữ trang lớp — 14/10/2026
+
+Theo yêu cầu mới nhất **bỏ qua việc chuyển danh sách lớp**, tab **Khu vườn của lớp** giáo viên giữ vườn, Top10 và Danh sách Học sinh cùng tìm kiếm/Thêm học sinh/CSV/sổ tay/reset mật khẩu. Tab **Quản lý lớp** có Quản lý chương và Quản lý cấp độ. Không đổi cấu trúc3tab/menu hoặc dropdown chọn lớp; không thêm danh sách các lớp mới.
+
+Mỗi chương có hàng controls Quản lý câu hỏi bên trái/Xóa chương danger-outline bên phải, tự xuống hàng màn hẹp. Xóa mở modal ghi tên/count và giải thích giữ lịch sử, Hủy/Xóa, busy/lỗi/thành công rõ ràng. API cũ thiếu canDeleteChapter thì disabled/title chờ backend. Thống kê số bài/câu, màu mở/khóa và icon xóa bài giữ đợt trước. Khung Quản lý cấp độ cách danh sách chương24px. Nghiệp vụ archive tại [question-bank.md](question-bank.md); trạng thái triển khai ở bàn giao.
+
+## Hiện hành: Top3 gọn, sát bục và huy chương có số — 14/10/2026
+
+Khung Vinh danh cách vườn24px. Bỏ dãy chip tiêu chí khỏi phần nhìn thấy theo ảnh, giữ danh sách ưu tiên cho trợ năng. Top3 bỏ chiều cao tên3em cố định, tên tối đa2dòng/title; gap4px mobile/6px desktop, cụm thông tin kết thúc cách bục8/10px. Ba chỉ số chỉ icon/số, cùng một hàng, nhãn ẩn về mặt thị giác nhưng vẫn đọc được/title hover; cột tỷ lệ rộng hơn, số tabular và font thích ứng.
+
+Huy chương Top3 là SVG riêng cùng palette bục: dải ruy băng/vòng viền/mặt huy chương chứa1/2/3,56px trong bục desktop/44px mobile,26px cạnh avatar. Thay số lớn + glyph nhỏ trước đây, không cho medal vượt khung đồng70px trên mobile. Giữ ba bục chung chân/bạc trái/vàng giữa cao nhất/đồng phải; giữ toàn bộ danh sách4–10 và các nhãn chỉ số của các dòng đó. Không thay icon Medal chung cho bảng xếp hạng học sinh hoặc comparator.
+
+## Hiện hành: nhãn số lượng và trạng thái chương — 14/10/2026
+
+Dưới tên chương Quản lý lớp, số bài có pill kem/vàng (#fcf3df/chữ #805c23), số câu pill xanh (#eaf3e7/chữ #315b3e); số bold, bỏ dấu chấm phân cách, cụm tự xuống hàng khi cần. Trạng thái Kiểm tra đang mở có nền xanh #cad9c7/chữ #285438, Kiểm tra đang khóa có nền đỏ nhạt #fff0ec/chữ #a14c3b. Bo8px, viền cùng màu, chữ600; giữ nút Mở/Khóa kiểm tra và dữ liệu/quyền.
+
+## Hiện hành: icon xóa trước tên bài — 14/10/2026
+
+Trong danh sách bài của Quản lý lớp, từng hàng có nút Trash Duotone16px trước tên, không có chữ Xóa bài. Giữ nền/viền đỏ danger-outline, vùng bấm44×44px và aria-label/title Xóa bài · tên bài. Grid44px/minmax(0,1fr) giữ icon bên trái tên dài; số câu dưới tên. Số thứ tự và modal xác nhận vẫn giữ.
+
+## Hiện hành: nhãn giáo viên chờ/mở kiểm tra — 14/10/2026
+
+Pill quyền kiểm tra trong thẻ Săn điểm: trạng thái chờ dùng nền đỏ nhạt #fff0ec, viền #f4d3c8, chữ #a14c3b như thông báo đỏ hiện có. Trạng thái đã mở giữ xanh, nền color-mix #eaf3e7 80% + #497349 20%, viền #a9c19d/chữ #315b3e. Giữ kích thước/bo góc/chữ rõ trạng thái, chỉ đổi màu nhãn, không đổi toàn thẻ hoặc màu nút/quy tắc dự thi.
+
+## Hiện hành: tên menu lớp, tab vườn và bỏ chữ lặp — 14/10/2026
+
+Học sinh dùng menu chính **Lớp học của tôi**, bên trong giữ hai tab Khu vườn của lớp / Hoạt động nhóm. Giáo viên giữ menu chính/h1 **Lớp học của tôi**, ba tab hiện là **Khu vườn của lớp / Hoạt động nhóm / Quản lý lớp**. Tab đầu vẫn route classes, không tách trang hay đổi quyền. Bỏ h2 Khu vườn của lớp cùng mô tả Mỗi bạn một cây trong vườn embedded của giáo viên; thống kê nằm ngay sau submenu. Trang vườn độc lập của học sinh giữ heading/mô tả. Các mục lịch sử có tên tab Lớp học của tôi và h2 vườn không thay quyết định này.
+
+## Hiện hành: Vinh danh Top10 của lớp giáo viên — 13/10/2026
+
+Sau khu vườn, trước roster, có bảng Top10 nền xanh/kem ấm. Ba bục chung chân: bạc/hạng2 bên trái, vàng/hạng1 cao nhất ở giữa, đồng/hạng3 bên phải thấp hơn. Avatar/tên/cây/metric phía trên từng bục; số hạng và Medal trong chân bục. Bên dưới là hạng4–10 theo lựa chọn người dùng, mỗi dòng có avatar/tên/cấp và3 chỉ số. Mobile vẫn giữ3 bục cạnh nhau, danh sách thông tin xuống hàng; không tạo thẻ người giả khi lớp dưới10 thành viên.
+
+Các chip thứ tự đầu bảng: Cấp cây → Câu đã làm → Tỷ lệ đúng → Câu khắc phục. Cấp = cao nhất trong các chương của lớp (giống vườn); số câu = answeredQuestions riêng biệt, tỷ lệ = correct/total chưa làm tròn khi so sánh, câu khắc phục = resolved của lớp. Tất cả giảm dần, bằng cả4 theo tên/ID. Thứ hạng chỉ hiển thị, không ghi thưởng/tiến độ. Khi metric chưa sẵn sàng, báo chờ thay vì suy từ lượt/tổng thời gian. Dữ liệu lấy từ toàn roster, không theo ô tìm học sinh.
+
+Component `ClassHonors`, CSS riêng và comparator chung; semantic section/h2, podium articles có nhãn hạng/tên, danh sách ol bắt đầu4 và dl cho metrics. SVG Medal/Avatar trang trí, cây có nhãn cấp, tên dài giới hạn2dòng kèm title. Không thêm animation hoặc hiệu ứng chuyển động liên tục. Roster tự đồng bộ30giây khi visible/online và khi focus/reconnect. QA/triển khai xem bàn giao mới nhất.
+
+## Hiện hành: mọi thành viên nhóm nộp sản phẩm — 13/10/2026
+
+Form nộp file/link hiển thị cho mọi thành viên hiện còn trong lớp và thuộc nhóm mình khi chưa hết hạn. Các nhóm khác được xem trong giai đoạn phản biện không có form nộp. Giữ lịch sử phiên bản, tên người nộp thật và hạn; role đại diện không hạn chế quyền nộp. Đại diện luôn đứng đầu danh sách có badge, selector giáo viên cũng ưu tiên đại diện; thứ tự các thành viên còn lại giữ như API.
+
+Capability detail `memberSubmissions` bảo vệ tương thích Railway cũ: chưa có flag, chỉ đại diện thấy form và thành viên khác thấy thông báo chờ cập nhật. Không tự gửi lệnh server cũ không hỗ trợ. Nghiệp vụ và trạng thái triển khai ở [group-activities.md](group-activities.md), [session-handoff.md](session-handoff.md).
+
+## Hiện hành: icon huy chương ở ba hạng đầu — 13/10/2026
+
+Rank1/2/3 hiển thị Medal Phosphor Duotone40px, mặt huy chương vàng/bạc/đồng với số hạng11px ở tâm và ribbon phía dưới. Giữ nền hàng màu nhẹ và tooltip tên huy chương; từ hạng4 giữ badge số. Mobile dành40px cho cột hạng để icon không chen tên học sinh. SVG trang trí aria-hidden, số vẫn là chữ đọc được. Áp dụng cho hai bảng xếp hạng còn hiển thị ở vườn học sinh.
+
+## Hiện hành: trang lớp giáo viên bỏ hai bảng xếp hạng — 13/10/2026
+
+Giáo viên Lớp học của tôi giữ vườn và roster, bỏ Những người chăm vườn/Bác sĩ cây trồng cùng đoạn mô tả. Vinh danh Kết Trái cấp5 trong khung vườn vẫn giữ; học sinh vẫn xem hai bảng trong Khu vườn của lớp. Quyết định này thay mô tả hai bảng nằm trong trang lớp giáo viên ở phần trước.
+
+Roster có thêm Câu đã khắc phục sau Câu cần sửa: số câu riêng biệt đang resolved của đúng lớp, không đếm lượt sửa. Chưa tải được số liệu hiển thị—. Header Thời gian học chỉ hiện icon Clock Duotone, có aria-label/title cho trợ năng/hover; giờ và số câu căn giữa. Cùng kết quả GET leaderboard đang dùng cho vườn, không thêm request hoặc giả tiến độ.
+
+## Hiện hành: ba hạng đầu theo màu huy chương — 13/10/2026
+
+Trong bảng xếp hạng chăm vườn/sửa sai, hạng1 dùng vàng, hạng2 bạc, hạng3 đồng. Badge có màu rõ, nền hàng desktop/thẻ mobile dùng sắc nhạt tương ứng để giữ chủ đề vườn và chữ dễ đọc. Phân loại theo giá trị rank của thành viên; giữ số hạng/nhãn Bạn, không thay thứ tự hoặc thành tích.
+
+## Hiện hành: chữ submenu căn giữa — 13/10/2026
+
+Mỗi mục submenu căn giữa cụm chữ và badge trong nút, không còn căn trái trên mobile. Giữ một hàng, vị trí trên dock, độ rộng và palette của đợt redesign; icon phụ vẫn ẩn trên portrait≤600px. Đây là điều chỉnh theo ảnh gửi sau đợt redesign bên dưới.
+
 ## Hiện hành: navbar gọn, tối đa hai dòng và submenu căn đều
 
 Navbar portrait giữ **năm ô rộng bằng nhau**, luôn hiện cả icon và tên đầy đủ của mọi mục. Theo yêu cầu tinh chỉnh sau preview, tên dài **tối đa hai dòng** trong vùng chữ cao32px, font thích ứng11–13px; ô cao64px và dock84px + safe area, thay bản88/112px trước đó. Ở màn hình≤350px bỏ khoảng cách giữa ô và padding ngang nút để nhãn Ngân hàng câu hỏi vẫn đủ chữ trong hai dòng. Icon Luyện tập16px, có khoảng đệm giữ cùng hàng icon20px ở các mục còn lại. Active chỉ đổi màu nền/viền/chữ, **không tăng chiều rộng, không dịch chuyển icon và không chạy hiệu ứng nới ô/fade nhãn**. Giữ màu rừng và active nền kem đã duyệt. Quyết định này thay navbar chỉ hiện tên mục active, flex-grow2.3 và vùng chữ34px trong lịch sử.
@@ -325,7 +389,7 @@ Bảng trên là hệ token trước khi áp dụng CSS khu vườn. `garden.css
 
 Phần đầu trang dùng minh họa ba học sinh thảo luận do người dùng cung cấp, asset `public/assets/group-learning-v1.webp`, nền xanh kem nhẹ. Desktop đặt hình bên phải tiêu đề/mô tả/nút Tạo hoạt động, điện thoại đặt hình dưới phần chữ. Ảnh trang trí có alt rỗng, giữ tỷ lệ/alpha; CSS riêng `src/group-activities.css`, không đổi các trang khác. Áp dụng cho giáo viên/học sinh, cả danh sách và chi tiết hoạt động.
 
-Danh sách có thẻ tổng quan, tìm tên/lọc đang nhận bài–đã hết hạn và tiến độ đã nộp. Trang chi tiết đặt hạn/trạng thái ở đầu, yêu cầu/file Word và danh sách nhóm trong hai khu; điện thoại xếp dọc. Giáo viên lọc Tất cả/Chưa nộp/Đã nộp, đổi đại diện và xem lịch sử ngay trong thẻ nhóm. Học sinh xem nhóm mình, form nộp chỉ hiện cho đại diện trước hạn. Trạng thái dùng cả màu và chữ; nghiệp vụ tại [group-activities.md](group-activities.md).
+Danh sách có thẻ tổng quan, tìm tên/lọc đang nhận bài–đã hết hạn và tiến độ đã nộp. Trang chi tiết đặt hạn/trạng thái ở đầu, yêu cầu/file Word và danh sách nhóm trong hai khu; điện thoại xếp dọc. Giáo viên lọc Tất cả/Chưa nộp/Đã nộp, đổi đại diện và xem lịch sử ngay trong thẻ nhóm. Học sinh xem nhóm mình, form nộp hiện cho mọi thành viên hiện còn thuộc lớp và đã phân nhóm trước hạn khi backend có capability memberSubmissions; API cũ vẫn giữ quyền đại diện. Trạng thái dùng cả màu và chữ; nghiệp vụ tại [group-activities.md](group-activities.md).
 
 Sau gia hạn ít nhất một lần và hết hạn mới, học sinh xem các nhóm/sản phẩm trong cùng hoạt động; nút **Trao đổi & phản biện** mở dialog câu hỏi/góp ý và phản hồi gắn phiên bản sản phẩm. Nhóm khác đặt ý kiến, nhóm sở hữu trả lời, giáo viên điều phối. Backend cũ thiếu capability không bật luồng mới. Quy tắc chi tiết ở [feedback-discussion.md](feedback-discussion.md).
 

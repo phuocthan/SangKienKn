@@ -25,12 +25,15 @@ for (const role of ["teacher", "student"] as const) {
         ? [
             {
               label: "Lớp học của tôi",
-              items: ["Lớp học của tôi", "Hoạt động nhóm", "Quản lý lớp"],
+              items: ["Khu vườn của lớp", "Hoạt động nhóm", "Quản lý lớp"],
             },
           ]
         : [
             { label: "Luyện tập", items: ["Luyện tập", "Sổ tay sửa sai"] },
-            { label: "Khu vườn của lớp", items: ["Khu vườn của lớp", "Hoạt động nhóm"] },
+            {
+              label: "Khu vườn của lớp",
+              items: ["Khu vườn của lớp", "Hoạt động nhóm"],
+            },
           ];
     for (const viewport of [
       { width: 1440, height: 1000 },
@@ -39,8 +42,9 @@ for (const role of ["teacher", "student"] as const) {
     ]) {
       await page.setViewportSize(viewport);
       for (const group of parents) {
+        const parentLabel = group.label === "Khu vườn của lớp" ? "Lớp học của tôi" : group.label;
         await nav
-          .getByRole("button", { name: group.label, exact: true })
+          .getByRole("button", { name: parentLabel, exact: true })
           .click();
         const tabs = page.getByRole("tablist", {
           name: group.label,
@@ -68,7 +72,7 @@ for (const role of ["teacher", "student"] as const) {
             tabs.getByRole("tab", { name, exact: true }),
           ).toHaveAttribute("aria-selected", "true");
           await expect(
-            nav.getByRole("button", { name: group.label, exact: true }),
+            nav.getByRole("button", { name: parentLabel, exact: true }),
           ).toHaveAttribute("aria-current", "page");
           await expect(page.getByRole("tabpanel")).toHaveAttribute(
             "aria-labelledby",
@@ -77,18 +81,44 @@ for (const role of ["teacher", "student"] as const) {
               .getAttribute("id")) as string,
           );
           await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-          if (role === "teacher" && name === "Lớp học của tôi") {
-            await expect(page.getByRole("region", { name: "Khu vườn của lớp", exact: true })).toBeVisible();
-            await expect(page.getByRole("heading", { name: "Khu vườn của lớp", level: 2, exact: true })).toBeVisible();
+          if (role === "teacher" && name === "Khu vườn của lớp") {
+            await expect(
+              page.getByRole("region", {
+                name: "Khu vườn của lớp",
+                exact: true,
+              }),
+            ).toBeVisible();
+            await expect(
+              page.getByRole("heading", {
+                name: "Khu vườn của lớp",
+                level: 2,
+                exact: true,
+              }),
+            ).toHaveCount(0);
             await expect(page.locator(".roster-card")).toBeVisible();
+            await expect(page.getByRole("region", { name: "Vinh danh Top 10" })).toBeVisible();
+            await expect(page.getByText("Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp.", { exact: true })).toHaveCount(0);
             await expect(page.locator(".chapter-list")).toHaveCount(0);
-            await expect(page.getByRole("button", { name: "Thêm chương", exact: true })).toHaveCount(0);
+            await expect(
+              page.getByRole("button", { name: "Thêm chương", exact: true }),
+            ).toHaveCount(0);
           }
           if (role === "teacher" && name === "Quản lý lớp") {
-            await expect(page.getByRole("heading", { name: "Danh sách Chương", exact: true })).toBeVisible();
-            await expect(page.locator(".chapter-list .chapter-row").first()).toBeVisible();
-            await expect(page.getByRole("button", { name: "Thêm chương", exact: true })).toBeVisible();
-            await expect(page.getByRole("form", { name: "Cài đặt thời gian tăng cấp" })).toBeVisible();
+            await expect(
+              page.getByRole("heading", {
+                name: "Quản lý chương",
+                exact: true,
+              }),
+            ).toBeVisible();
+            await expect(
+              page.locator(".chapter-list .chapter-row").first(),
+            ).toBeVisible();
+            await expect(
+              page.getByRole("button", { name: "Thêm chương", exact: true }),
+            ).toBeVisible();
+            await expect(
+              page.getByRole("form", { name: "Cài đặt thời gian tăng cấp" }),
+            ).toBeVisible();
             await expect(page.locator(".roster-card")).toHaveCount(0);
           }
           const section = (await tabs
@@ -152,28 +182,56 @@ for (const role of ["teacher", "student"] as const) {
         nav.getByRole("button", { name: "Hoạt động nhóm", exact: true }),
       ).toHaveCount(0);
     for (const hidden of role === "teacher"
-      ? ["Hoạt động nhóm", "Khu vườn của lớp", "Tiến độ học tập", "Xếp hạng chăm chỉ"]
-      : ["Hoạt động nhóm", "Sổ tay sửa sai", "Hành trình của tôi", "Xếp hạng chăm chỉ"])
+      ? [
+          "Hoạt động nhóm",
+          "Khu vườn của lớp",
+          "Tiến độ học tập",
+          "Xếp hạng chăm chỉ",
+        ]
+      : [
+          "Hoạt động nhóm",
+          "Sổ tay sửa sai",
+          "Hành trình của tôi",
+          "Xếp hạng chăm chỉ",
+        ])
       await expect(
         nav.getByRole("button", { name: hidden, exact: true }),
       ).toHaveCount(0);
     await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
-    await expect(
-      page.getByRole("heading", { name: "Những người chăm vườn" }),
-    ).toBeVisible();
+    const rankingHeading = page.getByRole("heading", {
+      name: "Những người chăm vườn",
+    });
+    if (role === "teacher") await expect(rankingHeading).toHaveCount(0);
+    else await expect(rankingHeading).toBeVisible();
     await expect(
       page.getByRole("tab", { name: "Xếp hạng chăm chỉ" }),
     ).toHaveCount(0);
     if (role === "teacher") {
-      await expect(page.getByRole("tab", { name: "Khu vườn của lớp", exact: true })).toHaveCount(0);
-      const classId = new URLSearchParams(new URL(page.url()).hash.slice(1)).get("classroom")!;
+      await expect(
+        page.getByRole("tab", { name: "Khu vườn của lớp", exact: true }),
+      ).toHaveCount(1);
+      const classId = new URLSearchParams(
+        new URL(page.url()).hash.slice(1),
+      ).get("classroom")!;
       for (const section of ["garden", "leaderboard"]) {
         await page.goto(`/#section=${section}&classroom=${classId}`);
         await page.reload();
-        await expect(page.getByRole("tab", { name: "Lớp học của tôi", exact: true })).toHaveAttribute("aria-selected", "true");
-        await expect(page.getByRole("heading", { name: "Lớp học của tôi", level: 1, exact: true })).toBeVisible();
-        await expect(page.getByRole("region", { name: "Khu vườn của lớp", exact: true })).toBeVisible();
-        await expect(page).toHaveURL(new RegExp(`section=classes&classroom=${classId}`));
+        await expect(
+          page.getByRole("tab", { name: "Khu vườn của lớp", exact: true }),
+        ).toHaveAttribute("aria-selected", "true");
+        await expect(
+          page.getByRole("heading", {
+            name: "Lớp học của tôi",
+            level: 1,
+            exact: true,
+          }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("region", { name: "Khu vườn của lớp", exact: true }),
+        ).toBeVisible();
+        await expect(page).toHaveURL(
+          new RegExp(`section=classes&classroom=${classId}`),
+        );
       }
     }
     if (role === "student") {

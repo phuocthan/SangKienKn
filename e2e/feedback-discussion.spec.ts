@@ -1,13 +1,13 @@
 import { navigateTo } from "./navigation";
 import { test, expect, type Page } from "@playwright/test";
 import type { GroupActivity } from "../shared/group-activities";
-async function login(page: Page, email: string) {
+async function login(page: Page, email: string, classroomId = "class-demo") {
   await page.goto("/");
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
-  await page.getByLabel("Chọn lớp học").selectOption("class-demo");
+  await page.getByLabel("Chọn lớp học").selectOption(classroomId);
 }
 async function noOverflow(page: Page) {
   expect(
@@ -104,15 +104,37 @@ test("students read other groups after the extended deadline and the responsible
   browser,
 }, info) => {
   await login(page, "giaovien@greenedu.nk");
+  // Earlier suites may add students to class-demo. Give this random-group case
+  // its own classroom with the three known accounts, without resetting them.
+  const created = await page.request.post("/api/classrooms", {
+    data: {
+      name: `Lớp phản biện ${info.project.name} ${crypto.randomUUID().slice(0, 8)}`,
+      subject: "Vật lý",
+      grade: "10",
+    },
+  });
+  expect(created.ok()).toBe(true);
+  const classroomId = (await created.json()).id as string;
+  for (const email of [
+    "hocsinh@greenedu.nk",
+    "minhkhoi@greenedu.nk",
+    "baongan@greenedu.nk",
+  ]) {
+    const enrolled = await page.request.post(
+      `/api/classrooms/${classroomId}/memberships`,
+      { data: { email } },
+    );
+    expect(enrolled.ok()).toBe(true);
+  }
   const list = await (
-    await page.request.get("/api/classrooms/class-demo/group-activities")
+    await page.request.get(`/api/classrooms/${classroomId}/group-activities`)
   ).json();
   const initial = list.serverNow,
     deadline = initial + 10000,
     extended = initial + 15000;
   const title = `Hoạt động phản biện · ${info.project.name}`;
   const response = await page.request.post(
-    "/api/classrooms/class-demo/group-activities",
+    `/api/classrooms/${classroomId}/group-activities`,
     {
       data: {
         title,
@@ -139,8 +161,8 @@ test("students read other groups after the extended deadline and the responsible
   const owner = await ownerContext.newPage(),
     peer = await peerContext.newPage();
   try {
-    await login(owner, email[target.representativeId]);
-    await login(peer, email[other.representativeId]);
+    await login(owner, email[target.representativeId], classroomId);
+    await login(peer, email[other.representativeId], classroomId);
     const submit = await owner.request.post(
       `/api/group-activities/${activity.id}/submissions`,
       {
@@ -179,7 +201,7 @@ test("students read other groups after the extended deadline and the responsible
           (
             await (
               await page.request.get(
-                "/api/classrooms/class-demo/group-activities",
+                `/api/classrooms/${classroomId}/group-activities`,
               )
             ).json()
           ).serverNow,
