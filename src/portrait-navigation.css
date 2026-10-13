@@ -177,8 +177,29 @@
   }
 
   .sidebar nav .nav-label {
+    display: flex;
+    flex: 0 0 34px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 34px;
+    max-width: 100%;
+    animation: portrait-label-reveal 120ms ease-out 240ms both;
+  }
+
+  .sidebar nav .nav-label-text {
+    min-width: 0;
     max-width: 100%;
     overflow-wrap: anywhere;
+  }
+
+  @keyframes portrait-label-reveal {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .sidebar nav .nav-item:hover:not(.active) {
@@ -227,6 +248,9 @@
   @media (prefers-reduced-motion: reduce) {
     .sidebar nav .nav-item {
       transition: none;
+    }
+    .sidebar nav .nav-label {
+      animation: none;
     }
   }
 

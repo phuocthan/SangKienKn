@@ -22,6 +22,7 @@ import { StudentLevelIcon } from "./StudentLevel";
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { ExamUpload, type UploadedExamQuestion } from "./ExamUpload";
 import { ExamBank, type ExamBankSelection } from "./ExamBank";
+import { OnlineExamGroups } from "./OnlineExamGroups";
 import type { Chapter, Classroom, User } from "./types";
 import type {
   ExamRun,
@@ -353,7 +354,7 @@ export function Learning({
                       </p>
                     </div>
                     <button
-                      className={`button ${ch.examAllowed ? "secondary" : "primary"} small`}
+                      className={`button ${ch.examAllowed ? "danger" : "primary"} small`}
                       disabled={busy || typeof ch.examAllowed !== "boolean"}
                       aria-label={`${ch.examAllowed ? "Khóa" : "Mở"} kiểm tra · ${ch.title}`}
                       onClick={() =>
@@ -965,195 +966,227 @@ export function Learning({
               )}
             </section>
           )}
-          <section
-            className="card learning-section"
-            aria-labelledby="learning-exams"
-          >
-            <h2 id="learning-exams">
-              <Clock3 size={21} />{" "}
-              {onlinePage
-                ? "Các buổi kiểm tra online"
-                : "Lịch kiểm tra chính thức"}
-            </h2>
-            <p>
-              Đáp án và câu sai được công bố sau khi khung thi đóng. Khi đang
-              thi, luyện tập và sửa sai tạm khóa.
-            </p>
-            {!exams.length ? (
-              <p className="muted">
-                {onlinePage
-                  ? "Chưa có buổi kiểm tra online cho lớp này."
-                  : "Giáo viên chưa tạo lịch kiểm tra."}
-              </p>
-            ) : (
-              <div className="learning-list">
-                {exams.map((ex) => (
-                  <div className="learning-row" key={ex.id}>
-                    <div>
-                      <strong>{ex.title}</strong>
-                      <p>
-                        {ex.questionCount} câu · Tự nộp ở lần rời tab{" "}
-                        {ex.tabLimit}
-                        {ex.delivery === "online" &&
-                          ` · Chờ ${ex.preparationMinutes} phút · Làm bài ${ex.durationMinutes} phút · Online cả lớp`}
-                      </p>
-                      <small>
-                        {ex.delivery === "online" && ex.startedAt == null ? (
-                          "Chờ giáo viên bắt đầu"
+          {onlinePage && (
+            <OnlineExamGroups
+              data={data}
+              teacher={teacher}
+              busy={busy}
+              onStart={(ex) =>
+                void act(
+                  () => api(`/learning/exams/${ex.id}/open`, {}),
+                  `Đã gửi thông báo cho lớp. Kiểm tra sẽ mở sau ${ex.preparationMinutes} phút, thời gian làm bài ${ex.durationMinutes} phút.`,
+                )
+              }
+              onClose={(ex) =>
+                void act(
+                  () =>
+                    api(`/learning/exams/${ex.id}/state`, { enabled: false }),
+                  data.onlineExamGroups
+                    ? "Buổi kiểm tra đã kết thúc. Có thể tải kết quả."
+                    : "Buổi kiểm tra đã kết thúc.",
+                )
+              }
+              onJoin={(ex) => void act(() => startRun({ examId: ex.id }))}
+              onOpen={openRun}
+            />
+          )}
+          {!onlinePage && (
+            <>
+              <section
+                className="card learning-section"
+                aria-labelledby="learning-exams"
+              >
+                <h2 id="learning-exams">
+                  <Clock3 size={21} />{" "}
+                  {onlinePage
+                    ? "Các buổi kiểm tra online"
+                    : "Lịch kiểm tra chính thức"}
+                </h2>
+                <p>
+                  Đáp án và câu sai được công bố sau khi khung thi đóng. Khi
+                  đang thi, luyện tập và sửa sai tạm khóa.
+                </p>
+                {!exams.length ? (
+                  <p className="muted">
+                    {onlinePage
+                      ? "Chưa có buổi kiểm tra online cho lớp này."
+                      : "Giáo viên chưa tạo lịch kiểm tra."}
+                  </p>
+                ) : (
+                  <div className="learning-list">
+                    {exams.map((ex) => (
+                      <div className="learning-row" key={ex.id}>
+                        <div>
+                          <strong>{ex.title}</strong>
+                          <p>
+                            {ex.questionCount} câu · Tự nộp ở lần rời tab{" "}
+                            {ex.tabLimit}
+                            {ex.delivery === "online" &&
+                              ` · Chờ ${ex.preparationMinutes} phút · Làm bài ${ex.durationMinutes} phút · Online cả lớp`}
+                          </p>
+                          <small>
+                            {ex.delivery === "online" &&
+                            ex.startedAt == null ? (
+                              "Chờ giáo viên bắt đầu"
+                            ) : (
+                              <>
+                                {date(ex.startsAt)} → {date(ex.closesAt)} ·{" "}
+                                {!ex.enabled
+                                  ? "Đã đóng"
+                                  : Date.now() < ex.startsAt
+                                    ? ex.delivery === "online"
+                                      ? "Đang chờ bắt đầu"
+                                      : "Chưa mở"
+                                    : Date.now() >= ex.closesAt
+                                      ? "Đã hết giờ"
+                                      : "Đang mở"}
+                              </>
+                            )}
+                          </small>
+                          {!!ex.blockedChapters?.length && (
+                            <p>
+                              Chờ giáo viên mở kiểm tra:{" "}
+                              {ex.blockedChapters
+                                .map((ch) => ch.title)
+                                .join(" · ")}
+                              .
+                            </p>
+                          )}
+                        </div>
+                        {teacher ? (
+                          <div className="learning-actions">
+                            <button
+                              className="button primary small"
+                              disabled={
+                                busy ||
+                                (ex.delivery === "online"
+                                  ? ex.startedAt != null || !data.onlineExams
+                                  : ex.closesAt <= Date.now()) ||
+                                !data.examCreation
+                              }
+                              onClick={() =>
+                                void act(
+                                  () =>
+                                    api(`/learning/exams/${ex.id}/open`, {}),
+                                  ex.delivery === "online"
+                                    ? `Đã gửi thông báo cho lớp. Kiểm tra sẽ mở sau ${ex.preparationMinutes} phút, thời gian làm bài ${ex.durationMinutes} phút.`
+                                    : "Đã mở kiểm tra và cho phép các chương trong đề. Học sinh có thể vào làm ngay.",
+                                )
+                              }
+                            >
+                              {ex.delivery === "online"
+                                ? ex.startedAt == null
+                                  ? "Bắt đầu kiểm tra"
+                                  : "Đã gửi thông báo"
+                                : "Mở kiểm tra ngay"}
+                            </button>
+                            <button
+                              className={`button ${ex.enabled ? "danger" : "primary"} small`}
+                              disabled={
+                                busy ||
+                                ex.closesAt <= Date.now() ||
+                                (ex.delivery === "online" && !ex.enabled)
+                              }
+                              onClick={() =>
+                                void act(
+                                  () =>
+                                    api(`/learning/exams/${ex.id}/state`, {
+                                      enabled: !ex.enabled,
+                                    }),
+                                  "Đã cập nhật trạng thái bài thi.",
+                                )
+                              }
+                            >
+                              {ex.enabled
+                                ? "Đóng bài thi"
+                                : ex.delivery === "online"
+                                  ? "Đã đóng"
+                                  : "Mở lại"}
+                            </button>
+                          </div>
                         ) : (
-                          <>
-                            {date(ex.startsAt)} → {date(ex.closesAt)} ·{" "}
-                            {!ex.enabled
-                              ? "Đã đóng"
-                              : Date.now() < ex.startsAt
-                                ? ex.delivery === "online"
-                                  ? "Đang chờ bắt đầu"
-                                  : "Chưa mở"
-                                : Date.now() >= ex.closesAt
-                                  ? "Đã hết giờ"
-                                  : "Đang mở"}
-                          </>
+                          <button
+                            className="button primary small"
+                            disabled={
+                              busy ||
+                              !ex.enabled ||
+                              !ex.blockedChapters ||
+                              ex.blockedChapters.length > 0 ||
+                              Date.now() < ex.startsAt ||
+                              Date.now() >= ex.closesAt
+                            }
+                            onClick={() =>
+                              void act(() => startRun({ examId: ex.id }))
+                            }
+                          >
+                            {onlinePage
+                              ? ex.startedAt == null
+                                ? "Chờ giáo viên bắt đầu"
+                                : !ex.enabled
+                                  ? "Đã đóng"
+                                  : Date.now() < ex.startsAt
+                                    ? "Chờ mở đề"
+                                    : Date.now() >= ex.closesAt
+                                      ? "Đã hết giờ"
+                                      : "Vào làm kiểm tra"
+                              : "Vào bài thi"}
+                          </button>
                         )}
-                      </small>
-                      {!!ex.blockedChapters?.length && (
-                        <p>
-                          Chờ giáo viên mở kiểm tra:{" "}
-                          {ex.blockedChapters.map((ch) => ch.title).join(" · ")}
-                          .
-                        </p>
-                      )}
-                    </div>
-                    {teacher ? (
-                      <div className="learning-actions">
-                        <button
-                          className="button primary small"
-                          disabled={
-                            busy ||
-                            (ex.delivery === "online"
-                              ? ex.startedAt != null || !data.onlineExams
-                              : ex.closesAt <= Date.now()) ||
-                            !data.examCreation
-                          }
-                          onClick={() =>
-                            void act(
-                              () => api(`/learning/exams/${ex.id}/open`, {}),
-                              ex.delivery === "online"
-                                ? `Đã gửi thông báo cho lớp. Kiểm tra sẽ mở sau ${ex.preparationMinutes} phút, thời gian làm bài ${ex.durationMinutes} phút.`
-                                : "Đã mở kiểm tra và cho phép các chương trong đề. Học sinh có thể vào làm ngay.",
-                            )
-                          }
-                        >
-                          {ex.delivery === "online"
-                            ? ex.startedAt == null
-                              ? "Bắt đầu kiểm tra"
-                              : "Đã gửi thông báo"
-                            : "Mở kiểm tra ngay"}
-                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+              <section className="card learning-section">
+                <div className="learning-heading">
+                  <h2>Lượt thi & kết quả</h2>
+                  {teacher && (
+                    <a
+                      className="button secondary small"
+                      href={`/api/classrooms/${classroom.id}/learning-report.xlsx`}
+                    >
+                      <Download size={16} /> Xuất Excel
+                    </a>
+                  )}
+                </div>
+                {onlinePage &&
+                  data.runs.some((run) => run.delivery === undefined) && (
+                    <p className="muted">
+                      Lịch sử kiểm tra online đang chờ máy chủ cập nhật để phân
+                      loại các lượt thi.
+                    </p>
+                  )}
+                {!runs.length ? (
+                  <p className="muted">Chưa có lượt thi.</p>
+                ) : (
+                  <div className="learning-list">
+                    {runs.map((r) => (
+                      <div className="learning-row" key={r.id}>
+                        <div>
+                          <strong>{r.title}</strong>
+                          <p>
+                            {teacher ? `${r.studentName} · ` : ""}
+                            {r.status === "active"
+                              ? `Đang làm · Hạn ${date(r.deadlineAt)}`
+                              : `Đã nộp · ${r.score == null ? "Chờ công bố điểm" : `${r.score.toFixed(1)} / 10`}`}{" "}
+                            · {r.warnings} lần rời tab
+                          </p>
+                        </div>
                         <button
                           className="button secondary small"
-                          disabled={
-                            busy ||
-                            ex.closesAt <= Date.now() ||
-                            (ex.delivery === "online" && !ex.enabled)
-                          }
-                          onClick={() =>
-                            void act(
-                              () =>
-                                api(`/learning/exams/${ex.id}/state`, {
-                                  enabled: !ex.enabled,
-                                }),
-                              "Đã cập nhật trạng thái bài thi.",
-                            )
-                          }
+                          onClick={() => openRun(r.id)}
                         >
-                          {ex.enabled
-                            ? "Đóng bài thi"
-                            : ex.delivery === "online"
-                              ? "Đã đóng"
-                              : "Mở lại"}
+                          {r.status === "active" && !teacher
+                            ? "Tiếp tục thi"
+                            : "Xem bài"}
                         </button>
                       </div>
-                    ) : (
-                      <button
-                        className="button primary small"
-                        disabled={
-                          busy ||
-                          !ex.enabled ||
-                          !ex.blockedChapters ||
-                          ex.blockedChapters.length > 0 ||
-                          Date.now() < ex.startsAt ||
-                          Date.now() >= ex.closesAt
-                        }
-                        onClick={() =>
-                          void act(() => startRun({ examId: ex.id }))
-                        }
-                      >
-                        {onlinePage
-                          ? ex.startedAt == null
-                            ? "Chờ giáo viên bắt đầu"
-                            : !ex.enabled
-                              ? "Đã đóng"
-                              : Date.now() < ex.startsAt
-                                ? "Chờ mở đề"
-                                : Date.now() >= ex.closesAt
-                                  ? "Đã hết giờ"
-                                  : "Vào làm kiểm tra"
-                          : "Vào bài thi"}
-                      </button>
-                    )}
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-          </section>
-          <section className="card learning-section">
-            <div className="learning-heading">
-              <h2>Lượt thi & kết quả</h2>
-              {teacher && (
-                <a
-                  className="button secondary small"
-                  href={`/api/classrooms/${classroom.id}/learning-report.xlsx`}
-                >
-                  <Download size={16} /> Xuất Excel
-                </a>
-              )}
-            </div>
-            {onlinePage &&
-              data.runs.some((run) => run.delivery === undefined) && (
-                <p className="muted">
-                  Lịch sử kiểm tra online đang chờ máy chủ cập nhật để phân loại
-                  các lượt thi.
-                </p>
-              )}
-            {!runs.length ? (
-              <p className="muted">Chưa có lượt thi.</p>
-            ) : (
-              <div className="learning-list">
-                {runs.map((r) => (
-                  <div className="learning-row" key={r.id}>
-                    <div>
-                      <strong>{r.title}</strong>
-                      <p>
-                        {teacher ? `${r.studentName} · ` : ""}
-                        {r.status === "active"
-                          ? `Đang làm · Hạn ${date(r.deadlineAt)}`
-                          : `Đã nộp · ${r.score?.toFixed(1)} / 10`}{" "}
-                        · {r.warnings} lần rời tab
-                      </p>
-                    </div>
-                    <button
-                      className="button secondary small"
-                      onClick={() => openRun(r.id)}
-                    >
-                      {r.status === "active" && !teacher
-                        ? "Tiếp tục thi"
-                        : "Xem bài"}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+                )}
+              </section>
+            </>
+          )}
           {!onlinePage && (
             <section className="card learning-section">
               <h2>Điểm thưởng hệ thống</h2>
@@ -1372,10 +1405,10 @@ function ExamRoom({
   onClose: () => void;
 }) {
   const teacher = user.role === "teacher";
-  const [tabWarning, setTabWarning] = useState("");
+  const [tabWarning, setTabWarning] = useState('');
   const [idleWarning, setIdleWarning] = useState<number | null>(null);
   const lastActivity = useRef(Date.now());
-  const storageKey = "greenedu-exam:" + user.id + ":" + id;
+  const storageKey = 'greenedu-exam:' + user.id + ':' + id;
   const [initial] = useState<{
     answers: Record<string, QuestionAnswer>;
     tabs: string[];
@@ -1485,57 +1518,32 @@ function ExamRoom({
       });
     void refresh();
     const poll = setInterval(() => void refresh(), 4000);
-    let away = false,
-      idleExited = false;
+    let away = false, idleExited = false;
     lastActivity.current = Date.now();
     const interaction = (event: Event) => {
-      if (event.isTrusted && !document.hidden && document.hasFocus()) {
-        lastActivity.current = Date.now();
-        setIdleWarning(null);
-      }
+      if (event.isTrusted && !document.hidden && document.hasFocus()) {lastActivity.current = Date.now(); setIdleWarning(null);}
     };
     const timer = setInterval(() => {
-      setNow(
-        anchor.current.server + performance.now() - anchor.current.elapsed,
-      );
-      if (teacher || current.current?.status !== "active") return;
+      setNow(anchor.current.server + performance.now() - anchor.current.elapsed);
+      if (teacher || current.current?.status !== 'active') return;
       const idle = (Date.now() - lastActivity.current) / 1000;
-      if (idle >= 120 && !idleExited) {
-        idleExited = true;
-        void enqueue(sync);
-        window.dispatchEvent(
-          new CustomEvent("greenedu-study-exit", {
-            detail: { reason: "idle" },
-          }),
-        );
-      } else if (idle >= 105) setIdleWarning(Math.ceil(120 - idle));
+      if (idle >= 120 && !idleExited) {idleExited = true; void enqueue(sync); window.dispatchEvent(new CustomEvent('greenedu-study-exit', {detail: {reason: 'idle'}}));}
+      else if (idle >= 105) setIdleWarning(Math.ceil(120-idle));
     }, 1000);
     const visibility = () => {
       const left = document.hidden || !document.hasFocus();
-      if (!teacher && left && !away && current.current?.status === "active") {
+      if (!teacher && left && !away && current.current?.status === 'active') {
         away = true;
         tabs.current.push(crypto.randomUUID());
         const warnings = current.current.warnings + tabs.current.length;
-        setTabWarning(
-          warnings >= current.current.tabLimit
-            ? "Bài đã khóa do đạt giới hạn rời tab. Đáp án đã lưu sẽ được nộp khi có mạng."
-            : "Không rời tab hoặc mở cửa sổ khác trong khi làm bài.",
-        );
+        setTabWarning(warnings >= current.current.tabLimit ? 'Bài đã khóa do đạt giới hạn rời tab. Đáp án đã lưu sẽ được nộp khi có mạng.' : 'Không rời tab hoặc mở cửa sổ khác trong khi làm bài.');
         persist();
         void enqueue(sync);
-      } else if (!left) {
-        away = false;
-        void refresh();
-      }
+      } else if (!left) {away = false; void refresh();}
     };
-    ["pointerdown", "keydown", "scroll"].forEach((name) =>
-      window.addEventListener(name, interaction, {
-        passive: true,
-        capture: true,
-      }),
-    );
-    window.addEventListener("blur", visibility);
-    window.addEventListener("focus", visibility);
+    ['pointerdown','keydown','scroll'].forEach(name => window.addEventListener(name, interaction, {passive:true,capture:true}));
+    window.addEventListener('blur', visibility);
+    window.addEventListener('focus', visibility);
     const online = () => void refresh();
     const beforeUnload = (e: BeforeUnloadEvent) => {
       if (current.current?.status === "active" && !teacher) {
@@ -1550,25 +1558,15 @@ function ExamRoom({
       clearInterval(poll);
       clearInterval(timer);
       document.removeEventListener("visibilitychange", visibility);
-      window.removeEventListener("blur", visibility);
-      window.removeEventListener("focus", visibility);
-      ["pointerdown", "keydown", "scroll"].forEach((name) =>
-        window.removeEventListener(name, interaction, true),
-      );
+      window.removeEventListener('blur', visibility);
+      window.removeEventListener('focus', visibility);
+      ['pointerdown','keydown','scroll'].forEach(name => window.removeEventListener(name, interaction, true));
       window.removeEventListener("online", online);
       window.removeEventListener("beforeunload", beforeUnload);
     };
   }, [id]);
   function choose(questionId: string, value: QuestionAnswer) {
-    if (
-      !current.current ||
-      current.current.status !== "active" ||
-      current.current.warnings + tabs.current.length >=
-        current.current.tabLimit ||
-      document.hidden ||
-      !document.hasFocus()
-    )
-      return;
+    if (!current.current || current.current.status !== 'active' || current.current.warnings + tabs.current.length >= current.current.tabLimit || document.hidden || !document.hasFocus()) return;
     dirty.current[questionId] = value;
     setAnswers((old) => ({ ...old, [questionId]: value }));
     persist();
@@ -1609,8 +1607,7 @@ function ExamRoom({
       </div>
     );
   const active = run.status === "active";
-  const tabLocked =
-    active && run.warnings + tabs.current.length >= run.tabLimit;
+  const tabLocked = active && run.warnings + tabs.current.length >= run.tabLimit;
   if (!run.questions.length)
     return (
       <div className="card learning-section">
@@ -1631,16 +1628,8 @@ function ExamRoom({
   );
   return (
     <div className="exam-room">
-      {tabWarning && (
-        <p className="error-banner" role="alert">
-          {tabWarning}
-        </p>
-      )}
-      {idleWarning !== null && (
-        <p className="idle-banner" role="alert">
-          Rời bài sau {idleWarning} giây nếu không tương tác.
-        </p>
-      )}
+      {tabWarning && <p className="error-banner" role="alert">{tabWarning}</p>}
+      {idleWarning !== null && <p className="idle-banner" role="alert">Rời bài sau {idleWarning} giây nếu không tương tác.</p>}
       <WorkspaceHeading className="learning-heading">
         <div>
           <span className="eyebrow">
@@ -1669,13 +1658,15 @@ function ExamRoom({
       <div className="info-panel">
         <p>
           {active
-            ? `${run.questions.filter((question) => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn · ${pending ? `${pending} thay đổi chưa đồng bộ` : "Đáp án đã lưu"}. Rời tab ${run.warnings}/${run.tabLimit}; đến lần ${run.tabLimit} bài sẽ tự nộp.`
-            : `Điểm ${run.score?.toFixed(1)} / 10 · ${run.reason === "tabs" ? "Tự nộp do rời tab" : run.reason === "deadline" ? "Tự nộp khi hết giờ" : run.reason === "teacher" ? "Giáo viên đã đóng bài thi" : "Đã hoàn thành"}.`}
+            ? `${run.questions.filter(question => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn · ${pending ? `${pending} thay đổi chưa đồng bộ` : "Đáp án đã lưu"}. Rời tab ${run.warnings}/${run.tabLimit}; đến lần ${run.tabLimit} bài sẽ tự nộp.`
+            : `${run.score == null ? "Chờ công bố điểm" : `Điểm ${run.score.toFixed(1)} / 10`} · ${run.reason === "tabs" ? "Tự nộp do rời tab" : run.reason === "deadline" ? "Tự nộp khi hết giờ" : run.reason === "teacher" ? "Giáo viên đã đóng bài thi" : "Đã hoàn thành"}.`}
         </p>
       </div>
       {!active && !run.results && (
         <p className="learning-notice">
-          Chờ khung thi đóng để xem đáp án và cập nhật sổ tay sửa sai.
+          {run.practiceAfterSubmission &&
+            "Bạn có thể quay lại luyện tập và được tính thời gian học. "}
+          Chờ khung thi đóng để xem điểm, đáp án và cập nhật sổ tay sửa sai.
         </p>
       )}
       <div className="exam-columns">
@@ -1701,15 +1692,9 @@ function ExamRoom({
             CÂU {index + 1}/{run.questions.length} · {q.chapterTitle}
           </span>
           <h2>{q.text}</h2>
-          <AnswerFields
-            question={q}
-            value={answers[q.id]}
-            result={questionResult}
-            disabled={
-              !active || teacher || submitting || seconds === 0 || tabLocked
-            }
-            onChange={(value) => choose(q.id, value)}
-          />
+          <AnswerFields question={q} value={answers[q.id]} result={questionResult}
+            disabled={!active || teacher || submitting || seconds === 0 || tabLocked}
+            onChange={value => choose(q.id, value)}/>
           {run.results && (
             <div className="explanation" role="status">
               <strong>{questionResult?.correct ? "Đúng" : "Cần ôn lại"}</strong>
@@ -1747,7 +1732,7 @@ function ExamRoom({
               onClick={() => {
                 if (
                   confirm(
-                    `Nộp bài với ${run.questions.filter((question) => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn?`,
+                    `Nộp bài với ${run.questions.filter(question => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn?`,
                   )
                 )
                   void submit();

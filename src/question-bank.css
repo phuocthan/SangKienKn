@@ -35,16 +35,6 @@
   outline: 2px solid #62845c;
   outline-offset: -2px;
 }
-.bank-management .button.bank-delete-button {
-  color: #914735;
-  border-color: #dbc2b8;
-}
-.bank-management .button.bank-delete-button:hover:not(:disabled) {
-  background: #f9eee8;
-}
-.bank-delete-confirm.button.primary {
-  background: #914735;
-}
 .bank-delete-preview {
   max-height: 220px;
   overflow: auto;

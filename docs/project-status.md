@@ -1,5 +1,17 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: nút hoạt động khác màu nút vô hiệu hóa — 13/10/2026
+
+Nút phụ dùng xanh lá nhạt thay màu xám trình duyệt, nút mở kiểm tra xanh đậm, nút khóa/đóng thi nâu đỏ và nút xóa/bỏ câu nâu đỏ theo mức nhấn. Chỉ nút không bấm được dùng xám nhạt nhất quán ở mọi trang. Build và 4/4 E2E học/thi đạt trên DB thử riêng; chưa push. Xem phần đầu `docs/session-handoff.md`.
+
+## Hiện hành: ổn định chữ tab portrait khi chuyển — 13/10/2026
+
+Giữ vùng chữ tab cao34px và fade-in sau khi ô tab đổi xong độ rộng để tránh hiện nhãn từ2 dòng rồi nhảy thành1 dòng. Chế độ giảm chuyển động hiện chữ ngay. Build và6/6 E2E portrait đạt trên DB riêng. Chưa push theo yêu cầu người dùng.
+
+## Hiện hành: tên học sinh trong xếp hạng thẳng cột — 13/10/2026
+
+Nhãn “Bạn” chuyển trước tên trong hai bảng xếp hạng vườn lớp, dành cùng chiều rộng nhãn cho mọi hàng để tên học sinh thẳng cột. Giữ thứ tự icon cấp sau tên. Build và2/2 E2E desktop/mobile đạt trên DB riêng. Chưa push vì người dùng chỉ muốn push khi yêu cầu.
+
 ## Hiện hành: thẻ luyện tập bớt nhãn trùng — 13/10/2026
 
 Bỏ nhãn môn viết hoa phía trên tên chương trong các thẻ luyện tập học sinh; vẫn giữ môn trong thông tin lớp, tên chương, cấp và tiến độ. Xem bản bàn giao ở đầu `docs/session-handoff.md`.
@@ -12,13 +24,21 @@ Tab con của các trang cha giáo viên/học sinh bám dưới header sticky k
 
 Phone/PC portrait dàn toàn bộ điểm đến trên thanh dưới, không cần swipe. Chỉ tab được chọn hiện chữ bên dưới icon; tab còn lại là icon với aria-label tên đầy đủ. Tab cùng trục, không nhảy lên; ô chọn hẹp hơn và chuyển màu/kích thước mượt. Kiểm tra kích thước từ 320px đến 1024px, giữ menu desktop/landscape. Heading Hoạt động nhóm ẩn ảnh trang trí ở landscape, giữ ảnh ở portrait.
 
+Đã push `792c97e` lên origin/main. Localhost5173 đang phục vụ frontend mới và proxy API Railway trả health ok; build root và checkout sạch, 10/10 E2E liên quan đạt.
+
+Đã push `d67b4da` lên origin/main; build và 10/10 E2E giao diện liên quan đạt trên checkout/DB riêng. Runtime Railway của commit này chưa xác minh.
+
 ## Hiện hành: menu rộng hơn và thống kê cấp bằng icon — 13/10/2026
 
 Sidebar desktop/landscape rộng hơn một chút, phần nội dung được căn theo mép mới; portrait không đổi. Khu vườn của tôi chỉ có Hành trình của tôi làm nơi xem timeline cấp theo chương, không còn thẻ CẤP ĐỘ CỦA BẠN lặp lại. Trong danh sách học sinh và bảng xếp hạng vườn lớp, cấp từng chương hiển thị bằng icon theo thứ tự chương và vạch ngăn, không hiện tên chương/tên cấp trực tiếp; title/nhãn hỗ trợ vẫn chứa thông tin đó. Không đổi dữ liệu cấp hay thời gian.
 
+Đã push `506c8a6` lên origin/main và đối chiếu remote SHA. Build, 14/14 E2E desktop/mobile trên checkout sạch và DB riêng đạt. Runtime Railway của commit này chưa được xác minh.
+
 ## Hiện hành: Hành trình của tôi trong trang vườn cá nhân — 13/10/2026
 
 Học sinh không còn tab Hành trình riêng. Timeline cấp/chương nằm dưới nội dung Khu vườn của tôi; nút Xem hành trình cuộn xuống đúng vùng, URL progress cũ mở trang vườn. Không thay dữ liệu/tính cấp. Giáo viên giữ tab lớp/nhóm. Build và12/12 E2E desktop/mobile trên DB riêng đạt; xem bàn giao. Quyết định thay mô tả home2 tab trong phần lịch sử.
+
+Đã push `edd8ebe` lên origin/main; Railway health báo hai capability mới và bundle mới đã phục vụ. Xác minh chỉ qua GET, không ghi dữ liệu thật. Root còn các thay đổi song song online/Excel/helper được giữ nguyên sau đồng bộ.
 
 ## Hiện hành: kết thúc phiên học và gộp vườn lớp — 13/10/2026
 
@@ -54,6 +74,10 @@ Kiểm tra mới đúng checkout push: TypeScript/Vite đạt; 12/12 QA tab/bố
 
 TypeScript/build đạt. **12/12 UI** sau sửa khôi phục tab đạt trước bước chốt kiểm tra URL theo vai trò; bản cuối **28 ca liên quan đã xác nhận đạt** (22 đạt lượt đầu,6 chạy lại đạt sau cập nhật selector cha/con và dùng reload thật cho ca hash). Gồm tab/role/54 tổ hợp tab×vai trò×viewport, account/portrait/nhóm/cấp cây/ôn-thi/online và hash phòng thi; chỉ DB/server riêng3331. Đã xem ảnh giáo viên desktop/portrait, root HMR phục vụ module200. Push riêng UI/test/ba phần tài liệu; giữ16 file backend/nhóm online/helper local/tài liệu đang làm, runtime Railway chưa xác minh.
 
+## Localhost504 và làm mới Vite cache — 12/10/2026
+
+Đã khởi động lại Vite với optimizer `--force` để xử lý Outdated Optimize Dep, thêm `npm run local -- -Force`. Script xác minh đúng Vite/mode/repository đang giữ5173, chờ dừng tiến trình cũ và kiểm tra PID readiness để không báo chạy nhầm khi có Vite khác cùng repo. QA mới trang login+reload:16dependency request200, không lỗi tài nguyên/JS, health proxy Railway200; vẫn frontend local/API+DB Railway, không ghi dữ liệu hoặc push/deploy. CSS Forest hiện đã có; thiếu CSS của ghi chú trước là lịch sử. Chi tiết ở [session-handoff.md](session-handoff.md), lệnh ở [dev-railway.md](dev-railway.md).
+
 ## Đăng nhập gọn và nút Quên mật khẩu — 12/10/2026
 
 Đã đưa chữ lớn lên trước slogan/badge, bỏ mô tả intro được đánh dấu, kéo form lên/căn với tiêu đề trên desktop và cùng cạnh trái trên mobile. Thêm nút Quên mật khẩu mở đúng thông báo liên hệ giáo viên chủ nhiệm hoặc admin theo yêu cầu; đóng bằng nút/Escape, giữ dữ liệu đang nhập và không gửi API reset.
@@ -84,9 +108,9 @@ TypeScript/build và **14/14 E2E mới** garden-note/warm-journey/portrait-navig
 
 Kiểm tra mới trên checkout chuẩn bị push: TypeScript/Vite build và **20/20 E2E** warm-journey/student-levels/portrait-navigation/account-popups đạt trên server/SQLite riêng3331, gồm căn tâm icon/tick X/Y qua năm cấp, panel/nút xanh và lời nhắc nghiêng/85%; đã xem ảnh desktop/mobile. Frontend5173/HMR vẫn chạy với API Railway; không ghi thử dữ liệu thật. Push riêng UI/test/ba phần tài liệu theo yêu cầu, giữ các thay đổi backend/nhóm thi của task khác. Kết quả push được ghi trong session-handoff; runtime Railway chưa xác minh.
 
-## Đưa bản góp ý UI lên remote — 12/10/2026
+## Góp ý UI và header Tổng quan đã lên remote — 12/10/2026
 
-Push riêng23 file menu/icon gốc/UI cam-vàng/asset/test/tài liệu, giữ các thay đổi ôn-thi/backend song song. Bỏ breadcrumb Tổng quan và đưa tiêu đề/chào lên header desktop; portrait chỉ một h1 trong nội dung, account/dock cũ. TypeScript/build và **20/20 E2E cuối trên đúng checkout push đạt** sau header mới; **34/34 trước đó** xác nhận clip đường cong/italic/cấp độ và luồng cũ, ghi là lượt riêng. Đã xem ảnh cuối, hash14 file task song song giữ nguyên. Deployment/runtime Railway commit mới chưa xác minh; bằng chứng [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).
+Đã push **`7ea2fab`**, xác minh SHA remote/main local0/0. Trả menu9 mục/icon Lucide gốc; áp dụng progress/chip/lộ trình cong cam-vàng/note mint/italic, giữ khẩu hiệu gọn và CTA đồng. Bỏ breadcrumb Tổng quan, đưa khối chào/tiêu đề lên header desktop; portrait chỉ một h1 trong nội dung/account-dock cũ. TypeScript/build và **20/20 E2E cuối đúng checkout push đạt**,34/34 trước header ghi riêng; đã xem ảnh desktop/mobile và clip tiến độ khớp mốc.14 file công việc song song nguyên hash; chỉ23 file UI/asset/test/tài liệu được push, phần ôn-thi/backend cònlocal. Deployment/runtime Railway mới chưa xác minh; chi tiết [session-handoff.md](session-handoff.md), [app-design.md](app-design.md).
 
 ## Trả menu/icon gốc; tiến độ và lộ trình theo ảnh góp ý — 12/10/2026
 
@@ -94,10 +118,9 @@ Push riêng23 file menu/icon gốc/UI cam-vàng/asset/test/tài liệu, giữ c�
 
 TypeScript/build riêng và **34/34 E2E desktop/mobile trước tinh chỉnh cuối đạt**, đã xem ảnh; đang QA clip đường tô/italic và bản push riêng. Theo quyền push ngay khi hoàn thành đã chốt, chuẩn bị commit UI/asset/test/tài liệu, giữ phần ôn-thi/backend song song; chưa suy deployment Railway. Chi tiết [app-design.md](app-design.md), [session-handoff.md](session-handoff.md).
 
+## Menu/submenu đã lên origin/main — 12/10/2026
 
-## Đưa menu/submenu lên remote theo yêu cầu — 12/10/2026
-
-Push riêng24 file menu/UI/test/tài liệu từremote `9d50b10`, giữForest/ntfy và phần ôn-thi/backend đang làm tạilocal. TypeScript/build và **30/30 E2E desktop/mobile mới trên đúng checkout push đạt**, gồm nhóm menu/bàn phím/auto mở theo trang/resize, header/dock/avatar/tài khoản và các luồng cũ. Lượt đầu29/30 phát hiện thiếu đồng bộ matchMedia khi resize ngay lúc mount; đã sửa runtime và chạy lại30/30 đầy đủ. Không đổi assertion nghiệp vụ hoặc ghi dữ liệu Railway. Deployment/runtime Railway củacommit menu chưa xác minh; bằng chứng/giới hạn tại [session-handoff.md](session-handoff.md).
+Đã push **`f7ccb42`**, xác minh git ls-remote; main local/remote0/0, giữ14 file công việc song song nguyên hash. Menu giáo viên4mục/học sinh5mục, một submenu mở mỗi lần/auto mở nhóm theo trang; portrait vẫn dock phẳng. Commit riêng24 file UI/test/tài liệu, không đưa backend/nhóm thi/Excel của task khác. TypeScript/build và **30/30 E2E mới trên đúng checkout push đạt** sau sửa race matchMedia lúc mount (lượt trước29/30). Local5173/HMR đang chạy, nguồn mới200, không ghi Railway; deployment/runtime commit mới chưa xác minh. Chi tiết [session-handoff.md](session-handoff.md), [app-design.md](app-design.md).
 
 ## Menu/submenu gọn cho giáo viên và học sinh — 12/10/2026
 
@@ -105,10 +128,9 @@ Push riêng24 file menu/UI/test/tài liệu từremote `9d50b10`, giữForest/nt
 
 **TypeScript/build riêng và30/30 E2E desktop/mobile mới đạt** trên DB/server riêng3320, đã xem ảnh giáo viên/học sinh/mobile. Frontend5173/HMR đang chạy, API/DB Railway thật không ghi thử. Chuẩn bị push riêng menu/UI/test/tài liệu theo yêu cầu trước đó, giữ các thay đổi ôn-thi/backend của task song song; QA bản push và kết quả remote/deployment cần phân biệt. Chi tiết [app-design.md](app-design.md), [session-handoff.md](session-handoff.md).
 
+## Theme Forest đã lên origin/main — 12/10/2026
 
-## Đưa theme Forest lên Git theo yêu cầu — 12/10/2026
-
-Đợt push riêng14 file giao diện/tài liệu trên remote `00a15b9`, giữ commit ntfy; không gom thay đổi backend/nhóm thi/Excel của task song song. TypeScript/build riêng và **12/12 E2E portrait/account-popups mới trên checkout chuẩn bị push đạt**, không lấy12/48 tổ hợp của đợt triển khai thành lượt mới. Đích `origin/main`, không force; deployment/runtime Railway của commit mới chưa xác minh. Chi tiết và phạm vi tại [session-handoff.md](session-handoff.md).
+Đã push commit **`9d50b10`**, xác minh SHA bằng git ls-remote; main local đồng bộremote0/0. Commit riêng14 file giao diện/tài liệu từremote `00a15b9`, giữntfy và các thay đổi ôn-thi/backend của task song song cònlocal. TypeScript/build riêng và12/12 E2E portrait/account-popups **mới trên đúng checkout push** đạt;14 file công việc song song giữ nguyên hash từng byte sau đồng bộGit. Deployment/runtime Railway củacommit giao diện chưa xác minh. Chi tiết tại [session-handoff.md](session-handoff.md).
 
 ## Theme khu rừng tri thức áp dụng các trang — 12/10/2026
 
@@ -116,10 +138,19 @@ Push riêng24 file menu/UI/test/tài liệu từremote `9d50b10`, giữForest/nt
 
 **TypeScript/build riêng,12/12 E2E portrait/account-popups và48 tổ hợp trang/vai trò/desktop-mobile đạt** trên server/database kiểm thử riêng; đã xem ảnh, không tràn ngang/lỗiJS. Frontend5173/HMR đang chạy, nguồn CSS mới200/API vẫn Railway. Giữ toàn bộ thay đổi online/backend có sẵn, không ghi Railway/đổi database chính hoặc tự commit/push/deploy. Thiết kế và bằng chứng tại [app-design.md](app-design.md), [session-handoff.md](session-handoff.md).
 
-
 ## Thông báo deploy trên Android qua ntfy — 12/10/2026
 
+**Đã hoạt động thật:** commit workflow/tài liệu **`00a15b9`** đã push main, Railway deployment7006554080 success; [GitHub Actions tự động38204421055](https://github.com/phuocthan/SangKienKn/actions/runs/38204421055) success, đã đọc lại tin deploy thành công từ ntfy. [Lượt thủ công38204354004](https://github.com/phuocthan/SangKienKn/actions/runs/38204354004) cũng success/tin thử có trên ntfy. Chưa xác nhận hiển thị Android; người dùng cần đăng ký topic. Push dùng checkout riêng, HEAD chính vẫn f7a655a và các sửa app đang làm giữ nguyên/chưa được đưa lên Railway. Cập nhật nghiệm thu này là local; đối chiếu remote trước đợt commit/push tiếp theo.
+
 Đã thêm workflow **Railway deploy notification**: Railway → GitHub deployment_status success → ntfy → Android, lọc bot `railway-app[bot]` và môi trường thật `zooming-light / production`, loại transient. GitHub Secret `NTFY_TOPIC` đã cấu hình; topic ngẫu nhiên không đưa vào Git. Có nút Run workflow gửi tin thử ghi rõ Test. **Actionlint và 9/9 ca mock mới đạt**; không đổi ứng dụng/DB. Đưa riêng workflow/tài liệu lên main từ checkout riêng để giữ các thay đổi ứng dụng đang làm ở phiên khác; kết quả push/gửi thật/deploy mới kiểm tra sau thực hiện. Người dùng cần đăng ký topic trong app ntfy trên Android; thành công gửi tới ntfy không đồng nghĩa đã kiểm tra thiết bị. Xem [hướng dẫn](deploy-notifications.md), [bàn giao](session-handoff.md).
+
+## Nhóm buổi thi, Excel riêng và luyện tập sau nộp — 12/10/2026
+
+Đã gom lịch/lượt/kết quả online thành một nhóm theo ID buổi, trạng thái **Chuẩn bị / Đang thi / Kết thúc**, số học sinh tham gia/đã nộp, giờ mở/hạn kết thúc và nút tải Excel sau kết thúc. Chủ lớp thấy bài nộp trong nhóm; student chỉ lượt mình. Thống kê/lượt theo buổi không phụ thuộc200 lượt gần nhất toàn lớp; Excel riêng gồm metadata/kết quả và thành viên chưa tham gia, có kiểm tra quyền/thời điểm tại server. Trang ôn/thi cũ giữ báo cáo lớp.
+
+Người dùng đã chọn cho luyện tập và tính giờ ngay sau bài đã nộp, kể cả tự nộp do tab trong buổi còn mở. Đã sửa lock chỉ xét active; điểm/đáp án/câu sai official vẫn chờ buổi kết thúc, không mở lại lượt đã nộp. **120/120 backend,26/26 E2E hồi quy và2/2 E2E mới desktop/mobile đạt**, TypeScript/build/ảnh/XLSX đã kiểm tra bằng DB/server riêng. Frontend5173/API/DB Railway giữ nguyên; **đợt này chưa push/deploy, cần backend Railway mới để tính giờ/thống kê/export có hiệu lực**. Chi tiết/bằng chứng/lượt test lỗi điều hướng đã sửa ở [session-handoff.md](session-handoff.md), nghiệp vụ [online-exams.md](online-exams.md) và [learning.md](learning.md).
+
+Người dùng xác nhận task Forest đang chỉnh cùng workspace sau QA của đợt này; đã giữ nguyên các thay đổi đó. Build cuối hiện chờ task kia tạo `src/forest-theme.css` đang được main import, chưa thể xác nhận toàn bộ checkout song song build được; kết quả kiểm tra ôn-thi ở trên không phải nghiệm thu theme Forest.
 
 ## Đồng bộ remote và push cập nhật online/Word — 12/10/2026
 
@@ -150,7 +181,6 @@ Theo đính chính mới nhất, ba icon ở **góc trên phải**, neo cùng he
 ## Bố cục portrait: tài khoản/lớp ở trên, menu ở dưới
 
 Đã chỉnh frontend theo yêu cầu mới: header luôn neo tên tài khoản/avatar/lớp ở đầu khi cuộn, thanh điều hướng fixed ở đáy và cuộn ngang; nội dung chừa khoảng để không bị che. Áp dụng portrait ≤1100px, cả giáo viên/học sinh/Admin; landscape và desktop giữ sidebar. CSS riêng nạp sau theme, có safe area. Build/TypeScript và 22/22 E2E đạt bằng database riêng. Theo yêu cầu tiếp theo, đưa bản này vào commit để push `origin/main`; không thay backend/dữ liệu và chưa xác minh kết quả deploy Railway. Chi tiết/bằng chứng trong [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).
-
 
 ## Cách nắm trạng thái hiện tại — cập nhật 12/10/2026
 
@@ -206,22 +236,22 @@ Kiểm tra mới **112/112 backend, 10/10 E2E desktop/mobile**, TypeScript/build
 
 Đọc phần này trước các ghi chép theo đợt bên dưới. **Mã checkout, bản đang phục vụ Railway và kết quả test là ba trạng thái riêng.** Ghi chép test/deploy cũ không xác nhận tình trạng đang chạy; kiểm tra Git/mã và capability khi tiếp tục. Yêu cầu mới của người dùng chọn việc tiếp theo, không tự triển khai lại toàn bộ đề án. Tổng rà soát tài liệu tại [documentation-audit.md](documentation-audit.md).
 
-| Phạm vi | Quyết định/trạng thái hiện hành | Tra cứu |
-| --- | --- | --- |
-| Thiết kế | Một tài liệu chính cho nền/logo/font/icon/layout/animation; các đoạn lịch sử không ghi đè thiết kế mới. Nền v11, blur2px trong CSS garden hiện tại | [app-design.md](app-design.md) |
-| Chạy và deploy | Frontend local5173/HMR; API/database Railway thật. Không tự deploy/push hoặc chạy API offline; test dùng database riêng | [dev-railway.md](dev-railway.md), [deploy-local.md](deploy-local.md) |
-| Tài khoản | Admin tạo giáo viên/học sinh; giáo viên tạo/thêm học sinh. Railway đã đổi miền đăng nhập@greenedu.nk. Vào nhanh chỉ backend offline; email chào chưa kết nối/gửi thật | [account-management.md](account-management.md), [welcome-email.md](welcome-email.md) |
-| Cấp học sinh | Riêng lớp→môn→chương, Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái. m phút/cấp do chủ lớp đặt, mặc định60; cấu hình mới còn chờ backend Railway | [student-levels.md](student-levels.md) |
-| Vườn và vinh danh | Vườn có rào chứa toàn lớp, avatar/hai từ cuối/cấp MAX một chương; frame cấp5 riêng. Frontend đã có, danh sách thật cần backend members mới | [app-design.md](app-design.md), [student-levels.md](student-levels.md) |
-| Ôn/kiểm tra | Đúng mới mở lời giải; Săn điểm cần cấp3/70% mọi lượt/sổ tay sạch/vé/quyền giáo viên. Thi chính thức mở từ bank hoặc Word/CSV, một/nhiều chương/bài, không cần điều kiện tự học. Các công cụ backend mới chưa deploy | [learning.md](learning.md) |
-| Kiểm tra online | Giáo viên phát yêu cầu, chờ X phút rồi làm Y phút; thông báo trong app, đề chung/đảo câu riêng/hạn chung. Đã có mã và test, chưa deploy Railway | [online-exams.md](online-exams.md) |
-| Vi phạm | Audit đã có, không sửa runtime. Còn lỗi nhận đáp án sau ngưỡng offline, thiếu focus/nhật ký/AI; idle mobile cần QA thật. Mặc định lần4 tự nộp, không tự thêm kỷ luật tài khoản | [violations-audit.md](violations-audit.md) |
-| Ngân hàng và PPCT | PPCT Vật lý11 gồm4chương/26bài chính thức và mục bổ sung; lần ghi nhận Railway12/10 có105 bản ghi câu hỏi, không suy thành105 câu hiện hành. Thêm/xóa archive/topic/trộn chủ đề đã có mã, cần đối chiếu backend; Word50câu đã tạo, chưa xác nhận nhập production | [question-bank.md](question-bank.md), [physics-11-curriculum-2026-2027.md](physics-11-curriculum-2026-2027.md) |
-| Hoạt động nhóm | Giao/chia/đại diện/nộp/gia hạn/lịch sử; mã đã có phản biện sau gia hạn và hết hạn mới. Banner minh họa mới ở frontend. Chấm/thưởng nhóm chưa có; backend phản biện Railway chưa xác minh trong đợt này | [group-activities.md](group-activities.md), [feedback-discussion.md](feedback-discussion.md), [app-design.md](app-design.md) |
-| Góp ý với giáo viên | Chủ đề riêng học sinh/giáo viên, trả lời, đóng/mở lại, tìm/lọc và retry không trùng đã có mã; không ẩn danh/không gửi email ngoài, Railway chưa xác minh trong đợt này | [feedback-discussion.md](feedback-discussion.md) |
-| Avatar |40ID/quyền vai trò/upload3MB, popup đổi ảnh và mật khẩu. Danh sách thành viên/avatar giáo viên cần API tương ứng | [user-avatars.md](user-avatars.md), [app-design.md](app-design.md) |
-| Tài liệu giới thiệu | Poster học sinh QR lớn/logo trường, Word50câu và hai bản PowerPoint; bản rework9slide/60 hiệu ứng là hiện hành | [poster](../artifacts/posters/README.md), [slide](../artifacts/presentations/README.md), [question-bank.md](question-bank.md) |
-| Nguồn và kiểm thử | Đề án là nguồn sản phẩm; kế hoạch/audit trước triển khai là lịch sử. Ca kiểm thử và bằng chứng theo từng đợt, không cộng số lượt hoặc báo lại thành test mới | [requirements-original.md](requirements-original.md), [mvp.md](mvp.md), [learning-implementation-plan.md](learning-implementation-plan.md), [levels-review-assessment.md](levels-review-assessment.md), [functional-test-cases.md](functional-test-cases.md) |
+| Phạm vi             | Quyết định/trạng thái hiện hành                                                                                                                                                                                                                                  | Tra cứu                                                                                                                                                                                                                                                      |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Thiết kế            | Một tài liệu chính cho nền/logo/font/icon/layout/animation; các đoạn lịch sử không ghi đè thiết kế mới. Nền v11, blur2px trong CSS garden hiện tại                                                                                                               | [app-design.md](app-design.md)                                                                                                                                                                                                                               |
+| Chạy và deploy      | Frontend local5173/HMR; API/database Railway thật. Không tự deploy/push hoặc chạy API offline; test dùng database riêng                                                                                                                                          | [dev-railway.md](dev-railway.md), [deploy-local.md](deploy-local.md)                                                                                                                                                                                         |
+| Tài khoản           | Admin tạo giáo viên/học sinh; giáo viên tạo/thêm học sinh. Railway đã đổi miền đăng nhập@greenedu.nk. Vào nhanh chỉ backend offline; email chào chưa kết nối/gửi thật                                                                                            | [account-management.md](account-management.md), [welcome-email.md](welcome-email.md)                                                                                                                                                                         |
+| Cấp học sinh        | Riêng lớp→môn→chương, Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái. m phút/cấp do chủ lớp đặt, mặc định60; cấu hình mới còn chờ backend Railway                                                                                                                             | [student-levels.md](student-levels.md)                                                                                                                                                                                                                       |
+| Vườn và vinh danh   | Vườn có rào chứa toàn lớp, avatar/hai từ cuối/cấp MAX một chương; frame cấp5 riêng. Frontend đã có, danh sách thật cần backend members mới                                                                                                                       | [app-design.md](app-design.md), [student-levels.md](student-levels.md)                                                                                                                                                                                       |
+| Ôn/kiểm tra         | Đúng mới mở lời giải; Săn điểm cần cấp3/70% mọi lượt/sổ tay sạch/vé/quyền giáo viên. Thi chính thức mở từ bank hoặc Word/CSV, một/nhiều chương/bài, không cần điều kiện tự học. Các công cụ backend mới chưa deploy                                              | [learning.md](learning.md)                                                                                                                                                                                                                                   |
+| Kiểm tra online     | Giáo viên phát yêu cầu, chờ X phút rồi làm Y phút; thông báo trong app, đề chung/đảo câu riêng/hạn chung. Đã có mã và test, chưa deploy Railway                                                                                                                  | [online-exams.md](online-exams.md)                                                                                                                                                                                                                           |
+| Vi phạm             | Audit đã có, không sửa runtime. Còn lỗi nhận đáp án sau ngưỡng offline, thiếu focus/nhật ký/AI; idle mobile cần QA thật. Mặc định lần4 tự nộp, không tự thêm kỷ luật tài khoản                                                                                   | [violations-audit.md](violations-audit.md)                                                                                                                                                                                                                   |
+| Ngân hàng và PPCT   | PPCT Vật lý11 gồm4chương/26bài chính thức và mục bổ sung; lần ghi nhận Railway12/10 có105 bản ghi câu hỏi, không suy thành105 câu hiện hành. Thêm/xóa archive/topic/trộn chủ đề đã có mã, cần đối chiếu backend; Word50câu đã tạo, chưa xác nhận nhập production | [question-bank.md](question-bank.md), [physics-11-curriculum-2026-2027.md](physics-11-curriculum-2026-2027.md)                                                                                                                                               |
+| Hoạt động nhóm      | Giao/chia/đại diện/nộp/gia hạn/lịch sử; mã đã có phản biện sau gia hạn và hết hạn mới. Banner minh họa mới ở frontend. Chấm/thưởng nhóm chưa có; backend phản biện Railway chưa xác minh trong đợt này                                                           | [group-activities.md](group-activities.md), [feedback-discussion.md](feedback-discussion.md), [app-design.md](app-design.md)                                                                                                                                 |
+| Góp ý với giáo viên | Chủ đề riêng học sinh/giáo viên, trả lời, đóng/mở lại, tìm/lọc và retry không trùng đã có mã; không ẩn danh/không gửi email ngoài, Railway chưa xác minh trong đợt này                                                                                           | [feedback-discussion.md](feedback-discussion.md)                                                                                                                                                                                                             |
+| Avatar              | 40ID/quyền vai trò/upload3MB, popup đổi ảnh và mật khẩu. Danh sách thành viên/avatar giáo viên cần API tương ứng                                                                                                                                                 | [user-avatars.md](user-avatars.md), [app-design.md](app-design.md)                                                                                                                                                                                           |
+| Tài liệu giới thiệu | Poster học sinh QR lớn/logo trường, Word50câu và hai bản PowerPoint; bản rework9slide/60 hiệu ứng là hiện hành                                                                                                                                                   | [poster](../artifacts/posters/README.md), [slide](../artifacts/presentations/README.md), [question-bank.md](question-bank.md)                                                                                                                                |
+| Nguồn và kiểm thử   | Đề án là nguồn sản phẩm; kế hoạch/audit trước triển khai là lịch sử. Ca kiểm thử và bằng chứng theo từng đợt, không cộng số lượt hoặc báo lại thành test mới                                                                                                     | [requirements-original.md](requirements-original.md), [mvp.md](mvp.md), [learning-implementation-plan.md](learning-implementation-plan.md), [levels-review-assessment.md](levels-review-assessment.md), [functional-test-cases.md](functional-test-cases.md) |
 
 Các trạng thái Railway trong bảng dựa trên lần triển khai/kiểm tra đã ghi ở [session-handoff.md](session-handoff.md), không phải gọi lại production trong đợt kiểm tra tài liệu. Còn nghiệm thu lớp thật/tải/vận hành và các khoảng trống audit; không ghi là hoàn thành toàn bộ.
 
@@ -359,22 +389,22 @@ Ngày 11/10 bổ sung nhập trực tiếp khi chạy `npm run create:admin`: h�
 
 Triển khai offline3002 ngày10/10 là lịch sử. Mặc định hiện hành local5173/API Railway theo bảng đầu tài liệu; test dùng server/database riêng. Trạng thái triển khai theo từng đợt ở [session-handoff.md](session-handoff.md), không ở nhật ký cũ cuối tài liệu.
 
-| Phân hệ trong đề án                | Trạng thái                                                                                         | Phần còn thiếu                                                                               |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Tài khoản Admin/giáo viên/học sinh | Admin tạo giáo viên/học sinh; giáo viên tạo/thêm học sinh có sẵn; mật khẩu tạm và cấp lại mật khẩu | Nhập hàng loạt, vòng đời tài khoản và vận hành trường học thật                               |
-| Ngân hàng câu hỏi                  | Phiên bản/ẩn/hiện, Word/CSV theo mẫu, học kỳ và ma trận theo bài/chương                            | Tự tách Word bố cục bất kỳ/PDF và nhập .xlsx                                                 |
-| Luyện tập và cây                   | Luyện bài/chương, ôn chương/kỳ trộn ma trận, phiên ôn lưu để tiếp tục, cây 5 cấp                   | Nghiệm thu bằng lớp học thật                                                                 |
-| Sổ tay sửa sai                     | Nhận câu sai luyện/ôn/thi; khi sửa sai chưa mở đáp án, tự làm lại đến đúng                         | Gợi ý AI khi có dịch vụ phù hợp                                                              |
-| Dashboard và xuất dữ liệu          | Thời gian, mọi lượt luyện/sửa sai, cây và CSV; kết quả thi/thưởng và Excel .xlsx                   | Điểm và thưởng nhóm sau khi có nghiệp vụ chấm nhóm                                           |
-| Khu vườn của lớp                   | Mỗi thành viên một cây/avatar/cấp MAX chương, vườn rào và vinh danh cấp5 riêng trong mã              | Deploy backend members để hiển thị đầy đủ với Railway; nghiệm thu lớp đông                    |
-| Xếp hạng chăm chỉ                  | Đã bổ sung xếp hạng thời gian/cây và bảng sửa sai                                                  | Đánh giá trải nghiệm vinh danh với giáo viên/học sinh thật                                   |
-| Vé và kiểm tra 20 phút             | Vé mốc3/4/5, quyền giáo viên, server deadline, autosave/khôi phục/thu/chấm và cảnh báo tab trong mã | Khắc phục offline/ngưỡng tab, focus/nhật ký, QA idle mobile theo audit; nghiệm thu lớp thật      |
-| Săn điểm và thi chính thức         | Tối đa 3 lượt/chương, lịch lớp/cùng bộ câu đảo thứ tự, giáo viên đóng/thu bài, báo cáo             | Điều chỉnh/kết luận điểm sau sự cố theo quy trình trường                                     |
-| Green Points/đổi thưởng            | Sổ thưởng cây/thi cấp một lần, duyệt/từ chối và lịch sử                                            | Danh mục quà và quy trình đổi thưởng                                                         |
+| Phân hệ trong đề án                | Trạng thái                                                                                                           | Phần còn thiếu                                                                                  |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Tài khoản Admin/giáo viên/học sinh | Admin tạo giáo viên/học sinh; giáo viên tạo/thêm học sinh có sẵn; mật khẩu tạm và cấp lại mật khẩu                   | Nhập hàng loạt, vòng đời tài khoản và vận hành trường học thật                                  |
+| Ngân hàng câu hỏi                  | Phiên bản/ẩn/hiện, Word/CSV theo mẫu, học kỳ và ma trận theo bài/chương                                              | Tự tách Word bố cục bất kỳ/PDF và nhập .xlsx                                                    |
+| Luyện tập và cây                   | Luyện bài/chương, ôn chương/kỳ trộn ma trận, phiên ôn lưu để tiếp tục, cây 5 cấp                                     | Nghiệm thu bằng lớp học thật                                                                    |
+| Sổ tay sửa sai                     | Nhận câu sai luyện/ôn/thi; khi sửa sai chưa mở đáp án, tự làm lại đến đúng                                           | Gợi ý AI khi có dịch vụ phù hợp                                                                 |
+| Dashboard và xuất dữ liệu          | Thời gian, mọi lượt luyện/sửa sai, cây và CSV; kết quả thi/thưởng và Excel .xlsx                                     | Điểm và thưởng nhóm sau khi có nghiệp vụ chấm nhóm                                              |
+| Khu vườn của lớp                   | Mỗi thành viên một cây/avatar/cấp MAX chương, vườn rào và vinh danh cấp5 riêng trong mã                              | Deploy backend members để hiển thị đầy đủ với Railway; nghiệm thu lớp đông                      |
+| Xếp hạng chăm chỉ                  | Đã bổ sung xếp hạng thời gian/cây và bảng sửa sai                                                                    | Đánh giá trải nghiệm vinh danh với giáo viên/học sinh thật                                      |
+| Vé và kiểm tra 20 phút             | Vé mốc3/4/5, quyền giáo viên, server deadline, autosave/khôi phục/thu/chấm và cảnh báo tab trong mã                  | Khắc phục offline/ngưỡng tab, focus/nhật ký, QA idle mobile theo audit; nghiệm thu lớp thật     |
+| Săn điểm và thi chính thức         | Tối đa 3 lượt/chương, lịch lớp/cùng bộ câu đảo thứ tự, giáo viên đóng/thu bài, báo cáo                               | Điều chỉnh/kết luận điểm sau sự cố theo quy trình trường                                        |
+| Green Points/đổi thưởng            | Sổ thưởng cây/thi cấp một lần, duyệt/từ chối và lịch sử                                                              | Danh mục quà và quy trình đổi thưởng                                                            |
 | Hoạt động nhóm                     | Đã có tạo hoạt động, yêu cầu Word, chia nhóm, đại diện, nộp file/link, deadline/gia hạn và phản biện sau hạn gia hạn | Chấm điểm/điểm thưởng, điều chỉnh thành viên sau khi chốt; nghiệm thu backend phản biện Railway |
-| Góp ý riêng                        | Học sinh gửi chủ đề cho giáo viên lớp, trả lời/đóng/mở lại và lịch sử trong mã | Nghiệm thu vận hành và xác minh deployment Railway |
-| Trợ lý AI                          | Chưa triển khai                                                                                    | Kích hoạt sau nhiều lần sai, gợi ý từng bước, bài tương tự, nhà cung cấp và cấu hình sử dụng |
-| Vận hành chính thức                | Railway HTTPS đã có; backup/đối chiếu ở các đợt đã ghi, chưa nghiệm thu vận hành quy mô trường      | Đồng bộ mã/deployment, quy trình khôi phục, giám sát và kiểm thử tải                          |
+| Góp ý riêng                        | Học sinh gửi chủ đề cho giáo viên lớp, trả lời/đóng/mở lại và lịch sử trong mã                                       | Nghiệm thu vận hành và xác minh deployment Railway                                              |
+| Trợ lý AI                          | Chưa triển khai                                                                                                      | Kích hoạt sau nhiều lần sai, gợi ý từng bước, bài tương tự, nhà cung cấp và cấu hình sử dụng    |
+| Vận hành chính thức                | Railway HTTPS đã có; backup/đối chiếu ở các đợt đã ghi, chưa nghiệm thu vận hành quy mô trường                       | Đồng bộ mã/deployment, quy trình khôi phục, giám sát và kiểm thử tải                            |
 
 ## Các bước còn lại theo thứ tự đề xuất
 

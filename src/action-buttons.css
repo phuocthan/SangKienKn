@@ -1,0 +1,45 @@
+/* Shared action states across teacher and student pages. */
+.button.secondary {
+  background: #eaf3e4;
+  border-color: #bdd3ad;
+  color: #285438;
+  box-shadow: none;
+}
+
+.button.secondary:hover:not(:disabled) {
+  background: #dcebcf;
+  border-color: #91b57c;
+}
+
+.button.danger {
+  background: #914735;
+  border-color: #914735;
+  color: #fff;
+  box-shadow: 0 4px 10px #73392a1c;
+}
+
+.button.danger:hover:not(:disabled) {
+  background: #773929;
+  border-color: #773929;
+}
+
+.button.danger-outline {
+  background: #fff8f4;
+  border-color: #dbc2b8;
+  color: #914735;
+  box-shadow: none;
+}
+
+.button.danger-outline:hover:not(:disabled) {
+  background: #f9eee8;
+  border-color: #bb8c7d;
+}
+
+button.button:disabled {
+  background: #eff0ee;
+  border-color: #dcdfda;
+  color: #737d75;
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+}

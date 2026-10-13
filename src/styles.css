@@ -1129,8 +1129,20 @@ label small {
   border-color: #aec798;
 }
 .community-you {
-  margin-left: 8px;
   font-size: var(--text-caption);
+}
+.community-student-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.community-you-slot {
+  display: inline-flex;
+  flex: 0 0 44px;
+  width: 44px;
+}
+.community-student-line .chapter-level-icons {
+  margin-top: 0;
 }
 .community-rank {
   display: inline-grid;

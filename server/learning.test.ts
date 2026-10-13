@@ -391,6 +391,157 @@ test("online uploaded paper stays private, can start immediately, and teacher cl
   assert.ok((await f.read(`/learning/exam-runs/${a.id}`)).results);
 });
 
+test("online groups count exact exam IDs, protect student results and export each closed session with absentees", async (t) => {
+  const f = await fixture(t);
+  const create = () =>
+    f.post(
+      "/classrooms/class-demo/exams",
+      {
+        title: "Trùng tên",
+        delivery: "online",
+        preparationMinutes: 0,
+        durationMinutes: 5,
+        chapterIds: ["chapter-1"],
+        questionCount: 2,
+        requestId: randomUUID(),
+      },
+      f.teacher,
+    );
+  const a = await create(),
+    b = await create();
+  const exportPath = `/learning/exams/${a.id}/results.xlsx`;
+  f.advance(3600000);
+  assert.equal((await f.request(exportPath, undefined, f.teacher)).status, 409);
+  await f.post(`/learning/exams/${a.id}/open`, {}, f.teacher);
+  const run = await f.start({ examId: a.id });
+  const peerRun = await f.post(
+    "/classrooms/class-demo/exam-runs",
+    { examId: a.id, requestId: randomUUID() },
+    f.peer,
+  );
+  await f.post(`/learning/exam-runs/${run.id}/submit`, {});
+  const overview = await f.read("/classrooms/class-demo/learning", f.teacher);
+  assert.equal(overview.onlineExamGroups, true);
+  assert.equal(overview.serverNow, f.now());
+  assert.deepEqual(
+    overview.exams.find((e: any) => e.id === a.id).participants,
+    { joined: 2, submitted: 1 },
+  );
+  assert.deepEqual(
+    overview.exams.find((e: any) => e.id === b.id).participants,
+    { joined: 0, submitted: 0 },
+  );
+  assert.equal(overview.runs.find((r: any) => r.id === run.id).examId, a.id);
+  assert.deepEqual(await f.read(`/learning/exams/${b.id}/runs`, f.teacher), []);
+  const studentRuns = await f.read(`/learning/exams/${a.id}/runs`);
+  assert.equal(studentRuns.length, 1);
+  assert.equal(studentRuns[0].id, run.id);
+  assert.equal(studentRuns[0].score, null);
+  const mine = await f.read("/classrooms/class-demo/learning");
+  assert.deepEqual(mine.exams.find((e: any) => e.id === a.id).myRun, {
+    id: run.id,
+    status: "submitted",
+  });
+  assert.equal((await f.request(exportPath, undefined, f.teacher)).status, 409);
+  for (const cookie of [f.student, f.other]) {
+    assert.equal((await f.request(exportPath, undefined, cookie)).status, 403);
+  }
+  assert.equal(
+    (await f.request(`/learning/exams/${a.id}/runs`, undefined, f.other))
+      .status,
+    403,
+  );
+  assert.equal((await f.request(exportPath)).status, 401);
+  assert.equal(
+    (
+      await f.request(
+        "/learning/exams/missing/results.xlsx",
+        undefined,
+        f.teacher,
+      )
+    ).status,
+    404,
+  );
+  // Include a real member who did not join, and preserve formula-looking names as text.
+  f.db
+    .prepare(
+      "INSERT INTO users VALUES ('absent','absent@test.local','=1+1',?,'student',0)",
+    )
+    .run(hashPassword("GreenEdu123!"));
+  f.db.prepare("INSERT INTO memberships VALUES('class-demo','absent')").run();
+  await f.post(`/learning/exams/${a.id}/state`, { enabled: false }, f.teacher);
+  assert.equal(
+    (await f.read(`/learning/exam-runs/${peerRun.id}`, f.peer)).status,
+    "submitted",
+  );
+  const response = await fetch(f.base + exportPath, {
+    headers: { Cookie: f.teacher },
+  });
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type")!, /spreadsheetml/);
+  assert.match(response.headers.get("content-disposition")!, new RegExp(a.id));
+  const zip = unzipSync(new Uint8Array(await response.arrayBuffer()));
+  const metadata = strFromU8(zip["xl/worksheets/sheet1.xml"]);
+  const results = strFromU8(zip["xl/worksheets/sheet2.xml"]);
+  assert.ok(metadata.includes(a.id));
+  assert.ok(!metadata.includes(b.id));
+  assert.ok(results.includes("Chưa tham gia"));
+  assert.ok(results.includes("=1+1"));
+  assert.ok(!results.includes("<f>"));
+  assert.equal((results.match(/Đã nộp/g) ?? []).length, 2);
+  assert.ok(
+    !(results.includes("password") || results.includes("correctIndex")),
+  );
+  assert.notEqual(
+    (await f.read(`/learning/exams/${a.id}/runs`))[0].score,
+    null,
+  );
+});
+
+test("online result download sweeps expired runs and forbids draft and scheduled exports", async (t) => {
+  const f = await fixture(t);
+  const scheduled = await f.official();
+  assert.equal(
+    (
+      await f.request(
+        `/learning/exams/${scheduled.id}/results.xlsx`,
+        undefined,
+        f.teacher,
+      )
+    ).status,
+    404,
+  );
+  const exam = await f.post(
+    "/classrooms/class-demo/exams",
+    {
+      title: "Hết giờ",
+      delivery: "online",
+      preparationMinutes: 0,
+      durationMinutes: 1,
+      chapterIds: ["chapter-1"],
+      questionCount: 2,
+    },
+    f.teacher,
+  );
+  await f.post(`/learning/exams/${exam.id}/open`, {}, f.teacher);
+  const run = await f.start({ examId: exam.id });
+  f.advance(60000);
+  const response = await fetch(
+    `${f.base}/learning/exams/${exam.id}/results.xlsx`,
+    { headers: { Cookie: f.teacher } },
+  );
+  assert.equal(response.status, 200);
+  assert.equal(
+    f.db.prepare("SELECT reason FROM exam_runs WHERE id=?").get(run.id)!.reason,
+    "deadline",
+  );
+  const overview = await f.read("/classrooms/class-demo/learning", f.teacher);
+  assert.deepEqual(
+    overview.exams.find((e: any) => e.id === exam.id).participants,
+    { joined: 1, submitted: 1 },
+  );
+});
+
 test("practice and review conceal answers after wrong submissions, retries and reload, including legacy saved feedback", async (t) => {
   const f = await fixture(t);
   const wrong = await f.attempt(1);
@@ -1123,6 +1274,11 @@ test("four distinct hidden-tab events auto-submit; duplicate delivery counts onc
   const e = await f.official();
   const r = await f.start({ examId: e.id });
   const path = `/learning/exam-runs/${r.id}`;
+  assert.equal(
+    (await f.request("/study/start", { chapterId: "chapter-1" }, f.student))
+      .status,
+    409,
+  );
   for (let i = 1; i <= 4; i++) {
     const eventId = `event-${i}`;
     const a = await f.post(`${path}/tab`, { eventId });
@@ -1133,6 +1289,7 @@ test("four distinct hidden-tab events auto-submit; duplicate delivery counts onc
   }
   const run = await f.read(path);
   assert.equal(run.reason, "tabs");
+  assert.equal(run.score, null);
   assert.equal(run.results, undefined);
   assert.equal(
     f.db
@@ -1155,7 +1312,7 @@ test("four distinct hidden-tab events auto-submit; duplicate delivery counts onc
         f.student,
       )
     ).status,
-    409,
+    200,
   );
   assert.equal(
     (
@@ -1165,12 +1322,44 @@ test("four distinct hidden-tab events auto-submit; duplicate delivery counts onc
         f.student,
       )
     ).status,
-    409,
+    201,
   );
   assert.equal(
     (await f.request(`/learning/reviews/${review.id}`, undefined, f.student))
       .status,
-    409,
+    200,
+  );
+  const session = await f.post("/study/start", { chapterId: "chapter-1" });
+  const secondsBefore = Number(
+    f.db
+      .prepare(
+        "SELECT seconds FROM progress WHERE student_id='student-demo' AND chapter_id='chapter-1'",
+      )
+      .get()?.seconds ?? 0,
+  );
+  f.advance(15000);
+  const pulse = await f.post("/study/heartbeat", {
+    sessionId: session.sessionId,
+    active: true,
+    interacted: true,
+  });
+  assert.equal(pulse.creditedSeconds, 15);
+  assert.equal(
+    Number(
+      f.db
+        .prepare(
+          "SELECT seconds FROM progress WHERE student_id='student-demo' AND chapter_id='chapter-1'",
+        )
+        .get()!.seconds,
+    ),
+    secondsBefore + 15,
+  );
+  assert.equal((await f.read(path)).results, undefined);
+  assert.equal(
+    (await f.read("/classrooms/class-demo/learning")).runs.find(
+      (row: any) => row.id === r.id,
+    ).score,
+    null,
   );
   await f.post(`/learning/exams/${e.id}/state`, { enabled: false }, f.teacher);
   const released = await f.read(path);

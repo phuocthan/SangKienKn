@@ -87,9 +87,8 @@ test("teacher starts a multi-lesson online exam; students get a persistent prepa
       .getByRole("button", { name: "Bắt đầu kiểm tra", exact: true })
       .click();
     await expect(row).toContainText("Đang chờ bắt đầu");
-    await expect(
-      row.getByRole("button", { name: "Đã gửi thông báo" }),
-    ).toBeDisabled();
+    await expect(row.locator(".online-exam-state")).toHaveText("Chuẩn bị");
+    await expect(row).toContainText("Đã gửi thông báo");
     await noOverflow(page);
     await form.screenshot({
       path: `.local/online-teacher-${info.project.name}.png`,
@@ -151,7 +150,7 @@ test("uploaded online exam notifies and opens a saved room; reload keeps questio
   await row
     .getByRole("button", { name: "Bắt đầu kiểm tra", exact: true })
     .click();
-  await expect(row).toContainText("Đang mở");
+  await expect(row.locator(".online-exam-state")).toHaveText("Đang thi");
   const context = await browser.newContext({ ...info.project.use });
   const student = await context.newPage();
   try {

@@ -28,7 +28,9 @@ export function SidebarNavigation<T extends string>({
           onClick={() => onNavigate(item.id)}
         >
           <item.icon size={20} aria-hidden="true" />
-          <span className="nav-label">{item.label}</span>
+          <span className="nav-label">
+            <span className="nav-label-text">{item.label}</span>
+          </span>
           {!!item.count && <span className="nav-count">{item.count}</span>}
         </button>
       ))}

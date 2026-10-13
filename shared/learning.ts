@@ -32,6 +32,8 @@ export type LearningChapter = {
   missing: string[];
 };
 export type ExamDefinition = {
+  participants?: { joined: number; submitted: number };
+  myRun?: { id: string; status: string } | null;
   delivery?: "online" | "scheduled";
   durationMinutes?: number;
   preparationMinutes?: number;
@@ -46,6 +48,7 @@ export type ExamDefinition = {
   blockedChapters: { id: string; title: string }[];
 };
 export type ExamRun = {
+  practiceAfterSubmission?: boolean;
   delivery?: "online" | "scheduled";
   id: string;
   title: string;
@@ -78,6 +81,8 @@ export type LearningReward = {
   createdAt: number;
 };
 export type LearningOverview = {
+  serverNow?: number;
+  onlineExamGroups?: boolean;
   onlineExams?: boolean;
   levelMinutes?: number;
   canConfigureLevels?: boolean;
@@ -94,6 +99,7 @@ export type LearningOverview = {
   exams: ExamDefinition[];
   runs: {
     id: string;
+    examId?: string | null;
     delivery?: "online" | "scheduled";
     title: string;
     kind: string;

@@ -214,11 +214,15 @@ function Ranking({
                 </span>
               </td>
               <th scope="row">
-                {member.name}
-                {member.id === userId && (
-                  <span className="pill community-you">Bạn</span>
-                )}
-                <ChapterLevelIcons chapters={member.chapterLevels} />
+                <span className="community-student-line">
+                  <span className="community-you-slot">
+                    {member.id === userId && (
+                      <span className="pill community-you">Bạn</span>
+                    )}
+                  </span>
+                  <span className="community-student-name">{member.name}</span>
+                  <ChapterLevelIcons chapters={member.chapterLevels} />
+                </span>
               </th>
               <td>
                 {kind === "effort"

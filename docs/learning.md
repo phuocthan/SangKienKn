@@ -68,7 +68,7 @@ Săn điểm/thi theo lịch: mỗi lượt tối đa20 phút từ giờ server,
 
 Mỗi lần tab bị ẩn ghi một sự kiện riêng, gửi lại không đếm trùng. **Lần thứ 4 tự nộp**, giáo viên cấu hình được từ 1–10 khi tạo thi chính thức. Đây là cảnh báo dựa trên tín hiệu trình duyệt, chưa phải cơ chế chống gian lận được nghiệm thu.
 
-Săn điểm công bố kết quả/lời giải và cập nhật sổ tay sau nộp. Thi chính thức công bố đáp án và cập nhật câu sai khi khung thi đóng hoặc giáo viên đóng bài; trong lúc chờ, các API ôn/luyện/sửa sai tạm khóa để tránh dò đáp án. Giáo viên xem trạng thái/lượt thi, đóng bài để thu các lượt đang làm và duyệt hoặc từ chối điểm thưởng.
+Săn điểm công bố kết quả/lời giải và cập nhật sổ tay sau nộp. Thi chính thức công bố điểm, đáp án và cập nhật câu sai khi khung thi đóng hoặc giáo viên đóng bài. **Quyết định mới 12/10/2026:** học sinh đã nộp bài được ôn/luyện/sửa sai và tính giờ ngay, kể cả tự nộp do rời tab và buổi lớp còn mở; chỉ bài đang active khóa các API này. Quyết định thay quy tắc chờ đóng buổi để ôn trước đây, không mở lại lượt hoặc công bố sớm kết quả thi. Cần triển khai backend Railway mới để có hiệu lực. Giáo viên xem trạng thái/lượt thi, đóng bài để thu các lượt đang làm và duyệt hoặc từ chối điểm thưởng.
 
 ## Báo cáo và giới hạn phạm vi
 

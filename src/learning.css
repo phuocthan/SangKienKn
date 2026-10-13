@@ -547,3 +547,101 @@
 .exam-upload strong {
   overflow-wrap: anywhere;
 }
+.online-exam-groups {
+  display: grid;
+  gap: 18px;
+}
+.online-exam-group.learning-row {
+  display: block;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  min-width: 0;
+}
+.online-exam-heading,
+.online-exam-controls,
+.online-exam-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.online-exam-heading {
+  align-items: flex-start;
+}
+.online-exam-title {
+  font-size: var(--text-body);
+  overflow-wrap: anywhere;
+}
+.online-exam-heading p,
+.online-exam-result p {
+  margin: 8px 0 0;
+}
+.online-exam-state {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: var(--text-caption);
+  background: #fff1d0;
+  color: #88601f;
+}
+.online-exam-state.running {
+  background: #e6f2e6;
+  color: #2c633a;
+}
+.online-exam-state.ended {
+  background: #edf0ed;
+  color: #55635a;
+}
+.online-exam-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 18px 0;
+  margin: 16px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.online-exam-facts dt {
+  color: var(--muted);
+  font-size: var(--text-caption);
+}
+.online-exam-facts dd {
+  margin: 7px 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.online-exam-controls small {
+  color: var(--muted);
+}
+.online-exam-results {
+  margin-top: 18px;
+}
+.online-exam-results summary {
+  cursor: pointer;
+  padding: 10px 0;
+  font-weight: 600;
+}
+.online-exam-result {
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 900px) {
+  .online-exam-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .online-exam-group.learning-row {
+    padding: 16px;
+  }
+  .online-exam-heading,
+  .online-exam-controls,
+  .online-exam-result {
+    flex-wrap: wrap;
+  }
+  .online-exam-controls > .learning-actions {
+    width: 100%;
+  }
+}

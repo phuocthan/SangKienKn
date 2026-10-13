@@ -4,6 +4,14 @@ Cập nhật 12/10/2026. Giáo viên dùng mục riêng **Quản lý kiểm tra 
 
 ## Quy trình và thời gian
 
+### Nhóm quản lý buổi thi — quyết định mới 12/10/2026
+
+Mỗi ID buổi là một nhóm gồm lịch, trạng thái và lượt/kết quả, kể cả hai buổi trùng tên. **Chuẩn bị** khi chưa phát yêu cầu hoặc đang trong X phút chờ; **Đang thi** khi đã mở và còn hạn; **Kết thúc** khi giáo viên đóng hoặc hết hạn chung. Buổi chưa bắt đầu không hết hạn theo mốc nháp. Số tham gia/đã nộp lấy toàn bộ lượt đúng exam_id, không suy từ 200 lượt gần nhất của lớp. Học sinh nộp sớm không tự kết thúc buổi. Thời gian mở/hạn chung hiển thị trong nhóm; chưa bắt đầu ghi Chưa ấn định.
+
+Overview bổ sung `serverNow`, `onlineExamGroups`, `participants`, `myRun` riêng học sinh và `runs.examId`. GET `/api/learning/exams/:id/runs` lấy lượt của đúng buổi khi mở danh sách: chủ lớp thấy mọi lượt, học sinh chỉ lượt mình. GET `/api/learning/exams/:id/results.xlsx` chỉ chủ lớp sau kết thúc; trước bắt đầu/đang chờ/đang thi trả409, student/teacher khác403. File Excel gồm hai sheet Buổi kiểm tra/Kết quả, học sinh đã tham gia và thành viên chưa tham gia; tên/email dùng ô văn bản, không thực thi công thức. Chốt các lượt quá hạn trước xuất; không chứa mật khẩu/đáp án/lời giải. Không thêm migration.
+
+Theo lựa chọn mới của người dùng, bài đã nộp (thủ công/tự nộp do tab/hết giờ/giáo viên đóng) **mở lại ôn/luyện/sửa sai và tính giờ ngay**, buổi lớp vẫn có thể đang thi. Bài active vẫn khóa; không mở lại/đổi đáp án của lượt đã nộp. Điểm thi chính thức cũng được ẩn ở phòng thi/overview/danh sách của student cho đến đóng buổi, cùng đáp án/câu sai. Room bổ sung capability `practiceAfterSubmission` để UI không hứa sai khi còn dùng backend cũ. Đợt này chưa push/deploy Railway, frontend local vẫn dùng server thật cũ cho tới deploy.
+
 Giáo viên sở hữu lớp **bắt buộc chọn một trong hai radio Nguồn đề**: Upload file hoặc Chọn từ ngân hàng, không có nguồn mặc định. Nguồn ngân hàng tích nhiều chương, xổ danh sách bài để lấy toàn chương hoặc chọn nhiều bài riêng; phạm vi mỗi chương độc lập nên có thể lấy toàn chương1 và chỉ vài bài chương2. Số câu/trọng số chỉ xét phạm vi đã chọn, backend vẫn kiểm tra đủ câu.
 
 Upload chọn chương trong chính khối tải file, không cần chọn chương trước ở một khu khác. Nhận Word `.docx` theo mẫu tối đa5MB hoặc CSV UTF-8 tối đa512KB; có đủ4lựa chọn, đáp án và lời giải, tổng đề tối đa100câu. Đọc file thành công hiển thị tên/số câu; lỗi/hỏng/trùng chặn thêm file, giữ các câu đã đọc trước đó. Có thể thêm nhiều file gắn nhiều chương và xem/bỏ từng câu. Chuyển nguồn giữ draft riêng nhưng payload chỉ gửi nguồn đang chọn. Câu riêng không phát hành cho luyện tập. Nhấn **Chuẩn bị kiểm tra online** để lưu bản chờ, chưa thông báo và chưa cho làm bài.

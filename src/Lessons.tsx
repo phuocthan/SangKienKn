@@ -86,7 +86,7 @@ export function Lessons({
                     </small>
                   </div>
                   <button
-                    className="button secondary small"
+                    className="button danger-outline small"
                     disabled={busy || !chapter.canManageLessons}
                     aria-label={`Xóa bài · ${lesson.title}`}
                     onClick={() => {
@@ -172,7 +172,7 @@ export function Lessons({
               Hủy
             </button>
             <button
-              className="button primary"
+              className="button danger"
               disabled={busy}
               onClick={() => void remove()}
             >

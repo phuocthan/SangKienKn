@@ -1,5 +1,14 @@
 # Ca kiểm thử chức năng GreenEdu
 
+## Nhóm buổi thi, export riêng và luyện tập sau tự nộp — 12/10/2026
+
+- ONLINE-GROUP: đúng examId dù trùng tên; trạng thái Chuẩn bị/Đang thi/Kết thúc, trước phát yêu cầu không hết hạn và thời gian Chưa ấn định; giờ mở/hạn chung; số tham gia/đã nộp đầy đủ, một em nộp không kết thúc buổi. Hai thẻ rời được gộp, danh sách bài mở trong nhóm, không tràn ngang.
+- ONLINE-GROUP-ACCESS: teacher chủ lớp xem tất cả lượt buổi, student chỉ lượt mình và myRun; teacher khác bị403, student không có nút export; điểm trước đóng bị ẩn ở overview/room/lượt.
+- ONLINE-RESULT-FILE: trước bắt đầu/đang thi409, student/teacher khác403, chưa login401, thiếu ID/lịch thi khác404. Đóng/hết hạn cho XLSX đúng buổi, thu lượt quá hạn trước xuất, gồm absentees và học sinh tham gia lịch sử; tên dạng=1+1 chỉ là text, không công thức/secrets/đáp án.
+- PRACTICE-AFTER-SUBMIT: active chặn học, tự nộp vì tab giữ khóa lượt/đáp án; sau submitted luyện tập/ôn mở ngay dù buổi còn mở, study start và heartbeat ghi giờ thật. Điểm/đáp án/câu sai thi vẫn chưa công bố cho đến đóng. E2E mô phỏng visibility handler thật, thấy reason=tabs, quay luyện tập không alert và heartbeat creditedSeconds>0, sau đó giáo viên đóng/tải XLSX.
+
+Kiểm tra mới:120/120 backend,26/26 E2E hồi quy và2/2 E2E mới desktop/mobile đạt, TypeScript/build riêng; ca mới ban đầu sai điều hướng sau reload/quay lại phòng đã lưu, đã sửa test sử dụng chọn lớp/trang và Về danh sách rồi chạy lại hai ca đạt. SQLite/server riêng3297, output `.local/exam-groups-results` và `.local/exam-groups-final-results`. Không chạy trên Railway; chưa deploy backend. Không thay/sửa các gap offline/focus/AI của báo cáo vi phạm.
+
 ## Quản lý online riêng, chọn nguồn và upload Word thật — 12/10/2026
 
 - ONLINE-PAGES: mục giáo viên/học sinh riêng, không hiển thị cấu hình cây/ma trận/thưởng; tách buổi online khỏi lịch cũ, đúng lớp/lượt qua thông báo và reload.

@@ -1,11 +1,4 @@
-import {
-  answerCorrect,
-  statementCorrectness,
-  storedAnswer,
-  validateQuestionAnswer,
-  type QuestionKind,
-  type QuestionAnswer,
-} from "../shared/question-types.js";
+import { answerCorrect, statementCorrectness, storedAnswer, validateQuestionAnswer, type QuestionKind, type QuestionAnswer } from "../shared/question-types.js";
 import type { Express } from "express";
 import type { DatabaseSync } from "node:sqlite";
 import { randomInt, randomUUID, createHash } from "node:crypto";
@@ -16,6 +9,7 @@ import { zipSync, strToU8 } from "fflate";
 import type { AppRequest, Row } from "./app.js";
 import { studentLevel, levelStepSeconds } from "../shared/student-levels.js";
 import { classroomLevelMinutes } from "./level-settings.js";
+import { examResultsWorkbook } from "./exam-results.js";
 
 type Context = {
   now: () => number;
@@ -47,12 +41,8 @@ const shuffle = <T>(values: T[]) => {
   }
   return result;
 };
-const cleanQuestion = ({
-  correctIndex: _c,
-  correctAnswer: _a,
-  explanation: _e,
-  ...q
-}: Snapshot) => q;
+const cleanQuestion = ({ correctIndex: _c, correctAnswer: _a, explanation: _e, ...q }: Snapshot) =>
+  q;
 const studyFeedback = (answer: {
   selected: QuestionAnswer;
   statementCorrectness?: boolean[];
@@ -130,8 +120,8 @@ function finalize(
   if (run.status !== "active") return;
   const questions = json<Snapshot[]>(run.questions),
     answers = json<Record<string, QuestionAnswer>>(run.answers);
-  const correct = questions.filter((q) =>
-    answerCorrect(q, answers[q.id]),
+  const correct = questions.filter(
+    (q) => answerCorrect(q, answers[q.id]),
   ).length;
   const score = questions.length
     ? Math.round((correct / questions.length) * 100) / 10
@@ -192,11 +182,8 @@ export function learningAnswersLocked(
 ) {
   sweepLearningExams(db, timestamp);
   return !!db
-    .prepare(
-      `SELECT 1 FROM exam_runs r LEFT JOIN exam_definitions e ON e.id=r.exam_id
-    WHERE r.student_id=? AND (r.status='active' OR (r.kind='official' AND e.enabled=1 AND e.closes_at>?))`,
-    )
-    .get(studentId, timestamp);
+    .prepare("SELECT 1 FROM exam_runs WHERE student_id=? AND status='active'")
+    .get(studentId);
 }
 
 export function registerLearningRoutes(
@@ -235,11 +222,7 @@ export function registerLearningRoutes(
     return value as string[];
   }
   function answerValue(q: Snapshot, value: unknown, partial = false) {
-    try {
-      return validateQuestionAnswer(q, value, partial);
-    } catch (e) {
-      return fail(400, (e as Error).message);
-    }
+    try { return validateQuestionAnswer(q, value, partial); } catch (e) { return fail(400, (e as Error).message); }
   }
   function bank(ids: string[]): Snapshot[] {
     return db
@@ -457,6 +440,7 @@ export function registerLearningRoutes(
         Number(definition.closes_at) <= now());
     return {
       id: fresh.id,
+      practiceAfterSubmission: true,
       title: fresh.title,
       kind: fresh.kind,
       delivery:
@@ -479,7 +463,7 @@ export function registerLearningRoutes(
       questions: questions.map(cleanQuestion),
       answers,
       revision: fresh.revision,
-      score: fresh.score,
+      score: released ? fresh.score : null,
       reason: fresh.reason,
       ...(released
         ? {
@@ -544,6 +528,8 @@ export function registerLearningRoutes(
     const args = own ? [c.id, req.user!.id] : [c.id];
     res.json({
       chapters,
+      serverNow: now(),
+      onlineExamGroups: true,
       levelMinutes: classroomLevelMinutes(db, String(c.id)),
       canConfigureLevels: req.user!.role === "teacher",
       examCreation: true,
@@ -570,6 +556,19 @@ export function registerLearningRoutes(
           const online = db
             .prepare("SELECT * FROM online_exam_sessions WHERE exam_id=?")
             .get(e.id);
+          const participants = db
+            .prepare(
+              "SELECT COUNT(*) AS joined,SUM(status='submitted') AS submitted FROM exam_runs WHERE exam_id=?",
+            )
+            .get(e.id)!;
+          const myRun =
+            req.user!.role === "student"
+              ? db
+                  .prepare(
+                    "SELECT id,status FROM exam_runs WHERE exam_id=? AND student_id=?",
+                  )
+                  .get(e.id, req.user!.id)
+              : null;
           return {
             id: e.id,
             title: e.title,
@@ -583,23 +582,35 @@ export function registerLearningRoutes(
             durationMinutes: online?.duration_minutes ?? 20,
             preparationMinutes: online?.preparation_minutes ?? 0,
             startedAt: online?.started_at ?? null,
+            participants: {
+              joined: Number(participants.joined),
+              submitted: Number(participants.submitted ?? 0),
+            },
+            ...(req.user!.role === "student"
+              ? {
+                  myRun: myRun
+                    ? { id: String(myRun.id), status: String(myRun.status) }
+                    : null,
+                }
+              : {}),
             blockedChapters: blockedExamChapters(json<Snapshot[]>(e.questions)),
           };
         }),
       runs: db
         .prepare(
-          `SELECT r.*,u.name AS studentName,EXISTS(SELECT 1 FROM online_exam_sessions o WHERE o.exam_id=r.exam_id) AS isOnline,(SELECT COUNT(*) FROM exam_tab_events t WHERE t.run_id=r.id) AS warnings
+          `SELECT r.*,u.name AS studentName,EXISTS(SELECT 1 FROM exam_definitions e WHERE e.id=r.exam_id AND e.enabled=1 AND e.closes_at>?) AS unreleased,EXISTS(SELECT 1 FROM online_exam_sessions o WHERE o.exam_id=r.exam_id) AS isOnline,(SELECT COUNT(*) FROM exam_tab_events t WHERE t.run_id=r.id) AS warnings
         FROM exam_runs r JOIN users u ON u.id=r.student_id WHERE r.classroom_id=?${own} ORDER BY r.started_at DESC LIMIT 200`,
         )
-        .all(...args)
+        .all(now(), ...args)
         .map((r) => ({
           id: r.id,
+          examId: r.exam_id ?? null,
           delivery: r.isOnline ? "online" : "scheduled",
           title: r.title,
           kind: r.kind,
           studentName: r.studentName,
           status: r.status,
-          score: r.score,
+          score: req.user!.role === "teacher" || !r.unreleased ? r.score : null,
           deadlineAt: r.deadline_at,
           warnings: r.warnings,
         })),
@@ -629,6 +640,132 @@ export function registerLearningRoutes(
           createdAt: r.created_at,
         })),
     });
+  });
+  function onlineSession(req: AppRequest) {
+    const exam = db
+      .prepare(
+        "SELECT e.*,o.started_at,o.duration_minutes,o.preparation_minutes,o.question_count FROM exam_definitions e JOIN online_exam_sessions o ON o.exam_id=e.id WHERE e.id=?",
+      )
+      .get(String(req.params.id));
+    if (!exam) fail(404, "Không tìm thấy buổi kiểm tra online.");
+    const c = classroom(req, String(exam.classroom_id));
+    return { exam, classroom: c };
+  }
+  app.get("/api/learning/exams/:id/runs", (req: AppRequest, res) => {
+    const { exam } = onlineSession(req);
+    sweepLearningExams(db, now());
+    const own = req.user!.role === "student" ? " AND r.student_id=?" : "";
+    const released =
+      exam.started_at != null &&
+      (!exam.enabled || Number(exam.closes_at) <= now());
+    const rows = db
+      .prepare(
+        `SELECT r.*,u.name AS studentName,(SELECT COUNT(*) FROM exam_tab_events t WHERE t.run_id=r.id) AS warnings FROM exam_runs r JOIN users u ON u.id=r.student_id WHERE r.exam_id=?${own} ORDER BY u.name,r.id`,
+      )
+      .all(...(own ? [exam.id, req.user!.id] : [exam.id]));
+    res.json(
+      rows.map((r) => ({
+        id: r.id,
+        examId: exam.id,
+        delivery: "online",
+        title: r.title,
+        kind: r.kind,
+        studentName: r.studentName,
+        status: r.status,
+        score: req.user!.role === "teacher" || released ? r.score : null,
+        deadlineAt: r.deadline_at,
+        warnings: r.warnings,
+      })),
+    );
+  });
+  app.get("/api/learning/exams/:id/results.xlsx", (req: AppRequest, res) => {
+    teacher(req);
+    const { exam, classroom: c } = onlineSession(req);
+    if (
+      exam.started_at == null ||
+      (exam.enabled && Number(exam.closes_at) > now())
+    )
+      fail(409, "Chỉ tải kết quả sau khi buổi kiểm tra kết thúc.");
+    sweepLearningExams(db, now());
+    const time = (value: unknown) =>
+      value == null
+        ? ""
+        : new Date(Number(value)).toLocaleString("vi-VN", {
+            timeZone: "Asia/Ho_Chi_Minh",
+          });
+    const students = db
+      .prepare(
+        `SELECT u.id,u.name,u.email,r.id AS runId,r.status,r.score,r.questions,r.answers,r.started_at,r.submitted_at,r.reason,
+      (SELECT COUNT(*) FROM exam_tab_events t WHERE t.run_id=r.id) AS warnings
+      FROM users u LEFT JOIN exam_runs r ON r.student_id=u.id AND r.exam_id=?
+      WHERE u.id IN (SELECT student_id FROM memberships WHERE classroom_id=? UNION SELECT student_id FROM exam_runs WHERE exam_id=?) ORDER BY u.name,u.id`,
+      )
+      .all(exam.id, c.id, exam.id);
+    const reasons: Record<string, string> = {
+      manual: "Học sinh nộp",
+      deadline: "Hết giờ",
+      teacher: "Giáo viên thu bài",
+      tabs: "Rời tab đạt ngưỡng",
+    };
+    const joined = students.filter((s) => s.runId).length;
+    const submitted = students.filter((s) => s.status === "submitted").length;
+    const metadata = [
+      ["Buổi kiểm tra", exam.title],
+      ["Mã buổi", exam.id],
+      ["Lớp", c.name],
+      ["Môn", c.subject],
+      ["Trạng thái", "Kết thúc"],
+      ["Giờ mở đề", time(exam.starts_at)],
+      ["Hạn kết thúc theo lịch", time(exam.closes_at)],
+      ["Tham gia", joined],
+      ["Đã nộp", submitted],
+      ["Múi giờ", "Việt Nam UTC+7"],
+    ];
+    const results: unknown[][] = [
+      [
+        "STT",
+        "Họ tên",
+        "Tài khoản",
+        "Trạng thái",
+        "Điểm / 10",
+        "Số câu đúng",
+        "Tổng số câu",
+        "Bắt đầu làm bài",
+        "Nộp bài",
+        "Lần rời tab",
+        "Lý do nộp",
+      ],
+    ];
+    students.forEach((s, index) => {
+      const questions = s.runId ? json<Snapshot[]>(s.questions) : [];
+      const answers = s.runId ? json<Record<string, QuestionAnswer>>(s.answers) : {};
+      results.push([
+        index + 1,
+        s.name,
+        s.email,
+        s.runId
+          ? s.status === "submitted"
+            ? "Đã nộp"
+            : "Đang làm"
+          : "Chưa tham gia",
+        s.score ?? "",
+        s.runId
+          ? questions.filter((q) => answerCorrect(q, answers[q.id])).length
+          : "",
+        s.runId ? questions.length : Number(exam.question_count),
+        time(s.started_at),
+        time(s.submitted_at),
+        s.runId ? Number(s.warnings) : "",
+        reasons[String(s.reason)] ?? "",
+      ]);
+    });
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="greenedu-ket-qua-${exam.id}.xlsx"`,
+    );
+    res
+      .type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+      .send(examResultsWorkbook(metadata, results));
   });
   app.post("/api/classrooms/:id/level-settings", (req: AppRequest, res) => {
     teacher(req);
@@ -705,7 +842,7 @@ export function registerLearningRoutes(
     student(req);
     const c = classroom(req, String(req.params.id));
     if (learningAnswersLocked(db, req.user!.id, now()))
-      fail(409, "Chờ khung thi đóng để tiếp tục ôn tập.");
+      fail(409, "Bạn đang làm bài thi. Hãy nộp bài trước khi tiếp tục ôn tập.");
     const key = text(req.body?.requestId, "Mã phiên", 100);
     const existing = db
       .prepare("SELECT * FROM review_sessions WHERE request_id=?")
@@ -752,48 +889,28 @@ export function registerLearningRoutes(
     classroom(req, String(r.classroom_id));
     return r;
   }
-  app.post("/api/learning/reviews/:id/repeat", (req: AppRequest, res) => {
+  app.post('/api/learning/reviews/:id/repeat', (req: AppRequest, res) => {
     const original = review(req);
-    if (!original.completed) fail(409, "Hoàn thành bộ ôn trước khi làm lại.");
-    if (learningAnswersLocked(db, req.user!.id, now()))
-      fail(409, "Hãy nộp bài thi trước khi ôn tập.");
-    const requestId = text(req.body?.requestId, "Mã phiên", 100);
-    const existing = db
-      .prepare("SELECT * FROM review_sessions WHERE request_id=?")
-      .get(requestId);
+    if (!original.completed) fail(409, 'Hoàn thành bộ ôn trước khi làm lại.');
+    if (learningAnswersLocked(db, req.user!.id, now())) fail(409, 'Hãy nộp bài thi trước khi ôn tập.');
+    const requestId = text(req.body?.requestId, 'Mã phiên', 100);
+    const existing = db.prepare('SELECT * FROM review_sessions WHERE request_id=?').get(requestId);
     if (existing) {
-      if (
-        existing.student_id !== req.user!.id ||
-        existing.classroom_id !== original.classroom_id
-      )
-        fail(409, "Mã phiên đã dùng.");
-      return res.json({ id: existing.id });
+      if (existing.student_id !== req.user!.id || existing.classroom_id !== original.classroom_id) fail(409, 'Mã phiên đã dùng.');
+      return res.json({id:existing.id});
     }
     const old = json<Snapshot[]>(original.questions);
-    const available = bank([...new Set(old.map((q) => q.chapterId))]);
-    const questions = old
-      .map((q) => available.find((current) => current.id === q.id))
-      .filter((q): q is Snapshot => !!q);
-    if (!questions.length)
-      fail(409, "Bộ ôn đã được cập nhật. Hãy chọn lại bộ ôn.");
+    const available = bank([...new Set(old.map(q => q.chapterId))]);
+    const questions = old.map(q => available.find(current => current.id === q.id)).filter((q): q is Snapshot => !!q);
+    if (!questions.length) fail(409, 'Bộ ôn đã được cập nhật. Hãy chọn lại bộ ôn.');
     const id = randomUUID();
-    db.prepare(
-      "INSERT INTO review_sessions(id,student_id,classroom_id,title,questions,request_id,created_at) VALUES(?,?,?,?,?,?,?)",
-    ).run(
-      id,
-      req.user!.id,
-      original.classroom_id,
-      original.title,
-      JSON.stringify(shuffle(questions)),
-      requestId,
-      now(),
-    );
-    res.status(201).json({ id });
+    db.prepare('INSERT INTO review_sessions(id,student_id,classroom_id,title,questions,request_id,created_at) VALUES(?,?,?,?,?,?,?)').run(id, req.user!.id, original.classroom_id, original.title, JSON.stringify(shuffle(questions)), requestId, now());
+    res.status(201).json({id});
   });
   app.get("/api/learning/reviews/:id", (req: AppRequest, res) => {
     const r = review(req);
     if (learningAnswersLocked(db, req.user!.id, now()))
-      fail(409, "Chờ khung thi đóng để tiếp tục ôn tập.");
+      fail(409, "Bạn đang làm bài thi. Hãy nộp bài trước khi tiếp tục ôn tập.");
     res.json({
       id: r.id,
       title: r.title,
@@ -810,7 +927,7 @@ export function registerLearningRoutes(
   app.post("/api/learning/reviews/:id/answer", (req: AppRequest, res) => {
     const r = review(req);
     if (learningAnswersLocked(db, req.user!.id, now()))
-      fail(409, "Chờ khung thi đóng để tiếp tục ôn tập.");
+      fail(409, "Bạn đang làm bài thi. Hãy nộp bài trước khi tiếp tục ôn tập.");
     const qs = json<Snapshot[]>(r.questions),
       answers = json<
         Record<
@@ -1314,7 +1431,7 @@ export function registerLearningRoutes(
       answers = json<Record<string, QuestionAnswer>>(r.answers);
     for (const [id, value] of Object.entries(incoming)) {
       if (!ids.has(id)) fail(400, "Câu không thuộc đề thi.");
-      const q = json<Snapshot[]>(r.questions).find((q) => q.id === id)!;
+      const q = json<Snapshot[]>(r.questions).find(q => q.id === id)!;
       answers[id] = answerValue(q, value, true);
     }
     db.prepare(

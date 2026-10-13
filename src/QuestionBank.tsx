@@ -210,7 +210,7 @@ export function QuestionBank({
         </div>
         <div className="bank-management-actions">
           <button
-            className="button outline small bank-delete-button"
+            className="button danger-outline small"
             disabled={
               !deleteSupported || busy || loading || !selectedQuestions.length
             }
@@ -221,7 +221,7 @@ export function QuestionBank({
             <Trash2 size={16} /> Xóa các câu đã chọn
           </button>
           <button
-            className="button outline small bank-delete-button"
+            className="button danger-outline small"
             disabled={
               !lessonSupported ||
               !lesson ||
@@ -431,7 +431,7 @@ export function QuestionBank({
                   Hủy
                 </button>
                 <button
-                  className="button primary bank-delete-confirm"
+                  className="button danger"
                   disabled={busy}
                   onClick={() => void remove()}
                 >

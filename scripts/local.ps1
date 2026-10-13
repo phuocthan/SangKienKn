@@ -1,5 +1,8 @@
 [CmdletBinding()]
-param([ValidateSet('Start', 'Status', 'Stop')][string]$Action = 'Start')
+param(
+  [ValidateSet('Start', 'Status', 'Stop')][string]$Action = 'Start',
+  [switch]$Force
+)
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $runtimeDir = Join-Path $projectRoot '.local'
@@ -16,8 +19,20 @@ if (Test-Path -LiteralPath $statePath) {
     $frontendProcess = $candidate
   }
 }
+if (-not $frontendProcess) {
+  $listener = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($listener) {
+    $info = Get-CimInstance Win32_Process -Filter "ProcessId = $($listener.OwningProcess)"
+    $expectedNode = (Get-Command node -CommandType Application | Select-Object -First 1).Source
+    if ($info.ExecutablePath -eq $expectedNode -and $info.CommandLine.Contains($vitePath) -and $info.CommandLine.Contains('--mode railway')) {
+      $frontendProcess = Get-Process -Id $listener.OwningProcess -ErrorAction Stop
+    } else {
+      throw 'Port 5173 belongs to another application. It will not be stopped.'
+    }
+  }
+}
 if ($Action -eq 'Stop') {
-  if ($frontendProcess) { Stop-Process -Id $frontendProcess.Id }
+  if ($frontendProcess) { Stop-Process -Id $frontendProcess.Id; $frontendProcess.WaitForExit() }
   Write-Output 'Local frontend stopped; Railway is unchanged.'
   exit
 }
@@ -25,6 +40,11 @@ if ($Action -eq 'Status') {
   if ($frontendProcess) { Write-Output "Frontend running: http://localhost:5173 (PID $($frontendProcess.Id)); API: https://greenedu.up.railway.app" }
   else { Write-Output 'Local frontend is stopped.' }
   exit
+}
+if ($frontendProcess -and $Force) {
+  Stop-Process -Id $frontendProcess.Id
+  $frontendProcess.WaitForExit()
+  $frontendProcess = $null
 }
 if ($frontendProcess) { Write-Output 'Frontend already running: http://localhost:5173'; exit }
 Push-Location -LiteralPath $projectRoot
@@ -34,7 +54,9 @@ try {
   New-Item -ItemType Directory -Path $runtimeDir -Force | Out-Null
   $nodePath = (Get-Command node -CommandType Application | Select-Object -First 1).Source
   $viteArgument = '"' + $vitePath + '"'
-  $started = Start-Process -FilePath $nodePath -ArgumentList @($viteArgument, '--mode', 'railway', '--host', '127.0.0.1') -WorkingDirectory $projectRoot -WindowStyle Hidden -RedirectStandardOutput (Join-Path $runtimeDir 'frontend.log') -RedirectStandardError (Join-Path $runtimeDir 'frontend-error.log') -PassThru
+  $frontendArguments = @($viteArgument, '--mode', 'railway', '--host', '127.0.0.1')
+  if ($Force) { $frontendArguments += '--force' }
+  $started = Start-Process -FilePath $nodePath -ArgumentList $frontendArguments -WorkingDirectory $projectRoot -WindowStyle Hidden -RedirectStandardOutput (Join-Path $runtimeDir 'frontend.log') -RedirectStandardError (Join-Path $runtimeDir 'frontend-error.log') -PassThru
   $ready = $false
   for ($attempt = 0; $attempt -lt 30; $attempt++) {
     Start-Sleep -Milliseconds 300
@@ -42,7 +64,11 @@ try {
     if ($started.HasExited) { throw 'Frontend failed to start; inspect .local/frontend-error.log (port 5173 may be occupied).' }
     try {
       $response = Invoke-WebRequest -Uri 'http://127.0.0.1:5173/@vite/client' -UseBasicParsing -TimeoutSec 2
-      if ($response.StatusCode -eq 200) { $ready = $true; break }
+      if ($response.StatusCode -eq 200) {
+        $listener = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+        $started.Refresh()
+        if (-not $started.HasExited -and $listener.OwningProcess -eq $started.Id) { $ready = $true; break }
+      }
     } catch { }
   }
   if (-not $ready) { Stop-Process -Id $started.Id; throw 'Frontend readiness timed out.' }

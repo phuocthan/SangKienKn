@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: trạng thái màu của nút — 13/10/2026
+
+Nút chính đang hoạt động xanh đậm; nút phụ đang hoạt động xanh lá nhạt có viền xanh. Khóa kiểm tra/đóng bài thi và xác nhận xóa dùng nâu đỏ đậm; nút mở thao tác xóa/bỏ câu dùng nền nâu đỏ rất nhạt. Nút disabled của tất cả các nhóm dùng chung nền xám nhạt, viền/chữ xám, không giữ màu hành động. Áp dụng bằng lớp `.button` chung trên các trang giáo viên/học sinh; kích thước và nhịp chữ không đổi.
+
 ## Hiện hành: neo submenu portrait, mật độ danh sách và thang chữ — 13/10/2026
 
 Trong portrait ≤1100px, tab con WorkspaceTabs sticky ngay dưới header tài khoản/lớp; offset theo chiều cao header thực tế khi đổi lớp, thiết bị hoặc tên dài. Tab có nền kem, viền be và mục chọn nâu ấm, khác menu đáy xanh đậm. Đổi tab hoặc mục menu cuộn về đầu nội dung. Landscape/desktop giữ tab con thường và palette xanh.
@@ -94,7 +98,6 @@ Lộ trình từng chương đổi rail thẳng sang SVG đường lượn nối
 
 Người dùng đã chọn **giữ câu “Gieo nỗ lực hôm nay, đón tri thức ngày mai” nhưng thu gọn**, không bỏ; h2 banner học sinh21–26px, mô tả14px, nút Tiếp tục luyện tập và nút luyện từng chương màu đồng/cam. Nút Xem hành trình giữ viền xanh. `src/learning-journey.css` nạp cuối dùng chung cho các chi tiết này; giữ palette khung đa sắc trước đó, trạng thái đúng/sai/cảnh báo và dữ liệu. Kết quả QA/push mới ghi ở bàn giao, không suy Railway deploy từ mã local.
 
-
 ## Menu trái gom nhóm và submenu — 12/10/2026
 
 Theo yêu cầu menu trái gọn hơn, giáo viên có **4 mục cấp đầu**: Tổng quan; Lớp học → Lớp học của tôi/Hoạt động nhóm; Dạy học & kiểm tra → Ngân hàng câu hỏi/Ôn tập & kiểm tra/Quản lý kiểm tra online; Khu rừng tri thức → Tiến độ học tập/Khu vườn của lớp/Xếp hạng chăm chỉ. Học sinh có **5 mục cấp đầu**: Khu vườn của tôi/Hành trình của tôi; Học tập → Luyện tập/Sổ tay sửa sai; Kiểm tra → Ôn tập & kiểm tra/Kiểm tra online; Cùng lớp → Hoạt động nhóm/Khu vườn của lớp/Xếp hạng chăm chỉ. Admin giữ mục Quản lý tài khoản riêng vì không có nhiều chức năng để nhóm.
@@ -102,7 +105,6 @@ Theo yêu cầu menu trái gọn hơn, giáo viên có **4 mục cấp đầu**:
 `SidebarNavigation` dùng chung: một nhóm mở mỗi lần, bấm lại để đóng; vào trang từ submenu/nút trong nội dung tự mở nhóm chứa trang hiện tại. Home/tiện ích tài khoản đóng nhóm; chọn lớp giữ trang. Menu cha chỉ mở/đóng, không dẫn ngầm sang trang đầu. Parent có icon Forest và chevron; submenu dùng chấm nhỏ/đường nối, item hiện tại có aria-current và nền xanh nhẹ. Lời nhắc sidebar rút thành một dòng, ba tiện ích Góp ý/Tài khoản/Đăng xuất vẫn dưới cùng. Bộ đếm sửa sai hiện cả trên nhóm Học tập khi đóng và mục con; không tạo hoặc đổi dữ liệu học tập.
 
 Accordion dùng nút có aria-expanded/aria-controls, submenu đóng có hidden; Tab/Enter/Space hoạt động tự nhiên, Escape trong nhóm đóng và đưa focus về cha. Desktop/landscape dùng sidebar phân cấp; portrait≤1100px hoặc viewport≤700px giữ navigation phẳng theo bố cục compact hiện có, nên menu đáy/header trên phải và safe area không đổi. Khi xoay qua lại chỉ có một navigation DOM, không nhân đôi nút hoặc active route. CSS `sidebar-navigation.css` scoped, dùng palette Forest riêng cho từng nhóm; reduced-motion tắt hiệu ứng chevron. Không thay API/backend hoặc nghiệp vụ các trang.
-
 
 ## Màu khung và icon khu rừng tri thức — 12/10/2026
 
@@ -112,6 +114,13 @@ Theme dùng chung `src/forest-theme.css`, nạp sau portrait-navigation.css: khu
 
 Icon trang trí aria-hidden; nhãn/tooltip/nút44px giữ ở thao tác gốc. Hover xoay icon rất nhẹ, tắt khi reduced-motion; menu portrait vẫn ở đáy/header tài khoản trên phải. Chỉ thay frontend, local5173 nhận HMR/API và DB vẫn Railway; không tự push/deploy. Kết quả kiểm tra mới của đợt Forest ghi riêng tại session-handoff.md, không dùng kết quả ôn-thi của task song song làm bằng chứng.
 
+## Nhóm buổi kiểm tra và luyện tập sau nộp — 12/10/2026
+
+Trang online gom lịch thi và lượt/kết quả vào **một nhóm cho mỗi ID buổi**, không gộp theo tên. Mỗi nhóm có tên đề, badge **Chuẩn bị / Đang thi / Kết thúc**, số **Tham gia / Đã nộp**, thời gian mở đề và hạn kết thúc chung. Chưa giáo viên bắt đầu thì thời gian ghi **Chưa ấn định**; đã thông báo nhưng còn X phút chờ vẫn là Chuẩn bị. Đang thi chỉ khi đã tới giờ mở, Kết thúc khi giáo viên đóng hoặc tới hạn chung; các em nộp sớm không kết thúc buổi cho cả lớp. Đồng hồ dùng serverNow và thời gian đơn điệu, metadata/lượt cập nhật từ server.
+
+Giáo viên mở danh sách **Học sinh tham gia & bài nộp** trong từng nhóm, xem bài và chỉ có **Tải kết quả** khi Kết thúc. Excel riêng buổi gồm metadata, từng học sinh/điểm/câu đúng/giờ nộp/cảnh báo/lý do nộp và thành viên chưa tham gia. Học sinh chỉ mở **Bài làm của bạn**, không xem tên/điểm bạn khác, không tải báo cáo. Desktop bốn cột thống kê, tablet/mobile hai cột, các nút xuống hàng. Loại bỏ thẻ Lượt thi & kết quả độc lập của trang online; trang Ôn tập & kiểm tra giữ lịch cũ và báo cáo lớp.
+
+Người dùng đã chọn **cho luyện tập và tính giờ ngay sau khi bài đã nộp**, kể cả tự nộp do rời tab trong buổi lớp còn mở. Chỉ bài active khóa ôn/luyện/sửa sai. Điểm, đáp án và câu sai của thi chính thức vẫn công bố khi buổi kết thúc; không mở lại lượt đã nộp. Phòng thi API mới nhắc rõ có thể quay lại luyện tập. Quyết định này thay quy tắc chờ đóng buổi để ôn trong mô tả cũ. Cần backend Railway mới để thống kê/Excel/quy tắc luyện tập có hiệu lực; UI thiếu capability báo chờ server.
 
 ## Trang kiểm tra online riêng và hai nguồn đề — 12/10/2026
 

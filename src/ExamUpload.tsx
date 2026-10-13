@@ -197,7 +197,7 @@ export function ExamUpload({
               </div>
               <button
                 type="button"
-                className="button secondary small"
+                className="button danger-outline small"
                 disabled={reading}
                 onClick={() =>
                   onChange(questions.filter((_, i) => i !== index))

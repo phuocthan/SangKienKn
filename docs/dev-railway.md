@@ -34,6 +34,14 @@ npm run dev
 
 Dừng bằng `Ctrl+C`. Cổng 5173 phải trống; nếu đã chạy nền, dừng bằng lệnh `local` trước. Vite chỉ lắng nghe loopback `127.0.0.1`, dùng cổng cố định, không tự chuyển cổng. Log nền: `.local/frontend.log`, `.local/frontend-error.log`; trạng thái: `.local/frontend-state.json`. Sau khi khởi động Windows, chạy lại lệnh.
 
+Nếu trình duyệt báo **504 (Outdated Optimize Dep)**, khởi động lại frontend và buộc Vite tạo lại dependency cache:
+
+```powershell
+npm run local -- -Force
+```
+
+Sau đó tải lại tab localhost bằng `Ctrl+F5` nếu tab còn giữ module cũ. `-Force` chỉ khởi động lại Vite của đúng repository ở chế độ Railway và truyền `--force` cho optimizer; không xóa dữ liệu hoặc khởi động API SQLite. Script kiểm tra cả tiến trình đang giữ cổng5173 khi file trạng thái cũ không còn hợp lệ, chờ tiến trình cũ dừng và chỉ báo ready khi chính Vite mới giữ cổng. Nếu cổng thuộc ứng dụng khác thì báo lỗi, không dừng ứng dụng đó.
+
 ## Đăng nhập và dữ liệu
 
 Đăng nhập bằng tài khoản/mật khẩu **có trên Railway**. Hai nút vào nhanh bỏ mật khẩu của backend local không hoạt động trong production; API Railway hiện trả `quickLogin:false`. Tài khoản/phiên của database local cũ không chuyển sang Railway.
