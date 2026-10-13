@@ -14,9 +14,10 @@ test("student switches independent subject icons, sees all five stages and retai
   const names = ["Mầm", "Chồi", "Cây Non", "Đơm Hoa", "Kết Trái"];
   for (let i = 0; i < names.length; i++) {
     await page.getByLabel("Chọn lớp học").selectOption(`levels-class-${i + 1}`);
-    const card = page.getByRole("region", {
-      name: "Cấp độ của bạn theo chương",
-    });
+    const card = page.getByRole("region", { name: "Hành trình của tôi" });
+    await expect(page.getByText("CẤP ĐỘ CỦA BẠN", { exact: true })).toHaveCount(
+      0,
+    );
     const timeline = card.locator(
       `.chapter-level-timeline[data-chapter-id="levels-class-${i + 1}-chapter"]`,
     );
@@ -79,7 +80,7 @@ test("student switches independent subject icons, sees all five stages and retai
   await page.getByLabel("Chọn lớp học").selectOption("levels-class-2");
   await expect(
     page
-      .getByRole("region", { name: "Cấp độ của bạn theo chương" })
+      .getByRole("region", { name: "Hành trình của tôi" })
       .locator(
         '.chapter-level-timeline[data-chapter-id="levels-class-2-chapter"]',
       ),
@@ -92,7 +93,7 @@ test("student switches independent subject icons, sees all five stages and retai
         '.chapter-level-timeline[data-chapter-id="levels-class-2-chapter"] .chapter-level-summary strong',
       ),
   ).toHaveText("Cấp 2 · Chồi");
-  await navigateTo(page, { name: "Hành trình của tôi", exact: true });
+  await navigateTo(page, { name: "Khu vườn của tôi", exact: true });
   await expect(
     page.locator(".progress-table .chapter-level-timeline"),
   ).toHaveCount(2);
@@ -122,23 +123,26 @@ test("teacher roster and class leaderboard show the same student stage for the s
     const row = page
       .getByRole("row")
       .filter({ hasText: "levels@greenedu.test" });
-    await expect(
-      row
-        .locator(".chapter-level-member")
-        .filter({ hasText: "Chương 1" })
-        .locator(".student-level-badge"),
-    ).toHaveAttribute("data-level", level);
+    const rosterIcons = row.locator(".chapter-level-icon-item");
+    await expect(rosterIcons).toHaveCount(2);
+    await expect(rosterIcons.first()).toHaveAttribute("data-level", level);
+    await expect(rosterIcons.first()).toHaveAttribute("title", /Chương 1.*Cấp/);
+    await expect(row.locator(".chapter-level-icons")).not.toContainText(
+      "Chương",
+    );
+    await expect(row.locator(".chapter-level-icons")).not.toContainText("Cấp");
     await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
     const boardRow = page
       .getByRole("table", { name: "Xếp hạng chăm vườn" })
       .getByRole("row")
       .filter({ hasText: "Học sinh cấp độ" });
-    await expect(
-      boardRow
-        .locator(".chapter-level-member")
-        .filter({ hasText: "Chương 1" })
-        .locator(".student-level-badge"),
-    ).toHaveAttribute("data-level", level);
+    const boardIcons = boardRow.locator(".chapter-level-icon-item");
+    await expect(boardIcons).toHaveCount(2);
+    await expect(boardIcons.first()).toHaveAttribute("data-level", level);
+    await expect(boardIcons.first()).toHaveAttribute("title", /Chương 1.*Cấp/);
+    await expect(boardRow.locator(".chapter-level-icons")).not.toContainText(
+      "Chương",
+    );
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,

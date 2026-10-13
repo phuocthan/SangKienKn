@@ -1,5 +1,9 @@
 # Bàn giao session GreenEdu
 
+## Vườn cá nhân gọn, biểu tượng cấp ở các bảng và menu rộng hơn — 13/10/2026
+
+Theo góp ý mới, sidebar landscape/desktop nới từ 252 lên 276px (hai breakpoint nhỏ nới 12px), đồng thời dịch phần nội dung tương ứng; dock portrait giữ nguyên. Trang Khu vườn của tôi bỏ thẻ CẤP ĐỘ CỦA BẠN vì timeline cấp theo chương đã nằm trong section Hành trình của tôi. Thẻ cấp trong Tài khoản vẫn giữ. Danh sách Học sinh của giáo viên và hai bảng xếp hạng trong Khu vườn của lớp hiện chuỗi biểu tượng cấp theo thứ tự chương, phân cách bằng vạch dọc; không lặp tên chương/tên cấp trên mặt bảng, nhưng mỗi icon có nhãn đầy đủ khi hover và đọc màn hình. Dữ liệu thời gian/cấp không đổi. Trên checkout push sạch: TypeScript/Vite build đạt; 4/4 E2E cấp cây và 10/10 E2E parent-tabs/portrait desktop/mobile đạt trên DB riêng. Đã xem ảnh vườn cá nhân và bảng học sinh giáo viên; không ghi dữ liệu Railway.
+
 ## Hành trình học sinh nằm trong Khu vườn của tôi — 13/10/2026
 
 Theo góp ý tiếp theo của người dùng, bỏ tab Hành trình của tôi ở trang học sinh. Trang Khu vườn của tôi hiện thêm section Hành trình của tôi ngay dưới các thẻ/mốc cây hiện có, chứa timeline cấp theo chương; không lặp lại thống kê tổng. Nút Xem hành trình cuộn đến section này. Hash `#section=progress` cũ chuyển về home, menu học sinh không thêm mục. Giáo viên giữ hai tab Lớp học/Hoạt động nhóm. Kiểm tra trên checkout push: build TypeScript/Vite và 12/12 E2E desktop/mobile về tab, vườn, cấp cây và tiêu đề đạt với DB riêng; nguồn tại root vẫn giữ công việc song song chưa commit. Đợt kết thúc phiên/sổ tay/vườn lớp ngay dưới được gộp cùng lần push này.

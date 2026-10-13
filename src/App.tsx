@@ -56,7 +56,7 @@ import { SidebarNavigation, type NavigationItem } from "./SidebarNavigation";
 import { Avatar, AvatarPicker } from "./Avatars";
 import {
   ChapterLevelTimeline,
-  StudentLevelBadge,
+  ChapterLevelIcons,
   StudentLevelCard,
   StudentLevelIcon,
 } from "./StudentLevel";
@@ -775,7 +775,6 @@ export default function App() {
                         setStudy({ chapter: ch, mode: "practice", lesson })
                       }
                     />
-                    <StudentLevelCard classroom={current} />
                     <section
                       id="student-journey"
                       style={{ scrollMarginTop: 100 }}
@@ -1933,20 +1932,7 @@ function Roster({
                         <div>
                           <strong>{s.name}</strong>
                           <small>{s.email}</small>
-                          {s.chapterLevels?.map((ch) => (
-                            <div
-                              key={ch.chapterId}
-                              className="chapter-level-member"
-                            >
-                              <small>{ch.chapterTitle}</small>
-                              <StudentLevelBadge
-                                seconds={ch.seconds}
-                                levelMinutes={ch.levelMinutes}
-                                scope={ch.chapterTitle}
-                                compact
-                              />
-                            </div>
-                          ))}
+                          <ChapterLevelIcons chapters={s.chapterLevels} />
                         </div>
                       </div>
                     </td>

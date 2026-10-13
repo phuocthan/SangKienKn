@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Clock3, Flower2, RefreshCw, Users } from "lucide-react";
 import { api, duration, errorMessage } from "./api";
 import { Empty, SectionTitle } from "./components";
-import { StudentLevelBadge } from "./StudentLevel";
+import { ChapterLevelIcons } from "./StudentLevel";
 import { StudentGarden } from "./StudentGarden";
 import type {
   ClassLeaderboard,
@@ -218,19 +218,7 @@ function Ranking({
                 {member.id === userId && (
                   <span className="pill community-you">Bạn</span>
                 )}
-                <div>
-                  {member.chapterLevels?.map((ch) => (
-                    <div key={ch.chapterId} className="chapter-level-member">
-                      <small>{ch.chapterTitle}</small>
-                      <StudentLevelBadge
-                        seconds={ch.seconds}
-                        levelMinutes={ch.levelMinutes}
-                        scope={ch.chapterTitle}
-                        compact
-                      />
-                    </div>
-                  ))}
-                </div>
+                <ChapterLevelIcons chapters={member.chapterLevels} />
               </th>
               <td>
                 {kind === "effort"

@@ -125,6 +125,30 @@
 .chapter-level-member small {
   overflow-wrap: anywhere;
 }
+.chapter-level-icons {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 6px;
+  max-width: 100%;
+}
+.chapter-level-icon-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 7px;
+  border-right: 1px solid #b8c8ac;
+}
+.chapter-level-icon-item:first-child {
+  padding-left: 0;
+}
+.chapter-level-icon-item:last-child {
+  border-right: 0;
+  padding-right: 0;
+}
+.chapter-level-icon-item .student-level-icon {
+  width: 27px;
+  height: 27px;
+}
 .chapter-art > .student-level-icon {
   width: 88px;
   height: 88px;

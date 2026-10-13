@@ -1,15 +1,17 @@
 import { useId } from "react";
 import { Check, LockKeyhole } from "lucide-react";
 import { STUDENT_LEVEL_NAMES, studentLevel } from "../shared/student-levels";
-import type { Chapter, Classroom } from "./types";
+import type { Chapter, Classroom, Student } from "./types";
 import { duration } from "./api";
 
 export function StudentLevelIcon({
   level,
   className = "",
+  label,
 }: {
   level: number;
   className?: string;
+  label?: string;
 }) {
   const stage = Math.max(1, Math.min(5, Math.floor(level)));
   const gradient = useId();
@@ -18,7 +20,7 @@ export function StudentLevelIcon({
       viewBox="0 0 80 80"
       className={`student-level-icon ${className}`}
       role="img"
-      aria-label={`Cấp ${stage} · ${STUDENT_LEVEL_NAMES[stage - 1]}`}
+      aria-label={label ?? `Cấp ${stage} · ${STUDENT_LEVEL_NAMES[stage - 1]}`}
     >
       <defs>
         <linearGradient id={gradient} x1="0" y1="0" x2="1" y2="1">
@@ -233,6 +235,38 @@ export function StudentLevelBadge({
       <span>
         Cấp {stage.level} · {stage.name}
       </span>
+    </span>
+  );
+}
+
+export function ChapterLevelIcons({
+  chapters,
+}: {
+  chapters?: Student["chapterLevels"];
+}) {
+  if (!chapters?.length) return null;
+  return (
+    <span
+      className="chapter-level-icons"
+      role="list"
+      aria-label="Cấp độ theo thứ tự chương"
+    >
+      {chapters.map((chapter) => {
+        const stage = studentLevel(chapter.seconds, chapter.levelMinutes);
+        const label = `${chapter.chapterTitle}: Cấp ${stage.level} · ${stage.name}`;
+        return (
+          <span
+            className="chapter-level-icon-item"
+            role="listitem"
+            key={chapter.chapterId}
+            title={label}
+            data-chapter-id={chapter.chapterId}
+            data-level={stage.level}
+          >
+            <StudentLevelIcon level={stage.level} label={label} />
+          </span>
+        );
+      })}
     </span>
   );
 }

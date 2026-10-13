@@ -92,7 +92,7 @@ a:focus-visible {
 }
 .sidebar {
   inset: 12px auto 12px 12px;
-  width: 252px;
+  width: 276px;
   padding: 26px 16px 18px;
   border: 0;
   border-radius: 24px;
@@ -153,8 +153,8 @@ a:focus-visible {
   margin-top: 14px;
 }
 .main-shell {
-  margin-left: 276px;
-  width: calc(100% - 276px);
+  margin-left: 300px;
+  width: calc(100% - 300px);
 }
 .topbar {
   background: transparent;
@@ -668,7 +668,7 @@ tbody tr:hover {
 }
 @media (min-width: 701px) and (max-width: 1200px) {
   .sidebar {
-    width: 218px;
+    width: 230px;
     padding-inline: 12px;
   }
   .sidebar .logo {
@@ -680,8 +680,8 @@ tbody tr:hover {
     height: 40px;
   }
   .main-shell {
-    margin-left: 242px;
-    width: calc(100% - 242px);
+    margin-left: 254px;
+    width: calc(100% - 254px);
   }
   .topbar,
   .main-content {
@@ -745,11 +745,11 @@ tbody tr:hover {
 }
 @media (min-width: 701px) and (max-width: 960px) {
   .sidebar {
-    width: 195px;
+    width: 207px;
   }
   .main-shell {
-    margin-left: 219px;
-    width: calc(100% - 219px);
+    margin-left: 231px;
+    width: calc(100% - 231px);
   }
   .sidebar .logo {
     font-size: 21px;

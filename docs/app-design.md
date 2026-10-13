@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: sidebar nới rộng và icon cấp theo chương — 13/10/2026
+
+Menu trái desktop nới nhẹ để logo/chữ/note thoáng hơn; main-shell dịch tương ứng, giữ khoảng cách 24px giữa menu và nội dung. Các breakpoint landscape nhỏ nới 12px; dock portrait giữ cấu hình cũ. Trang Khu vườn của tôi bỏ thẻ CẤP ĐỘ CỦA BẠN trùng Hành trình của tôi. Roster giáo viên và bảng xếp hạng trong vườn lớp dùng icon cấp thuần hình, phân cách vạch dọc theo thứ tự chương; nhãn chương/cấp vẫn có ở tooltip và aria-label. Thẻ cấp trong Tài khoản và timeline hành trình vẫn đầy đủ chữ.
+
 ## Hiện hành: gộp hành trình vào vườn cá nhân — 13/10/2026
 
 Học sinh vào Khu vườn của tôi thấy phần Hành trình của tôi ở cuối trang, sau những mầm xanh và thẻ cấp độ. Bỏ tab con Hành trình; nút Xem hành trình trong hero cuộn tới phần này. Chỉ một h1 đầu trang; section dùng tiêu đề h2 và timeline chương cũ. URL progress cũ chuyển về home. Quyết định thay mô tả tab home2 mục phía dưới.
