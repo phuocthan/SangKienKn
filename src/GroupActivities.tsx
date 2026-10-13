@@ -11,7 +11,6 @@ import {
   Clock3,
   Download,
   Plus,
-  RefreshCw,
   Search,
   CheckCircle2,
   FileText,
@@ -110,13 +109,20 @@ export function GroupActivities({
   );
   useEffect(() => {
     void refresh(selected);
-    const poll = setInterval(() => void refresh(selected, true), 20000);
-    const focus = () => void refresh(selected, true);
+    const focus = () => {
+      if (document.visibilityState === "visible" && navigator.onLine)
+        void refresh(selected, true);
+    };
+    const poll = setInterval(focus, 20000);
     window.addEventListener("focus", focus);
+    window.addEventListener("online", focus);
+    document.addEventListener("visibilitychange", focus);
     return () => {
       sequence.current++;
       clearInterval(poll);
       window.removeEventListener("focus", focus);
+      window.removeEventListener("online", focus);
+      document.removeEventListener("visibilitychange", focus);
     };
   }, [refresh, selected]);
   useEffect(() => {
@@ -174,13 +180,6 @@ export function GroupActivities({
       <WorkspaceHeading className="page-heading group-page-heading">
         <div className="group-heading-copy">
           <h1>Hoạt động nhóm</h1>
-          <span className="eyebrow">TRANG CỘNG TÁC</span>
-          <p>
-            {classroom.name} ·{" "}
-            {teacher
-              ? "Giao yêu cầu, chia nhóm ngẫu nhiên và theo dõi sản phẩm."
-              : "Xem nhóm của bạn, yêu cầu và các sản phẩm đã nộp."}
-          </p>
         </div>
         <img
           className="group-heading-illustration"
@@ -194,6 +193,13 @@ export function GroupActivities({
       {error && (
         <div className="error-banner" role="alert">
           {error}
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => void refresh(selected)}
+          >
+            Thử lại
+          </button>
         </div>
       )}
       {notice && (
@@ -273,14 +279,6 @@ export function GroupActivities({
           </button>
         )}
         {teacher && createButton}
-        <button
-          className="button outline group-refresh"
-          disabled={loading}
-          onClick={() => void refresh(selected)}
-        >
-          <RefreshCw size={16} />
-          Cập nhật
-        </button>
       </div>
       {loading && <p role="status">Đang tải hoạt động…</p>}
       {!selected &&

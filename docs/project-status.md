@@ -1,5 +1,15 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: hoàn tất redesign với hai skill — 13/10/2026
+
+Đã cài/đọc `redesign-existing-projects` làm chính và `web-design-guidelines` kiểm tra; [nguồn/đường dẫn](design-skills.md). Hoàn tất yêu cầu gửi lại: submenu một hàng trên navbar đáy portrait/không che nội dung, header và thẻ có sắc vườn, bộ5 cấp mới/cây ra hoa có+, ôn/online hai vai trò, form tạo online mở bằng nút rồi lưu vào danh sách, metadata có icon/màu, căn controls, bỏ chữ phụ nhóm và thay rào vườn. Bỏ các nút refresh thừa sau khi có poll/focus/reconnect; giữ Thử lại và thao tác Lưu/Cập nhật mật khẩu thật.
+
+Chỉ frontend, giữ backend/dữ liệu/điểm/vé/ngưỡng cấp/phân quyền. Local5173/HMR → Railway đang chạy, QA trên DB/server riêng. **TypeScript/build và72/72 E2E desktop/mobile mới đạt**; hai ca timer cũ ngoài lượt cuối chưa nghiệm thu. Kết quả/giới hạn QA ở [redesign-qa-20261013.md](redesign-qa-20261013.md); thiết kế mới nằm đầu [app-design.md](app-design.md), thay mục submenu sticky và hình thức cấp cũ. Đợt này người dùng yêu cầu commit/push origin/main; Railway cần xác nhận triển khai riêng, không đồng nhất build/push với deploy. Ghi chép xóa hoạt động Chủ đề1 đã được giữ khi pull và hợp nhất vào tài liệu.
+
+## Lịch sử trước redesign: đồng bộ mã mới qua pull — 13/10/2026
+
+`main` đã pull lên `3bb7fcf`, khớp origin/main. Ghi chép local xóa hoạt động Chủ đề1 được hợp nhất với tài liệu upstream, vẫn chưa commit; không còn conflict. Giữ stash/bản sao riêng để phục hồi, không đổi database hoặc deploy. Yêu cầu redesign mới tiếp tục trên bộ Duotone/menu/tab hiện có, tránh khôi phục bố cục cũ; chưa bắt đầu sửa UI trong đợt pull. Hai skill được nêu chưa tìm thấy SKILL.md trong các vị trí đã tra cứu, cần đường dẫn để đọc đúng hướng dẫn. Chi tiết tại [session-handoff.md](session-handoff.md).
+
 ## Hiện hành: áp dụng bộ GreenEdu Duotone đã duyệt — 13/10/2026
 
 Theo yêu cầu “áp dụng đề xuất”, đã chuyển toàn bộ icon UI trong `src` sang Phosphor Duotone và thay5 SVG cấp cây bằng bộ đã duyệt trong `.local/greenedu-icons-preview.html`. Icon lớp/ngân hàng/ôn/online/vườn/nhóm/sổ tay/tài khoản/cài đặt phân biệt theo chức năng; giữ nhãn accessibility và hành vi. Tập trung SVG trong `src/icons.tsx`, chỉ dùng weight Duotone; JS chính474998 byte, không còn cảnh báo chunk500KB của bản thử dùng mọi weight. Avatar/logo/minh họa và dữ liệu giữ nguyên.
@@ -195,6 +205,10 @@ Theo đính chính mới nhất, ba icon ở **góc trên phải**, neo cùng he
 ## Bố cục portrait: tài khoản/lớp ở trên, menu ở dưới
 
 Đã chỉnh frontend theo yêu cầu mới: header luôn neo tên tài khoản/avatar/lớp ở đầu khi cuộn, thanh điều hướng fixed ở đáy và cuộn ngang; nội dung chừa khoảng để không bị che. Áp dụng portrait ≤1100px, cả giáo viên/học sinh/Admin; landscape và desktop giữ sidebar. CSS riêng nạp sau theme, có safe area. Build/TypeScript và 22/22 E2E đạt bằng database riêng. Theo yêu cầu tiếp theo, đưa bản này vào commit để push `origin/main`; không thay backend/dữ liệu và chưa xác minh kết quả deploy Railway. Chi tiết/bằng chứng trong [session-handoff.md](session-handoff.md), thiết kế [app-design.md](app-design.md).
+
+## Xóa hoạt động Chủ đề 1 theo yêu cầu — 12/10/2026
+
+Đã xóa **Chủ đề 1 - Xây dựng và phát triển nhà trường** của Lớp11/2 trực tiếp trên database Railway:1 hoạt động,4 nhóm và47phân nhóm. Đã sao lưu trước, bảo toàn dữ liệu ngoài phạm vi bằng hash37bảng; kết nối chỉ đọc mới xác nhận hoạt động không còn, hai hoạt động khác và47thành viên lớp giữ nguyên, backup/khóa ngoại/integrity đạt. Database thực tế hiện có2lớp, ghi chép chỉ1lớp phía dưới là trạng thái trước đây. Không sửa runtime/push/deploy/restart hoặc database local; chi tiết backup/audit ở [session-handoff.md](session-handoff.md). Tải lại trang Hoạt động nhóm để cập nhật danh sách.
 
 ## Cách nắm trạng thái hiện tại — cập nhật 12/10/2026
 

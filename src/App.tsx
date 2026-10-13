@@ -20,7 +20,6 @@ import {
   Clock3,
   ClipboardList,
   Download,
-  Flower2,
   LayoutDashboard,
   Leaf,
   LogOut,
@@ -66,6 +65,7 @@ import {
   ChapterLevelIcons,
   StudentLevelCard,
   StudentLevelIcon,
+  BloomingTreeIcon,
 } from "./StudentLevel";
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { GardenGoal } from "./GardenGoal";
@@ -896,7 +896,6 @@ export default function App() {
                 <Learning
                   key={`${current.id}-${page}`}
                   view={page === "online-exams" ? "online" : "learning"}
-                  onOnline={() => navigate("online-exams")}
                   classroom={current}
                   user={user}
                   entryRunId={
@@ -1828,7 +1827,7 @@ function TeacherHome({
           color="amber"
         />
         <Stat
-          icon={<Flower2 size={21} />}
+          icon={<BloomingTreeIcon />}
           label="Cây đã ra hoa"
           value={
             loading || error

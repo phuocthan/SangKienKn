@@ -25,6 +25,12 @@ async function login(page: Page, teacher: boolean) {
   await expect(
     page.getByRole("heading", { name: "Thời gian tăng cấp", exact: true }),
   ).toHaveCount(0);
+  if (teacher) {
+    await expect(page.locator(".learning-form")).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "Tạo bài kiểm tra", exact: true })
+      .click();
+  }
 }
 async function noOverflow(page: Page) {
   expect(
@@ -53,7 +59,7 @@ test("online manager requires one source and supports whole chapter plus selecte
   await login(page, true);
   const form = page.locator(".learning-form");
   const save = form.getByRole("button", {
-    name: "Chuẩn bị kiểm tra online",
+    name: "Lưu bài kiểm tra",
     exact: true,
   });
   await expect(form.getByRole("radio", { checked: true })).toHaveCount(0);
@@ -98,7 +104,7 @@ test("online manager requires one source and supports whole chapter plus selecte
     "learning-ch2::Bài 2",
   ]);
   await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Đã chuẩn bị",
+    "Bạn đã tạo bài kiểm tra thành công",
   );
   await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
   await expect(
@@ -142,7 +148,7 @@ test("Word upload reads both real 15-question files without prior chapter checks
     .check();
   await expect(form.getByRole("radio", { checked: true })).toHaveCount(1);
   await expect(
-    form.getByRole("button", { name: "Chuẩn bị kiểm tra online" }),
+    form.getByRole("button", { name: "Lưu bài kiểm tra" }),
   ).toBeDisabled();
   await form.getByRole("radio", { name: "Upload file", exact: true }).check();
   await expect(form).toContainText("30 câu đã chọn");
@@ -156,7 +162,7 @@ test("Word upload reads both real 15-question files without prior chapter checks
       r.url().endsWith("/classrooms/learning-class/exams") &&
       r.request().method() === "POST",
   );
-  await form.getByRole("button", { name: "Chuẩn bị kiểm tra online" }).click();
+  await form.getByRole("button", { name: "Lưu bài kiểm tra" }).click();
   const response = await responsePromise;
   expect(response.ok()).toBe(true);
   const payload = response.request().postDataJSON();
@@ -178,9 +184,9 @@ test("student online page manages preparations separately from hunt eligibility"
   await form.getByLabel("Số câu", { exact: true }).fill("2");
   const title = `Manager student ${info.project.name} ${Date.now()}`;
   await form.getByLabel("Tên bộ câu").fill(title);
-  await form.getByRole("button", { name: "Chuẩn bị kiểm tra online" }).click();
+  await form.getByRole("button", { name: "Lưu bài kiểm tra" }).click();
   await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Đã chuẩn bị",
+    "Bạn đã tạo bài kiểm tra thành công",
   );
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
   await login(page, false);

@@ -171,7 +171,8 @@ test("teacher creates a Word group activity, changes representative; student upl
     await openGroups(student);
     await student.locator(".group-activity-card").click();
     await expect(student.locator(".group-submission")).toHaveCount(2);
-    await page.getByRole("button", { name: "Cập nhật", exact: true }).click();
+    await page.bringToFront();
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(page.locator(".group-submission")).toHaveCount(2);
     const downloadEvent = page.waitForEvent("download");
     await page.getByRole("link", { name: /Mô hình xanh.pdf/ }).click();
@@ -250,9 +251,8 @@ test("expired activity hides student submission despite wrong device clock; teac
     await expect(page.locator(".group-extensions")).toContainText(
       "Nhóm cần thêm thời gian",
     );
-    await student
-      .getByRole("button", { name: "Cập nhật", exact: true })
-      .click();
+    await student.bringToFront();
+    await student.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(
       student.getByRole("button", { name: "Nộp bài nhóm" }),
     ).toBeVisible();

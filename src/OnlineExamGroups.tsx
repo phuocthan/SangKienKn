@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Clock3, Download } from "./icons";
 import type { ExamDefinition, LearningOverview } from "../shared/learning";
 import { api, errorMessage } from "./api";
+import { ExamMetadata } from "./ExamMetadata";
 
 type RunSummary = LearningOverview["runs"][number];
 const date = (value: number) => new Date(value).toLocaleString("vi-VN");
@@ -37,15 +38,16 @@ export function OnlineExamGroups({
   const exams = data.exams.filter((exam) => exam.delivery === "online");
   return (
     <section
-      className="card learning-section"
+      className="card learning-section online-exam-list-section"
       aria-labelledby="online-exam-groups"
     >
       <h2 id="online-exam-groups">
         <Clock3 size={21} /> Các buổi kiểm tra online
       </h2>
       <p>
-        Mỗi buổi gồm lịch thi, số học sinh tham gia và bài đã nộp. Đáp án được
-        công bố khi buổi thi kết thúc.
+        {teacher
+          ? "Đề đã lưu sẵn. Bắt đầu khi lớp sẵn sàng."
+          : "Vào thi khi giáo viên mở đề. Xem kết quả sau khi buổi thi kết thúc."}
       </p>
       {!data.onlineExamGroups && (
         <p className="muted">
@@ -128,15 +130,14 @@ function ExamGroup({
   const visibleRuns = runs ?? data.runs.filter((run) => run.examId === exam.id);
   const ownRun = exam.myRun ?? (!teacher ? visibleRuns[0] : null);
   return (
-    <article className="online-exam-group learning-row" data-exam-id={exam.id}>
+    <article
+      className={`online-exam-group learning-row ${ended ? "is-ended" : running ? "is-running" : "is-preparing"}`}
+      data-exam-id={exam.id}
+    >
       <div className="online-exam-heading">
         <div>
           <strong className="online-exam-title">{exam.title}</strong>
-          <p>
-            {exam.questionCount} câu · Chờ {exam.preparationMinutes} phút · Làm
-            bài {exam.durationMinutes} phút · Tự nộp ở lần rời tab{" "}
-            {exam.tabLimit}
-          </p>
+          <ExamMetadata exam={exam} />
         </div>
         <span
           className={`online-exam-state ${ended ? "ended" : running ? "running" : "preparing"}`}

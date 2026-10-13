@@ -1,5 +1,9 @@
 # Cấp icon học sinh theo lớp, môn và chương
 
+## Hình thức icon mới — 13/10/2026
+
+Bộ SVG năm cấp đã được vẽ lại đồng bộ theo khu vườn, dùng chung trong tiến độ/roster/xếp hạng/tài khoản và vườn. Thống kê Cây đã ra hoa dùng cây đơm hoa kèm dấu+. Đây là thay hình hiển thị; giữ tên, số giây, công thức, phạm vi chương, MAX đại diện vườn và thưởng/vé cũ. Thiết kế mới và QA ở [app-design.md](app-design.md), [redesign-qa-20261013.md](redesign-qa-20261013.md).
+
 ## Thời gian mỗi cấp do giáo viên cài đặt — 11/10/2026
 
 Giáo viên sở hữu lớp đặt **số phút cho mỗi cấp** tại Ôn tập & kiểm tra → Thời gian tăng cấp. Phạm vi từng lớp/môn, áp dụng mọi chương của lớp; mặc định **60 phút**, số nguyên 1–1440 phút. Với m phút, cấp 1 bắt đầu 0, cấp 2/3/4/5 từ m/2m/3m/4m phút của riêng chương. Ví dụ 30 phút: Chồi 30 phút, Cây Non 60 phút, Đơm Hoa 90 phút, Kết Trái 120 phút. Bảng phía dưới là trường hợp mặc định 60 phút.
@@ -10,7 +14,7 @@ Vé cấp 3/4/5 ở 2m/3m/4m; điểm cây cấp 5 ở 4m. Khi thay đổi mốc
 
 Theo yêu cầu mới ngày 11/10/2026, cấp icon tính bằng **thời gian học được ghi nhận trong từng chương**, thuộc đúng lớp/môn đang chọn. Quy tắc này thay lựa chọn tổng theo lớp/môn trước đó.
 
-| Cấp | Tên      | Thời gian học của chương    |
+| Cấp | Tên      | Thời gian học của chương     |
 | --- | -------- | ---------------------------- |
 | 1   | Mầm      | Dưới 1 giờ, gồm học sinh mới |
 | 2   | Chồi     | Từ 1 giờ đến dưới 2 giờ      |

@@ -236,7 +236,8 @@ test("teacher controls chapter access; qualified students wait, opening another 
           })
         ).ok(),
       ).toBeTruthy();
-    await student.getByRole("button", { name: "Làm mới", exact: true }).click();
+    await student.bringToFront();
+    await student.evaluate(() => window.dispatchEvent(new Event("focus")));
     const chapter = student
       .locator(".learning-chapter")
       .filter({ hasText: "Chương ôn I" })
@@ -253,7 +254,8 @@ test("teacher controls chapter access; qualified students wait, opening another 
         exact: true,
       }),
     ).toBeEnabled();
-    await student.getByRole("button", { name: "Làm mới", exact: true }).click();
+    await student.bringToFront();
+    await student.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(hunt).toBeDisabled();
     await permission
       .getByRole("button", { name: "Mở kiểm tra · Chương ôn I", exact: true })
@@ -264,7 +266,8 @@ test("teacher controls chapter access; qualified students wait, opening another 
         exact: true,
       }),
     ).toBeEnabled();
-    await student.getByRole("button", { name: "Làm mới", exact: true }).click();
+    await student.bringToFront();
+    await student.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(hunt).toBeEnabled();
     await student.reload();
     await navigateTo(student, { name: "Ôn tập & kiểm tra" });
@@ -284,7 +287,8 @@ test("teacher controls chapter access; qualified students wait, opening another 
       "Giáo viên chưa mở kiểm tra",
     );
     await expect(student.locator(".exam-room")).toHaveCount(0);
-    await student.getByRole("button", { name: "Làm mới", exact: true }).click();
+    await student.bringToFront();
+    await student.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(hunt).toBeDisabled();
     await noOverflow(page);
     await noOverflow(student);
@@ -350,7 +354,8 @@ test("student reviews semester, resumes exact question and repairs without revea
   const corrections = await (await page.request.get("/api/corrections")).json();
   await navigateTo(page, { name: "Ôn tập & kiểm tra" });
   // The API setup happens after the learning view mounts on ending the review.
-  await page.getByRole("button", { name: "Làm mới", exact: true }).click();
+  await page.bringToFront();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.locator(".hunt-current-level > span")).toHaveCount(0);
   await expect(page.locator(".hunt-current-level").first()).toContainText(
     "Cấp độ hiện tại",
@@ -432,7 +437,8 @@ test("student uses hunt ticket and teacher approves the earned point", async ({
         requestId: crypto.randomUUID(),
       },
     });
-  await page.getByRole("button", { name: "Làm mới", exact: true }).click();
+  await page.bringToFront();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   const chapter = page
     .locator(".learning-chapter")
     .filter({ hasText: "Chương ôn I" })
@@ -493,7 +499,9 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
     .check();
   await page.getByLabel("Số câu", { exact: true }).fill("4");
   await page.getByRole("button", { name: "Lưu ma trận" }).click();
-  await expect(page.locator('.learning-notice[role="status"]')).toContainText("Đã lưu ma trận");
+  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
+    "Đã lưu ma trận",
+  );
   await page.getByLabel("Loại bộ câu").selectOption("exam");
   await page
     .getByRole("radio", { name: "Chọn từ ngân hàng", exact: true })
@@ -502,7 +510,9 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
   const title = `Thi ${info.project.name} ${Date.now()}`;
   await page.getByLabel("Tên bộ câu").fill(title);
   await page.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
-  await expect(page.locator('.learning-notice[role="status"]')).toContainText("Đã tạo kiểm tra");
+  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
+    "Đã tạo kiểm tra",
+  );
   await page
     .locator(".learning-row")
     .filter({ has: page.getByText(title, { exact: true }) })

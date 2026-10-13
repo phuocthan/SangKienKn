@@ -1,5 +1,21 @@
 # Bàn giao session GreenEdu
 
+## Hoàn tất redesign theo yêu cầu gửi lại — 13/10/2026
+
+Tiếp tục từ bản pull3bb7fcf, giữ tài liệu local về lần xóa Chủ đề1 và các chức năng upstream. Đã cài/đọc `redesign-existing-projects` chính và `web-design-guidelines` kiểm tra, theo nguồn skills.sh; thông tin máy/repo/path trong [design-skills.md](design-skills.md), AGENTS đã dẫn tới. Hai skill đã có, không tiếp tục hỏi người dùng đường dẫn hoặc dùng trạng thái “chưa tìm thấy” của đợt pull.
+
+Đã hoàn tất các mục: submenu một hàng ngay trên dock portrait, đệm nội dung/focus theo chiều cao thực; header mobile và bề mặt thẻ màu vườn; năm icon mới/cây ra hoa dấu+; form online mở từ nút Tạo bài kiểm tra và thông báo lưu thành công/có thể bắt đầu bất cứ lúc nào; bỏ shortcut tạo online ở ôn; card ôn/online cho hai vai trò, metadata có icon/màu; bỏ refresh thừa có auto refresh/Thử lại; căn chapter/card controls; bỏ chữ phụ Hoạt động nhóm; rào gỗ/dây lá trong vườn. Giữ API, DB, cấp/điểm/vé, quyền giáo viên/học sinh và cách bắt đầu/thu bài. Modal giữ focus khi busy đổi; phản hồi GET chậm không ghi đè dữ liệu learning mới hơn.
+
+Thiết kế mới nằm đầu [app-design.md](app-design.md); quy trình online ở [online-exams.md](online-exams.md). Bằng chứng QA và các ca cũ ngoài phạm vi ở [redesign-qa-20261013.md](redesign-qa-20261013.md). TypeScript/build riêng đạt; **72/72 E2E desktop/mobile lượt cuối đạt (4,0phút)** trên server/DB riêng, gồm cả vườn47học sinh và auto refresh không có nút tải lại. Hai ca timer cũ ngoài lượt cuối còn ghi trong báo cáo QA, không báo toàn bộ suite đều xanh. Lượt22/22 ban đầu đã đạt nhưng không dùng làm kết quả bản cuối sau tinh chỉnh.
+
+Local5173 đã khởi động lại bằng `npm run local -- -Force` do dependency Phosphor vừa pull chưa có trong node_modules; giữ API/DB Railway. Build/test/chụp ảnh dùng server3101 và SQLite riêng, không thay dist hoặc DB thật. Người dùng yêu cầu commit/push origin/main sau hoàn thành; không tự deploy offline hoặc suy Railway đã phát hành chỉ từ push. File khóa PowerPoint đang mở, stash phục hồi hai tài liệu và backup local vẫn giữ nguyên, không đưa vào commit.
+
+## Lịch sử trước redesign: pull dự án và giữ ghi chép local — 13/10/2026
+
+Theo yêu cầu mới, đã pull fast-forward `main` lên `3bb7fcf18f5967fd2d42d29d159d9696ac6aa0ed`, đồng bộ origin/main. Trước pull, chỉ hai tài liệu có thay đổi local về xóa hoạt động Chủ đề1; đã sao chép vào `.local/pull-20261013-*` và stash riêng hai file. Khôi phục stash có xung đột do upstream cũng thêm nhiều mục ở đầu tài liệu; đã hợp nhất giữ toàn bộ nội dung upstream và ghi chép local, không còn conflict. Hai tài liệu vẫn là thay đổi chưa commit; stash giữ làm bản phục hồi. File khóa PowerPoint người dùng đang mở giữ nguyên. Không push/deploy/ghi database trong đợt pull.
+
+Yêu cầu chỉnh giao diện13/10 vẫn đang chờ tiếp tục sau pull: submenu một dòng phía trên navbar/không che nội dung, header mobile/thẻ theo chủ đề, bộ cấp và cây ra hoa kèm dấu+, tạo online exam qua button/modal, thiết kế ôn/kiểm tra cho hai vai trò, metadata bài thi có icon/màu, rà soát nút cập nhật, căn nội dung/nút và rào khu vườn. Upstream đã có Duotone/menu5mục/tab/các đợt polish; đọc phần hiện hành trước để tránh làm lại. Hai skill người dùng nêu `redesign-existing-projects`, `web-design-guidelines` được nhắc trong tài liệu upstream nhưng chưa tìm thấy SKILL.md ở repo và các thư mục Codex/agent đã tra cứu trong session này; cần xác định đường dẫn skill trước khi áp dụng. Chưa sửa code UI trong đợt pull, không báo các kết quả test upstream thành test mới.
+
 ## Áp dụng bộ icon GreenEdu Duotone đã duyệt — 13/10/2026
 
 Yêu cầu mới nhất “áp dụng đề xuất” phê duyệt bộ icon trong `.local/greenedu-icons-preview.html`. Đã thay44 tên icon UI Lucide đã kiểm kê bằng Phosphor Duotone trong22 module `src`; thêm glyph theo ngữ nghĩa lớp/ngân hàng/ôn/sổ tay/tài khoản/vườn. `src/icons.tsx` tập trung50 mapping, giữ props/ref/size và mặc định aria-hidden cho icon trang trí. Tên button/tab và quyền/luồng hiện có giữ nguyên. Năm SVG StudentLevelIcon thay đúng phong cách preview, còn nguyên nhãn cấp/chương, kích thước roster và geometry timeline. Avatar/logo/ảnh trường/minh họa sách/khu rừng không đổi.
@@ -303,6 +319,14 @@ Yêu cầu mới của người dùng: khi portrait, luôn neo tên tài khoản
 Thay đổi chỉ frontend, không khởi động frontend/API production, không ghi Railway, không push/deploy. Bản trên cloud được build riêng `.local/portrait-navigation-build` để kiểm tra; chưa phải bản frontend trên máy Windows hoặc bản đang phục vụ Railway. Chi tiết giao diện tại [app-design.md](app-design.md), test trong `e2e/portrait-navigation.spec.ts`.
 
 Kiểm tra mới: TypeScript/Vite build riêng và `git diff --check` đạt. **22/22 E2E** trong portrait-navigation/account-popups/workflow đạt trên Chromium desktop/mobile: ba vai trò, viewport portrait320/390/768/1024, cuộn thật/header luôn thấy tên và lớp, nút cuối trang không bị dock che, đổi lớp, cuộn tới menu cuối/Tài khoản/Đăng xuất, modal nằm trên dock, xoay landscape844 và desktop1440 khôi phục sidebar; các luồng Word/CSV/luyện tập/sổ tay/tài khoản/cộng đồng cũ vẫn đạt. Database riêng `.local/e2e-*.sqlite`, không Railway. Đã xem ảnh390px giáo viên/học sinh tại `.local/portrait-navigation-{desktop,mobile}-{role}.png`. Lượt đầu hai ca dừng vì locator avatar khớp cả header và trang Tài khoản; giới hạn locator vào header rồi chạy lại đạt, không phải lỗi ứng dụng. Chưa QA Safari/bàn phím trên thiết bị thật.
+
+## Xóa một hoạt động nhóm trên Railway — 12/10/2026
+
+Theo yêu cầu mới, đã xóa đúng **Chủ đề 1 - Xây dựng và phát triển nhà trường**, ID `1e0eb376-27a4-465f-a837-ea3056e8f669`, thuộc Lớp 11/2. Xóa1 hoạt động/4 nhóm/47 bản ghi phân nhóm trong transaction bật foreign_keys. Hoạt động chưa có sản phẩm/file/lịch sử gia hạn/phản biện nên không có các bản ghi đó cần xóa. Không xóa tài khoản hay membership của lớp.
+
+Sao lưu WAL-safe đầy đủ trước thao tác tại `/data/backups/pre-delete-group-activity-1e0eb376-1791816590989.sqlite`; audit private `/data/backups/delete-group-activity-1e0eb376-1791816590989.json`. Kiểm tra backup khớp dữ liệu sắp xóa, chốt ID/tên/lớp/số bản ghi và đối chiếu hash dữ liệu ngoài phạm vi của37bảng trước commit transaction. Kết nối chỉ đọc mới xác nhận hoạt động không còn, hai hoạt động khác giữ nguyên, lớp11/2 vẫn47membership, backup hash/khóa ngoại/quick_check đạt. Script private `.local/inspect-target-group-activity.cjs`, `.local/delete-target-group-activity.cjs`, `.local/verify-target-group-activity-deletion.cjs`; không đưa database/audit chứa hash hoặc script riêng lên Git.
+
+Lần đọc thực tế này database có2lớp và3hoạt động trước xóa, còn2hoạt động sau xóa; không dùng ghi chép “chỉ một lớp” trước đây làm hiện trạng mới. Railway đang chạy deployment `dd7b7c73-a3d2-4247-a5b5-2b74d6634488`, commit `51d4a2cfb578388640e2ea1d79db5f0f8bd988c0`; checkout local `31507f2` đang sau origin/main13commit, đã đọc schema thật thay vì suy từ mã cũ. Giữ file khóa PowerPoint người dùng đang mở, không pull/reset/commit/push/deploy/restart. Chỉ sửa dữ liệu đã yêu cầu và bổ sung bàn giao; frontend tải lại trang để bỏ hoạt động đã xóa.
 
 ## Gom tài liệu hiện hành và commit theo yêu cầu — 12/10/2026
 

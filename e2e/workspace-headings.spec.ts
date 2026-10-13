@@ -71,7 +71,10 @@ for (const role of ["teacher", "student"] as const) {
           const bounds = await heading.boundingBox();
           const topbar = await page.locator(".topbar").boundingBox();
           expect(bounds!.y).toBeLessThan(topbar!.y + topbar!.height);
-          expect(bounds!.y).toBeLessThanOrEqual(40);
+          expect(bounds!.y).toBeGreaterThanOrEqual(topbar!.y);
+          expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(
+            topbar!.y + topbar!.height,
+          );
         } else {
           await expect(slot).toBeHidden();
           await expect(

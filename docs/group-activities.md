@@ -27,9 +27,9 @@ Nếu phản hồi bị mất sau khi máy chủ đã nhận, giữ nguyên form
 
 Hạn nhập theo múi giờ của thiết bị giáo viên; thời điểm được lưu thống nhất ở máy chủ. Giao diện hiển thị theo múi giờ của thiết bị đang xem. **Thời gian máy chủ quyết định việc nhận bài**: khi thời gian hiện tại bằng hoặc vượt hạn, không nhận bài mới. Nút/form nộp ẩn khi hết hạn; tải lại, sửa giờ máy hay gọi API trực tiếp không vượt được giới hạn.
 
-Giáo viên chọn **Gia hạn nộp bài**, nhập hạn mới và lý do tùy chọn. Hạn mới phải muộn hơn hạn cũ và thời gian hiện tại. Có thể gia hạn cả trước và sau khi hết hạn. App lưu người gia hạn, thời điểm, hạn cũ/mới và lý do. Nếu người khác vừa đổi hạn hoặc đại diện, yêu cầu cũ bị từ chối để tránh ghi đè; bấm **Cập nhật** trước khi thao tác lại.
+Giáo viên chọn **Gia hạn nộp bài**, nhập hạn mới và lý do tùy chọn. Hạn mới phải muộn hơn hạn cũ và thời gian hiện tại. Có thể gia hạn cả trước và sau khi hết hạn. App lưu người gia hạn, thời điểm, hạn cũ/mới và lý do. Nếu người khác vừa đổi hạn hoặc đại diện, yêu cầu cũ bị từ chối để tránh ghi đè; đợi đồng bộ tự động hoặc quay lại cửa sổ trước khi thao tác lại; nếu tải lỗi dùng Thử lại.
 
-Trang cập nhật dữ liệu mỗi 20 giây và khi quay lại cửa sổ. Học sinh có thể bấm **Cập nhật** để nhận hạn mới ngay. Sau gia hạn, đại diện được nộp tiếp; lịch sử cũ còn nguyên.
+Trang cập nhật dữ liệu mỗi 20 giây và khi quay lại cửa sổ. Từ13/10, bỏ nút Cập nhật vì đã đồng bộ tự động khi quay lại cửa sổ/khôi phục kết nối; lỗi có Thử lại. Heading bỏ TRANG CỘNG TÁC và mô tả lớp, giữ tên trang/minh họa và toolbar tạo hoạt động. Sau gia hạn, đại diện được nộp tiếp; lịch sử cũ còn nguyên.
 
 ## Quyền truy cập và lưu trữ
 

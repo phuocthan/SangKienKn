@@ -19,6 +19,7 @@ import "./ui-refinement.css";
 import "./action-buttons.css";
 import "./mobile-density.css";
 import "./app-polish.css";
+import "./redesign.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

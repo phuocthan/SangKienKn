@@ -1,5 +1,7 @@
 # Góp ý riêng và phản biện hoạt động nhóm
 
+**Giao diện13/10/2026:** bỏ nút Cập nhật/Cập nhật trao đổi thường; poll20giây khi visible/online, đồng bộ khi focus/khôi phục mạng. Lỗi vẫn có Thử lại. Không đổi quyền, trạng thái hoặc lịch sử; E2E liên quan kiểm tra cập nhật bằng focus thay nút tải lại.
+
 Đối chiếu mã checkout ngày 12/10/2026: `server/feedback.ts`, `server/group-discussion.ts`, `server/group-activities.ts`, `src/Feedback.tsx`, `src/GroupDiscussion.tsx`, `src/Conversation.tsx`. Tài liệu này mô tả chức năng đã có trong mã, không xác nhận backend Railway đã triển khai. Đợt cập nhật tài liệu không chạy lại các kiểm thử của phân hệ này.
 
 ## Góp ý riêng với giáo viên

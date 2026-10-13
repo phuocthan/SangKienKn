@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { LevelArtwork } from "./LevelArtwork";
 import { Check, LockKeyhole } from "./icons";
 import { STUDENT_LEVEL_NAMES, studentLevel } from "../shared/student-levels";
 import type { Chapter, Classroom, Student } from "./types";
@@ -23,107 +24,26 @@ export function StudentLevelIcon({
       data-icon-family="greenedu-duotone"
       data-level={stage}
     >
-      <path
-        d="M21 68h38"
-        stroke="currentColor"
-        opacity=".25"
-        strokeWidth="3.4"
-        strokeLinecap="round"
-      />
-      {stage === 1 && (
-        <>
-          <ellipse
-            cx="39"
-            cy="49"
-            rx="12"
-            ry="16"
-            transform="rotate(30 39 49)"
-            fill="#b68b57"
-            fillOpacity=".25"
-            stroke="#916d40"
-            strokeWidth="3.4"
-          />
-          <path
-            d="M40 35q-2-15 13-19-1 14-13 19m-2 17 5-11"
-            fill="currentColor"
-            fillOpacity=".25"
-            stroke="currentColor"
-            strokeWidth="3.4"
-            strokeLinecap="round"
-          />
-        </>
-      )}
-      {stage === 2 && (
-        <>
-          <path
-            d="M40 66V39"
-            stroke="currentColor"
-            strokeWidth="3.4"
-            strokeLinecap="round"
-          />
-          <path
-            d="M40 47C24 47 19 35 20 27c14-1 23 7 20 20Zm0-8c-2-14 7-23 22-22 2 14-7 24-22 22Z"
-            fill="currentColor"
-            fillOpacity=".22"
-            stroke="currentColor"
-            strokeWidth="3.4"
-            strokeLinejoin="round"
-          />
-        </>
-      )}
-      {stage >= 3 && (
-        <>
-          <path
-            d="M40 66V41m0 13-10-10m10 5 10-11"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M22 47C11 46 10 32 20 28C18 17 29 11 37 17C43 6 58 11 58 23C71 22 75 37 64 43C66 54 53 59 45 51C38 60 24 57 22 47Z"
-            fill="currentColor"
-            fillOpacity=".19"
-            stroke="currentColor"
-            strokeWidth="3.4"
-          />
-        </>
-      )}
-      {stage === 4 &&
-        [
-          [27, 32],
-          [48, 24],
-          [55, 42],
-        ].map(([x, y]) => (
-          <g key={x} transform={`translate(${x} ${y})`}>
-            <path
-              d="M0-5C8-10 11 1 5 4C3 12-9 8-6 2C-12-4-3-11 0-5Z"
-              fill="#f3d5bb"
-              stroke="#a5673e"
-              strokeWidth="2"
-            />
-            <circle r="2" fill="#a5673e" />
-          </g>
-        ))}
-      {stage === 5 &&
-        [
-          [26, 32],
-          [49, 23],
-          [54, 43],
-        ].map(([x, y]) => (
-          <g key={x} transform={`translate(${x} ${y})`}>
-            <path
-              d="M0-6v-4m0 1 5-3"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.3"
-              strokeLinecap="round"
-            />
-            <circle r="5.3" fill="#e6b455" stroke="#9a7130" strokeWidth="2" />
-          </g>
-        ))}
+      <LevelArtwork stage={stage} />
     </svg>
+  );
+}
+
+export function BloomingTreeIcon() {
+  return (
+    <span className="blooming-tree-icon" aria-hidden="true">
+      <StudentLevelIcon level={4} />
+      <svg className="blooming-tree-plus" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="9" fill="#326145" />
+        <path
+          d="M10 5v10M5 10h10"
+          fill="none"
+          stroke="#fff8e9"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      </svg>
+    </span>
   );
 }
 

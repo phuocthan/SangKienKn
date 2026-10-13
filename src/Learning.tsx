@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type ReactNode,
 } from "react";
 import {
   ArrowLeft,
@@ -13,12 +14,14 @@ import {
   Notebook,
   Clock3,
   Download,
-  RefreshCw,
+  Plus,
   Trophy,
   Ticket,
 } from "./icons";
 import { api, ApiError, duration, errorMessage } from "./api";
 import { WorkspaceHeading } from "./WorkspaceHeading";
+import { Modal } from "./components";
+import { ExamMetadata } from "./ExamMetadata";
 import { StudentLevelIcon } from "./StudentLevel";
 import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { ExamUpload, type UploadedExamQuestion } from "./ExamUpload";
@@ -43,6 +46,33 @@ const statusText = {
   rejected: "Không ghi nhận",
 };
 
+function ExamFormSurface({
+  modal,
+  open,
+  busy,
+  onClose,
+  children,
+}: {
+  modal: boolean;
+  open: boolean;
+  busy: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  if (!modal) return <>{children}</>;
+  if (!open) return null;
+  return (
+    <Modal
+      title="Tạo bài kiểm tra"
+      className="online-exam-create-modal"
+      dismissible={!busy}
+      onClose={onClose}
+    >
+      {children}
+    </Modal>
+  );
+}
+
 export function Learning({
   classroom,
   user,
@@ -51,7 +81,6 @@ export function Learning({
   entryRunId,
   onExamExit,
   view = "learning",
-  onOnline,
 }: {
   classroom: Classroom;
   user: User;
@@ -60,7 +89,6 @@ export function Learning({
   entryRunId?: string;
   onExamExit?: () => void;
   view?: "learning" | "online";
-  onOnline?: () => void;
 }) {
   const teacher = user.role === "teacher";
   const onlinePage = view === "online";
@@ -76,6 +104,12 @@ export function Learning({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  const [examFormOpen, setExamFormOpen] = useState(false);
+  const [formError, setFormError] = useState("");
+  const formErrorRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (formError) formErrorRef.current?.focus();
+  }, [formError]);
   const [semester, setSemester] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [count, setCount] = useState(teacher ? 10 : 0);
@@ -121,25 +155,43 @@ export function Learning({
       onlinePage ? run.delivery === "online" : run.delivery !== "online",
     ) ?? [];
   const startKeys = useRef(new Map<string, string>());
+  const refreshSequence = useRef(0);
   const requestKey = (intent: string) => {
     if (!startKeys.current.has(intent))
       startKeys.current.set(intent, crypto.randomUUID());
     return startKeys.current.get(intent)!;
   };
   const refresh = useCallback(async () => {
+    const ticket = ++refreshSequence.current;
     try {
-      setData(
-        await api<LearningOverview>(`/classrooms/${classroom.id}/learning`),
+      const overview = await api<LearningOverview>(
+        `/classrooms/${classroom.id}/learning`,
       );
-      setError("");
+      if (ticket === refreshSequence.current) {
+        setData(overview);
+        setError("");
+      }
     } catch (e) {
-      setError(errorMessage(e));
+      if (ticket === refreshSequence.current) setError(errorMessage(e));
     }
   }, [classroom.id]);
   useEffect(() => {
     void refresh();
-    const timer = setInterval(() => void refresh(), 15000);
-    return () => clearInterval(timer);
+    const update = () => {
+      if (document.visibilityState === "visible" && navigator.onLine)
+        void refresh();
+    };
+    const timer = setInterval(update, 15000);
+    window.addEventListener("focus", update);
+    window.addEventListener("online", update);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      refreshSequence.current++;
+      clearInterval(timer);
+      window.removeEventListener("focus", update);
+      window.removeEventListener("online", update);
+      document.removeEventListener("visibilitychange", update);
+    };
   }, [refresh]);
   useEffect(() => {
     if (entryRunId) setRunId(entryRunId);
@@ -153,7 +205,8 @@ export function Learning({
       setNotice(message);
       await refresh();
     } catch (e) {
-      setError(errorMessage(e));
+      if (examFormOpen) setFormError(errorMessage(e));
+      else setError(errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -186,8 +239,9 @@ export function Learning({
   }
   async function create(e: FormEvent) {
     e.preventDefault();
+    setFormError("");
     if (isExam && !examSource) {
-      setError("Chọn một nguồn đề: Upload file hoặc Chọn từ ngân hàng.");
+      setFormError("Chọn một nguồn đề: Upload file hoặc Chọn từ ngân hàng.");
       return;
     }
     const chosenWeights = Object.fromEntries(
@@ -233,10 +287,14 @@ export function Learning({
           },
         );
         startKeys.current.delete(intent);
+        if (isOnline) {
+          setExamFormOpen(false);
+          setTitle("");
+        }
       },
       isExam
         ? isOnline
-          ? "Đã chuẩn bị kiểm tra online. Bấm Bắt đầu kiểm tra để chốt đề và thông báo cho lớp."
+          ? "Bạn đã tạo bài kiểm tra thành công và lưu vào danh sách. Có thể bắt đầu bất cứ lúc nào."
           : manualOpen
             ? "Đã tạo kiểm tra. Chọn Mở kiểm tra ngay khi sẵn sàng."
             : "Đã tạo lịch kiểm tra cho lớp."
@@ -261,8 +319,10 @@ export function Learning({
       />
     );
   return (
-    <div className="learning-workspace">
-      <WorkspaceHeading className="learning-heading">
+    <div
+      className={`learning-workspace ${onlinePage ? "online-workspace" : "review-workspace"} ${teacher ? "teacher-learning" : "student-learning"}`}
+    >
+      <WorkspaceHeading className="learning-heading learning-page-heading">
         <div>
           <h1>
             {onlinePage
@@ -282,25 +342,25 @@ export function Learning({
                 : "Theo dõi điều kiện từng chương, tiếp tục ôn tập và làm bài kiểm tra."}
           </p>
         </div>
-        {teacher && !onlinePage && (
+        {teacher && onlinePage && (
           <button
-            className="button primary small"
-            disabled={busy}
-            onClick={onOnline}
+            className="button primary"
+            disabled={busy || !data}
+            onClick={() => {
+              setFormError("");
+              setExamFormOpen(true);
+            }}
           >
-            Tạo kiểm tra online
+            <Plus size={19} /> Tạo bài kiểm tra
           </button>
         )}
-        <button
-          className="button secondary small"
-          onClick={() => void refresh()}
-        >
-          <RefreshCw size={16} /> Làm mới
-        </button>
       </WorkspaceHeading>
       {error && (
         <div className="error-banner" role="alert">
           {error}
+          <button type="button" onClick={() => void refresh()}>
+            Thử lại
+          </button>
         </div>
       )}
       {notice && (
@@ -425,472 +485,504 @@ export function Learning({
             </section>
           )}
           {(!onlinePage || teacher) && (
-            <section
-              className="card learning-section"
-              aria-labelledby="learning-review"
+            <ExamFormSurface
+              modal={onlinePage}
+              open={examFormOpen}
+              busy={busy || uploadBusy}
+              onClose={() => setExamFormOpen(false)}
             >
-              <h2 id="learning-review">
-                <BookOpen size={21} />{" "}
-                {onlinePage
-                  ? "Chuẩn bị kiểm tra online"
-                  : teacher
-                    ? "Học kỳ & ma trận ôn tập"
-                    : "Ôn chương / ôn học kỳ"}
-              </h2>
-              {teacher ? (
-                <>
-                  {!onlinePage && (
-                    <div className="learning-settings">
-                      {data.chapters.map((ch) => (
-                        <ChapterSettings
-                          key={`${ch.id}-${ch.semester}-${ch.accuracyBasis}`}
-                          chapter={ch}
-                          busy={busy}
-                          onSave={(body) =>
-                            act(
-                              () => api(`/chapters/${ch.id}/learning`, body),
-                              "Đã lưu thiết lập chương.",
-                            )
-                          }
-                        />
-                      ))}
-                    </div>
-                  )}
-                  <form
-                    ref={formRef}
-                    className="learning-form"
-                    onSubmit={(e) => void create(e)}
-                  >
+              <section
+                className="card learning-section"
+                aria-labelledby="learning-review"
+              >
+                <h2 id="learning-review">
+                  <BookOpen size={21} />{" "}
+                  {onlinePage
+                    ? "Chuẩn bị đề & thời gian"
+                    : teacher
+                      ? "Học kỳ & ma trận ôn tập"
+                      : "Ôn chương / ôn học kỳ"}
+                </h2>
+                {teacher ? (
+                  <>
                     {!onlinePage && (
-                      <label>
-                        Loại bộ câu
-                        <select
-                          value={creating}
-                          onChange={(e) =>
-                            setCreating(e.target.value as typeof creating)
-                          }
-                          disabled={busy || uploadBusy}
-                        >
-                          <option value="blueprint">Ma trận ôn tập</option>
-                          <option value="exam">Thi chính thức</option>
-                        </select>
-                      </label>
-                    )}
-                    {creating === "exam" && !data.examCreation && (
-                      <p className="muted">
-                        Tạo đề theo bài, tải đề và mở kiểm tra đang chờ cập nhật
-                        server.
-                      </p>
-                    )}
-                    {isOnline && !data.onlineExams && (
-                      <p className="muted">
-                        Kiểm tra online và thông báo cho lớp đang chờ cập nhật
-                        server Railway.
-                      </p>
-                    )}
-                    {isOnline && (
-                      <p className="learning-notice">
-                        Chuẩn bị đề, đặt thời gian chờ và làm bài rồi bấm Bắt
-                        đầu kiểm tra. Cả lớp cùng một bộ câu, thứ tự câu được
-                        trộn riêng cho từng học sinh.
-                      </p>
-                    )}
-                    <label>
-                      Tên bộ câu
-                      <input
-                        required
-                        maxLength={120}
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Ví dụ: Ôn tập học kỳ I"
-                      />
-                    </label>
-                    {!isExam && (
-                      <fieldset>
-                        <legend>Chương trong bộ câu</legend>
-                        <div className="learning-options">
-                          {data.chapters.map((ch) => (
-                            <label key={ch.id}>
-                              <input
-                                type="checkbox"
-                                disabled={busy || uploadBusy}
-                                checked={selected.includes(ch.id)}
-                                onChange={(e) =>
-                                  setSelected((ids) =>
-                                    e.target.checked
-                                      ? [...ids, ch.id]
-                                      : ids.filter((id) => id !== ch.id),
-                                  )
-                                }
-                              />
-                              {ch.title}
-                            </label>
-                          ))}
-                        </div>
-                      </fieldset>
-                    )}
-                    {isExam && (
-                      <fieldset className="exam-source">
-                        <legend>Nguồn đề</legend>
-                        <p>Bắt buộc chọn một trong hai nguồn.</p>
-                        <div className="learning-options">
-                          <label>
-                            <input
-                              type="radio"
-                              name="exam-source"
-                              value="upload"
-                              required
-                              checked={examSource === "upload"}
-                              disabled={busy || uploadBusy}
-                              onChange={() => setExamSource("upload")}
-                            />
-                            Upload file
-                          </label>
-                          <label>
-                            <input
-                              type="radio"
-                              name="exam-source"
-                              value="bank"
-                              required
-                              checked={examSource === "bank"}
-                              disabled={busy || uploadBusy}
-                              onChange={() => setExamSource("bank")}
-                            />
-                            Chọn từ ngân hàng
-                          </label>
-                        </div>
-                      </fieldset>
-                    )}
-                    {isExam && examSource === "upload" ? (
-                      <ExamUpload
-                        chapters={classroom.chapters}
-                        questions={uploaded}
-                        onChange={setUploaded}
-                        onReadingChange={setUploadBusy}
-                      />
-                    ) : (
-                      (!isExam || examSource === "bank") && (
-                        <>
-                          {isExam && (
-                            <ExamBank
-                              chapters={classroom.chapters}
-                              matrix={data.matrix}
-                              selection={bankSelection}
-                              onChange={setBankSelection}
-                              disabled={busy || uploadBusy}
-                            />
-                          )}
-                          <label>
-                            Số câu
-                            <input
-                              type="number"
-                              min={1}
-                              max={100}
-                              required
-                              value={count}
-                              onChange={(e) => setCount(Number(e.target.value))}
-                            />
-                          </label>
-                          <details>
-                            <summary>
-                              Trọng số theo bài (để trống để chọn ngẫu nhiên)
-                            </summary>
-                            <p>
-                              Trọng số tỷ lệ với số câu. Chỉ thêm các bài muốn
-                              sử dụng; 0 loại bài khỏi ma trận. Thiếu câu sẽ
-                              được báo trước khi lưu.
-                            </p>
-                            <div className="learning-settings">
-                              {data.matrix
-                                .filter(
-                                  (row) =>
-                                    selectedChapters.includes(row.chapterId) &&
-                                    (!isExam || bankKeys.includes(row.key)),
-                                )
-                                .map((row) => (
-                                  <label key={row.key}>
-                                    {row.chapterTitle} ·{" "}
-                                    {row.lesson || "Chưa gắn bài"} (
-                                    {row.available} câu)
-                                    <input
-                                      type="number"
-                                      min={0}
-                                      max={10000}
-                                      aria-label={`Trọng số ${row.chapterTitle} ${row.lesson}`}
-                                      value={weights[row.key] ?? ""}
-                                      onChange={(e) =>
-                                        setWeights((old) => {
-                                          const next = { ...old };
-                                          if (e.target.value === "")
-                                            delete next[row.key];
-                                          else
-                                            next[row.key] = Number(
-                                              e.target.value,
-                                            );
-                                          return next;
-                                        })
-                                      }
-                                    />
-                                  </label>
-                                ))}
-                            </div>
-                          </details>
-                        </>
-                      )
-                    )}
-                    {isExam && (
                       <div className="learning-settings">
-                        {isOnline ? (
-                          <>
-                            <label>
-                              Thời gian chuẩn bị (phút)
-                              <input
-                                type="number"
-                                min={0}
-                                max={60}
-                                required
-                                value={preparationMinutes}
-                                onChange={(e) =>
-                                  setPreparationMinutes(Number(e.target.value))
-                                }
-                              />
-                            </label>
-                            <label>
-                              Thời gian làm bài (phút)
-                              <input
-                                type="number"
-                                min={1}
-                                max={180}
-                                required
-                                value={durationMinutes}
-                                onChange={(e) =>
-                                  setDurationMinutes(Number(e.target.value))
-                                }
-                              />
-                            </label>
-                          </>
-                        ) : (
-                          <>
-                            <label>
-                              Cách mở kiểm tra
-                              <select
-                                value={manualOpen ? "manual" : "scheduled"}
-                                onChange={(e) =>
-                                  setManualOpen(e.target.value === "manual")
-                                }
-                              >
-                                <option value="manual">
-                                  Giáo viên bấm mở khi sẵn sàng
-                                </option>
-                                <option value="scheduled">
-                                  Theo lịch, khi các chương đã được cho phép
-                                </option>
-                              </select>
-                            </label>
-                            <label>
-                              Mở bài thi
-                              <input
-                                type="datetime-local"
-                                required
-                                value={starts}
-                                onChange={(e) => setStarts(e.target.value)}
-                              />
-                            </label>
-                            <label>
-                              Đóng khung thi
-                              <input
-                                type="datetime-local"
-                                required
-                                value={closes}
-                                onChange={(e) => setCloses(e.target.value)}
-                              />
-                            </label>
-                          </>
-                        )}
-                        <label>
-                          Tự nộp ở lần rời tab
-                          <input
-                            type="number"
-                            min={1}
-                            max={10}
-                            required
-                            value={tabLimit}
-                            onChange={(e) =>
-                              setTabLimit(Number(e.target.value))
-                            }
-                          />
-                        </label>
-                        <p
-                          className={
-                            isOnline ? "online-exam-timing-note" : undefined
-                          }
-                        >
-                          {isOnline
-                            ? "Bấm Bắt đầu kiểm tra để thông báo cho lớp. Hết thời gian chuẩn bị mới mở đề; thời gian làm bài bắt đầu từ lúc mở đề. Cả lớp cùng hạn nộp, vào muộn không được cộng thêm giờ."
-                            : "Cả lớp dùng cùng tập câu, đảo thứ tự. Mỗi học sinh có tối đa 20 phút, kết thúc sớm hơn nếu khung thi đóng."}
-                        </p>
-                      </div>
-                    )}
-                    <button
-                      className="button primary"
-                      disabled={
-                        busy ||
-                        uploadBusy ||
-                        (isExam && !data.examCreation) ||
-                        (isOnline && !data.onlineExams) ||
-                        !selectedChapters.length ||
-                        (isExam &&
-                          (examSource === "upload"
-                            ? !uploaded.length
-                            : !examSource || !bankKeys.length))
-                      }
-                    >
-                      {isOnline
-                        ? "Chuẩn bị kiểm tra online"
-                        : `Lưu ${isExam ? "lịch kiểm tra" : "ma trận"}`}
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <div className="learning-settings">
-                    <label>
-                      Học kỳ
-                      <select
-                        value={semester}
-                        onChange={(e) => {
-                          setSemester(e.target.value);
-                          setSelected([]);
-                        }}
-                      >
-                        <option value="">Tất cả chương</option>
-                        {[
-                          ...new Set(
-                            data.chapters
-                              .map((ch) => ch.semester)
-                              .filter(Boolean),
-                          ),
-                        ].map((s) => (
-                          <option key={s}>{s}</option>
-                        ))}
-                      </select>
-                    </label>
-                    <label>
-                      Số câu ôn (0 = toàn bộ, tối đa 100)
-                      <input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={count}
-                        onChange={(e) => setCount(Number(e.target.value))}
-                      />
-                    </label>
-                  </div>
-                  <div className="learning-options">
-                    {data.chapters
-                      .filter((ch) => !semester || ch.semester === semester)
-                      .map((ch) => (
-                        <label key={ch.id}>
-                          <input
-                            type="checkbox"
-                            checked={selected.includes(ch.id)}
-                            onChange={(e) =>
-                              setSelected((ids) =>
-                                e.target.checked
-                                  ? [...ids, ch.id]
-                                  : ids.filter((id) => id !== ch.id),
+                        {data.chapters.map((ch) => (
+                          <ChapterSettings
+                            key={`${ch.id}-${ch.semester}-${ch.accuracyBasis}`}
+                            chapter={ch}
+                            busy={busy}
+                            onSave={(body) =>
+                              act(
+                                () => api(`/chapters/${ch.id}/learning`, body),
+                                "Đã lưu thiết lập chương.",
                               )
                             }
                           />
-                          {ch.title}
-                        </label>
-                      ))}
-                  </div>
-                  <div className="learning-actions">
-                    <button
-                      className="button primary"
-                      disabled={busy || !selected.length}
-                      onClick={() =>
-                        void act(() =>
-                          startReview({
-                            chapterIds: selected,
-                            questionCount: count,
-                          }),
-                        )
-                      }
+                        ))}
+                      </div>
+                    )}
+                    <form
+                      ref={formRef}
+                      className="learning-form"
+                      onSubmit={(e) => void create(e)}
                     >
-                      Bắt đầu ôn
-                    </button>
-                    {semester && (
+                      {formError && (
+                        <p
+                          ref={formErrorRef}
+                          tabIndex={-1}
+                          className="error-banner"
+                          role="alert"
+                        >
+                          {formError}
+                        </p>
+                      )}
+                      {!onlinePage && (
+                        <label>
+                          Loại bộ câu
+                          <select
+                            value={creating}
+                            onChange={(e) =>
+                              setCreating(e.target.value as typeof creating)
+                            }
+                            disabled={busy || uploadBusy}
+                          >
+                            <option value="blueprint">Ma trận ôn tập</option>
+                            <option value="exam">Thi chính thức</option>
+                          </select>
+                        </label>
+                      )}
+                      {creating === "exam" && !data.examCreation && (
+                        <p className="muted">
+                          Tạo đề theo bài, tải đề và mở kiểm tra đang chờ cập
+                          nhật server.
+                        </p>
+                      )}
+                      {isOnline && !data.onlineExams && (
+                        <p className="muted">
+                          Kiểm tra online và thông báo cho lớp đang chờ cập nhật
+                          server Railway.
+                        </p>
+                      )}
+                      {isOnline && (
+                        <p className="learning-notice">
+                          Lưu đề vào danh sách, bắt đầu khi lớp sẵn sàng. Thứ tự
+                          câu được trộn riêng cho từng học sinh.
+                        </p>
+                      )}
+                      <label>
+                        Tên bộ câu
+                        <input
+                          required
+                          name="title"
+                          autoComplete="off"
+                          maxLength={120}
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          placeholder={
+                            isOnline
+                              ? "Ví dụ: Dao động điều hòa…"
+                              : "Ví dụ: Ôn tập học kỳ I…"
+                          }
+                        />
+                      </label>
+                      {!isExam && (
+                        <fieldset>
+                          <legend>Chương trong bộ câu</legend>
+                          <div className="learning-options">
+                            {data.chapters.map((ch) => (
+                              <label key={ch.id}>
+                                <input
+                                  type="checkbox"
+                                  disabled={busy || uploadBusy}
+                                  checked={selected.includes(ch.id)}
+                                  onChange={(e) =>
+                                    setSelected((ids) =>
+                                      e.target.checked
+                                        ? [...ids, ch.id]
+                                        : ids.filter((id) => id !== ch.id),
+                                    )
+                                  }
+                                />
+                                {ch.title}
+                              </label>
+                            ))}
+                          </div>
+                        </fieldset>
+                      )}
+                      {isExam && (
+                        <fieldset className="exam-source">
+                          <legend>Nguồn đề</legend>
+                          <p>Bắt buộc chọn một trong hai nguồn.</p>
+                          <div className="learning-options">
+                            <label>
+                              <input
+                                type="radio"
+                                name="exam-source"
+                                value="upload"
+                                required
+                                checked={examSource === "upload"}
+                                disabled={busy || uploadBusy}
+                                onChange={() => setExamSource("upload")}
+                              />
+                              Upload file
+                            </label>
+                            <label>
+                              <input
+                                type="radio"
+                                name="exam-source"
+                                value="bank"
+                                required
+                                checked={examSource === "bank"}
+                                disabled={busy || uploadBusy}
+                                onChange={() => setExamSource("bank")}
+                              />
+                              Chọn từ ngân hàng
+                            </label>
+                          </div>
+                        </fieldset>
+                      )}
+                      {isExam && examSource === "upload" ? (
+                        <ExamUpload
+                          chapters={classroom.chapters}
+                          questions={uploaded}
+                          onChange={setUploaded}
+                          onReadingChange={setUploadBusy}
+                        />
+                      ) : (
+                        (!isExam || examSource === "bank") && (
+                          <>
+                            {isExam && (
+                              <ExamBank
+                                chapters={classroom.chapters}
+                                matrix={data.matrix}
+                                selection={bankSelection}
+                                onChange={setBankSelection}
+                                disabled={busy || uploadBusy}
+                              />
+                            )}
+                            <label>
+                              Số câu
+                              <input
+                                type="number"
+                                min={1}
+                                max={100}
+                                required
+                                value={count}
+                                onChange={(e) =>
+                                  setCount(Number(e.target.value))
+                                }
+                              />
+                            </label>
+                            <details>
+                              <summary>
+                                Trọng số theo bài (để trống để chọn ngẫu nhiên)
+                              </summary>
+                              <p>
+                                Trọng số tỷ lệ với số câu. Chỉ thêm các bài muốn
+                                sử dụng; 0 loại bài khỏi ma trận. Thiếu câu sẽ
+                                được báo trước khi lưu.
+                              </p>
+                              <div className="learning-settings">
+                                {data.matrix
+                                  .filter(
+                                    (row) =>
+                                      selectedChapters.includes(
+                                        row.chapterId,
+                                      ) &&
+                                      (!isExam || bankKeys.includes(row.key)),
+                                  )
+                                  .map((row) => (
+                                    <label key={row.key}>
+                                      {row.chapterTitle} ·{" "}
+                                      {row.lesson || "Chưa gắn bài"} (
+                                      {row.available} câu)
+                                      <input
+                                        type="number"
+                                        min={0}
+                                        max={10000}
+                                        aria-label={`Trọng số ${row.chapterTitle} ${row.lesson}`}
+                                        value={weights[row.key] ?? ""}
+                                        onChange={(e) =>
+                                          setWeights((old) => {
+                                            const next = { ...old };
+                                            if (e.target.value === "")
+                                              delete next[row.key];
+                                            else
+                                              next[row.key] = Number(
+                                                e.target.value,
+                                              );
+                                            return next;
+                                          })
+                                        }
+                                      />
+                                    </label>
+                                  ))}
+                              </div>
+                            </details>
+                          </>
+                        )
+                      )}
+                      {isExam && (
+                        <div className="learning-settings">
+                          {isOnline ? (
+                            <>
+                              <label>
+                                Thời gian chuẩn bị (phút)
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={60}
+                                  required
+                                  value={preparationMinutes}
+                                  onChange={(e) =>
+                                    setPreparationMinutes(
+                                      Number(e.target.value),
+                                    )
+                                  }
+                                />
+                              </label>
+                              <label>
+                                Thời gian làm bài (phút)
+                                <input
+                                  type="number"
+                                  min={1}
+                                  max={180}
+                                  required
+                                  value={durationMinutes}
+                                  onChange={(e) =>
+                                    setDurationMinutes(Number(e.target.value))
+                                  }
+                                />
+                              </label>
+                            </>
+                          ) : (
+                            <>
+                              <label>
+                                Cách mở kiểm tra
+                                <select
+                                  value={manualOpen ? "manual" : "scheduled"}
+                                  onChange={(e) =>
+                                    setManualOpen(e.target.value === "manual")
+                                  }
+                                >
+                                  <option value="manual">
+                                    Giáo viên bấm mở khi sẵn sàng
+                                  </option>
+                                  <option value="scheduled">
+                                    Theo lịch, khi các chương đã được cho phép
+                                  </option>
+                                </select>
+                              </label>
+                              <label>
+                                Mở bài thi
+                                <input
+                                  type="datetime-local"
+                                  required
+                                  value={starts}
+                                  onChange={(e) => setStarts(e.target.value)}
+                                />
+                              </label>
+                              <label>
+                                Đóng khung thi
+                                <input
+                                  type="datetime-local"
+                                  required
+                                  value={closes}
+                                  onChange={(e) => setCloses(e.target.value)}
+                                />
+                              </label>
+                            </>
+                          )}
+                          <label>
+                            Tự nộp ở lần rời tab
+                            <input
+                              type="number"
+                              min={1}
+                              max={10}
+                              required
+                              value={tabLimit}
+                              onChange={(e) =>
+                                setTabLimit(Number(e.target.value))
+                              }
+                            />
+                          </label>
+                          <p
+                            className={
+                              isOnline ? "online-exam-timing-note" : undefined
+                            }
+                          >
+                            {isOnline
+                              ? "Bấm Bắt đầu kiểm tra để thông báo cho lớp. Hết thời gian chuẩn bị mới mở đề; thời gian làm bài bắt đầu từ lúc mở đề. Cả lớp cùng hạn nộp, vào muộn không được cộng thêm giờ."
+                              : "Cả lớp dùng cùng tập câu, đảo thứ tự. Mỗi học sinh có tối đa 20 phút, kết thúc sớm hơn nếu khung thi đóng."}
+                          </p>
+                        </div>
+                      )}
                       <button
-                        className="button secondary"
-                        disabled={busy}
+                        className="button primary"
+                        disabled={
+                          busy ||
+                          uploadBusy ||
+                          (isExam && !data.examCreation) ||
+                          (isOnline && !data.onlineExams) ||
+                          !selectedChapters.length ||
+                          (isExam &&
+                            (examSource === "upload"
+                              ? !uploaded.length
+                              : !examSource || !bankKeys.length))
+                        }
+                      >
+                        {busy
+                          ? "Đang lưu…"
+                          : isOnline
+                            ? "Lưu bài kiểm tra"
+                            : `Lưu ${isExam ? "lịch kiểm tra" : "ma trận"}`}
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <>
+                    <div className="learning-settings">
+                      <label>
+                        Học kỳ
+                        <select
+                          value={semester}
+                          onChange={(e) => {
+                            setSemester(e.target.value);
+                            setSelected([]);
+                          }}
+                        >
+                          <option value="">Tất cả chương</option>
+                          {[
+                            ...new Set(
+                              data.chapters
+                                .map((ch) => ch.semester)
+                                .filter(Boolean),
+                            ),
+                          ].map((s) => (
+                            <option key={s}>{s}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        Số câu ôn (0 = toàn bộ, tối đa 100)
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={count}
+                          onChange={(e) => setCount(Number(e.target.value))}
+                        />
+                      </label>
+                    </div>
+                    <div className="learning-options">
+                      {data.chapters
+                        .filter((ch) => !semester || ch.semester === semester)
+                        .map((ch) => (
+                          <label key={ch.id}>
+                            <input
+                              type="checkbox"
+                              checked={selected.includes(ch.id)}
+                              onChange={(e) =>
+                                setSelected((ids) =>
+                                  e.target.checked
+                                    ? [...ids, ch.id]
+                                    : ids.filter((id) => id !== ch.id),
+                                )
+                              }
+                            />
+                            {ch.title}
+                          </label>
+                        ))}
+                    </div>
+                    <div className="learning-actions">
+                      <button
+                        className="button primary"
+                        disabled={busy || !selected.length}
                         onClick={() =>
                           void act(() =>
                             startReview({
-                              chapterIds: data.chapters
-                                .filter((ch) => ch.semester === semester)
-                                .map((ch) => ch.id),
+                              chapterIds: selected,
                               questionCount: count,
                             }),
                           )
                         }
                       >
-                        Ôn toàn học kỳ
+                        Bắt đầu ôn
                       </button>
-                    )}
-                  </div>
-                </>
-              )}
-              {!onlinePage && !!data.blueprints.length && (
-                <div className="learning-list">
-                  {data.blueprints.map((p) => (
-                    <div className="learning-row" key={p.id}>
-                      <div>
-                        <strong>{p.title}</strong>
-                        <p>
-                          {p.chapterIds.length} chương ·{" "}
-                          {p.questionCount || "Toàn bộ"} câu
-                        </p>
-                      </div>
-                      {!teacher && (
+                      {semester && (
                         <button
-                          className="button secondary small"
+                          className="button secondary"
                           disabled={busy}
                           onClick={() =>
-                            void act(() => startReview({ blueprintId: p.id }))
+                            void act(() =>
+                              startReview({
+                                chapterIds: data.chapters
+                                  .filter((ch) => ch.semester === semester)
+                                  .map((ch) => ch.id),
+                                questionCount: count,
+                              }),
+                            )
                           }
                         >
-                          Ôn theo ma trận
+                          Ôn toàn học kỳ
                         </button>
                       )}
                     </div>
-                  ))}
-                </div>
-              )}
-              {!teacher && !!data.reviews.length && (
-                <>
-                  <h3>Phiên ôn đang dở</h3>
+                  </>
+                )}
+                {!onlinePage && !!data.blueprints.length && (
                   <div className="learning-list">
-                    {data.reviews.map((r) => (
-                      <div className="learning-row" key={r.id}>
-                        <span>
-                          {r.title} · Câu{" "}
-                          {Math.min(r.currentIndex + 1, r.questionCount)}/
-                          {r.questionCount}
-                        </span>
-                        <button
-                          className="button secondary small"
-                          onClick={() => onReview(r.id, classroom.chapters[0])}
-                        >
-                          Tiếp tục ôn
-                        </button>
+                    {data.blueprints.map((p) => (
+                      <div className="learning-row" key={p.id}>
+                        <div>
+                          <strong>{p.title}</strong>
+                          <p>
+                            {p.chapterIds.length} chương ·{" "}
+                            {p.questionCount || "Toàn bộ"} câu
+                          </p>
+                        </div>
+                        {!teacher && (
+                          <button
+                            className="button secondary small"
+                            disabled={busy}
+                            onClick={() =>
+                              void act(() => startReview({ blueprintId: p.id }))
+                            }
+                          >
+                            Ôn theo ma trận
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
-                </>
-              )}
-            </section>
+                )}
+                {!teacher && !!data.reviews.length && (
+                  <>
+                    <h3>Phiên ôn đang dở</h3>
+                    <div className="learning-list">
+                      {data.reviews.map((r) => (
+                        <div className="learning-row" key={r.id}>
+                          <span>
+                            {r.title} · Câu{" "}
+                            {Math.min(r.currentIndex + 1, r.questionCount)}/
+                            {r.questionCount}
+                          </span>
+                          <button
+                            className="button secondary small"
+                            onClick={() =>
+                              onReview(r.id, classroom.chapters[0])
+                            }
+                          >
+                            Tiếp tục ôn
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </section>
+            </ExamFormSurface>
           )}
           {onlinePage && (
             <OnlineExamGroups
@@ -944,12 +1036,7 @@ export function Learning({
                       <div className="learning-row" key={ex.id}>
                         <div>
                           <strong>{ex.title}</strong>
-                          <p>
-                            {ex.questionCount} câu · Tự nộp ở lần rời tab{" "}
-                            {ex.tabLimit}
-                            {ex.delivery === "online" &&
-                              ` · Chờ ${ex.preparationMinutes} phút · Làm bài ${ex.durationMinutes} phút · Online cả lớp`}
-                          </p>
+                          <ExamMetadata exam={ex} />
                           <small>
                             {ex.delivery === "online" &&
                             ex.startedAt == null ? (
@@ -1233,10 +1320,10 @@ function ExamRoom({
   onClose: () => void;
 }) {
   const teacher = user.role === "teacher";
-  const [tabWarning, setTabWarning] = useState('');
+  const [tabWarning, setTabWarning] = useState("");
   const [idleWarning, setIdleWarning] = useState<number | null>(null);
   const lastActivity = useRef(Date.now());
-  const storageKey = 'greenedu-exam:' + user.id + ':' + id;
+  const storageKey = "greenedu-exam:" + user.id + ":" + id;
   const [initial] = useState<{
     answers: Record<string, QuestionAnswer>;
     tabs: string[];
@@ -1346,32 +1433,57 @@ function ExamRoom({
       });
     void refresh();
     const poll = setInterval(() => void refresh(), 4000);
-    let away = false, idleExited = false;
+    let away = false,
+      idleExited = false;
     lastActivity.current = Date.now();
     const interaction = (event: Event) => {
-      if (event.isTrusted && !document.hidden && document.hasFocus()) {lastActivity.current = Date.now(); setIdleWarning(null);}
+      if (event.isTrusted && !document.hidden && document.hasFocus()) {
+        lastActivity.current = Date.now();
+        setIdleWarning(null);
+      }
     };
     const timer = setInterval(() => {
-      setNow(anchor.current.server + performance.now() - anchor.current.elapsed);
-      if (teacher || current.current?.status !== 'active') return;
+      setNow(
+        anchor.current.server + performance.now() - anchor.current.elapsed,
+      );
+      if (teacher || current.current?.status !== "active") return;
       const idle = (Date.now() - lastActivity.current) / 1000;
-      if (idle >= 120 && !idleExited) {idleExited = true; void enqueue(sync); window.dispatchEvent(new CustomEvent('greenedu-study-exit', {detail: {reason: 'idle'}}));}
-      else if (idle >= 105) setIdleWarning(Math.ceil(120-idle));
+      if (idle >= 120 && !idleExited) {
+        idleExited = true;
+        void enqueue(sync);
+        window.dispatchEvent(
+          new CustomEvent("greenedu-study-exit", {
+            detail: { reason: "idle" },
+          }),
+        );
+      } else if (idle >= 105) setIdleWarning(Math.ceil(120 - idle));
     }, 1000);
     const visibility = () => {
       const left = document.hidden || !document.hasFocus();
-      if (!teacher && left && !away && current.current?.status === 'active') {
+      if (!teacher && left && !away && current.current?.status === "active") {
         away = true;
         tabs.current.push(crypto.randomUUID());
         const warnings = current.current.warnings + tabs.current.length;
-        setTabWarning(warnings >= current.current.tabLimit ? 'Bài đã khóa do đạt giới hạn rời tab. Đáp án đã lưu sẽ được nộp khi có mạng.' : 'Không rời tab hoặc mở cửa sổ khác trong khi làm bài.');
+        setTabWarning(
+          warnings >= current.current.tabLimit
+            ? "Bài đã khóa do đạt giới hạn rời tab. Đáp án đã lưu sẽ được nộp khi có mạng."
+            : "Không rời tab hoặc mở cửa sổ khác trong khi làm bài.",
+        );
         persist();
         void enqueue(sync);
-      } else if (!left) {away = false; void refresh();}
+      } else if (!left) {
+        away = false;
+        void refresh();
+      }
     };
-    ['pointerdown','keydown','scroll'].forEach(name => window.addEventListener(name, interaction, {passive:true,capture:true}));
-    window.addEventListener('blur', visibility);
-    window.addEventListener('focus', visibility);
+    ["pointerdown", "keydown", "scroll"].forEach((name) =>
+      window.addEventListener(name, interaction, {
+        passive: true,
+        capture: true,
+      }),
+    );
+    window.addEventListener("blur", visibility);
+    window.addEventListener("focus", visibility);
     const online = () => void refresh();
     const beforeUnload = (e: BeforeUnloadEvent) => {
       if (current.current?.status === "active" && !teacher) {
@@ -1386,15 +1498,25 @@ function ExamRoom({
       clearInterval(poll);
       clearInterval(timer);
       document.removeEventListener("visibilitychange", visibility);
-      window.removeEventListener('blur', visibility);
-      window.removeEventListener('focus', visibility);
-      ['pointerdown','keydown','scroll'].forEach(name => window.removeEventListener(name, interaction, true));
+      window.removeEventListener("blur", visibility);
+      window.removeEventListener("focus", visibility);
+      ["pointerdown", "keydown", "scroll"].forEach((name) =>
+        window.removeEventListener(name, interaction, true),
+      );
       window.removeEventListener("online", online);
       window.removeEventListener("beforeunload", beforeUnload);
     };
   }, [id]);
   function choose(questionId: string, value: QuestionAnswer) {
-    if (!current.current || current.current.status !== 'active' || current.current.warnings + tabs.current.length >= current.current.tabLimit || document.hidden || !document.hasFocus()) return;
+    if (
+      !current.current ||
+      current.current.status !== "active" ||
+      current.current.warnings + tabs.current.length >=
+        current.current.tabLimit ||
+      document.hidden ||
+      !document.hasFocus()
+    )
+      return;
     dirty.current[questionId] = value;
     setAnswers((old) => ({ ...old, [questionId]: value }));
     persist();
@@ -1435,7 +1557,8 @@ function ExamRoom({
       </div>
     );
   const active = run.status === "active";
-  const tabLocked = active && run.warnings + tabs.current.length >= run.tabLimit;
+  const tabLocked =
+    active && run.warnings + tabs.current.length >= run.tabLimit;
   if (!run.questions.length)
     return (
       <div className="card learning-section">
@@ -1456,8 +1579,16 @@ function ExamRoom({
   );
   return (
     <div className="exam-room">
-      {tabWarning && <p className="error-banner" role="alert">{tabWarning}</p>}
-      {idleWarning !== null && <p className="idle-banner" role="alert">Rời bài sau {idleWarning} giây nếu không tương tác.</p>}
+      {tabWarning && (
+        <p className="error-banner" role="alert">
+          {tabWarning}
+        </p>
+      )}
+      {idleWarning !== null && (
+        <p className="idle-banner" role="alert">
+          Rời bài sau {idleWarning} giây nếu không tương tác.
+        </p>
+      )}
       <WorkspaceHeading className="learning-heading">
         <div>
           <span className="eyebrow">
@@ -1486,7 +1617,7 @@ function ExamRoom({
       <div className="info-panel">
         <p>
           {active
-            ? `${run.questions.filter(question => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn · ${pending ? `${pending} thay đổi chưa đồng bộ` : "Đáp án đã lưu"}. Rời tab ${run.warnings}/${run.tabLimit}; đến lần ${run.tabLimit} bài sẽ tự nộp.`
+            ? `${run.questions.filter((question) => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn · ${pending ? `${pending} thay đổi chưa đồng bộ` : "Đáp án đã lưu"}. Rời tab ${run.warnings}/${run.tabLimit}; đến lần ${run.tabLimit} bài sẽ tự nộp.`
             : `${run.score == null ? "Chờ công bố điểm" : `Điểm ${run.score.toFixed(1)} / 10`} · ${run.reason === "tabs" ? "Tự nộp do rời tab" : run.reason === "deadline" ? "Tự nộp khi hết giờ" : run.reason === "teacher" ? "Giáo viên đã đóng bài thi" : "Đã hoàn thành"}.`}
         </p>
       </div>
@@ -1520,9 +1651,15 @@ function ExamRoom({
             CÂU {index + 1}/{run.questions.length} · {q.chapterTitle}
           </span>
           <h2>{q.text}</h2>
-          <AnswerFields question={q} value={answers[q.id]} result={questionResult}
-            disabled={!active || teacher || submitting || seconds === 0 || tabLocked}
-            onChange={value => choose(q.id, value)}/>
+          <AnswerFields
+            question={q}
+            value={answers[q.id]}
+            result={questionResult}
+            disabled={
+              !active || teacher || submitting || seconds === 0 || tabLocked
+            }
+            onChange={(value) => choose(q.id, value)}
+          />
           {run.results && (
             <div className="explanation" role="status">
               <strong>{questionResult?.correct ? "Đúng" : "Cần ôn lại"}</strong>
@@ -1560,7 +1697,7 @@ function ExamRoom({
               onClick={() => {
                 if (
                   confirm(
-                    `Nộp bài với ${run.questions.filter(question => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn?`,
+                    `Nộp bài với ${run.questions.filter((question) => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn?`,
                   )
                 )
                   void submit();

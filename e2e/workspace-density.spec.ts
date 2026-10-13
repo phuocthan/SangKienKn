@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("portrait submenu stays below the account header and tab changes return to top", async ({
+test("portrait submenu stays above the bottom navigation and tab changes return to top", async ({
   page,
 }) => {
   await page.request.post("/api/auth/login", {
@@ -23,13 +23,13 @@ test("portrait submenu stays below the account header and tab changes return to 
     .toBeGreaterThan(400);
   await expect
     .poll(async () => {
-      const headerBottom = await page
-        .locator(".topbar")
-        .evaluate((header) => header.getBoundingClientRect().bottom);
-      const tabsTop = await tabs.evaluate(
-        (node) => node.getBoundingClientRect().top,
+      const dockTop = await page
+        .locator(".sidebar")
+        .evaluate((node) => node.getBoundingClientRect().top);
+      const tabsBottom = await tabs.evaluate(
+        (node) => node.getBoundingClientRect().bottom,
       );
-      return Math.abs(tabsTop - headerBottom);
+      return Math.abs(tabsBottom - dockTop);
     })
     .toBeLessThan(3);
   await tabs.getByRole("tab", { name: "Hoạt động nhóm" }).click();
@@ -37,7 +37,7 @@ test("portrait submenu stays below the account header and tab changes return to 
   await expect(
     tabs.getByRole("tab", { name: "Hoạt động nhóm" }),
   ).toHaveAttribute("aria-selected", "true");
-  await expect(tabs).toHaveCSS("position", "sticky");
+  await expect(tabs).toHaveCSS("position", "fixed");
   await expect(tabs.getByRole("tab", { name: "Hoạt động nhóm" })).toHaveCSS(
     "background-color",
     "rgb(169, 87, 55)",
@@ -65,7 +65,10 @@ test("teacher chapter and roster lists use compact, readable rows", async ({
     const second = (await chapters.nth(1).boundingBox())!;
     expect(Math.abs(first.y - second.y)).toBeLessThan(2);
     // The compact content now has a separate row for chapter exam access.
-    const access = (await chapters.first().locator(".class-chapter-access").boundingBox())!;
+    const access = (await chapters
+      .first()
+      .locator(".class-chapter-access")
+      .boundingBox())!;
     expect(first.height - access.height).toBeLessThan(145);
   }
   await expect(

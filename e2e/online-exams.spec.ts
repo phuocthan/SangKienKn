@@ -13,12 +13,12 @@ async function login(page: Page, teacher = false) {
   await expect(page.getByRole("navigation")).toBeVisible();
   if (teacher) {
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-    await navigateTo(page, { name: "Ôn tập & kiểm tra" });
+    await navigateTo(page, { name: "Kiểm tra online", exact: true });
     await expect(
-      page.getByRole("button", { name: "Tạo kiểm tra online", exact: true }),
+      page.getByRole("button", { name: "Tạo bài kiểm tra", exact: true }),
     ).toBeEnabled();
     await page
-      .getByRole("button", { name: "Tạo kiểm tra online", exact: true })
+      .getByRole("button", { name: "Tạo bài kiểm tra", exact: true })
       .click();
   }
 }
@@ -52,7 +52,7 @@ test("teacher starts a multi-lesson online exam; students get a persistent prepa
   const title = `Online chờ ${info.project.name} ${Date.now()}`;
   await form.getByLabel("Tên bộ câu").fill(title);
   await expect(
-    form.getByRole("button", { name: "Chuẩn bị kiểm tra online" }),
+    form.getByRole("button", { name: "Lưu bài kiểm tra" }),
   ).toBeDisabled();
   await form
     .getByRole("radio", { name: "Chọn từ ngân hàng", exact: true })
@@ -68,9 +68,9 @@ test("teacher starts a multi-lesson online exam; students get a persistent prepa
   await form.getByLabel("Số câu", { exact: true }).fill("4");
   await form.getByLabel("Thời gian chuẩn bị (phút)").fill("2");
   await form.getByLabel("Thời gian làm bài (phút)").fill("45");
-  await form.getByRole("button", { name: "Chuẩn bị kiểm tra online" }).click();
+  await form.getByRole("button", { name: "Lưu bài kiểm tra" }).click();
   await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Đã chuẩn bị kiểm tra online",
+    "Bạn đã tạo bài kiểm tra thành công",
   );
   const row = page
     .locator(".learning-row")
@@ -90,7 +90,7 @@ test("teacher starts a multi-lesson online exam; students get a persistent prepa
     await expect(row.locator(".online-exam-state")).toHaveText("Chuẩn bị");
     await expect(row).toContainText("Đã gửi thông báo");
     await noOverflow(page);
-    await form.screenshot({
+    await row.screenshot({
       path: `.local/online-teacher-${info.project.name}.png`,
     });
     await student.bringToFront();
@@ -101,10 +101,17 @@ test("teacher starts a multi-lesson online exam; students get a persistent prepa
     await expect(notice).toContainText("Lớp ôn thi · Vật lý");
     await expect(notice).toContainText("45 phút");
     await expect(notice).toContainText("Bắt đầu sau");
-    const popup = student.getByRole("dialog", { name: "Có kiểm tra online từ giáo viên" });
+    const popup = student.getByRole("dialog", {
+      name: "Có kiểm tra online từ giáo viên",
+    });
     await expect(popup).toBeVisible();
-    await expect(student.locator(".exam-notices .modal-backdrop")).toHaveCSS("background-color", "rgba(27, 54, 43, 0.4)");
-    await student.screenshot({ path: `.local/online-popup-${info.project.name}.png` });
+    await expect(student.locator(".exam-notices .modal-backdrop")).toHaveCSS(
+      "background-color",
+      "rgba(27, 54, 43, 0.4)",
+    );
+    await student.screenshot({
+      path: `.local/online-popup-${info.project.name}.png`,
+    });
     await student.keyboard.press("Escape");
     await expect(popup).toBeVisible();
     await expect(
@@ -148,9 +155,9 @@ test("uploaded online exam notifies and opens a saved room; reload keeps questio
   await expect(form).toContainText("2 câu đã chọn");
   await form.getByLabel("Thời gian chuẩn bị (phút)").fill("0");
   await form.getByLabel("Thời gian làm bài (phút)").fill("25");
-  await form.getByRole("button", { name: "Chuẩn bị kiểm tra online" }).click();
+  await form.getByRole("button", { name: "Lưu bài kiểm tra" }).click();
   await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Đã chuẩn bị",
+    "Bạn đã tạo bài kiểm tra thành công",
   );
   const row = page
     .locator(".learning-row")
@@ -176,7 +183,9 @@ test("uploaded online exam notifies and opens a saved room; reload keeps questio
       name: "Thông báo kiểm tra online",
     });
     await expect(notice).toContainText(title);
-    await expect(student.getByRole("dialog", { name: "Có kiểm tra online từ giáo viên" })).toBeVisible();
+    await expect(
+      student.getByRole("dialog", { name: "Có kiểm tra online từ giáo viên" }),
+    ).toBeVisible();
     await notice.screenshot({
       path: `.local/online-ready-${info.project.name}.png`,
     });
@@ -229,17 +238,17 @@ test("older Railway capability disables online preparation and start without sen
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
+  await navigateTo(page, { name: "Kiểm tra online", exact: true });
   await expect(
-    page.getByRole("button", { name: "Tạo kiểm tra online", exact: true }),
+    page.getByRole("button", { name: "Tạo bài kiểm tra", exact: true }),
   ).toBeEnabled();
   await page
-    .getByRole("button", { name: "Tạo kiểm tra online", exact: true })
+    .getByRole("button", { name: "Tạo bài kiểm tra", exact: true })
     .click();
   await expect(page.locator(".learning-form")).toContainText(
     "đang chờ cập nhật server Railway",
   );
   await expect(
-    page.getByRole("button", { name: "Chuẩn bị kiểm tra online" }),
+    page.getByRole("button", { name: "Lưu bài kiểm tra" }),
   ).toBeDisabled();
 });

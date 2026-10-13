@@ -27,25 +27,41 @@ export function WorkspaceContent<T extends string>({
   const mainRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
-    if (!tabs) return;
     const header = document.querySelector<HTMLElement>(".workspace-topbar");
     const main = mainRef.current;
     if (!header || !main) return;
+    const submenu = main.querySelector<HTMLElement>(".workspace-tabs");
+    const dock = document.querySelector<HTMLElement>(".sidebar");
+    const root = document.documentElement;
     const updateOffset = () => {
-      main.style.setProperty(
+      root.style.setProperty(
         "--workspace-sticky-offset",
         `${header.getBoundingClientRect().height}px`,
+      );
+      root.style.setProperty(
+        "--workspace-submenu-height",
+        `${submenu?.getBoundingClientRect().height ?? 0}px`,
+      );
+      root.style.setProperty(
+        "--workspace-dock-height",
+        `${dock?.getBoundingClientRect().height ?? 88}px`,
       );
     };
     updateOffset();
     const observer = new ResizeObserver(updateOffset);
     observer.observe(header);
-    return () => observer.disconnect();
+    if (submenu) observer.observe(submenu);
+    if (dock) observer.observe(dock);
+    window.addEventListener("resize", updateOffset);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateOffset);
+    };
   }, [tabs?.label]);
 
   return (
     <main
-      className="main-content"
+      className={`main-content ${tabs ? "has-submenu" : ""}`}
       id="workspace-content"
       tabIndex={-1}
       ref={mainRef}
@@ -80,6 +96,16 @@ export function WorkspaceTabs<T extends string>({
   page: T;
   onNavigate: (page: T) => void;
 }) {
+  const listRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    const active = list?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (list && active)
+      list.scrollTo({
+        left: active.offsetLeft - (list.clientWidth - active.clientWidth) / 2,
+        behavior: "instant",
+      });
+  }, [page]);
   function move(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const next =
       event.key === "ArrowRight"
@@ -101,12 +127,18 @@ export function WorkspaceTabs<T extends string>({
     buttons?.[next]?.focus();
   }
   return (
-    <div className="workspace-tabs" role="tablist" aria-label={label}>
+    <div
+      ref={listRef}
+      className="workspace-tabs"
+      role="tablist"
+      aria-label={label}
+    >
       {items.map((item, index) => (
         <button
           type="button"
           role="tab"
           aria-label={item.label}
+          title={item.label}
           id={`workspace-tab-${item.id}`}
           key={item.id}
           aria-selected={page === item.id}
@@ -116,7 +148,7 @@ export function WorkspaceTabs<T extends string>({
           onKeyDown={(event) => move(event, index)}
         >
           <item.icon size={18} aria-hidden="true" />
-          {item.label}
+          <span className="workspace-tab-label">{item.label}</span>
           {!!item.count && (
             <span className="workspace-tab-count" aria-hidden="true">
               {item.count}

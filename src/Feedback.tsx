@@ -5,13 +5,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import {
-  MessageSquare,
-  Plus,
-  RefreshCw,
-  CheckCircle2,
-  RotateCcw,
-} from "./icons";
+import { MessageSquare, Plus, CheckCircle2, RotateCcw } from "./icons";
 import { api, ApiError, errorMessage } from "./api";
 import { Empty, Modal } from "./components";
 import { WorkspaceHeading } from "./WorkspaceHeading";
@@ -65,12 +59,18 @@ export function Feedback({
   }, [classroom.id]);
   useEffect(() => {
     void reload();
-    const timer = setInterval(() => void reload(), 20000);
-    window.addEventListener("focus", reload);
+    const update = () => {
+      if (document.visibilityState === "visible" && navigator.onLine)
+        void reload();
+    };
+    const timer = setInterval(update, 20000);
+    window.addEventListener("focus", update);
+    window.addEventListener("online", update);
     return () => {
       sequence.current++;
       clearInterval(timer);
-      window.removeEventListener("focus", reload);
+      window.removeEventListener("focus", update);
+      window.removeEventListener("online", update);
     };
   }, [reload]);
   function updated(thread: FeedbackThread) {
@@ -118,10 +118,6 @@ export function Feedback({
           </p>
         </div>
         <div className="button-group">
-          <button className="button outline" onClick={() => void reload()}>
-            <RefreshCw size={16} />
-            Cập nhật
-          </button>
           {!teacher && (
             <button
               className="button primary"
@@ -142,6 +138,9 @@ export function Feedback({
         error && (
           <div className="error-banner" role="alert">
             {error}
+            <button type="button" onClick={() => void reload()}>
+              Thử lại
+            </button>
           </div>
         )
       )}

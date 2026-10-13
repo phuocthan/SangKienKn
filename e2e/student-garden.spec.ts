@@ -144,11 +144,19 @@ test("fenced garden includes everyone with moving icons and separate level-5 hon
   if (info.project.name === "mobile") {
     const ranking = page.locator(".community-ranking").first();
     await expect(ranking).toBeVisible();
-    expect(await ranking.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+    expect(
+      await ranking.evaluate((node) => node.scrollWidth <= node.clientWidth),
+    ).toBe(true);
     const originalSize = page.viewportSize()!;
     await page.setViewportSize({ width: 320, height: 700 });
-    expect(await ranking.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect(
+      await ranking.evaluate((node) => node.scrollWidth <= node.clientWidth),
+    ).toBe(true);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
     await page.setViewportSize(originalSize);
   }
   await page.screenshot({
@@ -157,7 +165,8 @@ test("fenced garden includes everyone with moving icons and separate level-5 hon
     style:
       "@media(max-width:700px) { .sidebar { visibility: hidden !important; } }",
   });
-  await page.getByRole("button", { name: "Cập nhật", exact: true }).click();
+  await page.bringToFront();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(garden.locator(".garden-student")).toHaveCount(5);
   await page.getByLabel("Chọn lớp học").selectOption("garden-other-class");
   await expect(garden.locator(".garden-student")).toHaveCount(1);
@@ -276,7 +285,8 @@ test("large class keeps all 47 students inside the fenced scrolling garden and h
     node.scrollTop = node.scrollHeight;
   });
   await expect(page.locator(".garden-student").last()).toBeInViewport();
-  await page.getByRole("button", { name: "Cập nhật", exact: true }).click();
+  await page.bringToFront();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.locator(".garden-student")).toHaveCount(47);
   await expect(page.locator(".garden-honoree")).toHaveCount(9);
 });

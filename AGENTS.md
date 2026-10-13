@@ -26,3 +26,7 @@ Theo yêu cầu mới của người dùng, **giao diện chạy local để tes
 Quy tắc này thay cách tự `npm run deploy` local sau mỗi thay đổi trước đây. Không tự khởi động API SQLite local, không tự push/deploy Railway. Sửa backend chỉ có hiệu lực trong chế độ này sau khi backend Railway được triển khai; báo rõ nếu cần bước đó. Khi người dùng yêu cầu deploy mà chưa rõ đích, dùng bối cảnh để xác định hoặc hỏi đích, không tự coi đó là deploy local cũ.
 
 Thao tác trong giao diện local sẽ đọc/ghi **dữ liệu thật Railway**. Kiểm thử tự động, seed/demo, ca tạo trùng và stress test vẫn dùng server/database riêng; không chạy chúng trên Railway. Không bật đăng nhập nhanh bỏ mật khẩu cho production. Chỉ dùng chế độ `npm run dev:offline` hoặc `npm run deploy` khi cần kiểm thử độc lập hoặc người dùng yêu cầu bản offline; giữ database local cũ.
+
+## Skill thiết kế — 13/10/2026
+
+Khi chỉnh giao diện theo yêu cầu hiện tại, dùng `redesign-existing-projects` làm skill chính và `web-design-guidelines` để rà soát. Đã cài cả hai vào `C:/Users/thant/.codex/skills/`; đọc SKILL.md tại đó, không suy nội dung từ tên skill. Nguồn, đường dẫn và phạm vi áp dụng ở [docs/design-skills.md](docs/design-skills.md). Quyết định mới về submenu, modal kiểm tra, icon và màu thẻ nằm đầu [docs/app-design.md](docs/app-design.md); mục sticky dưới header cũ là lịch sử đã được thay thế.

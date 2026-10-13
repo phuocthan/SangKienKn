@@ -508,7 +508,8 @@ test("community honors earned students once with old API and keeps tied ranks wi
     path: info.outputPath("class-garden-earned.png"),
     fullPage: true,
   });
-  await page.getByRole("button", { name: "Cập nhật", exact: true }).click();
+  await page.bringToFront();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.getByRole("img", { name: "Cấp 5 · Kết Trái" })).toHaveCount(
     2,
   );
@@ -618,7 +619,10 @@ test("teacher creates content and student account; student changes password, lea
     .getByLabel("Chọn lớp học")
     .selectOption({ label: `${className} · Toán` });
   await navigateTo(page, { name: "Tiến độ học tập" });
-  const row = page.locator(".roster-card").getByRole("row").filter({ hasText: studentName });
+  const row = page
+    .locator(".roster-card")
+    .getByRole("row")
+    .filter({ hasText: studentName });
   await expect(row).toContainText("100%");
   await expect(row.getByRole("cell").nth(2)).toHaveText("1");
   await page.screenshot({
@@ -643,9 +647,13 @@ test("teacher creates content and student account; student changes password, lea
     .getByLabel("Chọn lớp học")
     .selectOption({ label: "Lớp 10A1 · Vật lý" });
   const selectedClass = await page.getByLabel("Chọn lớp học").inputValue();
-  const gardenResponse = await page.request.get(`/api/classrooms/${selectedClass}/garden`);
+  const gardenResponse = await page.request.get(
+    `/api/classrooms/${selectedClass}/garden`,
+  );
   expect(gardenResponse.ok()).toBeTruthy();
   const garden = await gardenResponse.json();
-  await expect(page.locator(".garden-student")).toHaveCount(garden.members.length);
+  await expect(page.locator(".garden-student")).toHaveCount(
+    garden.members.length,
+  );
   await expect(page.locator(".garden-frame")).not.toContainText(studentName);
 });

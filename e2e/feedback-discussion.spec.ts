@@ -62,7 +62,8 @@ test("private student feedback reaches the teacher, who replies, resolves and re
     await expect(teacher.locator(".feedback-detail .pill")).toHaveText(
       "Đã phản hồi",
     );
-    await page.getByRole("button", { name: "Cập nhật", exact: true }).click();
+    await page.bringToFront();
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(page.locator(".feedback-detail")).toContainText(
       "Cô sẽ dành thêm 10 phút",
     );
@@ -70,7 +71,8 @@ test("private student feedback reaches the teacher, who replies, resolves and re
     await expect(
       teacher.getByRole("button", { name: "Mở lại", exact: true }),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Cập nhật", exact: true }).click();
+    await page.bringToFront();
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(page.locator(".feedback-detail .pill")).toHaveText("Đã xử lý");
     await expect(
       page.getByRole("button", { name: "Gửi phản hồi", exact: true }),
@@ -106,8 +108,8 @@ test("students read other groups after the extended deadline and the responsible
     await page.request.get("/api/classrooms/class-demo/group-activities")
   ).json();
   const initial = list.serverNow,
-    deadline = initial + 60000,
-    extended = initial + 120000;
+    deadline = initial + 10000,
+    extended = initial + 15000;
   const title = `Hoạt động phản biện · ${info.project.name}`;
   const response = await page.request.post(
     "/api/classrooms/class-demo/group-activities",
@@ -170,14 +172,22 @@ test("students read other groups after the extended deadline and the responsible
       },
     );
     expect(extension.ok()).toBeTruthy();
-    expect(
-      (
-        await page.request.post("/__test/clock", {
-          data: { timestamp: extended },
-        })
-      ).ok(),
-    ).toBeTruthy();
-    await peer.getByRole("button", { name: "Cập nhật", exact: true }).click();
+    // Real server clock; the production server has no test clock endpoint.
+    await expect
+      .poll(
+        async () =>
+          (
+            await (
+              await page.request.get(
+                "/api/classrooms/class-demo/group-activities",
+              )
+            ).json()
+          ).serverNow,
+        { timeout: 20000 },
+      )
+      .toBeGreaterThanOrEqual(extended);
+    await peer.bringToFront();
+    await peer.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(peer.locator(".group-roster")).toHaveCount(2);
     const card = peer.locator(".group-roster").filter({
       has: peer.getByRole("heading", {
@@ -221,7 +231,8 @@ test("students read other groups after the extended deadline and the responsible
     await expect(ownerDialog.locator(".discussion-replies")).toContainText(
       "giảm sai số ngẫu nhiên",
     );
-    await peerDialog.getByRole("button", { name: "Cập nhật trao đổi" }).click();
+    await peer.bringToFront();
+    await peer.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(peerDialog.locator(".discussion-replies")).toContainText(
       "giảm sai số ngẫu nhiên",
     );

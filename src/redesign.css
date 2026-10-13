@@ -1,0 +1,554 @@
+/* 13/10/2026 — garden surfaces, review/exam cards and a single-row submenu. */
+:root {
+  --workspace-submenu-height: 0px;
+  --workspace-sticky-offset: 140px;
+}
+.workspace-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #96ad80 transparent;
+}
+.workspace-tabs [role="tab"] {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  min-height: 44px;
+}
+.workspace-tab-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.workspace-tabs [role="tab"]:focus-visible {
+  outline: 2px solid #326145;
+  outline-offset: -3px;
+}
+.app-shell .main-content .stat-card.card {
+  background: #f0f5e8;
+  border-color: #cdddbf;
+  box-shadow: 0 5px 20px #32563708;
+}
+.app-shell .main-content .stat-card.card:nth-child(2) {
+  background: #faf1df;
+  border-color: #e8d8b7;
+}
+.app-shell .main-content .stat-card.card:nth-child(3) {
+  background: #f8ede4;
+  border-color: #e6d5c5;
+}
+.app-shell .main-content .stat-card.card:nth-child(4) {
+  background: #edf3e4;
+  border-color: #ceddbb;
+}
+.app-shell .main-content .quick-actions > button.card,
+.app-shell .main-content .chapter-card.card,
+.app-shell .main-content .workspace-stat.card,
+.app-shell .main-content .group-roster.card {
+  background: #f5f7ed;
+  border-color: #d2dfc4;
+}
+.app-shell .main-content .quick-actions > button.card:nth-child(2) {
+  background: #fcf4e5;
+  border-color: #e5d6b7;
+}
+.app-shell .main-content .quick-actions > button.card:nth-child(3) {
+  background: #f5eee3;
+  border-color: #ded3bf;
+}
+.app-shell .main-content .chapter-card.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.chapter-card > :is(h3, p) {
+  margin-block: 0;
+}
+.chapter-card > .button {
+  margin-top: auto;
+  align-self: stretch;
+}
+.chapter-card :is(select, label) {
+  min-width: 0;
+  max-width: 100%;
+}
+.app-shell .main-content .chapter-list .chapter-row {
+  background: #f2f5e9;
+  border-color: #d2dfc4;
+}
+.chapter-row-copy {
+  flex: 1 1 160px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.chapter-row-copy :is(h3, p) {
+  margin-bottom: 0;
+}
+.chapter-list .chapter-row > .text-button {
+  justify-self: start;
+}
+.class-chapter-access {
+  align-items: center;
+  gap: 12px;
+}
+.blooming-tree-icon {
+  position: relative;
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+}
+.blooming-tree-icon .student-level-icon {
+  width: 36px;
+  height: 36px;
+}
+.blooming-tree-icon .blooming-tree-plus {
+  position: absolute;
+  right: -3px;
+  bottom: -1px;
+  width: 16px;
+  height: 16px;
+}
+.app-shell .student-level-icon {
+  overflow: visible;
+  flex-shrink: 0;
+}
+.learning-workspace {
+  gap: 22px;
+}
+.learning-page-heading {
+  padding: 24px 28px;
+  border: 1px solid #cfddbf;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 100% 0, #d7e7bd80, transparent 65%), #f1f5e8;
+  align-items: center;
+}
+.learning-page-heading h1 {
+  font-size: clamp(22px, 3vw, 30px);
+  color: #254e34;
+}
+.learning-page-heading p {
+  max-width: 630px;
+  margin-bottom: 0;
+}
+.learning-page-heading .eyebrow {
+  letter-spacing: 0.06em;
+  color: #5e714b;
+}
+.app-shell .main-content .learning-workspace .learning-section {
+  background: #faf8ee;
+  border-color: #d8dfc6;
+  box-shadow: 0 6px 22px #34532e06;
+}
+.learning-section > h2 {
+  margin-top: 0;
+  color: #294e37;
+  align-items: center;
+}
+.learning-section > h2 > svg {
+  flex-shrink: 0;
+  color: #547f41;
+}
+.learning-chapter-settings {
+  background: #f0f4e7;
+  border-color: #ceddbc;
+}
+.learning-chapter-settings .button {
+  justify-self: start;
+}
+.learning-list {
+  gap: 12px;
+}
+.learning-list > .learning-row {
+  background: #f2f5e9;
+  border: 1px solid #d5dfc5;
+  border-radius: 16px;
+  padding: 18px;
+}
+.learning-row > div {
+  min-width: 0;
+}
+.learning-row :is(strong, small),
+.online-exam-title {
+  overflow-wrap: anywhere;
+}
+.learning-actions {
+  align-items: center;
+}
+.learning-actions .button {
+  min-height: 44px;
+}
+.app-shell .main-content .student-learning .learning-chapter {
+  background: #f0f5e7;
+}
+.app-shell .main-content .student-learning .learning-chapter:nth-child(2n) {
+  background: #fcf3e3;
+}
+.student-learning .learning-chapter > .button {
+  width: 100%;
+  margin-top: auto;
+}
+.learning-options label {
+  min-height: 44px;
+  cursor: pointer;
+  border: 1px solid #d2dfc2;
+}
+.learning-options label:has(input:checked) {
+  background: #e3edcf;
+  border-color: #759b61;
+  color: #294e37;
+}
+.learning-options input:focus-visible {
+  outline-offset: 3px;
+}
+.learning-form > .button {
+  justify-self: start;
+  min-width: 180px;
+}
+.learning-form fieldset {
+  min-width: 0;
+  background: #f3f5e9;
+  border-color: #d2dfc2;
+}
+.online-exam-create-modal {
+  max-width: 900px;
+  width: min(900px, calc(100vw - 32px));
+  background: #fbf9ef;
+}
+.online-exam-create-modal .learning-section {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.online-exam-create-modal .learning-section > h2 {
+  font-size: 16px;
+  color: #61764f;
+}
+.online-exam-create-modal .learning-form {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 8px;
+}
+.online-exam-create-modal .learning-notice {
+  padding: 12px 16px;
+  margin: 0;
+  background: #e9f1dc;
+  border-color: #c8d8b7;
+}
+.online-exam-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.online-exam-group.learning-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid #d4dfc3;
+  border-top: 3px solid #96ad72;
+  border-radius: 18px;
+  background: #f3f6ea;
+}
+.online-exam-group.is-running {
+  border-top-color: #387557;
+  background: #edf5e9;
+}
+.online-exam-group.is-ended {
+  border-top-color: #b6a17c;
+  background: #f4f1e9;
+}
+.online-exam-heading {
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+.online-exam-heading > div {
+  min-width: 0;
+}
+.online-exam-title {
+  font-size: 18px;
+  line-height: 1.5;
+  color: #294e37;
+}
+.online-exam-state {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid #c5d4ad;
+  background: #e4edcf;
+  color: #425e2f;
+}
+.online-exam-state.running {
+  color: #22583e;
+  background: #d5e9d3;
+  border-color: #a7c6a2;
+}
+.online-exam-state.ended {
+  color: #6b5c40;
+  background: #eee5d1;
+  border-color: #d9cbaa;
+}
+.exam-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.exam-metadata li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border-radius: 9px;
+}
+.exam-metadata svg {
+  flex-shrink: 0;
+}
+.exam-metadata strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+.exam-meta-questions {
+  color: #315d3e;
+  background: #e3edce;
+}
+.exam-meta-wait {
+  color: #78551d;
+  background: #f4e6c4;
+}
+.exam-meta-duration {
+  color: #355d71;
+  background: #e0eaf0;
+}
+.exam-meta-rule {
+  color: #8a4b31;
+  background: #f5e4d7;
+}
+.online-exam-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 16px 0;
+  border-block: 1px solid #d5dfc6;
+}
+.online-exam-facts div {
+  min-width: 0;
+}
+.online-exam-facts dt {
+  color: #69765f;
+  font-size: 12px;
+}
+.online-exam-facts dd {
+  margin: 4px 0 0;
+  color: #2e4d39;
+  font-weight: 700;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.online-exam-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: auto;
+}
+.online-exam-controls > small {
+  flex: 1 1 150px;
+  color: #64745a;
+}
+.online-exam-results {
+  width: 100%;
+  border-top: 1px solid #d5dfc6;
+  padding-top: 12px;
+}
+.online-exam-results summary {
+  min-height: 44px;
+  padding: 10px 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #315d3e;
+}
+.online-exam-result {
+  gap: 12px;
+}
+.online-exam-result .button {
+  flex-shrink: 0;
+}
+.learning-notice[role="status"] {
+  color: #2d573b;
+  background: #e6efd8;
+  border: 1px solid #c8d9b4;
+  padding: 16px 20px;
+  border-radius: 14px;
+}
+.garden-enclosure {
+  background: #e0ebca;
+  box-shadow:
+    inset 0 0 0 1px #bfd2a0,
+    0 6px 20px #486a2510;
+  padding-top: 40px;
+}
+.garden-fence {
+  filter: drop-shadow(0 2px 1px #6b572b18);
+}
+.garden-fence-top,
+.garden-fence-bottom {
+  height: 36px;
+  border-radius: 0;
+  background: url("/assets/garden-fence.svg") repeat-x left center / 96px 36px;
+}
+.garden-fence-top::after,
+.garden-fence-bottom::after {
+  content: none;
+}
+.garden-fence-left,
+.garden-fence-right {
+  top: 36px;
+  bottom: 30px;
+  width: 12px;
+  border: 1px solid #789157;
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 40% 20%, #adc581 0 30%, transparent 34%) 0 0 /
+      12px 24px,
+    #7b9a59;
+}
+.garden-fence-left::after,
+.garden-fence-right::after {
+  content: none;
+}
+.garden-gate {
+  background: #fff5dc;
+  border-color: #b18f61;
+  border-radius: 10px;
+}
+@media (max-width: 1200px) {
+  .online-exam-groups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .learning-page-heading {
+    padding: 20px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .learning-page-heading .button {
+    align-self: flex-start;
+  }
+  .online-exam-group.learning-row {
+    padding: 18px;
+  }
+  .online-exam-heading {
+    flex-wrap: wrap;
+  }
+  .online-exam-state {
+    order: -1;
+  }
+  .learning-row:not(.online-exam-group) {
+    flex-wrap: wrap;
+  }
+  .online-exam-create-modal {
+    width: calc(100vw - 20px);
+  }
+  .learning-form > .button {
+    width: 100%;
+  }
+  .chapter-row .lesson-management > .button,
+  .chapter-row .curriculum-lessons > summary {
+    min-height: 44px;
+  }
+}
+@media (max-width: 1100px) and (orientation: portrait) {
+  html:has(.app-shell) {
+    scroll-padding-top: calc(var(--workspace-sticky-offset) + 12px);
+    scroll-padding-bottom: calc(
+      var(--workspace-dock-height, 88px) + var(--workspace-submenu-height) +
+        20px
+    );
+  }
+  .topbar.workspace-topbar {
+    background:
+      radial-gradient(ellipse at 100% 0, #cfdfb380, transparent 70%), #eaf0dfef;
+    border-bottom-color: #b9cfa1;
+    box-shadow: 0 4px 16px #24442e12;
+  }
+  .portrait-actions .icon-button {
+    background: #f5f7e9;
+    border-color: #c3d3b0;
+  }
+  .topbar .class-switch select {
+    background: #fcf9ee;
+    border-color: #b8cba0;
+    color: #294e37;
+  }
+  .main-content .workspace-tabs {
+    position: fixed;
+    inset: auto 0 calc(var(--workspace-dock-height, 88px)) 0;
+    top: auto;
+    z-index: 19;
+    width: 100%;
+    max-width: 100%;
+    padding: 7px 10px;
+    margin: 0;
+    gap: 4px;
+    border: 1px solid #c8d5b5;
+    border-bottom: 0;
+    border-radius: 16px 16px 0 0;
+    background: #f1f5e8f7;
+    box-shadow: 0 -6px 20px #29492e14;
+    backdrop-filter: blur(12px);
+    scrollbar-width: none;
+  }
+  .workspace-tabs [role="tab"] {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .main-content {
+    padding-bottom: calc(
+      var(--workspace-dock-height, 88px) + var(--workspace-submenu-height) +
+        28px
+    );
+  }
+  .main-content :is(:focus-visible, [id]) {
+    scroll-margin-top: calc(var(--workspace-sticky-offset) + 12px);
+    scroll-margin-bottom: calc(
+      var(--workspace-dock-height, 88px) + var(--workspace-submenu-height) +
+        20px
+    );
+  }
+  .modal :is(input, button, select, textarea, summary) {
+    scroll-margin: 16px;
+  }
+  .app-shell > .main-shell {
+    padding-bottom: 0;
+  }
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  .main-content .workspace-tabs [role="tab"] {
+    padding-inline: 6px;
+    gap: 4px;
+    font-size: clamp(10px, 2.8vw, 12px);
+  }
+  .main-content .workspace-tabs [role="tab"] > svg {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace-tabs {
+    scroll-behavior: auto;
+  }
+}

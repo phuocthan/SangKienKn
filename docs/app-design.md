@@ -1,5 +1,23 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: hoàn tất yêu cầu redesign, submenu trên dock — 13/10/2026
+
+Áp dụng `redesign-existing-projects` chính + `web-design-guidelines` kiểm tra; [nguồn và đường dẫn skill](design-skills.md). Giữ React/CSS, Be Vietnam Pro, năm mục menu, Phosphor Duotone cho icon chức năng và màu nút nghiệp vụ.
+
+Submenu chỉ một hàng. **Portrait ≤1100px đặt cố định ngay trên navbar đáy**; chiều cao submenu/header/dock đo theo layout thật, tính cả safe-area, dự phòng khoảng đệm cuối nội dung và scroll margin/padding cho control/anchor. Ở320–600px ẩn icon phụ của submenu, dùng chữ đầy đủ trong ba ô vừa hàng; icon của navbar vẫn hiện. Desktop/landscape giữ submenu một hàng trong nội dung; keyboard, lựa chọn và URL cũ giữ nguyên. Quyết định này thay sticky ngay dưới header ở mục lịch sử.
+
+Header mobile dùng nền xanh lá nhạt pha kem, viền xanh và nút tài khoản/lớp rõ hơn. Thống kê/thao tác nhanh/chương/nhóm/ôn dùng nền xanh, kem, đất nhạt thay trắng đồng loạt; canh nút và text cùng nhịp. Các nút chính/phụ/khóa/disabled giữ màu đã chốt. Danh sách chương quản lý có tiêu đề và controls linh hoạt, link quản lý câu hỏi căn đầu, vùng chạm44px trên mobile.
+
+Bộ năm cấp dùng `LevelArtwork`: hạt có lá, chồi hai lá, cây non, cây đơm hoa, cây kết trái; nét vẽ/đất/tán lá đồng bộ và nhận ra ở24–88px. Giữ toàn bộ tên/mốc/nhãn accessibility và metadata cấp. Thống kê **Cây đã ra hoa** dùng cùng cây cấp4, có dấu+ riêng; không đổi giá trị thống kê hoặc cách thưởng.
+
+Ôn tập & kiểm tra bỏ shortcut Tạo kiểm tra online. Trang **Kiểm tra online** giáo viên chỉ hiện nút **Tạo bài kiểm tra** và danh sách; nút mở Modal với nguồn đề/tên/thời gian. **Lưu bài kiểm tra** thành công đóng modal, hiện “Bạn đã tạo bài kiểm tra thành công và lưu vào danh sách. Có thể bắt đầu bất cứ lúc nào.” Lưu không bắt đầu, không thông báo thi; giáo viên bấm **Bắt đầu kiểm tra** ở card đã lưu. Lỗi giữ draft và hiện/focus trong modal; Escape/Đóng hoạt động khi không gửi/đọc upload. Học sinh chỉ thấy danh sách/quyền vào thi/kết quả, không có nút tạo.
+
+Card online chia hai cột khi đủ rộng, một cột màn hẹp; tách title/trạng thái, metadata có icon và màu xanh/mật ong/xanh trời/đất cho số câu/chờ/làm bài/ngưỡng tab. Thông tin tham gia/đã nộp/giờ mở/hạn nằm2×2, controls cùng trục, danh sách bài nộp mở riêng. Review cho hai vai trò có header và panel nền nhẹ, chapter settings/điều kiện/phiên dở/nút tiếp tục rõ ràng; không đổi điều kiện thi hoặc cấp/vé.
+
+Bỏ các nút refresh thường ở Ôn/online, vườn, nhóm, góp ý và trao đổi. Poll15/30/20giây tương ứng, refresh khi focus/reconnect (nhóm/learning/vườn cả visibility); chỉ poll khi visible/online. **Thử lại** trong trạng thái lỗi vẫn có. Giữ nút **Cập nhật mật khẩu** quản trị và các nút Lưu vì đó là thao tác ghi thật, không phải tải lại dữ liệu. Không bỏ API cập nhật dữ liệu.
+
+Heading Hoạt động nhóm chỉ giữ tên trang và minh họa; bỏ TRANG CỘNG TÁC và mô tả lớp/yêu cầu. Tạo hoạt động tiếp tục ở toolbar. Rào chung dùng asset SVG gỗ bo tròn, dây lá/hoa, hai cạnh dạng hàng lá và biển cổng kem; giữ scroll, roster thật, avatar, cấp và công tắc chuyển động. QA mới/giới hạn tại [redesign-qa-20261013.md](redesign-qa-20261013.md).
+
 ## Hiện hành: vườn lớp trong trang lớp, chương trong quản lý — 13/10/2026
 
 Theo yêu cầu mới, **giáo viên** xem Khu vườn của lớp ngay trong tab **Lớp học của tôi**: tiêu đề vườn dùng h2 trong nội dung, kèm thống kê, vinh danh, khu vườn, hai bảng thành tích và danh sách học sinh phía dưới. Chỉ có một h1 Lớp học của tôi; nút Cập nhật vườn vẫn hoạt động. Bỏ tab Khu vườn của lớp riêng; bộ tab giáo viên còn Lớp học của tôi / Hoạt động nhóm / Quản lý lớp.
@@ -28,7 +46,7 @@ Menu Luyện tập có badge tổng câu cần sửa, tab Sổ tay sửa sai có
 
 Nút chính đang hoạt động xanh đậm; nút phụ đang hoạt động xanh lá nhạt có viền xanh. Khóa kiểm tra/đóng bài thi và xác nhận xóa dùng nâu đỏ đậm; nút mở thao tác xóa/bỏ câu dùng nền nâu đỏ rất nhạt. Nút disabled của tất cả các nhóm dùng chung nền xám nhạt, viền/chữ xám, không giữ màu hành động. Áp dụng bằng lớp `.button` chung trên các trang giáo viên/học sinh; kích thước và nhịp chữ không đổi.
 
-## Hiện hành: neo submenu portrait, mật độ danh sách và thang chữ — 13/10/2026
+## Lịch sử: neo submenu dưới header, mật độ danh sách và thang chữ — 13/10/2026
 
 Trong portrait ≤1100px, tab con WorkspaceTabs sticky ngay dưới header tài khoản/lớp; offset theo chiều cao header thực tế khi đổi lớp, thiết bị hoặc tên dài. Tab có nền kem, viền be và mục chọn nâu ấm, khác menu đáy xanh đậm. Đổi tab hoặc mục menu cuộn về đầu nội dung. Landscape/desktop giữ tab con thường và palette xanh.
 

@@ -1,9 +1,9 @@
 import { WorkspaceHeading } from "./WorkspaceHeading";
 import { useEffect, useState } from "react";
-import { Clock3, Flower2, RefreshCw, Users } from "./icons";
+import { Clock3, Users } from "./icons";
 import { api, duration, errorMessage } from "./api";
 import { Empty, SectionTitle } from "./components";
-import { ChapterLevelIcons } from "./StudentLevel";
+import { BloomingTreeIcon, ChapterLevelIcons } from "./StudentLevel";
 import { StudentGarden } from "./StudentGarden";
 import type {
   ClassLeaderboard,
@@ -40,33 +40,53 @@ export function ClassCommunity({
   const [retry, setRetry] = useState(0);
   useEffect(() => {
     let alive = true;
+    let inFlight = false;
     setLoading(true);
     setError("");
-    Promise.all([
-      api<{
-        trees: ClassTree[];
-        members?: ClassGardenMember[];
-        teacher?: { name: string; avatarId: string | null };
-      }>(`/classrooms/${classroom.id}/garden`),
-      api<ClassLeaderboard>(`/classrooms/${classroom.id}/leaderboard`),
-    ])
-      .then(([garden, board]) => {
-        if (alive)
-          setData({
-            trees: garden.trees,
-            members: garden.members,
-            teacher: garden.teacher,
-            board,
-          });
-      })
-      .catch((e) => {
-        if (alive) setError(errorMessage(e));
-      })
-      .finally(() => {
-        if (alive) setLoading(false);
-      });
+    const refresh = () => {
+      if (!alive || inFlight) return;
+      inFlight = true;
+      Promise.all([
+        api<{
+          trees: ClassTree[];
+          members?: ClassGardenMember[];
+          teacher?: { name: string; avatarId: string | null };
+        }>(`/classrooms/${classroom.id}/garden`),
+        api<ClassLeaderboard>(`/classrooms/${classroom.id}/leaderboard`),
+      ])
+        .then(([garden, board]) => {
+          if (alive) {
+            setError("");
+            setData({
+              trees: garden.trees,
+              members: garden.members,
+              teacher: garden.teacher,
+              board,
+            });
+          }
+        })
+        .catch((e) => {
+          if (alive) setError(errorMessage(e));
+        })
+        .finally(() => {
+          inFlight = false;
+          if (alive) setLoading(false);
+        });
+    };
+    const update = () => {
+      if (document.visibilityState === "visible" && navigator.onLine) refresh();
+    };
+    refresh();
+    const timer = window.setInterval(update, 30000);
+    window.addEventListener("focus", update);
+    window.addEventListener("online", update);
+    document.addEventListener("visibilitychange", update);
     return () => {
       alive = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", update);
+      window.removeEventListener("online", update);
+      document.removeEventListener("visibilitychange", update);
     };
   }, [classroom.id, revision, retry]);
 
@@ -76,16 +96,6 @@ export function ClassCommunity({
         <SectionTitle
           title="Khu vườn của lớp"
           description="Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp."
-          action={
-            <button
-              className="button outline small"
-              disabled={loading}
-              onClick={() => setRetry((n) => n + 1)}
-            >
-              <RefreshCw size={16} />
-              Cập nhật
-            </button>
-          }
         />
       ) : (
         <WorkspaceHeading className="page-heading">
@@ -96,14 +106,6 @@ export function ClassCommunity({
             </span>
             <p>Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp.</p>
           </div>
-          <button
-            className="button outline small"
-            disabled={loading}
-            onClick={() => setRetry((n) => n + 1)}
-          >
-            <RefreshCw size={16} />
-            Cập nhật
-          </button>
         </WorkspaceHeading>
       )}
       {error ? (
@@ -120,7 +122,7 @@ export function ClassCommunity({
           <div className="stats-grid community-stats">
             <div className="stat-card card">
               <span className="stat-icon rose">
-                <Flower2 size={21} />
+                <BloomingTreeIcon />
               </span>
               <span className="stat-label">Cây đã ra hoa</span>
               <strong>{data.board.bloomedTrees}</strong>

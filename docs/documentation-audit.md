@@ -1,5 +1,11 @@
 # Rà soát tài liệu và bối cảnh GreenEdu
 
+## Đồng bộ redesign và skill đã cài — 13/10/2026
+
+Đã cập nhật AGENTS, nguồn/path hai skill, thiết kế hiện hành, online exam, icon, auto refresh nhóm/góp ý, bàn giao/tiến độ và báo cáo QA. Mục submenu sticky cũ được đổi nhãn lịch sử; ghi chép skill chưa tìm thấy giữ rõ bối cảnh đợt pull trước cài. Giữ đầy đủ ghi chép xóa Chủ đề1 và các mục upstream, không dùng test cũ hoặc commit làm bằng chứng Railway đã triển khai.
+
+Kiểm tra mới:245 liên kết local trong11 tài liệu được cập nhật đều có đích; `git diff --check` đạt. TypeScript/build và72/72 ca E2E liên quan đạt trên server/database riêng; giới hạn hai ca timer cũ được ghi tại [redesign-qa-20261013.md](redesign-qa-20261013.md).
+
 ## Đồng bộ hiện trạng và chuẩn bị commit — 12/10/2026
 
 Đối chiếu HEAD `72a7e3b`, thay đổi hiện có và mã góp ý/phản biện. Bảng tra cứu `project-status.md` được cập nhật12/10, bổ sung tài liệu [feedback-discussion.md](feedback-discussion.md), sửa mô tả cũ “chưa phản biện” trong đặc tả nhóm và bảng phần còn thiếu. README/AGENTS/thiết kế/bàn giao liên kết tới chức năng và poster/slide hiện hành. Giữ nhật ký cũ làm lịch sử, không tạo kết quả kiểm thử hay trạng thái deployment mới từ việc đọc mã.
@@ -12,19 +18,19 @@ Ngày 11/10/2026. Phạm vi: **21 Markdown lõi** gồm AGENTS.md, README.md và
 
 ## Những chỗ đã sửa
 
-| Vấn đề | Nội dung đã đồng bộ |
-| --- | --- |
-| Audit chỉ ở báo cáo/bàn giao, thiếu thiết kế chính | app-design bổ sung UI xử lý ôn/thi, quy tắc lần4 và gap chưa sửa; liên kết violations-audit |
-| Session dễ đọc mô tả cũ thành yêu cầu hiện hành | AGENTS/README nêu thứ tự đọc; project-status có bảng tra cứu; handoff và app-design đánh dấu vùng lịch sử |
-| MVP/README còn cho xem lời giải sau trả lời sai | Chỉ trả lời đúng mới mở đáp án/lời giải, kể cả retry/reload; thi có lịch công bố riêng |
-| Vườn chỉ mô tả cây cấp5 | Vườn toàn lớp, mỗi người một cây/cấp MAX chương/avatar/tên; frame vinh danh cấp5 riêng; API cũ không đủ roster |
-| Cấp tổng hoặc giờ cố định bị hiểu là hiện hành | Cấp riêng lớp→môn→chương, m phút/cấp default60, vé2m/3m/4m; ca LEVEL-04/05/06 sửa để không SUM |
-| Tài liệu PPCT nói chưa có tạo bài thủ công | Thêm/xóa archive đã có code, còn chờ backend Railway; UI nhập toàn bộ PPCT chưa có |
-| Nền mô tả login1px/bên trong3px nhưng CSS override | garden.css nạp sau cùng: cả hai2px/cover, gradient kem hiện hành; giữ số cũ trong lịch sử |
-| Cổng3002/vào nhanh/tự deploy gây nhầm mặc định | Frontend5173/API Railway; quick login chỉ backend offline; CLI local không tạo Admin trên Railway |
+| Vấn đề                                                  | Nội dung đã đồng bộ                                                                                                  |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Audit chỉ ở báo cáo/bàn giao, thiếu thiết kế chính      | app-design bổ sung UI xử lý ôn/thi, quy tắc lần4 và gap chưa sửa; liên kết violations-audit                          |
+| Session dễ đọc mô tả cũ thành yêu cầu hiện hành         | AGENTS/README nêu thứ tự đọc; project-status có bảng tra cứu; handoff và app-design đánh dấu vùng lịch sử            |
+| MVP/README còn cho xem lời giải sau trả lời sai         | Chỉ trả lời đúng mới mở đáp án/lời giải, kể cả retry/reload; thi có lịch công bố riêng                               |
+| Vườn chỉ mô tả cây cấp5                                 | Vườn toàn lớp, mỗi người một cây/cấp MAX chương/avatar/tên; frame vinh danh cấp5 riêng; API cũ không đủ roster       |
+| Cấp tổng hoặc giờ cố định bị hiểu là hiện hành          | Cấp riêng lớp→môn→chương, m phút/cấp default60, vé2m/3m/4m; ca LEVEL-04/05/06 sửa để không SUM                       |
+| Tài liệu PPCT nói chưa có tạo bài thủ công              | Thêm/xóa archive đã có code, còn chờ backend Railway; UI nhập toàn bộ PPCT chưa có                                   |
+| Nền mô tả login1px/bên trong3px nhưng CSS override      | garden.css nạp sau cùng: cả hai2px/cover, gradient kem hiện hành; giữ số cũ trong lịch sử                            |
+| Cổng3002/vào nhanh/tự deploy gây nhầm mặc định          | Frontend5173/API Railway; quick login chỉ backend offline; CLI local không tạo Admin trên Railway                    |
 | Kế hoạch tick hoàn tất bị coi đã nghiệm thu mọi vi phạm | Ghi rõ phạm vi ban đầu10:39; audit còn lỗi offline/focus/AI/QA mobile, không coi test tái hiện gap là sửa thành công |
-| Thiết kế nhóm còn rải trong đặc tả chức năng | Bố cục/thẻ/bộ lọc/responsive gom vào app-design, group-activities giữ nghiệp vụ và dẫn liên kết |
-| Hosting/trạng thái cũ được gọi là hiện tại | Railway HTTPS đã có theo bản ghi triển khai; runtime checkout chưa đồng nghĩa đã deploy, còn nghiệm thu vận hành |
+| Thiết kế nhóm còn rải trong đặc tả chức năng            | Bố cục/thẻ/bộ lọc/responsive gom vào app-design, group-activities giữ nghiệp vụ và dẫn liên kết                      |
+| Hosting/trạng thái cũ được gọi là hiện tại              | Railway HTTPS đã có theo bản ghi triển khai; runtime checkout chưa đồng nghĩa đã deploy, còn nghiệm thu vận hành     |
 
 Giữ nguyên nội dung đề án gốc và dữ liệu PPCT JSON; không sửa nguồn sản phẩm để khớp code. Các quyết định đã thay được ghi ở phần hiện hành, lịch sử giữ để đối chiếu. Không viết lại lịch sử chat hoặc suy quyền triển khai từ tài liệu.
 

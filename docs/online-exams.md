@@ -1,6 +1,6 @@
 # Kiểm tra online do giáo viên bắt đầu
 
-Cập nhật 12/10/2026. Giáo viên dùng mục riêng **Kiểm tra online**, học sinh dùng **Kiểm tra online**. Nút Tạo kiểm tra online ở trang Ôn tập & kiểm tra cũng dẫn sang trang riêng. Dùng chung phòng thi/chấm điểm/lưu đáp án hiện có; kiểm tra theo lịch và Săn điểm vẫn ở trang cũ và giữ quy tắc riêng. Thiết kế giao diện chính tại [app-design.md](app-design.md).
+Cập nhật giao diện13/10/2026. Giáo viên/học sinh vào mục riêng **Kiểm tra online**. Đã bỏ shortcut tạo online ở Ôn tập & kiểm tra. Giáo viên bấm **Tạo bài kiểm tra** để mở form trong modal; **Lưu bài kiểm tra** thành công đóng form, thông báo đã lưu vào danh sách và có thể bắt đầu bất cứ lúc nào. Trang mặc định chỉ còn danh sách; học sinh không có nút tạo. Các nút Làm mới đã bỏ, dùng poll15giây/focus/reconnect và Thử lại khi lỗi. Metadata mỗi buổi tách nhãn có icon/màu, giữ các quy tắc thời gian/quyền bên dưới. Dùng chung phòng thi/chấm điểm/lưu đáp án hiện có; kiểm tra theo lịch và Săn điểm vẫn ở trang cũ và giữ quy tắc riêng. Thiết kế giao diện chính tại [app-design.md](app-design.md).
 
 ## Quy trình và thời gian
 
@@ -14,7 +14,7 @@ Theo lựa chọn mới của người dùng, bài đã nộp (thủ công/tự 
 
 Giáo viên sở hữu lớp **bắt buộc chọn một trong hai radio Nguồn đề**: Upload file hoặc Chọn từ ngân hàng, không có nguồn mặc định. Nguồn ngân hàng tích nhiều chương, xổ danh sách bài để lấy toàn chương hoặc chọn nhiều bài riêng; phạm vi mỗi chương độc lập nên có thể lấy toàn chương1 và chỉ vài bài chương2. Số câu/trọng số chỉ xét phạm vi đã chọn, backend vẫn kiểm tra đủ câu.
 
-Upload chọn chương trong chính khối tải file, không cần chọn chương trước ở một khu khác. Nhận Word `.docx` theo mẫu tối đa5MB hoặc CSV UTF-8 tối đa512KB; có đủ4lựa chọn, đáp án và lời giải, tổng đề tối đa100câu. Đọc file thành công hiển thị tên/số câu; lỗi/hỏng/trùng chặn thêm file, giữ các câu đã đọc trước đó. Có thể thêm nhiều file gắn nhiều chương và xem/bỏ từng câu. Chuyển nguồn giữ draft riêng nhưng payload chỉ gửi nguồn đang chọn. Câu riêng không phát hành cho luyện tập. Nhấn **Chuẩn bị kiểm tra online** để lưu bản chờ, chưa thông báo và chưa cho làm bài.
+Upload chọn chương trong chính khối tải file, không cần chọn chương trước ở một khu khác. Nhận Word `.docx` theo mẫu tối đa5MB hoặc CSV UTF-8 tối đa512KB; có đủ4lựa chọn, đáp án và lời giải, tổng đề tối đa100câu. Đọc file thành công hiển thị tên/số câu; lỗi/hỏng/trùng chặn thêm file, giữ các câu đã đọc trước đó. Có thể thêm nhiều file gắn nhiều chương và xem/bỏ từng câu. Chuyển nguồn giữ draft riêng nhưng payload chỉ gửi nguồn đang chọn. Câu riêng không phát hành cho luyện tập. Nhấn **Lưu bài kiểm tra** trong modal để lưu bản chờ, chưa thông báo và chưa cho làm bài.
 
 Mỗi buổi có **thời gian chuẩn bị X (0–60 phút, mặc định3)** và **thời gian làm bài Y (1–180 phút, mặc định20)**. Khi nhấn **Bắt đầu kiểm tra**, server chốt một bộ câu chung, ghi thời điểm thông báo T, đặt giờ mở T+X và giờ đóng T+X+Y. Chờ bao lâu trước khi bấm không làm bản chuẩn bị hết hạn. Học sinh vào muộn chỉ có thời gian còn lại tới giờ đóng chung; không cộng Y phút kể từ lúc từng em vào. X=0 mở ngay.
 

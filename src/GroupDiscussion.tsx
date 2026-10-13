@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageSquare, RefreshCw } from "./icons";
+import { MessageSquare } from "./icons";
 import { api, errorMessage } from "./api";
 import { Modal } from "./components";
 import { MessageComposer, conversationDate } from "./Conversation";
@@ -77,11 +77,19 @@ function DiscussionDialog({
       }
     };
     void reload();
-    const poll = setInterval(() => void reload(), 20000);
+    const update = () => {
+      if (document.visibilityState === "visible" && navigator.onLine)
+        void reload();
+    };
+    const poll = setInterval(update, 20000);
+    window.addEventListener("focus", update);
+    window.addEventListener("online", update);
     return () => {
       alive = false;
       sequence.current++;
       clearInterval(poll);
+      window.removeEventListener("focus", update);
+      window.removeEventListener("online", update);
     };
   }, [endpoint]);
   async function send(body: string, requestId: string, parentId?: string) {
@@ -140,14 +148,13 @@ function DiscussionDialog({
           Đọc sản phẩm của nhóm, trao đổi rõ ràng và tôn trọng nhau. Thành viên
           nhóm phụ trách trả lời dưới từng câu hỏi hoặc ý kiến.
         </p>
-        <button className="button outline small" onClick={() => void reload()}>
-          <RefreshCw size={16} />
-          Cập nhật trao đổi
-        </button>
       </div>
       {error && (
         <p className="error-banner" role="alert">
           {error}
+          <button type="button" onClick={() => void reload()}>
+            Thử lại
+          </button>
         </p>
       )}
       {loading ? (
