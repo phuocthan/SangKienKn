@@ -1,5 +1,9 @@
 # Hoạt động nhóm
 
+## Vị trí quản lý thành viên hiện hành — 14/10/2026
+
+Giáo viên thêm/tìm học sinh tại **Lớp học của tôi → Quản lý lớp → Quản lý học sinh**, sau Quản lý cấp độ/Quản lý chương. Tab Hoạt động nhóm và quy tắc phân nhóm/quyền nộp không đổi. Top10 dùng chung hai vai trò nằm trong tab Khu vườn của lớp, không ở roster quản lý. Thay đổi danh sách lớp không tự thay thành viên hoạt động đã chia.
+
 Thiết kế giao diện theo dõi, bố cục thẻ/bộ lọc và responsive tập trung tại [app-design.md](app-design.md). Tài liệu này giữ nghiệp vụ, quyền truy cập và lưu trữ; không phải danh sách mọi mục hoạt động nhóm trong đề án đã hoàn thành.
 
 ## Giáo viên giao hoạt động

@@ -1,5 +1,13 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: vườn lớp chung hai vai trò và quản lý học sinh — 14/10/2026
+
+Quyết định mới nhất thay yêu cầu skip chuyển roster của đợt Git trước: **Lớp học của tôi → Khu vườn của lớp** của giáo viên và học sinh chỉ có **thống kê chung → Vinh danh Top 10 → Vinh danh Kết Trái · Cấp 5 → Khu vườn chung**. Top10 nằm trong ClassCommunity dùng chung, không phụ thuộc roster giáo viên. Bỏ cả bảng Những người chăm vườn/Bác sĩ cây trồng của học sinh. Giữ menu/submenu, huy chương, Top3 icon/số cùng hàng và hạng4–10; ưu tiên cấp cây → câu practice riêng biệt đã làm → tỷ lệ đúng chưa làm tròn → câu khắc phục. Không thay thưởng/tiến độ hoặc tạo học sinh giả.
+
+Tab Quản lý lớp giáo viên theo thứ tự **Quản lý cấp độ → Quản lý chương → Quản lý học sinh**. Roster, tìm kiếm, Xuất CSV, Thêm học sinh, xem sổ tay/reset mật khẩu cùng số Câu đã khắc phục nằm ở khung cuối; link Xem tiến độ trên Tổng quan dẫn tới tab này. Dropdown chọn lớp giữ nguyên; đây không phải chuyển danh sách các lớp. Nguồn khắc phục của roster tự refresh30giây/focus/reconnect/visibility; lỗi giữ bảng và dấu—, có Thử lại thống kê.
+
+GET /api/classrooms/:id/honors chỉ cho giáo viên sở hữu hoặc thành viên hiện tại, trả tên/avatar/cấp và số liệu cần so hạng, không trả email, mật khẩu hoặc controls tài khoản. Kết hợp leaderboard hiện có lấy resolved. GET students vẫn teacher-only. Lỗi honors chỉ báo lỗi/Thử lại trong Top10, giữ thống kê và vườn; backend cũ thiếu API báo chờ thay vì dựng số liệu. Cần backend Railway mới để học sinh nhận nguồn honors; push Git không chứng minh đã deploy. QA mới ở đầu bàn giao. Các mục hiện hành cũ mâu thuẫn bên dưới là lịch sử trước quyết định này.
+
 ## Hiện hành: bảng chăm vườn ba cột — 14/10/2026
 
 Những người chăm vườn chỉ hiện Hạng/Học sinh/Thời gian học; bỏ Cây ra hoa theo ảnh. Mobile nhãn thời gian vẫn đúng và chiếm phần còn lại hàng; cây cấp ở cạnh tên/huy chương/nền hàng giữ nguyên. Bảng sửa sai, thống kê cây và Top10 giữ nguyên; việc ẩn cột không thay tiêu chí phụ của thứ hạng.

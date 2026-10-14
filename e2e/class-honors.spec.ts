@@ -9,7 +9,7 @@ test("honors shows only existing podium winners and waits for missing metrics", 
   await page.request.post("/api/auth/login", {
     data: { email: "giaovien@greenedu.nk", password: "GreenEdu123!" },
   });
-  await page.route("**/api/classrooms/class-demo/students", (route) =>
+  await page.route("**/api/classrooms/class-demo/honors", (route) =>
     route.fulfill({ json: roster }),
   );
   await page.route("**/api/classrooms/class-demo/leaderboard", (route) =>
@@ -26,7 +26,7 @@ test("honors shows only existing podium winners and waits for missing metrics", 
   await expect(honors.locator(".honors-bronze")).toHaveCount(0);
   roster = [];
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
-  await expect(honors).toContainText("Thêm học sinh");
+  await expect(honors).toContainText("Lớp chưa có học sinh");
   await expect(honors.locator(".honors-podium-place")).toHaveCount(0);
   roster = [{ ...fixtures[0], answeredQuestions: undefined }];
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
@@ -102,7 +102,7 @@ test("top ten has gold above silver on left and bronze on right, followed by ran
   await page.request.post("/api/auth/login", {
     data: { email: "giaovien@greenedu.nk", password: "GreenEdu123!" },
   });
-  await page.route("**/api/classrooms/class-demo/students", (route) =>
+  await page.route("**/api/classrooms/class-demo/honors", (route) =>
     route.fulfill({ json: roster }),
   );
   await page.route("**/api/classrooms/class-demo/leaderboard", (route) =>
@@ -229,8 +229,11 @@ test("top ten has gold above silver on left and bronze on right, followed by ran
       style: ".sidebar, .topbar, .skip-link { visibility: hidden !important; }",
     });
   }
+  await page.route("**/api/classrooms/class-demo/students", (route) => route.fulfill({ json: roster }));
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
   await page.getByLabel("Tìm học sinh").fill("vinh danh 13");
   await expect(page.locator(".roster-card tbody tr")).toHaveCount(1);
+  await navigateTo(page, { name: "Khu vườn của lớp", exact: true });
   await expect(honors.locator(".honors-list li")).toHaveCount(7);
   roster[5].chapterLevels![0].level = 5;
   roster[5].answeredQuestions = 2000;

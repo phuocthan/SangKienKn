@@ -77,7 +77,6 @@ test("teacher chapter and roster lists use compact, readable rows", async ({
   await expect(
     page.getByRole("heading", { name: "Quản lý lớp", level: 1 }),
   ).toHaveCSS("font-family", /Be Vietnam Pro/);
-  await page.getByRole("tab", { name: "Khu vườn của lớp", exact: true }).click();
   const studentRow = page.locator(".roster-card tbody tr").first();
   await expect(studentRow).toBeVisible();
   expect((await studentRow.boundingBox())!.height).toBeLessThan(100);

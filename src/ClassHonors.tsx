@@ -5,8 +5,9 @@ import {
   hasHonorsMetrics,
   rankClassHonors,
   type ClassHonoree,
+  type HonorsStudent,
 } from "../shared/class-honors";
-import type { ClassLeaderboard, Student } from "./types";
+import type { ClassLeaderboard } from "./types";
 import "./class-honors.css";
 
 function HonorsMedal({ position }: { position: number }) {
@@ -114,11 +115,13 @@ export function ClassHonors({
   leaderboard,
   loading,
   error,
+  onRetry,
 }: {
-  students: Student[];
+  students: HonorsStudent[];
   leaderboard?: ClassLeaderboard;
   loading: boolean;
   error: string;
+  onRetry?: () => void;
 }) {
   const complete = hasHonorsMetrics(students);
   const ranked =
@@ -153,11 +156,12 @@ export function ClassHonors({
       {loading ? (
         <p role="status">Đang tải thành tích của lớp…</p>
       ) : error ? (
-        <p role="status">
-          Chưa tải được thành tích. Dùng Thử lại ở danh sách học sinh.
-        </p>
+        <div className="error-banner" role="alert">
+          {error}
+          {onRetry && <button onClick={onRetry}>Thử lại Top 10</button>}
+        </div>
       ) : !students.length ? (
-        <p className="muted">Thêm học sinh để bắt đầu hành trình vinh danh.</p>
+        <p className="muted">Lớp chưa có học sinh để vinh danh.</p>
       ) : !leaderboard ? (
         <p role="status">Đang chờ thống kê khắc phục của lớp…</p>
       ) : !complete ? (

@@ -363,7 +363,7 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
   page.on("pageerror", (e) => errors.push(e.message));
   await demoLogin(page, "Học sinh");
   await expect(
-    page.getByRole("heading", { name: "Những mầm xanh của bạn" }),
+    page.getByRole("heading", { name: "Gieo nỗ lực hôm nay, đón tri thức ngày mai." }),
   ).toBeVisible();
   await page.screenshot({
     path: info.outputPath("garden.png"),
@@ -420,13 +420,11 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
   ).toHaveCount(1);
   await expect(page.locator(".garden-honoree")).toHaveCount(0);
   await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
-  const repairTable = page.getByRole("table", { name: "Xếp hạng sửa sai" });
-  const repairRow = repairTable
-    .getByRole("row")
+  const honoree = page
+    .locator(".honors-podium-place, .honors-list > li")
     .filter({ hasText: "Trần Hà Linh" });
-  await expect(repairRow).toBeVisible();
-  await expect(repairRow.getByRole("cell").nth(1)).toHaveText("1");
-  await expect(repairRow).toContainText("Bạn");
+  await expect(honoree).toBeVisible();
+  await expect(honoree.locator("dd").last()).toHaveText("1");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -439,7 +437,7 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
   expect(errors).toEqual([]);
 });
 
-test("community honors earned students once with old API and keeps tied ranks without overflowing", async ({
+test("community shares top ten and honors earned students once with the legacy garden API", async ({
   page,
 }, info) => {
   // Presentation fixtures are intercepted only in this browser; persisted demo data is unchanged.
@@ -493,11 +491,26 @@ test("community honors earned students once with old API and keeps tied ranks wi
       },
     }),
   );
+  await page.route("**/api/classrooms/class-demo/honors", (route) =>
+    route.fulfill({
+      json: [own, other, third].map((member) => ({
+        id: member.id,
+        name: member.name,
+        avatarId: null,
+        chapterLevels: [{ level: member.id === third.id ? 1 : 5 }],
+        answeredQuestions: member.id === third.id ? 1 : 50,
+        correct: 5,
+        total: 10,
+      })),
+    }),
+  );
   await demoLogin(page, "Học sinh");
   await navigateTo(page, { name: "Khu vườn của lớp", exact: true });
-  await expect(page.getByRole("img", { name: "Cấp 5 · Kết Trái" })).toHaveCount(
-    2,
-  );
+  await expect(
+    page
+      .locator(".garden-honors")
+      .getByRole("img", { name: "Cấp 5 · Kết Trái" }),
+  ).toHaveCount(2);
   await expect(page.locator(".garden-honoree.is-mine")).toHaveCount(1);
   expect(
     await page.evaluate(
@@ -510,25 +523,18 @@ test("community honors earned students once with old API and keeps tied ranks wi
   });
   await page.bringToFront();
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
-  await expect(page.getByRole("img", { name: "Cấp 5 · Kết Trái" })).toHaveCount(
-    2,
-  );
-  await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
-  const table = page.getByRole("table", { name: "Xếp hạng chăm vườn" });
-  await expect(table.getByRole("columnheader", { name: "Cây ra hoa", exact: true })).toHaveCount(0);
-  await expect(table.locator("thead th")).toHaveCount(3);
-  const studyTime = table.locator("tbody tr").first().locator("td").last();
-  await expect(studyTime).toHaveText("10 giờ 0 phút");
-  if (page.viewportSize()!.width <= 700)
-    expect(await studyTime.evaluate((node) => getComputedStyle(node, "::before").content)).toBe('"Thời gian: "');
-  await expect(table.getByRole("row")).toHaveCount(4);
-  const positions = await table
-    .locator("tbody .community-rank")
-    .allTextContents();
-  expect(positions).toEqual(["1", "1", "3"]);
   await expect(
-    table.getByRole("row").filter({ hasText: "Trần Hà Linh" }),
-  ).toContainText("Bạn");
+    page
+      .locator(".garden-honors")
+      .getByRole("img", { name: "Cấp 5 · Kết Trái" }),
+  ).toHaveCount(2);
+  await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
+  const podium = page.locator(".honors-podium-place");
+  await expect(podium).toHaveCount(3);
+  await expect(podium.nth(0)).toContainText(own.name);
+  await expect(podium.nth(1)).toContainText(other.name);
+  await expect(podium.nth(2)).toContainText(third.name);
+  await expect(page.locator(".community-ranking")).toHaveCount(0);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -581,7 +587,7 @@ test("teacher creates content and student account; student changes password, lea
   await expect(
     page.getByRole("heading", { name: "Một cộng một bằng bao nhiêu?" }),
   ).toBeVisible();
-  await navigateTo(page, { name: "Lớp học của tôi" });
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
   await page
     .getByRole("button", { name: "Thêm học sinh", exact: true })
     .click();
@@ -624,7 +630,7 @@ test("teacher creates content and student account; student changes password, lea
   await page
     .getByLabel("Chọn lớp học")
     .selectOption({ label: `${className} · Toán` });
-  await navigateTo(page, { name: "Tiến độ học tập" });
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
   const row = page
     .locator(".roster-card")
     .getByRole("row")
@@ -647,8 +653,9 @@ test("teacher creates content and student account; student changes password, lea
   await expect(page.locator(".garden-honoree")).toHaveCount(0);
   await navigateTo(page, { name: "Xếp hạng chăm chỉ", exact: true });
   await expect(
-    page.getByRole("heading", { name: "Chưa có câu được khắc phục" }),
+    page.getByRole("region", { name: "Vinh danh Top 10" }),
   ).toBeVisible();
+  await expect(page.locator(".honors-podium-place dd").last()).toHaveText("0");
   await page
     .getByLabel("Chọn lớp học")
     .selectOption({ label: "Lớp 10A1 · Vật lý" });
@@ -661,5 +668,5 @@ test("teacher creates content and student account; student changes password, lea
   await expect(page.locator(".garden-student")).toHaveCount(
     garden.members.length,
   );
-  await expect(page.locator(".garden-frame")).not.toContainText(studentName);
+  await expect(page.locator(".student-garden")).not.toContainText(studentName);
 });

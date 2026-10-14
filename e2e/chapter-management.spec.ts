@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { navigateTo } from "./navigation";
 
-test("management keeps the roster in class, preserves honors and confirms chapter deletion", async ({
+test("management owns the roster, preserves honors and confirms chapter deletion", async ({
   page,
 }, info) => {
   await page.request.post("/api/auth/login", {
@@ -10,12 +10,12 @@ test("management keeps the roster in class, preserves honors and confirms chapte
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
   await navigateTo(page, { name: "Lớp học của tôi", exact: true });
-  await expect(page.locator(".roster-card")).toBeVisible();
+  await expect(page.locator(".roster-card")).toHaveCount(0);
   await expect(
     page.getByRole("region", { name: "Vinh danh Top 10" }),
   ).toBeVisible();
   await navigateTo(page, { name: "Quản lý lớp", exact: true });
-  await expect(page.locator(".roster-card")).toHaveCount(0);
+  await expect(page.locator(".roster-card")).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Quản lý chương", exact: true }),
   ).toBeVisible();

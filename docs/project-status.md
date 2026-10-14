@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: Top10 chung và Quản lý học sinh đúng tab — 14/10/2026
+
+Theo yêu cầu mới nhất, **bỏ quyết định skip chuyển roster của đợt trước**. Giáo viên/học sinh đều thấy **thông tin chung → Vinh danh Top10 → Vinh danh Kết Trái → Khu vườn chung**. Bỏ hai bảng xếp hạng cũ của học sinh. Giáo viên có **Quản lý cấp độ → Quản lý chương → Quản lý học sinh** trong Quản lý lớp, giữ search/CSV/Thêm học sinh/sổ tay/reset và thống kê khắc phục. Không chuyển dropdown chọn lớp.
+
+API honors mới cho thành viên hiện tại/giáo viên sở hữu trả whitelist tên/avatar/cấp/câu/tỷ lệ; không mở quyền đọc roster/email cho học sinh. Comparator/tiến độ/dữ liệu giữ nguyên. Không cần migration. Nguồn lỗi có Thử lại, giữ vườn/roster và không giả0. Đợt này cập nhật mã/tài liệu/test để push origin/main theo yêu cầu; deployment Railway chưa xác minh. QA mới: TypeScript/build,129/129 server,6/6 comparator và60/60 E2E liên quan desktop/mobile đạt; test dùng DB riêng. Cách tiếp tục ở đầu [session-handoff.md](session-handoff.md); các đoạn skip/roster giữ trang lớp bên dưới thuộc lịch sử trước yêu cầu mới.
+
 ## Chốt đợt push sau pull — 14/10/2026
 
 Đã push mã và tài liệu trong commit **124cb18** lên **origin/main**, đối chiếu SHA remote/local khớp. Working tree mã sạch; chỉ giữ file khóa PowerPoint bên ngoài commit. Xác nhận này được cập nhật bằng commit tài liệu tiếp theo; chưa xác minh phát hành Railway.

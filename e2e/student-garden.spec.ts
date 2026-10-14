@@ -142,7 +142,7 @@ test("fenced garden includes everyone with moving icons and separate level-5 hon
     ),
   ).toBe(true);
   if (info.project.name === "mobile") {
-    const ranking = page.locator(".community-ranking").first();
+    const ranking = page.locator(".class-honors");
     await expect(ranking).toBeVisible();
     expect(
       await ranking.evaluate((node) => node.scrollWidth <= node.clientWidth),

@@ -6,7 +6,7 @@ Quản lý lớp → Quản lý chương → Xóa chương mở popup xác nhậ
 
 Xóa là archive trong bảng archived_chapters có người/thời điểm, tắt active câu hỏi và khóa kiểm tra, không DELETE chương/bài/câu hoặc dữ liệu học sinh. Transaction atomic và retry giữ audit lần đầu. Chương không còn ở danh sách/matrix/nguồn ôn mới; thêm/sửa bài/câu hoặc mở thi lại trên chương archive bị chặn. Phiên ôn/thi/snapshot/attempts/progress/sổ tay/vé/điểm đã lưu vẫn giữ; sửa sai của câu cũ và đọc history vẫn được. GET metadata chương kiểm tra quyền lớp để frontend mở sửa sai khi chương đã ra khỏi danh sách. Chương khác không đổi. Chưa có UI khôi phục chương trong phạm vi yêu cầu này.
 
-Sau xóa, danh sách tải lại; nếu ngân hàng đang chọn chương vừa xóa thì chuyển sang chương còn lại, không gửi nhầm ID cũ. Theo yêu cầu skip mới nhất, Danh sách Học sinh giữ ở Lớp học của tôi cùng Vinh danh Top10/vườn. QA mới/trạng thái deployment tại đầu [session-handoff.md](session-handoff.md).
+Sau xóa, danh sách tải lại; nếu ngân hàng đang chọn chương vừa xóa thì chuyển sang chương còn lại, không gửi nhầm ID cũ. Theo yêu cầu mới nhất14/10, Danh sách Học sinh đổi thành Quản lý học sinh ở cuối Quản lý lớp, sau Quản lý cấp độ/Quản lý chương. Top10/vườn giữ ở Khu vườn của lớp cho cả giáo viên và học sinh. QA mới/trạng thái deployment tại đầu [session-handoff.md](session-handoff.md).
 
 ## Lưu dạng mới trên máy chủ và số ý đúng — 13/10/2026
 

@@ -144,7 +144,7 @@ test("teacher finds Vietnamese students without accents and clears the filter", 
   );
   expect(response.ok()).toBeTruthy();
   await page.goto("/");
-  await navigateTo(page, { name: "Lớp học của tôi", exact: true });
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
   await page
     .getByLabel("Tìm học sinh")
     .fill(`  DANG   ANH HOA ${info.project.name}  `);

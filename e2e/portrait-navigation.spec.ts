@@ -272,8 +272,8 @@ for (const role of ["teacher", "student", "admin"] as const) {
       const ranking = page.getByRole("heading", {
         name: "Những người chăm vườn",
       });
-      if (role === "teacher") await expect(ranking).toHaveCount(0);
-      else await expect(ranking).toBeVisible();
+      await expect(ranking).toHaveCount(0);
+      await expect(page.getByRole("region", { name: "Vinh danh Top 10" })).toBeVisible();
     }
     if (role !== "admin") {
       const feedback = header.getByRole("button", {

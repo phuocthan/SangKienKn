@@ -7,7 +7,7 @@ async function openTeacherClass(page: Page) {
   });
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Lớp học của tôi", exact: true });
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
 }
 
 test.afterEach(async ({ request }) => {
@@ -36,7 +36,7 @@ test.afterEach(async ({ request }) => {
   }
 });
 
-test("teacher roster shows unique resolved corrections and a labeled clock; student rankings remain", async ({
+test("teacher roster shows unique resolved corrections and a labeled clock; student sees the shared top ten", async ({
   page,
 }, info) => {
   await page.request.post("/api/auth/login", {
@@ -111,10 +111,9 @@ test("teacher roster shows unique resolved corrections and a labeled clock; stud
   await navigateTo(page, { name: "Khu vườn của lớp", exact: true });
   await expect(
     page.getByRole("heading", { name: "Những người chăm vườn" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Bác sĩ cây trồng" }),
-  ).toBeVisible();
+  ).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Bác sĩ cây trồng" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Vinh danh Top 10" })).toBeVisible();
 });
 
 test("a failed leaderboard load does not invent a zero resolved count or hide roster", async ({
@@ -130,9 +129,8 @@ test("a failed leaderboard load does not invent a zero resolved count or hide ro
   await openTeacherClass(page);
   const count = page.locator(".roster-resolved-count").first();
   await expect(count).toHaveText("—");
-  const garden = page.getByRole("region", { name: "Khu vườn của lớp", exact: true });
-  await expect(garden.getByRole("alert")).toContainText("Tạm thời chưa tải");
+  await expect(page.getByRole("alert")).toContainText("Chưa tải được số câu đã khắc phục");
   await page.unroute(endpoint);
-  await garden.getByRole("button", { name: "Thử lại", exact: true }).click();
+  await page.getByRole("button", { name: "Thử lại thống kê", exact: true }).click();
   await expect(count).toHaveText(/^\d+$/);
 });

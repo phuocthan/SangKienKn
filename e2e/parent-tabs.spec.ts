@@ -95,7 +95,7 @@ for (const role of ["teacher", "student"] as const) {
                 exact: true,
               }),
             ).toHaveCount(0);
-            await expect(page.locator(".roster-card")).toBeVisible();
+            await expect(page.locator(".roster-card")).toHaveCount(0);
             await expect(page.getByRole("region", { name: "Vinh danh Top 10" })).toBeVisible();
             await expect(page.getByText("Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp.", { exact: true })).toHaveCount(0);
             await expect(page.locator(".chapter-list")).toHaveCount(0);
@@ -119,7 +119,7 @@ for (const role of ["teacher", "student"] as const) {
             await expect(
               page.getByRole("form", { name: "Cài đặt thời gian tăng cấp" }),
             ).toBeVisible();
-            await expect(page.locator(".roster-card")).toHaveCount(0);
+            await expect(page.locator(".roster-card")).toBeVisible();
           }
           const section = (await tabs
             .getByRole("tab", { name, exact: true })
@@ -201,8 +201,8 @@ for (const role of ["teacher", "student"] as const) {
     const rankingHeading = page.getByRole("heading", {
       name: "Những người chăm vườn",
     });
-    if (role === "teacher") await expect(rankingHeading).toHaveCount(0);
-    else await expect(rankingHeading).toBeVisible();
+    await expect(rankingHeading).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Vinh danh Top 10" })).toBeVisible();
     await expect(
       page.getByRole("tab", { name: "Xếp hạng chăm chỉ" }),
     ).toHaveCount(0);

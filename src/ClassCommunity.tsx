@@ -1,15 +1,15 @@
 import { WorkspaceHeading } from "./WorkspaceHeading";
 import { useEffect, useState } from "react";
-import { Clock3, Medal, Users } from "./icons";
+import { Clock3, Users } from "./icons";
 import { api, duration, errorMessage } from "./api";
-import { Empty, SectionTitle } from "./components";
-import { BloomingTreeIcon, ChapterLevelIcons } from "./StudentLevel";
+import { BloomingTreeIcon } from "./StudentLevel";
+import { ClassHonors } from "./ClassHonors";
+import type { HonorsStudent } from "../shared/class-honors";
 import { StudentGarden } from "./StudentGarden";
 import type {
   ClassLeaderboard,
   Classroom,
   ClassTree,
-  CommunityMember,
   ClassGardenMember,
 } from "./types";
 
@@ -22,20 +22,20 @@ export function ClassCommunity({
   userId,
   teacherAvatarId,
   embedded = false,
-  onLeaderboardChange,
 }: {
   classroom: Classroom;
   revision: number;
   userId: string;
   teacherAvatarId?: string | null;
   embedded?: boolean;
-  onLeaderboardChange?: (classroomId: string, board: ClassLeaderboard) => void;
 }) {
   const [data, setData] = useState<{
     trees: ClassTree[];
     members?: ClassGardenMember[];
     teacher?: { name: string; avatarId: string | null };
     board: ClassLeaderboard;
+    honorStudents: HonorsStudent[];
+    honorsError: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,23 +48,40 @@ export function ClassCommunity({
     const refresh = () => {
       if (!alive || inFlight) return;
       inFlight = true;
-      Promise.all([
+      Promise.allSettled([
         api<{
           trees: ClassTree[];
           members?: ClassGardenMember[];
           teacher?: { name: string; avatarId: string | null };
         }>(`/classrooms/${classroom.id}/garden`),
         api<ClassLeaderboard>(`/classrooms/${classroom.id}/leaderboard`),
+        api<HonorsStudent[]>(`/classrooms/${classroom.id}/honors`),
       ])
-        .then(([garden, board]) => {
+        .then(([gardenResult, boardResult, honorsResult]) => {
+          if (gardenResult.status === "rejected") throw gardenResult.reason;
+          if (boardResult.status === "rejected") throw boardResult.reason;
+          const garden = gardenResult.value,
+            board = boardResult.value;
           if (alive) {
             setError("");
-            onLeaderboardChange?.(classroom.id, board);
             setData({
               trees: garden.trees,
               members: garden.members,
               teacher: garden.teacher,
               board,
+              honorStudents:
+                honorsResult.status === "fulfilled" &&
+                Array.isArray(honorsResult.value)
+                  ? honorsResult.value
+                  : [],
+              honorsError:
+                honorsResult.status === "rejected"
+                  ? honorsResult.reason instanceof SyntaxError
+                    ? "Bảng vinh danh đang chờ cập nhật hệ thống."
+                    : errorMessage(honorsResult.reason)
+                  : !Array.isArray(honorsResult.value)
+                    ? "Chưa tải được thành tích của lớp."
+                    : "",
             });
           }
         })
@@ -91,7 +108,7 @@ export function ClassCommunity({
       window.removeEventListener("online", update);
       document.removeEventListener("visibilitychange", update);
     };
-  }, [classroom.id, revision, retry, onLeaderboardChange]);
+  }, [classroom.id, revision, retry]);
 
   return (
     <>
@@ -145,6 +162,13 @@ export function ClassCommunity({
               <small>Tổng thời gian có hoạt động đã được ghi nhận</small>
             </div>
           </div>
+          <ClassHonors
+            students={data.honorStudents}
+            leaderboard={data.board}
+            loading={false}
+            error={data.honorsError}
+            onRetry={() => setRetry((n) => n + 1)}
+          />
           <StudentGarden
             members={data.members}
             trees={data.trees}
@@ -158,124 +182,8 @@ export function ClassCommunity({
                 : data.teacher?.avatarId
             }
           />
-          {!embedded && (
-            <>
-              <SectionTitle
-                title="Những người chăm vườn"
-                description="Ưu tiên thời gian học; cùng thời gian thì xét số cây ra hoa. Thành tích bằng nhau cùng hạng."
-              />
-              <Ranking rows={data.board.effort} userId={userId} kind="effort" />
-              <SectionTitle
-                title="Bác sĩ cây trồng"
-                description="Ghi nhận số câu đang ở trạng thái đã khắc phục trong lớp. Một câu chỉ tính một lần."
-              />
-              <Ranking
-                rows={data.board.repairs}
-                userId={userId}
-                kind="repairs"
-              />
-              <p className="subtle-note">
-                Chỉ hiển thị thành viên đã có hoạt động tương ứng. Thành tích
-                tính trong lớp đang chọn và không dùng điểm số để xếp hạng.
-              </p>
-            </>
-          )}
         </>
       )}
     </>
-  );
-}
-
-function Ranking({
-  rows,
-  userId,
-  kind,
-}: {
-  rows: CommunityMember[];
-  userId: string;
-  kind: "effort" | "repairs";
-}) {
-  if (!rows.length)
-    return (
-      <Empty
-        title={
-          kind === "effort"
-            ? "Chưa có thành tích chăm vườn"
-            : "Chưa có câu được khắc phục"
-        }
-        text={
-          kind === "effort"
-            ? "Thời gian học có hoạt động sẽ được ghi nhận tại đây."
-            : "Làm lại đúng các câu trong sổ tay sửa sai để ghi nhận nỗ lực của bạn."
-        }
-      />
-    );
-  return (
-    <div className={`card community-ranking table-scroll ${kind}`}>
-      <table
-        aria-label={
-          kind === "effort" ? "Xếp hạng chăm vườn" : "Xếp hạng sửa sai"
-        }
-      >
-        <thead>
-          <tr>
-            <th scope="col">Hạng</th>
-            <th scope="col">Học sinh</th>
-            <th scope="col">
-              {kind === "effort" ? "Thời gian học" : "Câu đã khắc phục"}
-            </th>
-            {kind === "repairs" && <th scope="col">Cây ra hoa</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((member) => (
-            <tr
-              key={member.id}
-              data-rank={member.rank}
-              className={member.id === userId ? "community-mine" : ""}
-            >
-              <td>
-                <span
-                  className={`community-rank ${member.rank <= 3 ? "community-top community-medal" : ""}`}
-                  title={
-                    member.rank <= 3
-                      ? `Huy chương ${["vàng", "bạc", "đồng"][member.rank - 1]} · Hạng ${member.rank}`
-                      : undefined
-                  }
-                >
-                  {member.rank <= 3 ? (
-                    <>
-                      <Medal size={40} />
-                      <span className="community-medal-number">
-                        {member.rank}
-                      </span>
-                    </>
-                  ) : (
-                    member.rank
-                  )}
-                </span>
-              </td>
-              <th scope="row">
-                <span className="community-student-line">
-                  <span className="community-you-slot">
-                    {member.id === userId && (
-                      <span className="pill community-you">Bạn</span>
-                    )}
-                  </span>
-                  <span className="community-student-name">{member.name}</span>
-                  <ChapterLevelIcons chapters={member.chapterLevels} />
-                </span>
-              </th>
-              <td>
-                {kind === "effort"
-                  ? studyTime(member.seconds)
-                  : member.resolvedCorrections}
-              </td>
-              {kind === "repairs" && <td>{member.bloomedTrees}</td>}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }

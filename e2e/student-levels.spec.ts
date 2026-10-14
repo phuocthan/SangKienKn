@@ -119,7 +119,7 @@ test("teacher roster stages match class data while teacher overview omits rankin
     ["levels-class-5", "5"],
   ]) {
     await page.getByLabel("Chọn lớp học").selectOption(id);
-    await navigateTo(page, { name: "Lớp học của tôi", exact: true });
+    await navigateTo(page, { name: "Quản lý lớp", exact: true });
     const row = page
       .getByRole("row")
       .filter({ hasText: "levels@greenedu.test" });

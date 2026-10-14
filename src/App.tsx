@@ -1,5 +1,4 @@
 import { StudentNotebook } from "./StudentNotebook";
-import { ClassHonors } from "./ClassHonors";
 import { ChapterDelete } from "./ChapterDelete";
 import {
   useCallback,
@@ -159,19 +158,6 @@ export default function App() {
   const [entryClassId, setEntryClassId] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [classLeaderboards, setClassLeaderboards] = useState<
-    Record<string, ClassLeaderboard>
-  >({});
-  const rememberClassLeaderboard = useCallback(
-    (classroomId: string, board: ClassLeaderboard) => {
-      setClassLeaderboards((previous) => ({
-        ...previous,
-        [classroomId]: board,
-      }));
-    },
-    [],
-  );
-  useEffect(() => setClassLeaderboards({}), [user?.id]);
   const [studyExitNotice, setStudyExitNotice] = useState("");
   const [editor, setEditor] = useState<Editor>(null);
   const [accountDialog, setAccountDialog] = useState<
@@ -988,17 +974,8 @@ export default function App() {
                       userId={user.id}
                       teacherAvatarId={user.avatarId}
                       embedded
-                      onLeaderboardChange={rememberClassLeaderboard}
                     />
                   </section>
-                  <Roster
-                    key={current.id}
-                    classroom={current}
-                    leaderboard={classLeaderboards[current.id]}
-                    revision={revision}
-                    onAdd={() => setEditor("student")}
-                    onReset={(s) => setEditor({ student: s })}
-                  />
                 </>
               )}
               {page === "class-settings" && (
@@ -1008,6 +985,28 @@ export default function App() {
                     title="Quản lý lớp"
                     text={`Tổ chức chương học và điều chỉnh nhịp tăng cấp cho ${current.name}.`}
                   />
+                  {classLearningError && (
+                    <div className="error-banner" role="alert">
+                      {classLearningError}
+                    </div>
+                  )}
+                  {classLearning ? (
+                    <ClassLevelSettings
+                      key={`${current.id}-${classLearning.levelMinutes ?? 60}`}
+                      minutes={classLearning.levelMinutes ?? 60}
+                      enabled={classLearning.canConfigureLevels === true}
+                      busy={classLearningBusy}
+                      onSave={(minutes) =>
+                        updateClassLearning(
+                          `/classrooms/${current.id}/level-settings`,
+                          { minutes },
+                          "Đã lưu thời gian tăng cấp cho lớp.",
+                        )
+                      }
+                    />
+                  ) : !classLearningError ? (
+                    <div className="loading-panel">Đang tải cài đặt lớp…</div>
+                  ) : null}
                   <SectionTitle
                     title="Quản lý chương"
                     action={
@@ -1109,28 +1108,13 @@ export default function App() {
                       />
                     )}
                   </div>
-                  {classLearningError && (
-                    <div className="error-banner" role="alert">
-                      {classLearningError}
-                    </div>
-                  )}
-                  {classLearning ? (
-                    <ClassLevelSettings
-                      key={`${current.id}-${classLearning.levelMinutes ?? 60}`}
-                      minutes={classLearning.levelMinutes ?? 60}
-                      enabled={classLearning.canConfigureLevels === true}
-                      busy={classLearningBusy}
-                      onSave={(minutes) =>
-                        updateClassLearning(
-                          `/classrooms/${current.id}/level-settings`,
-                          { minutes },
-                          "Đã lưu thời gian tăng cấp cho lớp.",
-                        )
-                      }
-                    />
-                  ) : !classLearningError ? (
-                    <div className="loading-panel">Đang tải cài đặt lớp…</div>
-                  ) : null}
+                  <Roster
+                    key={current.id}
+                    classroom={current}
+                    revision={revision}
+                    onAdd={() => setEditor("student")}
+                    onReset={(s) => setEditor({ student: s })}
+                  />
                 </>
               )}
               {page === "questions" && (
@@ -1914,7 +1898,7 @@ function TeacherHome({
           <p>Tổ chức kiến thức theo từng chặng.</p>
           <ArrowRight size={18} />
         </button>
-        <button className="card" onClick={() => onPage("progress")}>
+        <button className="card" onClick={() => onPage("class-settings")}>
           <span className="stat-icon amber">
             <TrendingUp size={22} />
           </span>
@@ -2068,17 +2052,17 @@ function Corrections({
 }
 function Roster({
   classroom,
-  leaderboard,
   revision,
   onAdd,
   onReset,
 }: {
   classroom: Classroom;
-  leaderboard?: ClassLeaderboard;
   revision: number;
   onAdd: () => void;
   onReset: (s: Student) => void;
 }) {
+  const [leaderboard, setLeaderboard] = useState<ClassLeaderboard>();
+  const [boardError, setBoardError] = useState("");
   const [notebookStudent, setNotebookStudent] = useState<Student | null>(null);
   const [rows, setRows] = useState<Student[]>([]),
     [error, setError] = useState(""),
@@ -2091,13 +2075,27 @@ function Roster({
     let inFlight = false;
     setLoading(true);
     setError("");
+    setLeaderboard(undefined);
+    setBoardError("");
     const refresh = () => {
       if (!alive || inFlight) return;
       inFlight = true;
-      api<Student[]>(`/classrooms/${classroom.id}/students`)
-        .then((r) => {
+      Promise.allSettled([
+        api<Student[]>(`/classrooms/${classroom.id}/students`),
+        api<ClassLeaderboard>(`/classrooms/${classroom.id}/leaderboard`),
+      ])
+        .then(([studentsResult, boardResult]) => {
+          if (studentsResult.status === "rejected") throw studentsResult.reason;
           if (alive) {
-            setRows(r);
+            setRows(studentsResult.value);
+            setLeaderboard(
+              boardResult.status === "fulfilled" ? boardResult.value : undefined,
+            );
+            setBoardError(
+              boardResult.status === "rejected"
+                ? "Chưa tải được số câu đã khắc phục."
+                : "",
+            );
             setError("");
           }
         })
@@ -2158,15 +2156,8 @@ function Roster({
   );
   return (
     <>
-      <ClassHonors
-        students={rows}
-        leaderboard={leaderboard}
-        loading={loading}
-        error={error}
-      />
       <SectionTitle
-        title="Danh sách Học sinh"
-
+        title="Quản lý học sinh"
         action={
           <div className="button-group">
             <button
@@ -2184,6 +2175,14 @@ function Roster({
           </div>
         }
       />
+      {boardError && (
+        <div className="error-banner" role="alert">
+          {boardError}
+          <button onClick={() => setRetry((n) => n + 1)}>
+            Thử lại thống kê
+          </button>
+        </div>
+      )}
       <div className="card roster-card">
         <div className="roster-search-toolbar">
           <label className="search-input">

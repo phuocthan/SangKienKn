@@ -809,6 +809,20 @@ export function createApp(
       };
     });
   }
+  app.get("/api/classrooms/:id/honors", (req: AppRequest, res) => {
+    classroom(req, String(req.params.id));
+    res.json(
+      roster(String(req.params.id)).map((member) => ({
+        id: member.id,
+        name: member.name,
+        avatarId: member.avatarId,
+        chapterLevels: member.chapterLevels.map(({ level }) => ({ level })),
+        answeredQuestions: member.answeredQuestions,
+        correct: member.correct,
+        total: member.total,
+      })),
+    );
+  });
   app.get("/api/classrooms/:id/students", (req: AppRequest, res) => {
     teacher(req);
     classroom(req, String(req.params.id));

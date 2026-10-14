@@ -1,5 +1,17 @@
 # Bàn giao session GreenEdu
 
+## Hiện hành: đồng bộ vinh danh hai vai trò và chuyển Quản lý học sinh — 14/10/2026
+
+**Yêu cầu mới nhất thay quyết định skip roster của commit124cb18/f0ecf42:** giáo viên và học sinh tại Lớp học của tôi/Khu vườn của lớp chỉ thấy **thống kê chung → Vinh danh Top10 → Vinh danh Kết Trái cấp5 → Khu vườn chung**. ClassHonors chuyển vào ClassCommunity dùng chung. Bỏ hai bảng Những người chăm vườn/Bác sĩ cây trồng còn ở trang học sinh; không bỏ thống kê hoặc khung KếtTrái. Giữ huy chương,3 bục vàng/bạc/đồng, hạng4–10 và comparator **MAX cấp chương → câu practice đã làm riêng biệt → tỷ lệ đúng chưa làm tròn → resolved**, bằng cả4 theo tên/ID. Không tạo số liệu/đủ10 người giả.
+
+Giáo viên tab **Quản lý lớp: Quản lý cấp độ → Quản lý chương → Quản lý học sinh**. Đổi tiêu đề roster, chuyển nguyên tìm kiếm/CSV/Thêm học sinh/sổ tay/reset mật khẩu, giữ header đồng hồ/Câu đã khắc phục. Link Xem tiến độ ở Tổng quan dẫn tới Quản lý lớp. Dropdown chọn lớp và menu3tab giữ nguyên; không chuyển danh sách các lớp. Roster tự tải leaderboard đúng lớp,30giây/focus/online/visibility, chặn request chồng/race. Lỗi nguồn khắc phục giữ bảng/dấu— và có Thử lại thống kê.
+
+Backend mới **GET /api/classrooms/:id/honors** dùng cùng tính toán roster nhưng chỉ trả whitelist id/name/avatarId/chapterLevels[level]/answeredQuestions/correct/total. Giáo viên sở hữu và thành viên hiện tại đọc được; người ngoài/lớp khác/đã rời bị403, thiếu phiên401, lớp không có404. Không trả email, mật khẩu, cấp lại mật khẩu hoặc các trường quản trị. GET students vẫn teacher-only. Kết hợp leaderboard có sẵn cho resolved. Không migration/reset/ghi tiến độ. Frontend honors lỗi/máy chủ cũ chỉ báo lỗi/Thử lại riêng, thống kê/KếtTrái/vườn vẫn hiện, không dựng thứ hạng giả.
+
+QA mới: TypeScript và build riêng **.local/shared-honors-20261014-final đạt**, **129/129 server** (2ca API honors mới) và **6/6 comparator Top10 đạt**. Các lượt E2E ban đầu53/54 rồi10/14 có selector cũ cho bảng đã bỏ, heading home/khung vườn cũ; đã cập nhật theo giao diện hiện hành. Ca workflow tạo tài khoản/học/lưu kết quả mới4/4 desktop/mobile đạt sau sửa selector. **Lượt xác nhận cuối60/60 E2E desktop/mobile đạt (2,4phút)** trên build cuối, gồm thứ tự bốn mục hai vai trò,3khung quản lý, API quyền/nguồn lỗi/retry, Top10, tìm kiếm/CSV, workflow học/sửa sai, cấp cây/vườn, menu/keyboard/navbar và xóa chương. Không báo toàn bộ E2E repository đã chạy. Đã xem ảnh student320px/desktop và trang Quản lý lớp; geometry kiểm tra cả320/390/768/1440px, giữ navbar/badge remote. Mọi test ghi dữ liệu đều dùng server/SQLite riêng, không Railway, không đổi .local/greenedu.sqlite.
+
+Đợt này push **origin/main** theo yêu cầu sau fetch kiểm tra remote; tài liệu này đi cùng mã/test. Không đưa .local/database/file học sinh/secrets hoặc file khóa PowerPoint vào Git, không apply stash roster cũ. **Push không xác nhận Railway đã deploy**: API honors mới phải có trên Railway để frontend local/học sinh đọc Top10; chưa báo backend production đã triển khai. Không tự chạy API SQLite local hoặc deploy offline. Các mục skip/roster giữ trang lớp bên dưới là lịch sử trước yêu cầu mới này.
+
 ## Chốt phạm vi, pull và bàn giao Git — 14/10/2026
 
 **Đã commit và push mã/tài liệu đợt này lên origin/main: `124cb18caf418f421aeba5a667bc8db614e53f08`.** Đã đối chiếu HEAD local với refs/heads/main trên remote, trùng SHA. Working tree chỉ còn file khóa PowerPoint không đưa vào Git. Bản ghi xác nhận này được gửi bằng commit tài liệu tiếp theo; Railway chưa được xác minh triển khai xong.
