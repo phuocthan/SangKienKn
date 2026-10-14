@@ -250,8 +250,8 @@ export function registerLearningRoutes(
     return db
       .prepare(
         `SELECT q.chapter_id AS chapterId,ch.title AS chapterTitle,q.lesson,COUNT(*) AS available
-      FROM questions q JOIN chapters ch ON ch.id=q.chapter_id WHERE ch.classroom_id=? AND q.active=1 AND q.is_current=1 AND ch.id NOT IN (SELECT chapter_id FROM archived_chapters)
-      GROUP BY q.chapter_id,q.lesson ORDER BY MIN(q.rowid)`,
+      FROM questions q JOIN chapters ch ON ch.id=q.chapter_id JOIN chapter_display_order o ON o.chapter_id=ch.id WHERE ch.classroom_id=? AND q.active=1 AND q.is_current=1 AND ch.id NOT IN (SELECT chapter_id FROM archived_chapters)
+      GROUP BY q.chapter_id,q.lesson ORDER BY o.position,MIN(q.rowid)`,
       )
       .all(classId)
       .map((q) => ({ ...q, key: `${q.chapterId}::${q.lesson}` }));
@@ -522,7 +522,7 @@ export function registerLearningRoutes(
     if (req.user!.role === "student")
       grantLearningMilestones(db, req.user!.id, now());
     const chapters = db
-      .prepare("SELECT * FROM chapters WHERE classroom_id=? AND id NOT IN (SELECT chapter_id FROM archived_chapters) ORDER BY rowid")
+      .prepare("SELECT ch.* FROM chapters ch JOIN chapter_display_order o ON o.chapter_id=ch.id WHERE ch.classroom_id=? AND ch.id NOT IN (SELECT chapter_id FROM archived_chapters) ORDER BY o.position,ch.rowid")
       .all(c.id)
       .map((ch) => eligibility(ch, req.user!.id));
     const own = req.user!.role === "teacher" ? "" : " AND r.student_id=?";

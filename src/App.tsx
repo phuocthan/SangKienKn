@@ -242,6 +242,31 @@ export default function App() {
   );
   const [classLearningError, setClassLearningError] = useState("");
   const [classLearningBusy, setClassLearningBusy] = useState(false);
+  const [chapterOrderBusy, setChapterOrderBusy] = useState(false);
+  const [chapterOrderError, setChapterOrderError] = useState("");
+  useEffect(() => setChapterOrderError(""), [current?.id]);
+  async function moveChapter(chapterId: string, position: number) {
+    if (!current || chapterOrderBusy) return;
+    const classId = current.id;
+    const ids = current.chapters.map((ch) => ch.id);
+    const from = ids.indexOf(chapterId);
+    if (from < 0 || from === position - 1) return;
+    ids.splice(from, 1);
+    ids.splice(position - 1, 0, chapterId);
+    setChapterOrderBusy(true);
+    setChapterOrderError("");
+    try {
+      await api(`/classrooms/${classId}/chapters/order`, { chapterIds: ids });
+      const rows = await api<Classroom[]>("/classrooms");
+      setClasses(rows);
+      setRevision((value) => value + 1);
+      setNotice("Đã lưu thứ tự hiển thị chương.");
+    } catch (error) {
+      setChapterOrderError(errorMessage(error));
+    } finally {
+      setChapterOrderBusy(false);
+    }
+  }
   useEffect(() => {
     if (!isTeacher || !current || page !== "class-settings") return;
     let active = true;
@@ -1020,6 +1045,20 @@ export default function App() {
                     }
                   />
                   <div className="chapter-list">
+                    {chapterOrderError && (
+                      <div className="error-banner" role="alert">
+                        {chapterOrderError}
+                      </div>
+                    )}
+                    {chapterOrderBusy && (
+                      <p role="status">Đang lưu thứ tự chương…</p>
+                    )}
+                    {current.chapters.length > 0 &&
+                      !current.chapters[0].canReorderChapter && (
+                        <p className="form-intro">
+                          Đổi thứ tự chương đang chờ cập nhật máy chủ.
+                        </p>
+                      )}
                     {current.chapters.length ? (
                       current.chapters.map((ch, i) => {
                         const access = classLearning?.chapters.find(
@@ -1027,12 +1066,47 @@ export default function App() {
                         );
                         return (
                           <div className="card chapter-row" key={ch.id}>
-                            <span className="chapter-index">
-                              {String(i + 1).padStart(2, "0")}
-                            </span>
+                            <label className="chapter-order-control">
+                              <span>Vị trí</span>
+                              <select
+                                name={`chapter-order-${ch.id}`}
+                                aria-label={`Vị trí chương · ${ch.title}`}
+                                value={i + 1}
+                                disabled={
+                                  chapterOrderBusy ||
+                                  !ch.canReorderChapter ||
+                                  current.chapters.length < 2
+                                }
+                                onChange={(event) =>
+                                  void moveChapter(
+                                    ch.id,
+                                    Number(event.target.value),
+                                  )
+                                }
+                              >
+                                {current.chapters.map((item, index) => (
+                                  <option key={item.id} value={index + 1}>
+                                    {index + 1}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
                             <div className="chapter-row-main">
                               <div className="chapter-row-copy">
-                                <h3>{ch.title}</h3>
+                                <div className="chapter-title-row">
+                                  <ChapterDelete
+                                    compact
+                                    chapter={ch}
+                                    onChange={async () => {
+                                      await reload();
+                                      setRevision((value) => value + 1);
+                                      setNotice(
+                                        "Đã xóa chương khỏi danh sách đang dùng.",
+                                      );
+                                    }}
+                                  />
+                                  <h3>{ch.title}</h3>
+                                </div>
                                 <p className="chapter-counts">
                                   <span className="chapter-count lessons">
                                     <strong>{ch.lessons.length}</strong> bài
@@ -1051,22 +1125,14 @@ export default function App() {
                               />
                             </div>
                             <div className="chapter-row-actions">
-                            <LinkButton
-                              onClick={() => {
-                                setQuestionChapter(ch.id);
-                                navigate("questions");
-                              }}
-                            >
-                              Quản lý câu hỏi
-                            </LinkButton>
-                            <ChapterDelete
-                              chapter={ch}
-                              onChange={async () => {
-                                await reload();
-                                setRevision((value) => value + 1);
-                                setNotice("Đã xóa chương khỏi danh sách đang dùng.");
-                              }}
-                            />
+                              <LinkButton
+                                onClick={() => {
+                                  setQuestionChapter(ch.id);
+                                  navigate("questions");
+                                }}
+                              >
+                                Quản lý câu hỏi
+                              </LinkButton>
                             </div>
                             <div className="class-chapter-access">
                               <span
@@ -1898,12 +1964,12 @@ function TeacherHome({
           <p>Tổ chức kiến thức theo từng chặng.</p>
           <ArrowRight size={18} />
         </button>
-        <button className="card" onClick={() => onPage("class-settings")}>
+        <button className="card" onClick={() => onPage("classes")}>
           <span className="stat-icon amber">
             <TrendingUp size={22} />
           </span>
           <h3>Xem tiến độ</h3>
-          <p>Tìm những học sinh cần hỗ trợ thêm.</p>
+          <p>Xem tiến độ và khu vườn của lớp.</p>
           <ArrowRight size={18} />
         </button>
       </div>
@@ -2473,10 +2539,27 @@ function EditorForm({
           <p className="form-intro">
             Chương mới thuộc {classroom?.name} · {classroom?.subject}.
           </p>
+          <section className="existing-chapters" aria-label="Chương hiện có">
+            <h3>Chương hiện có ({classroom?.chapters.length ?? 0})</h3>
+            {classroom?.chapters.length ? (
+              <ol>
+                {classroom.chapters.map((chapter) => (
+                  <li key={chapter.id}>{chapter.title}</li>
+                ))}
+              </ol>
+            ) : (
+              <p>Lớp chưa có chương học.</p>
+            )}
+          </section>
+          <p className="form-intro">
+            Chương mới sẽ nằm cuối danh sách, ở vị trí{" "}
+            {(classroom?.chapters.length ?? 0) + 1}.
+          </p>
           <label>
             Tên chương
             <input
               name="title"
+              autoComplete="off"
               required
               maxLength={120}
               placeholder="Ví dụ: Chương 4 · Năng lượng"

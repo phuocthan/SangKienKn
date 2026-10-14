@@ -1,5 +1,13 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: chương có thứ tự lưu, tạo chương hiển thị danh sách — 14/10/2026
+
+Hộp tạo chương liệt kê chương hiện có và vị trí cuối của chương mới. Quản lý chương có ô chọn Vị trí1–N, lưu thứ tự server, tự dịch các chương còn lại và giữ qua reload; trạng thái gửi/lỗi/thử lại rõ ràng. Xóa icon44px ngay trước tên, giữ xác nhận/archive. Xem tiến độ Tổng quan giáo viên mở Lớp học của tôi → Khu vườn của lớp, thay lối tắt Quản lý lớp cũ; roster vẫn trong Quản lý học sinh.
+
+Migration bổ sung bảng thứ tự, giữ schema chapters3cột/ID/lịch sử và backfill thứ tự cũ. Trigger thêm mới vào cuối từng lớp. API reorder teacher-owner-only, permutation toàn bộ chương active, atomic/reject trùng/thiếu/ID khác lớp/archive. Các nguồn hiển thị luyện/ngân hàng/ôn-thi/ma trận/cấp chương dùng thứ tự mới; snapshot và dữ liệu học giữ nguyên. Backend cũ khóa select qua capability. **Backend Railway cần triển khai để lưu thứ tự; chưa xác minh deployment từ push.**
+
+QA mới:134/134 server đạt (5ca mới), TypeScript/build riêng đạt; **18/18 E2E desktop/mobile đạt** trên build cuối, gồm thứ tự/tạo/xóa/lỗi lưu/capability/menu/cấp cây và lối tắt khu vườn. Chi tiết lượt đầu/ảnh/responsive tại đầu [session-handoff.md](session-handoff.md). Test dùng database/server riêng, không ghi Railway. Frontend5173 đã ready bằng npm run local. Mã/tài liệu đi cùng push origin/main theo yêu cầu.
+
 ## Hiện hành: Top3 nằm trong bục, gọn hai hướng màn hình — 14/10/2026
 
 Theo ảnh mới, đưa avatar/tên/cấp/chỉ số vào trong bục vàng/bạc/đồng, bỏ medal lớn lặp. Cụm tối đa800px, vàng cao nhất/bạc trái/đồng phải chung chân; chênh cao16px desktop,14px khung hẹp. Container query thích ứng cả mobile/desktop portrait/landscape, giữ tên dài/title và số thập phân/4chữ số trong khung. Không backend/migration/dữ liệu mới; danh sách4–10 và xếp hạng giữ nguyên. TypeScript/build và10/10 E2E desktop/mobile mới đạt, đã xem ảnh ba hướng/kích thước tiêu biểu. Mã/tài liệu đợt này được push origin/main theo yêu cầu; QA và deployment thực tế ở đầu [session-handoff.md](session-handoff.md).

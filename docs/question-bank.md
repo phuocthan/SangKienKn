@@ -1,5 +1,13 @@
 # Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
+## Thứ tự hiển thị chương và thêm chương cuối danh sách — 14/10/2026
+
+Hộp tạo chương hiển thị danh sách chương hiện có theo thứ tự lưu. Quản lý lớp → Quản lý chương cho chọn vị trí1–N; chương được chuyển đến vị trí đã chọn, các chương còn lại tự dịch. Chương mới thêm cuối danh sách. Nút xóa icon nằm ngay trước tên, giữ xác nhận/archive và nhãn truy cập.
+
+Migration bổ sung **chapter_display_order(chapter_id,position)**, khởi tạo dữ liệu cũ theo rowid trong từng lớp và giữ nguyên bảng chapters3cột/ID/lịch sử. Trigger AFTER INSERT gán vị trí cuối riêng mỗi lớp; chạy migration lại không reset thứ tự đã lưu. **POST /api/classrooms/:id/chapters/order {chapterIds}** chỉ giáo viên sở hữu lớp, yêu cầu toàn bộ ID chương đang dùng đúng một lần. Payload sai/trùng bị400; thiếu/thừa/ID khác lớp/chương archive hoặc danh sách cũ sau thêm/xóa bị409, toàn bộ transaction rollback. Lưu không thay câu hỏi/điểm/progress/attempts/corrections/snapshot. Các nguồn hiển thị chương dùng thứ tự này; không đổi thứ tự câu trong đề đã chốt.
+
+GET classrooms trả canReorderChapter cho giáo viên; frontend dùng flag để chặn máy chủ cũ. Tính năng lưu thứ tự cần backend Railway mới, push Git không xác nhận deploy. QA mới ở đầu session-handoff và project-status.
+
 ## Xóa chương khỏi danh sách đang dùng — 14/10/2026
 
 Quản lý lớp → Quản lý chương → Xóa chương mở popup xác nhận tên chương/số bài/câu. Hủy không ghi dữ liệu. Xác nhận gọi POST `/api/chapters/:id/delete` với `confirm:true`; chỉ giáo viên sở hữu lớp, giáo viên khác/học sinh bị403. canDeleteChapter từ API bảo vệ client tương thích máy chủ cũ. Backend Railway cần bản mới; mã local không chứng minh đã triển khai.

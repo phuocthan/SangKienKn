@@ -7,9 +7,11 @@ import type { Chapter } from "./types";
 export function ChapterDelete({
   chapter,
   onChange,
+  compact = false,
 }: {
   chapter: Chapter;
   onChange: () => Promise<void>;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -32,7 +34,7 @@ export function ChapterDelete({
     <>
       <button
         type="button"
-        className="button danger-outline small"
+        className={`button danger-outline small${compact ? " chapter-delete-icon" : ""}`}
         aria-label={`Xóa chương · ${chapter.title}`}
         disabled={!chapter.canDeleteChapter}
         title={
@@ -45,7 +47,8 @@ export function ChapterDelete({
           setOpen(true);
         }}
       >
-        <Trash2 size={16} /> Xóa chương
+        <Trash2 size={16} />
+        {!compact && " Xóa chương"}
       </button>
       {open && (
         <Modal

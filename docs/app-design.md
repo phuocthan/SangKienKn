@@ -1,5 +1,15 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: danh sách và thứ tự chương, lối tắt khu vườn — 14/10/2026
+
+Hộp **Thêm chương học** (cả nút Tạo chương học ở Tổng quan và Thêm chương trong Quản lý lớp) liệt kê chương hiện có bằng danh sách đánh số theo thứ tự đã lưu. Danh sách dài cuộn trong hộp, tên dài xuống dòng; lớp chưa có chương có thông báo riêng. Hiển thị vị trí cuối mà chương mới sẽ được thêm vào.
+
+Trong **Quản lý chương**, số thứ tự đổi thành ô chọn **Vị trí** 1–N. Chọn vị trí lưu ngay, chương được chuyển đến chỗ đó và các chương còn lại dịch theo; khóa ô trong lúc lưu, có trạng thái/ lỗi tại chỗ và thông báo thành công. Nút xóa chỉ hiện icon thùng rác trong vùng44×44px, ngay bên trái đầu tên chương; giữ tooltip/aria-label theo tên, popup xác nhận và quy tắc archive. Màu, font và các thao tác bài/câu/mở khóa kiểm tra giữ nguyên. API cũ thiếu canReorderChapter khóa đổi vị trí với thông báo chờ cập nhật máy chủ.
+
+Nút **Xem tiến độ** ở Tổng quan giáo viên mở **Lớp học của tôi → Khu vườn của lớp** (`section=classes`), giữ lớp đang chọn. Quyết định này thay lối tắt sang Quản lý lớp trong các đoạn cũ; roster vẫn nằm ở Quản lý học sinh.
+
+Thứ tự chương là dữ liệu phía server và áp dụng cho danh sách luyện tập/hành trình/ngân hàng/ôn-thi/ma trận/chuỗi cấp trong roster và leaderboard. Chương mới luôn ở cuối kể cả sau sắp xếp/xóa. Không đổi tên chương theo số, ID, câu hỏi, tiến độ hay snapshot phiên học/thi. Backend Railway cần hỗ trợ mới; kết quả kiểm tra và trạng thái Git ở đầu session-handoff.
+
 ## Hiện hành: người nằm trong bục Top3 gọn — 14/10/2026
 
 Avatar, huy chương có số, tên, cấp cây và ba chỉ số Top3 nằm **bên trong** khung màu vàng/bạc/đồng, không còn cụm người phía trên + bục trống/huy chương lớn lặp bên dưới. Giữ bạc trái/vàng giữa/đồng phải, chung chân; vàng cao hơn bạc16px, bạc cao hơn đồng16px trên khung rộng. Cụm ba bục tối đa800px/căn giữa, cao242/226/210px (vàng/bạc/đồng) thay tổng chiều cao người + bục cũ. Tên tối đa2dòng, title/nhãn trợ năng giữ tên đầy đủ; giữ avatar/huy chương và màu chủ đề.

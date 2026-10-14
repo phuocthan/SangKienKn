@@ -39,6 +39,7 @@ import {
 import { loginEmail } from "../shared/login-email.js";
 import { registerFeedbackRoutes } from "./feedback.js";
 import { archiveChapter, chapterIsArchived } from "./chapter-archive.js";
+import { activeChapterIds } from "./chapter-order.js";
 
 export type Row = Record<string, any>;
 export type AppRequest = Request & { user?: Row; tokenHash?: string };
@@ -497,7 +498,7 @@ export function createApp(
         chapters: (
           db
             .prepare(
-              "SELECT id,title FROM chapters WHERE classroom_id = ? AND id NOT IN (SELECT chapter_id FROM archived_chapters) ORDER BY rowid",
+              "SELECT ch.id,ch.title FROM chapters ch JOIN chapter_display_order o ON o.chapter_id=ch.id WHERE ch.classroom_id = ? AND ch.id NOT IN (SELECT chapter_id FROM archived_chapters) ORDER BY o.position,ch.rowid",
             )
             .all(c.id) as Row[]
         ).map((ch) => ({
@@ -505,6 +506,7 @@ export function createApp(
           lessons: chapterLessons(db, ch.id),
           canManageLessons: req.user!.role === "teacher",
           canDeleteChapter: req.user!.role === "teacher",
+          canReorderChapter: req.user!.role === "teacher",
           canDeleteQuestions: req.user!.role === "teacher",
           canTagQuestions: true,
           questionCount: (
@@ -606,6 +608,36 @@ export function createApp(
     const ch = chapter(req, String(req.params.id), true);
     if (req.body?.confirm !== true) fail(400, "Vui lòng xác nhận xóa chương.");
     res.json(archiveChapter(db, ch.id, req.user!.id, now()));
+  });
+  app.post("/api/classrooms/:id/chapters/order", (req: AppRequest, res) => {
+    teacher(req);
+    const classId = String(req.params.id);
+    classroom(req, classId);
+    const ids: unknown = req.body?.chapterIds;
+    if (
+      !Array.isArray(ids) ||
+      ids.some((id) => typeof id !== "string") ||
+      new Set(ids).size !== ids.length
+    )
+      fail(400, "Danh sách thứ tự chương không hợp lệ.");
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const current = activeChapterIds(db, classId);
+      if (
+        ids.length !== current.length ||
+        ids.some((id) => !current.includes(id))
+      )
+        fail(409, "Danh sách chương đã thay đổi. Tải lại trang rồi sắp xếp lại.");
+      const update = db.prepare(
+        "UPDATE chapter_display_order SET position=? WHERE chapter_id=?",
+      );
+      ids.forEach((id, index) => update.run(index + 1, id));
+      db.exec("COMMIT");
+      res.json({ chapterIds: ids });
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
   });
   app.post("/api/classrooms/:id/chapters", (req: AppRequest, res) => {
     teacher(req);
@@ -768,7 +800,7 @@ export function createApp(
     return (
       db
         .prepare(
-          "SELECT ch.id,ch.title,COALESCE(p.seconds,0) AS seconds FROM chapters ch LEFT JOIN progress p ON p.chapter_id=ch.id AND p.student_id=? WHERE ch.classroom_id=? ORDER BY ch.rowid",
+          "SELECT ch.id,ch.title,COALESCE(p.seconds,0) AS seconds FROM chapters ch JOIN chapter_display_order o ON o.chapter_id=ch.id LEFT JOIN progress p ON p.chapter_id=ch.id AND p.student_id=? WHERE ch.classroom_id=? ORDER BY o.position,ch.rowid",
         )
         .all(studentId, classId) as Row[]
     ).map((ch) => ({
