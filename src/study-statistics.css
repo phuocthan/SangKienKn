@@ -1,0 +1,110 @@
+.study-statistics {
+  min-width: 0;
+}
+.study-statistics-class {
+  color: var(--text-muted, #647565);
+  margin-top: 0;
+}
+.study-statistics-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.study-periods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.study-statistics-filters label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+.study-statistics-filters input {
+  min-height: 44px;
+  max-width: 100%;
+}
+.study-statistics-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.study-statistics-summary > div {
+  padding: 10px;
+  background: #eff5e9;
+  border-radius: 8px;
+}
+.study-statistics-summary dt {
+  font-size: 12px;
+  color: #546b52;
+}
+.study-statistics-summary dd {
+  margin: 6px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.study-statistics-summary small,
+.study-statistics-table small {
+  display: block;
+  font-size: 12px;
+  color: #805c23;
+  margin-top: 4px;
+}
+.study-statistics-note {
+  font-size: 12px;
+  color: #647565;
+  line-height: 1.7;
+}
+.study-statistics-table {
+  min-width: 0;
+  width: 100%;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.study-statistics-table th {
+  text-align: left;
+  white-space: normal;
+}
+.study-statistics-table tbody th {
+  font-weight: 500;
+}
+.study-statistics-table td {
+  white-space: normal;
+}
+.study-time-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: #e7ecdf;
+  margin-top: 6px;
+}
+.study-time-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #497349;
+}
+.roster-time-cell .roster-statistics-button {
+  display: block;
+  min-height: 44px;
+}
+@media (max-width: 600px) {
+  .study-statistics-summary {
+    grid-template-columns: 1fr;
+  }
+  .study-statistics-summary > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+  }
+  .study-statistics-summary dd {
+    margin: 0;
+  }
+  .study-statistics-summary small {
+    margin: 0;
+  }
+}

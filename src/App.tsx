@@ -1,5 +1,6 @@
 import { StudentNotebook } from "./StudentNotebook";
 import { useStudentActivity } from "./useStudentActivity";
+import { StudentStudyStatistics } from "./StudentStudyStatistics";
 import { ChapterDelete } from "./ChapterDelete";
 import {
   useCallback,
@@ -2167,6 +2168,7 @@ function Roster({
   const [leaderboard, setLeaderboard] = useState<ClassLeaderboard>();
   const [boardError, setBoardError] = useState("");
   const [notebookStudent, setNotebookStudent] = useState<Student | null>(null);
+  const [statisticsStudent, setStatisticsStudent] = useState<Student | null>(null);
   const [rowsReceivedAt, setRowsReceivedAt] = useState(0);
   const [rows, setRows] = useState<Student[]>([]),
     [error, setError] = useState(""),
@@ -2389,6 +2391,13 @@ function Roster({
                           Đang luyện tập
                         </span>
                       )}
+                      <button
+                        className="text-button roster-statistics-button"
+                        aria-label={`Thống kê thời gian học · ${s.name}`}
+                        onClick={() => setStatisticsStudent(s)}
+                      >
+                        Thống kê
+                      </button>
                     </td>
                     <td>{s.answeredQuestions ?? s.total}</td>
                     <td>
@@ -2452,6 +2461,13 @@ function Roster({
           classroom={classroom}
           student={notebookStudent}
           onClose={() => setNotebookStudent(null)}
+        />
+      )}
+      {statisticsStudent && (
+        <StudentStudyStatistics
+          classroom={classroom}
+          student={statisticsStudent}
+          onClose={() => setStatisticsStudent(null)}
         />
       )}
     </>

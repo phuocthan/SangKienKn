@@ -1,5 +1,13 @@
 # Cấp độ ôn tập và kiểm tra
 
+## Hiện hành: lịch sử thời gian học theo ngày/tuần/tháng — 14/10/2026
+
+Giáo viên xem thống kê từng học sinh qua nút **Thống kê** trong ô thời gian của Quản lý học sinh. Chỉ chủ lớp/thành viên hiện tại, tổng hợp đúng chương của lớp, gồm cả chương lưu lịch sử. GET classrooms/:id/students/:studentId/study-statistics nhận period=day/week/month và date=YYYY-MM-DD; mặc định ngày hôm nay giờ Việt Nam. Trả14ngày/8tuần/12tháng và tổng ngày/tuần/tháng chứa ngày chọn, tổng tích lũy, mốc bắt đầu theo dõi. Tuần bắt đầu thứ Hai; không nhận ngày tương lai hoặc ngày sai. Xem [app-design.md](app-design.md) và QA mới tại [session-handoff.md](session-handoff.md).
+
+Migration thêm study_daily_time(student_id,chapter_id,day,credited_ms) và study_history_tracking, không đổi progress/study_sessions hoặc backfill tổng cũ thành ngày giả. Heartbeat/stop ghi đúng phần thời gian được cơ chế hiện có xác nhận, chia khoảng qua nửa đêm UTC+7 và lưu mili-giây; progress + lịch sử + con trỏ/xóa phiên trong một transaction. Phiên còn từ trước rollout giữ tổng credit cũ nhưng lịch sử chỉ ghi phần sau thời điểm bắt đầu theo dõi. Dừng/retry không ghi trùng; hidden/gap/idle/thi vẫn theo chính sách cũ. API đọc không thay progress. Kỳ trước mốc có seconds=null/coverage=none, kỳ cắt mốc partial, kỳ sau full; UI phân biệt chưa theo dõi với0giây đã theo dõi. Không suy lịch sử luyện tập từ attempts.created_at hoặc điều chỉnh thời gian thủ công.
+
+Theo lựa chọn mới, trạng thái vẫn là **Đang luyện tập** trong ô thời gian, không mở rộng thành online đăng nhập. Tính năng cần backend Railway mới để tự thêm bảng và bắt đầu ghi lịch sử; chưa deploy hoặc ghi dữ liệu production trong đợt triển khai local.
+
 ## Quyết định mới: rời phiên học thay vì đăng xuất — 13/10/2026
 
 Trong luyện bài/chương, ôn, sửa sai, rời tab/mất focus, timer gián đoạn do ngủ máy hoặc không tương tác đủ120 giây kết thúc phiên ngay, về trang chính và hiện popup. Giữ cookie/tài khoản; không ghi thời gian vắng mặt, stop active:false. Backend khi phiên hết hạn xóa phiên mà không ghi thêm phần đuôi chưa được xác nhận. Cảnh báo từ105 giây đổi thành kết thúc phiên. Phòng thi vẫn có xử lý rời tab theo ngưỡng và deadline riêng; idle rời giao diện chứ không đăng xuất. Quyết định này thay câu “đăng xuất120 giây” phía dưới.

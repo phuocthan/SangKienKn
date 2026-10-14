@@ -1,5 +1,13 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: thống kê thời gian từng học sinh theo kỳ — 14/10/2026
+
+**Lớp học của tôi → Quản lý lớp → Quản lý học sinh**, mỗi ô thời gian có nút **Thống kê** mở hộp theo đúng học sinh/lớp/môn. Nhãn xanh **Đang luyện tập** vẫn ở cùng ô; theo lựa chọn mới của người dùng, không thêm trạng thái online đăng nhập tổng quát. Nút có nhãn trợ năng kèm tên, đóng hộp trả focus về nút.
+
+Hộp có ba chế độ **Ngày / Tuần / Tháng**, chọn ngày xem (không chọn tương lai), ba tổng của ngày/tuần/tháng chứa ngày đã chọn, tổng tích lũy và bảng/thanh so sánh. Hiện14ngày/8tuần/12tháng gần ngày chọn, mới nhất ở trên; chọn ngày cũ để xem giai đoạn khác. Tuần thứ Hai–Chủ nhật, ngày/tháng theo giờ Việt Nam. Khi đang mở, nguồn cập nhật5giây ở tab visible/online, lấy thời gian server đã xác nhận. Không biến thanh so sánh thành phần trăm hoàn thành hay tự cộng giờ.
+
+Lịch sử chỉ bắt đầu từ lần backend hỗ trợ tính năng này chạy; tổng cũ giữ nguyên. Kỳ trước thời điểm đó ghi **Chưa có lịch sử**, không dựng0giây; kỳ cắt qua mốc bắt đầu ghi **Lịch sử chưa đủ kỳ**. Giữ tổng tích lũy riêng, ghi rõ thời gian cũ chưa chia theo ngày. Lỗi khi refresh giữ dữ liệu đã xác nhận + lỗi/Thử lại; đổi kỳ/ngày xóa nguồn cũ trong lúc tải để không gắn nhầm số. Backend cũ báo cần cập nhật máy chủ. Hộp/table không tràn320–1440px, summary một cột mobile/ba cột màn rộng, không thêm hoạt ảnh. Quyết định này bổ sung báo cáo kỳ vào yêu cầu live trước; các mô tả “chưa có ngày/tuần/tháng” bên dưới là trạng thái trước đợt này.
+
 ## Hiện hành: thời gian luyện tập trực tiếp trong quản lý học sinh — 14/10/2026
 
 Trong **Lớp học của tôi → Quản lý lớp → Quản lý học sinh**, ô thời gian giữ giờ/phút và thêm giây nhỏ phía dưới; khi có phiên học hoạt động trong đúng lớp, hiện nhãn xanh **Đang luyện tập**. Đây là tín hiệu phiên luyện/ôn/sửa đang hoạt động, không phải trạng thái đăng nhập online tổng quát. Bảng lấy số giây đã được server ghi nhận; không tự cộng thời gian bằng đồng hồ frontend. Tín hiệu nhẹ cập nhật5giây khi trang visible/online và khi focus/reconnect; số liệu đầy đủ/khắc phục giữ nhịp30giây. Nhịp học sinh hiện có15giây nên thay đổi thời gian thường xuất hiện sau15–20giây.

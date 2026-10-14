@@ -1,5 +1,17 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Chốt Git thống kê thời gian theo kỳ — 14/10/2026
+
+Theo yêu cầu push sau chỉnh popup online mới, giữ và chốt phần thống kê đã hoàn tất trong commit riêng để đưa lên origin/main cùng đợt. Fetch trước commit xác nhận local/remotecbdecd9, diff check đạt; không kèm .local/database/secrets. QA144server/14E2E/6xác nhận là của lượt triển khai thống kê đã ghi, không chạy lại trong bước Git. Chưa xác minh backend Railway mới; chi tiết ở đầu session-handoff.
+
+## Hiện hành: thống kê từng học sinh theo ngày/tuần/tháng — 14/10/2026
+
+Yêu cầu mới bổ sung báo cáo kỳ; người dùng chọn giữ nhãn **Đang luyện tập** hiện có, không thêm online tài khoản. Trong Quản lý học sinh, nút **Thống kê** từng ô thời gian mở Ngày/Tuần/Tháng, chọn ngày xem, ba tổng kỳ/tổng tích lũy, bảng/thanh so sánh, tự refresh5giây. Backend thêm ledger thời gian được xác nhận theo ngày VN, tuần thứ Hai và tháng; transaction cùng progress/phiên học, không reset/backfill dữ liệu cũ. Kỳ chưa theo dõi/thiếu một phần phân biệt rõ. API teacher/owner/member-only, đọc không cộng giờ. TypeScript/build và144/144 server đạt, lượt14/14 E2E desktop/mobile đạt; sau xử lý phiên qua rollout, lượt xác nhận cuối6/6 thống kê desktop/mobile đạt. Chi tiết ở đầu [session-handoff.md](session-handoff.md). Chưa commit/push/deploy; cần backend Railway mới, lịch sử bắt đầu khi backend đó chạy. Các mục “chưa làm ngày/tuần/tháng” phía dưới là trạng thái trước yêu cầu mới này.
+
+## Điều chỉnh Dau Tay lớp 11/2: chương3/4 về0 — 14/10/2026
+
+Đã đặt riêng **chươngIII vàIV về0giây** theo yêu cầu “chưa từng luyện tập”; dữ liệu hai chương có0attempts/0corrections trước và sau, không xóa lịch sử. ChươngI/II giữ mỗi3600giây, tổng7200giây. Có backup/audit và xác nhận chỉ đọc độc lập trên Railway thật. Không đổi mã hoặc database local; chi tiết ở đầu [session-handoff.md](session-handoff.md). Ghi nhận cả4chương mỗi1giờ phía dưới là trạng thái trước yêu cầu mới.
+
 ## Chốt push cập nhật thời gian luyện tập — 14/10/2026
 
 Theo yêu cầu mới, chốt API/hiển thị trực tiếp thời gian luyện tập, test và tài liệu vào **origin/main**. Fetch xác nhận main/remote cùng7683297 trước commit; không kèm database/.local/secrets. Các ghi nhận “chưa push” bên dưới là trước đợt chốt này. Không chạy lại hoặc báo kết quả kiểm thử lượt triển khai thành test mới của phiên Git. Chưa xác minh Railway triển khai backend mới; chi tiết ở đầu [session-handoff.md](session-handoff.md).

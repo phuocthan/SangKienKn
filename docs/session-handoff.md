@@ -1,5 +1,27 @@
 # Bàn giao session GreenEdu
 
+## Chốt Git thống kê thời gian theo kỳ — 14/10/2026
+
+Yêu cầu mới sau phần thống kê là đổi popup tạo online và hoàn tất push remote; giữ phần thống kê đã hoàn thành để đưa lên cùng đợt, commit riêng trước popup. Fetch xác nhận HEAD/origin/main cùngcbdecd9, không có commit mới cần ghép; git diff --check đạt. Chỉ docs/server/shared/src/e2e, không database/.local/secrets. QA thống kê là lượt144server/14E2E/6xác nhận ghi ngay dưới, không báo thành lượt chạy mới của phiên Git. Các ghi nhận “chưa commit/push” bên dưới là trước đợt chốt này. Không tự deploy/restart Railway hoặc thao tác dữ liệu thật.
+
+## Thống kê thời gian từng học sinh theo ngày/tuần/tháng — 14/10/2026
+
+Yêu cầu mới: xem thống kê học tập từng học sinh theo ngày/tuần/tháng và hỏi online ở đâu. Đã giải thích nhãn ở Lớp học của tôi → Quản lý lớp → Quản lý học sinh/cột thời gian và dữ liệu cũ chỉ có tổng. Người dùng chọn **Chỉ cần nhãn đang luyện tập hiện có**, không làm presence đăng nhập. Git đầu đợt sạch maincbdecd9 đã push; không triển khai lại phần live trước hoặc chỉnh dữ liệu Dau Tay.
+
+Schema bổ sung study_daily_time với khóa student/chapter/day và credited_ms, index student/day; study_history_tracking lưu mốc bắt đầu duy nhất lúc createApp chạy. Không đổi số cột/schema progress/study_sessions, không backfill/reset/seed tổng cũ. Heartbeat/stop dùng creditStudyInterval giữ cơ chế credit cũ, transaction progress + chia khoảng theo midnightUTC+7 + update/delete cursor phiên. Ghi ms để không mất phần giây qua nhiều nhịp, no duplicate tail sau stop hoặc heartbeat cùng timestamp; rollback cả3 khi lỗi. Khoảng trước mốc rollout thuộc tổng cũ, không biến thành lịch sử: phiên đang lưu qua deploy vẫn được credit tổng đúng nhưng ledger chỉ ghi phần sau mốc bắt đầu. Không sửa quy tắc focus/idle/gap/thi hoặc grantLearningMilestones.
+
+GET classrooms/:id/students/:studentId/study-statistics chỉ giáo viên sở hữu, student còn membership đúng lớp; tổng hợp tất cả chương đúng lớp gồm lưu lịch sử. Filter period day/week/month, date hợp lệ≤todayVN; mặc định day/today, reject mảng/lặp/sai. Shared calendarUTC+7/tuầnMonday/chuyển tháng thật;14day/8week/12month, ba summary theo date, tổng tích lũy và trackingStartedAt. Bucket coverage none=>secondsnull, partial=>lịch sử chưa đủ kỳ, full; không tạo0đại diện dữ liệu chưa ghi. Chỉ query/read, không cộng từ đồng hồ UI hoặc attempts.
+
+Frontend StudentStudyStatistics mở Modal từ Thống kê trong ô thời gian mỗi học sinh, Ngày/Tuần/Tháng + date selector + summary/table/bar theo số giây thật, kỳ mới ở trên; chọn ngày để xem giai đoạn cũ. Chỉ poll5giây khi visible/online, không chồng request/ghi kết quả lớp/ngày/kỳ cũ; lỗi refresh giữ source + alert/retry, đổi nguồn xóa source cũ, offline/reconnect/focus/visibility có xử lý. Backend cũ báo chờ cập nhật/kiểm tra membership, giữ roster. Modal trả focus, labels/pressed/table semantic, mobile summary một cột và geometry320/390/768/1440. Nhãn luyện tập không đổi.
+
+QA mới: TypeScript và build .local/study-statistics-20261014-final đạt; **144/144 server đạt** gồm7ca mới timezone/Monday/leap/month, migration giữ tổng/không lịch sử giả, midnight/retry/stop, inactive/gap/expiry/rollback, scoped aggregation/ms/month/week, quyền/invalid/future/removal và phiên qua rollout. Lượt E2E đầu **14/14 desktop/mobile đạt (1,9phút)** gồm study-statistics/student-activity/class-roster: đổi mode/date/history cũ, livecredit trong modal/lỗi/retry/backend cũ, geometry/focus, giữ roster/live/corrections/honors. Sau bổ sung cutoff rollout chỉ ở backend, build cuối và **6/6 E2E thống kê desktop/mobile đạt (42,9giây)** trên server mới. Đã xem ảnh desktop/mobile, số/thanh/kỳ thiếu rõ. Mọi test server/database riêng, không Railway/.local/greenedu.sqlite; không tạo dữ liệu học giả ở production. Chưa commit/push/deploy; cần backend Railway mới để thêm bảng và bắt đầu lưu lịch sử. Giữ frontend local5173/HMR/API-DB Railway, GET component mới200; git diff --check đạt. Không tự mở API SQLite local chính.
+
+## Dau Tay lớp 11/2: chương3 và4 chưa luyện tập — 14/10/2026
+
+Theo yêu cầu mới, sửa riêng thời gian **Chương III: ĐIỆN TRƯỜNG** và **Chương IV: DÒNG ĐIỆN–MẠCH ĐIỆN** của Dau Tay trong Lớp11/2♥ từ3600 xuống **0giây**. Kiểm tra trước ghi xác nhận cả hai chương đã có0attempts/0corrections và không có phiên học; không cần xóa lịch sử. Transaction chỉ UPDATE2 hàng progress.seconds, giữ chươngI/II mỗi3600giây và toàn bộ các trường/bản ghi khác. Tổng thời gian lớp của tài khoản còn7200giây.
+
+Đúng SQLite Railway `/data/greenedu.sqlite`, service SangKienKn/production. Backup WAL-safe `/data/backups/reset-study-time-dautay-11-2-ch3-ch4-1791969728453.sqlite`, audit trước/sau cùng tên `.json`; COMMIT và kết nối chỉ đọc độc lập xác nhận chươngIII/IV có0giây,0lượt,0sửa sai. Ảnh `.local/dautay-ch3-ch4-zero-20261014.png`. Không sửa mã ứng dụng, deploy/restart/push hoặc database local; giữ công việc có sẵn. Quyết định này thay riêng chươngIII/IV của lần đặt cả4chương thành1giờ trước.
+
 ## Chốt Git cập nhật thời gian luyện tập — 14/10/2026
 
 Theo yêu cầu push remote sau khi hoàn tất tính năng, gom backend/API nhẹ, hook/frontend, CSS,3ca server/2ca E2E và tài liệu để commit/push **origin/main**. Fetch trước commit xác nhận HEAD/origin/main cùng7683297, không có commit mới cần ghép; git diff --check đạt. Chỉ9file docs/server/src/e2e, không kèm database/.local/file học sinh/secrets. Trạng thái “chưa commit/push” ở phần triển khai bên dưới là trước yêu cầu chốt Git này.

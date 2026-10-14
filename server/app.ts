@@ -40,6 +40,16 @@ import { loginEmail } from "../shared/login-email.js";
 import { registerFeedbackRoutes } from "./feedback.js";
 import { archiveChapter, chapterIsArchived } from "./chapter-archive.js";
 import { activeChapterIds } from "./chapter-order.js";
+import {
+  creditStudyInterval,
+  startStudyHistory,
+  studentStudyStatistics,
+} from "./study-history.js";
+import {
+  studyDate,
+  validStudyDate,
+  type StudyPeriod,
+} from "../shared/study-statistics.js";
 
 export type Row = Record<string, any>;
 export type AppRequest = Request & { user?: Row; tokenHash?: string };
@@ -80,6 +90,7 @@ export function createApp(
   } = {},
 ) {
   const now = options.now ?? Date.now;
+  startStudyHistory(db, now());
   const publicUser = (u: Row) => ({
     id: u.id,
     email: u.email,
@@ -888,6 +899,24 @@ export function createApp(
       )) : 0,
     })));
   });
+  app.get(
+    "/api/classrooms/:id/students/:studentId/study-statistics",
+    (req: AppRequest, res) => {
+      teacher(req);
+      const classId = String(req.params.id),
+        studentId = String(req.params.studentId);
+      classroom(req, classId);
+      if (!db.prepare("SELECT 1 FROM memberships WHERE classroom_id=? AND student_id=?").get(classId, studentId))
+        fail(404, "Học sinh không thuộc lớp này.");
+      const period = req.query.period ?? "day";
+      if (!["day", "week", "month"].includes(period as string))
+        fail(400, "Khoảng thống kê không hợp lệ.");
+      const date = req.query.date ?? studyDate(now());
+      if (typeof date !== "string" || !validStudyDate(date) || date > studyDate(now()))
+        fail(400, "Ngày thống kê không hợp lệ.");
+      res.json(studentStudyStatistics(db, classId, studentId, period as StudyPeriod, date));
+    },
+  );
   app.post("/api/classrooms/:id/students", (req: AppRequest, res) => {
     teacher(req);
     const c = classroom(req, String(req.params.id));
@@ -1523,16 +1552,16 @@ export function createApp(
       req.body.active && s.active && delta <= 30000
         ? Math.max(0, end - s.last_received) / 1000
         : 0;
-    db.prepare(
-      "INSERT INTO progress VALUES (?,?,?) ON CONFLICT(student_id,chapter_id) DO UPDATE SET seconds = seconds + excluded.seconds",
-    ).run(req.user!.id, s.chapter_id, seconds);
-    db.prepare(
-      "UPDATE study_sessions SET last_received = ?, last_activity = ?, active = ? WHERE id = ?",
-    ).run(
-      timestamp,
-      req.body.interacted && req.body.active ? timestamp : s.last_activity,
-      Number(req.body.active),
-      s.id,
+    creditStudyInterval(
+      db, req.user!.id, s.chapter_id, s.last_received,
+      s.last_received + seconds * 1000,
+      () => {
+        db.prepare("UPDATE study_sessions SET last_received = ?, last_activity = ?, active = ? WHERE id = ?").run(
+          timestamp,
+          req.body.interacted && req.body.active ? timestamp : s.last_activity,
+          Number(req.body.active), s.id,
+        );
+      },
     );
     grantLearningMilestones(db, req.user!.id, now());
     res.json({
@@ -1556,12 +1585,13 @@ export function createApp(
               Math.min(timestamp, s.last_activity + 120000) - s.last_received,
             ) / 1000
           : 0;
-      db.prepare(
-        "INSERT INTO progress VALUES (?,?,?) ON CONFLICT(student_id,chapter_id) DO UPDATE SET seconds = seconds + excluded.seconds",
-      ).run(req.user!.id, s.chapter_id, seconds);
-      db.prepare(
-        "DELETE FROM study_sessions WHERE id = ? AND student_id = ?",
-      ).run(id, req.user!.id);
+      creditStudyInterval(
+        db, req.user!.id, s.chapter_id, s.last_received,
+        s.last_received + seconds * 1000,
+        () => {
+          db.prepare("DELETE FROM study_sessions WHERE id = ? AND student_id = ?").run(id, req.user!.id);
+        },
+      );
     }
     grantLearningMilestones(db, req.user!.id, now());
     res.json({ ok: true });

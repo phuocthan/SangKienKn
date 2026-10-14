@@ -10,6 +10,7 @@ import { ensureFeedbackSchema } from "./feedback.js";
 import { ensureGroupDiscussionSchema } from "./group-discussion.js";
 import { ensureChapterArchiveSchema } from "./chapter-archive.js";
 import { ensureChapterOrderSchema } from "./chapter-order.js";
+import { ensureStudyHistorySchema } from "./study-history.js";
 
 export function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -191,6 +192,7 @@ export function openDatabase(path: string) {
   ensureLearningSchema(db);
   ensureChapterArchiveSchema(db);
   ensureChapterOrderSchema(db);
+  ensureStudyHistorySchema(db);
   ensureLevelSettingsSchema(db);
   ensureLessonSchema(db);
   ensureWelcomeSchema(db);
