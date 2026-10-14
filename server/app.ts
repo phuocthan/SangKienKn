@@ -860,6 +860,34 @@ export function createApp(
     classroom(req, String(req.params.id));
     res.json(roster(String(req.params.id)));
   });
+  app.get("/api/classrooms/:id/student-activity", (req: AppRequest, res) => {
+    teacher(req);
+    const classId = String(req.params.id);
+    classroom(req, classId);
+    const timestamp = now();
+    const members = db.prepare(`
+      SELECT m.student_id AS id,
+        COALESCE((SELECT SUM(CAST(p.seconds AS INTEGER)) FROM progress p
+          JOIN chapters c ON c.id=p.chapter_id
+          WHERE p.student_id=m.student_id AND c.classroom_id=?),0) AS seconds,
+        s.active, s.last_received, s.last_activity
+      FROM memberships m
+      LEFT JOIN study_sessions s ON s.student_id=m.student_id
+        AND s.chapter_id IN (SELECT id FROM chapters WHERE classroom_id=?)
+      WHERE m.classroom_id=?
+    `).all(classId, classId, classId) as Row[];
+    res.set("Cache-Control", "no-store").json(members.map((member) => ({
+      id: String(member.id),
+      seconds: Number(member.seconds),
+      // Presence never credits time. Expire disconnected/idle sessions even
+      // when no subsequent heartbeat arrives to delete the database row.
+      activeForMs: member.active === 1 ? Math.max(0, Math.min(
+        30000 - (timestamp - member.last_received),
+        120000 - (timestamp - member.last_activity),
+        30000,
+      )) : 0,
+    })));
+  });
   app.post("/api/classrooms/:id/students", (req: AppRequest, res) => {
     teacher(req);
     const c = classroom(req, String(req.params.id));

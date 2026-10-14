@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: thời gian luyện tập trực tiếp trong quản lý học sinh — 14/10/2026
+
+Trong **Lớp học của tôi → Quản lý lớp → Quản lý học sinh**, ô thời gian giữ giờ/phút và thêm giây nhỏ phía dưới; khi có phiên học hoạt động trong đúng lớp, hiện nhãn xanh **Đang luyện tập**. Đây là tín hiệu phiên luyện/ôn/sửa đang hoạt động, không phải trạng thái đăng nhập online tổng quát. Bảng lấy số giây đã được server ghi nhận; không tự cộng thời gian bằng đồng hồ frontend. Tín hiệu nhẹ cập nhật5giây khi trang visible/online và khi focus/reconnect; số liệu đầy đủ/khắc phục giữ nhịp30giây. Nhịp học sinh hiện có15giây nên thay đổi thời gian thường xuất hiện sau15–20giây.
+
+Phiên ngừng, không có heartbeat30giây hoặc không tương tác2phút thì nhãn hết hiệu lực. Lỗi/mất mạng ẩn nhãn, giữ thời gian đã xác nhận và thông báo ngắn có Thử lại; không gán offline cho người chưa có phiên. Backend cũ báo cần cập nhật máy chủ và giữ bảng hiện có. Không thêm cột hoặc hoạt ảnh, không thay cách tính giờ/cấp/điểm, không tạo dữ liệu lịch sử theo ngày/tuần/tháng.
+
 ## Hiện hành: bục Top3 thấp hơn, cấp chỉ còn icon — 14/10/2026
 
 Theo ảnh mới “quá cao”, bục vàng/bạc/đồng giảm **188/174/160px** ở khung rộng, **168/156/144px** trong container≤600px (thay242/226/210 và218/204/190). Bỏ chữ Cấp+n ở cả Top3 và hạng4–10; icon vẫn có tên cấp cho trình đọc màn hình. Bỏ min-height dành sẵn hai dòng cho tên ngắn; giữ giới hạn hai dòng/tooltip tên đầy đủ. Giảm gap2px, padding thân, khoảng header→bục và bục→danh sách, avatar Top3 còn44px/36px. Giữ ba bục chung chân, vàng cao nhất, crown/medal/khung vàng và chỉ số/tỷ lệ thật. Avatar/tên header1,5× của đợt trước không đổi. QA mới ở đầu session-handoff.

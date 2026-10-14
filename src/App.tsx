@@ -1,4 +1,5 @@
 import { StudentNotebook } from "./StudentNotebook";
+import { useStudentActivity } from "./useStudentActivity";
 import { ChapterDelete } from "./ChapterDelete";
 import {
   useCallback,
@@ -2166,12 +2167,18 @@ function Roster({
   const [leaderboard, setLeaderboard] = useState<ClassLeaderboard>();
   const [boardError, setBoardError] = useState("");
   const [notebookStudent, setNotebookStudent] = useState<Student | null>(null);
+  const [rowsReceivedAt, setRowsReceivedAt] = useState(0);
   const [rows, setRows] = useState<Student[]>([]),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true),
     [search, setSearch] = useState(""),
     [retry, setRetry] = useState(0),
     [exporting, setExporting] = useState(false);
+  const activity = useStudentActivity(classroom.id, retry);
+  const recordedSeconds = (s: Student) =>
+    activity.snapshot && activity.snapshot.receivedAt >= rowsReceivedAt
+      ? (activity.snapshot.members.get(s.id)?.seconds ?? s.seconds)
+      : s.seconds;
   useEffect(() => {
     let alive = true;
     let inFlight = false;
@@ -2190,8 +2197,11 @@ function Roster({
           if (studentsResult.status === "rejected") throw studentsResult.reason;
           if (alive) {
             setRows(studentsResult.value);
+            setRowsReceivedAt(Date.now());
             setLeaderboard(
-              boardResult.status === "fulfilled" ? boardResult.value : undefined,
+              boardResult.status === "fulfilled"
+                ? boardResult.value
+                : undefined,
             );
             setBoardError(
               boardResult.status === "rejected"
@@ -2277,6 +2287,17 @@ function Roster({
           </div>
         }
       />
+      {activity.warning && (
+        <p className="roster-activity-warning" role="status">
+          {activity.warning}
+          <button
+            className="text-button"
+            onClick={() => setRetry((n) => n + 1)}
+          >
+            Thử lại
+          </button>
+        </p>
+      )}
       {boardError && (
         <div className="error-banner" role="alert">
           {boardError}
@@ -2355,7 +2376,20 @@ function Roster({
                         </div>
                       </div>
                     </td>
-                    <td className="roster-time-cell">{duration(s.seconds)}</td>
+                    <td
+                      className="roster-time-cell"
+                      data-recorded-seconds={recordedSeconds(s)}
+                    >
+                      {duration(recordedSeconds(s))}
+                      <small className="roster-time-detail">
+                        {Math.floor(recordedSeconds(s) % 60)} giây
+                      </small>
+                      {activity.isStudying(s.id) && (
+                        <span className="roster-study-status">
+                          Đang luyện tập
+                        </span>
+                      )}
+                    </td>
                     <td>{s.answeredQuestions ?? s.total}</td>
                     <td>
                       {s.total

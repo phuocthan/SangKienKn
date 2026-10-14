@@ -1,5 +1,21 @@
 # Bàn giao session GreenEdu
 
+## Chốt Git cập nhật thời gian luyện tập — 14/10/2026
+
+Theo yêu cầu push remote sau khi hoàn tất tính năng, gom backend/API nhẹ, hook/frontend, CSS,3ca server/2ca E2E và tài liệu để commit/push **origin/main**. Fetch trước commit xác nhận HEAD/origin/main cùng7683297, không có commit mới cần ghép; git diff --check đạt. Chỉ9file docs/server/src/e2e, không kèm database/.local/file học sinh/secrets. Trạng thái “chưa commit/push” ở phần triển khai bên dưới là trước yêu cầu chốt Git này.
+
+Phiên Git không chạy lại kiểm thử: TypeScript/build,137/137 server và8/8 E2E là kết quả mới của lượt triển khai ngay trước, không báo thành lượt test mới của phiên push. Push không xác nhận backend Railway đã triển khai; cần phiên bản có student-activity để nguồn cập nhật trực tiếp hoạt động. Không thao tác dữ liệu production hoặc tự deploy/restart.
+
+## Thời gian luyện tập cập nhật trên quản lý học sinh — 14/10/2026
+
+Người dùng làm rõ yêu cầu thống kê: muốn thời gian luyện tập cập nhật ở trang quản lý giáo viên khi một học sinh đang online. Thực hiện cập nhật phiên học hiện có, không tự chọn triển khai báo cáo ngày/tuần/tháng. Git đầu đợt sạch main7683297; giữ các quyết định/data correction đã có. Không sửa dữ liệu Railway hoặc .local/greenedu.sqlite.
+
+Thêm GET classrooms/:id/student-activity teacher/owner-only, no-store; SQL lấy tất cả thành viên hiện tại, tổng progress của mọi chương đúng lớp (khớp roster kể cả lịch sử) và phiên study_sessions đúng lớp. Chỉ trả id/seconds/activeForMs, không email/session ID. TTL min(heartbeat30giây, idle120giây), chỉ khi active; đọc không credit thời gian/xóa dữ liệu. Không đổi heartbeat15giây, quy tắc focus/idle/credit, không migration.
+
+useStudentActivity poll5giây khi visible/online, focus/reconnect/visibility; không chồng request, bỏ kết quả lớp/unmount cũ, trừ round-trip khỏi TTL và tự hết nhãn khi tín hiệu cũ. Bảng giữ đồng bộ đầy đủ30giây cho cấp/câu/khắc phục. Thời gian hiển thị giờ/phút + dòng giây, nhãn xanh Đang luyện tập tại ô thời gian; chỉ lấy số server đã xác nhận và ưu tiên nguồn mới hơn. Nguồn nhẹ làm tròn từng chương giống summary/roster, giữ số giây lẻ trong database. Nhãn là phiên học hoạt động, không phải online tổng quát; học sinh học lớp khác không hiện. Lỗi/mất mạng ẩn nhãn, giữ tổng đã xác nhận; thông báo/Thử lại, 404 ngừng nguồn nhẹ và báo cần backend mới. Đã xem ảnh hàng desktop/mobile, nhãn/thời gian gọn và rõ; mobile giữ bảng cuộn ngang hiện có.
+
+QA cuối: TypeScript và build riêng **.local/live-study-20261014-final đạt**; **137/137 server đạt** gồm3ca mới: quyền/đúng lớp/không lộ session/giây lẻ khớp roster, heartbeat+stop+đọc không credit, mất heartbeat/idle hết hiệu lực. Lượt3ca đầu có2lỗi fixture dùng hàng đầu thay đúng student-demo; sửa tìm ID. TypeScript phát hiện port bị mất narrowing trong closure fixture; sửa const port. E2E đầu7/8 do nguồn nhẹ trả giây lẻ khác summary; chuẩn hóa từng chương, kiểm tra thời gian UI đúng nguồn server. **Lượt cuối8/8 E2E desktop/mobile đạt (1,3phút)** gồm student-activity/class-roster: start/heartbeat/stop tự đồng bộ không reload, lỗi503/404/retry/không mất bảng hoặc dựng trạng thái giả, giữ metric/clock/khắc phục/vinh danh. Test dùng server/database riêng, không Railway. git diff --check đạt, local5173 phục vụ hook mới200 qua HMR. Chưa commit/push/deploy. Cần backend Railway mới cho API; local5173 vẫn dùng API/database Railway thật nên hiện cảnh báo chờ máy chủ khi API chưa có. Không báo đã hoạt động production.
+
 ## Chốt Git cho các chỉnh giao diện theo ảnh — 14/10/2026
 
 Người dùng yêu cầu push remote sau các đợt châm ngôn/thẻ/roadmap/Top1, avatar-header1,5× và thu thấp Top3. Gom mã, CSS, test và tài liệu của cả ba đợt để commit/push **origin/main**. Fetch trước commit xác nhận HEAD và origin/main cùng915f7d6, không có commit remote mới cần ghép; git diff --check đạt. Chỉ gồm docs/e2e/src, không kèm .local/database/file học sinh/secrets. Các đoạn “chưa commit/push” bên dưới là trạng thái trước yêu cầu push này.

@@ -1,5 +1,13 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Chốt push cập nhật thời gian luyện tập — 14/10/2026
+
+Theo yêu cầu mới, chốt API/hiển thị trực tiếp thời gian luyện tập, test và tài liệu vào **origin/main**. Fetch xác nhận main/remote cùng7683297 trước commit; không kèm database/.local/secrets. Các ghi nhận “chưa push” bên dưới là trước đợt chốt này. Không chạy lại hoặc báo kết quả kiểm thử lượt triển khai thành test mới của phiên Git. Chưa xác minh Railway triển khai backend mới; chi tiết ở đầu [session-handoff.md](session-handoff.md).
+
+## Hiện hành: cập nhật thời gian luyện tập tại bảng giáo viên — 14/10/2026
+
+Theo giải thích mới của người dùng, làm thời gian luyện tập cập nhật khi học sinh đang học ở bảng **Quản lý học sinh**, chưa làm báo cáo ngày/tuần/tháng. API nhẹ `GET /api/classrooms/:id/student-activity` chỉ chủ lớp, tổng giây đã ghi nhận và thời hạn tín hiệu phiên học theo đúng lớp; không cộng thời gian hoặc trả session ID. Frontend đồng bộ5giây, hiện giây và nhãn Đang luyện tập, hết tín hiệu thì bỏ nhãn; giữ refresh đầy đủ30giây. Lỗi/mất mạng không giữ trạng thái live giả; backend cũ có hướng dẫn cập nhật/Thử lại. Không migration/dữ liệu mới. QA cuối: TypeScript/build,137/137 server và8/8 E2E desktop/mobile đạt trên dữ liệu riêng; đã xem ảnh. Cần triển khai backend Railway mới; chưa push/deploy hoặc kiểm thử ghi production. Chi tiết ở đầu [session-handoff.md](session-handoff.md).
+
 ## Chốt push các chỉnh giao diện theo ảnh — 14/10/2026
 
 Theo yêu cầu push remote, gom các thay đổi lời dẫn/thẻ/roadmap/Top1, avatar-header1,5× và Top3 thấp/chỉ icon cấp cùng test/tài liệu để commit/push **origin/main**. Fetch trước commit: main local/remote cùng915f7d6, git diff --check đạt; không kèm .local/database/secrets. Trạng thái “chưa push” của các lượt dưới đã được thay bởi đợt chốt này. QA là các lượt đã chạy vừa trước yêu cầu push, không chạy lại hoặc báo thành kết quả mới trong phiên Git. Chưa xác minh Railway phục vụ bundle mới từ thao tác push; chi tiết ở đầu session-handoff.
