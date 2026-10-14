@@ -1,4 +1,5 @@
 import { navigateTo } from "./navigation";
+import { acknowledgeOnlineExamCreated } from "./online-exam-created";
 import { test, expect, type Page } from "@playwright/test";
 
 async function login(page: Page, teacher: boolean) {
@@ -103,9 +104,7 @@ test("online manager requires one source and supports whole chapter plus selecte
     "learning-ch1::Bài 2",
     "learning-ch2::Bài 2",
   ]);
-  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Bạn đã tạo bài kiểm tra thành công",
-  );
+  await acknowledgeOnlineExamCreated(page);
   await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
   await expect(
     page.getByRole("heading", { name: "Ôn tập & kiểm tra", exact: true }),
@@ -170,6 +169,7 @@ test("Word upload reads both real 15-question files without prior chapter checks
   expect(payload.lessonKeys).toBeUndefined();
   expect(payload.questions).toHaveLength(30);
   expect(payload.chapterIds.sort()).toEqual(["learning-ch1", "learning-ch2"]);
+  await acknowledgeOnlineExamCreated(page);
 });
 
 test("student online page manages preparations separately from hunt eligibility", async ({
@@ -185,9 +185,7 @@ test("student online page manages preparations separately from hunt eligibility"
   const title = `Manager student ${info.project.name} ${Date.now()}`;
   await form.getByLabel("Tên bộ câu").fill(title);
   await form.getByRole("button", { name: "Lưu bài kiểm tra" }).click();
-  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Bạn đã tạo bài kiểm tra thành công",
-  );
+  await acknowledgeOnlineExamCreated(page);
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
   await login(page, false);
   await expect(page.getByText(title, { exact: true })).toBeVisible();

@@ -105,6 +105,13 @@ export function Learning({
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [examFormOpen, setExamFormOpen] = useState(false);
+  const [createdOnlineExam, setCreatedOnlineExam] = useState<{
+    id: string;
+    preparationMinutes: number;
+    durationMinutes: number;
+  } | null>(null);
+  const [createdExamError, setCreatedExamError] = useState("");
+  const createExamButtonRef = useRef<HTMLButtonElement>(null);
   const [formError, setFormError] = useState("");
   const formErrorRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
@@ -237,6 +244,32 @@ export function Learning({
     startKeys.current.delete(intent);
     onReview(r.id, classroom.chapters[0]);
   }
+  function dismissCreatedOnlineExam() {
+    setCreatedOnlineExam(null);
+    requestAnimationFrame(() => createExamButtonRef.current?.focus());
+  }
+  async function startCreatedOnlineExam() {
+    if (busy || !createdOnlineExam) return;
+    setBusy(true);
+    setCreatedExamError("");
+    setError("");
+    let started = false;
+    try {
+      await api(`/learning/exams/${createdOnlineExam.id}/open`, {});
+      setCreatedOnlineExam(null);
+      started = true;
+      setNotice(
+        `Đã gửi thông báo cho lớp. Kiểm tra sẽ mở sau ${createdOnlineExam.preparationMinutes} phút, thời gian làm bài ${createdOnlineExam.durationMinutes} phút.`,
+      );
+      await refresh();
+    } catch (e) {
+      setCreatedExamError(errorMessage(e));
+    } finally {
+      setBusy(false);
+      if (started)
+        requestAnimationFrame(() => createExamButtonRef.current?.focus());
+    }
+  }
   async function create(e: FormEvent) {
     e.preventDefault();
     setFormError("");
@@ -279,7 +312,7 @@ export function Learning({
     const intent = `create:${JSON.stringify(body)}`;
     await act(
       async () => {
-        await api(
+        const saved = await api<{ id: string }>(
           `/classrooms/${classroom.id}/${isExam ? "exams" : "blueprints"}`,
           {
             ...body,
@@ -290,11 +323,17 @@ export function Learning({
         if (isOnline) {
           setExamFormOpen(false);
           setTitle("");
+          setCreatedExamError("");
+          setCreatedOnlineExam({
+            id: saved.id,
+            preparationMinutes,
+            durationMinutes,
+          });
         }
       },
       isExam
         ? isOnline
-          ? "Bạn đã tạo bài kiểm tra thành công và lưu vào danh sách. Có thể bắt đầu bất cứ lúc nào."
+          ? ""
           : manualOpen
             ? "Đã tạo kiểm tra. Chọn Mở kiểm tra ngay khi sẵn sàng."
             : "Đã tạo lịch kiểm tra cho lớp."
@@ -344,6 +383,7 @@ export function Learning({
         </div>
         {teacher && onlinePage && (
           <button
+            ref={createExamButtonRef}
             className="button primary"
             disabled={busy || !data}
             onClick={() => {
@@ -367,6 +407,41 @@ export function Learning({
         <div className="learning-notice" role="status">
           {notice}
         </div>
+      )}
+      {createdOnlineExam && (
+        <Modal
+          title="Đã tạo bài kiểm tra"
+          dismissible={!busy}
+          onClose={dismissCreatedOnlineExam}
+        >
+          <p>
+            Bạn đã tạo bài kiểm tra thành công và lưu vào danh sách. Có thể bắt
+            đầu bất cứ lúc nào ở trong danh sách.
+          </p>
+          {createdExamError && (
+            <p className="error-banner" role="alert">
+              {createdExamError}
+            </p>
+          )}
+          <div className="modal-actions">
+            <button
+              type="button"
+              className="button primary"
+              disabled={busy}
+              onClick={() => void startCreatedOnlineExam()}
+            >
+              {busy ? "Đang bắt đầu…" : "Bắt đầu ngay"}
+            </button>
+            <button
+              type="button"
+              className="button outline"
+              disabled={busy}
+              onClick={dismissCreatedOnlineExam}
+            >
+              Đã hiểu
+            </button>
+          </div>
+        </Modal>
       )}
       {!data ? (
         <div className="loading-panel">Đang tải tiến độ…</div>

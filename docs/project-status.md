@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: popup tạo online với Bắt đầu ngay/Đã hiểu — 14/10/2026
+
+Thay banner sau lưu online bằng popup đúng nội dung người dùng, hai lựa chọn Bắt đầu ngay/Đã hiểu. Bắt đầu dùng ID vừa trả từ create, API open hiện có và X/Y cũ; lỗi trong popup/thử lại, khóa khi gửi, đóng thành công/cập nhật danh sách. Đã hiểu giữ bản chưa bắt đầu; focus về Tạo bài kiểm tra. QA mới: TypeScript/build đạt;14ca hồi quy online đạt, lượt xác nhận cuối6/6 popup desktop/mobile đạt sau sửa harness reload chọn lại lớp/page. Có bank/upload/trùng tên/start/lỗi/busy/ack/reload/geometry/focus. Không thêm backend/migration ở thay đổi popup. Phần thống kê trước đã commit riêng03f8cec để push cùng đợt theo yêu cầu; không database/secrets/deploy. Chi tiết mới ở đầu session-handoff.
+
 ## Chốt Git thống kê thời gian theo kỳ — 14/10/2026
 
 Theo yêu cầu push sau chỉnh popup online mới, giữ và chốt phần thống kê đã hoàn tất trong commit riêng để đưa lên origin/main cùng đợt. Fetch trước commit xác nhận local/remotecbdecd9, diff check đạt; không kèm .local/database/secrets. QA144server/14E2E/6xác nhận là của lượt triển khai thống kê đã ghi, không chạy lại trong bước Git. Chưa xác minh backend Railway mới; chi tiết ở đầu session-handoff.

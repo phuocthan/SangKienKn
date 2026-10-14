@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: popup sau tạo kiểm tra online — 14/10/2026
+
+Lưu online thành công đóng form và mở **Đã tạo bài kiểm tra**, nội dung chính xác: **Bạn đã tạo bài kiểm tra thành công và lưu vào danh sách. Có thể bắt đầu bất cứ lúc nào ở trong danh sách.** Không dùng banner thành công cũ. **Bắt đầu ngay** (primary) mở đúng ID bài vừa lưu qua API hiện có, giữ X phút chuẩn bị/Y phút làm bài; **Đã hiểu** (outline) đóng popup, bài vẫn trong danh sách và chưa phát yêu cầu. Dùng Modal/giao diện hiện có, đóng bằng X/Escape/backdrop tương đương Đã hiểu khi không busy. Khi bắt đầu khóa hai nút và thao tác đóng popup, nút ghi Đang bắt đầu…; lỗi hiện trong popup để thử lại, giữ bài đã lưu, không tạo lại. Đóng popup/bắt đầu thành công trả focus về Tạo bài kiểm tra. Lưu thất bại giữ form/lỗi, không popup thành công. Tên trùng không dùng để tìm bài; dùng response.id. Không sửa popup của thi theo lịch/ma trận hoặc quy tắc phòng thi. Xem nghiệp vụ [online-exams.md](online-exams.md), QA mới ở đầu session-handoff.
+
 ## Hiện hành: thống kê thời gian từng học sinh theo kỳ — 14/10/2026
 
 **Lớp học của tôi → Quản lý lớp → Quản lý học sinh**, mỗi ô thời gian có nút **Thống kê** mở hộp theo đúng học sinh/lớp/môn. Nhãn xanh **Đang luyện tập** vẫn ở cùng ô; theo lựa chọn mới của người dùng, không thêm trạng thái online đăng nhập tổng quát. Nút có nhãn trợ năng kèm tên, đóng hộp trả focus về nút.

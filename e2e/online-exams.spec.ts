@@ -1,4 +1,5 @@
 import { navigateTo } from "./navigation";
+import { acknowledgeOnlineExamCreated } from "./online-exam-created";
 import { test, expect, type Page } from "@playwright/test";
 
 async function login(page: Page, teacher = false) {
@@ -69,9 +70,7 @@ test("teacher starts a multi-lesson online exam; students get a persistent prepa
   await form.getByLabel("Thời gian chuẩn bị (phút)").fill("2");
   await form.getByLabel("Thời gian làm bài (phút)").fill("45");
   await form.getByRole("button", { name: "Lưu bài kiểm tra" }).click();
-  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Bạn đã tạo bài kiểm tra thành công",
-  );
+  await acknowledgeOnlineExamCreated(page);
   const row = page
     .locator(".learning-row")
     .filter({ has: page.getByText(title, { exact: true }) })
@@ -156,9 +155,7 @@ test("uploaded online exam notifies and opens a saved room; reload keeps questio
   await form.getByLabel("Thời gian chuẩn bị (phút)").fill("0");
   await form.getByLabel("Thời gian làm bài (phút)").fill("25");
   await form.getByRole("button", { name: "Lưu bài kiểm tra" }).click();
-  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Bạn đã tạo bài kiểm tra thành công",
-  );
+  await acknowledgeOnlineExamCreated(page);
   const row = page
     .locator(".learning-row")
     .filter({ has: page.getByText(title, { exact: true }) })
