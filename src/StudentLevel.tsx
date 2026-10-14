@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { LevelArtwork } from "./LevelArtwork";
-import { Check, LockKeyhole } from "./icons";
+import { Check, CheckCircle2, LockKeyhole } from "./icons";
 import { STUDENT_LEVEL_NAMES, studentLevel } from "../shared/student-levels";
 import type { Chapter, Classroom, Student } from "./types";
 import { duration } from "./api";
@@ -26,6 +26,18 @@ export function StudentLevelIcon({
     >
       <LevelArtwork stage={stage} />
     </svg>
+  );
+}
+
+export function ChapterTitle({ title }: { title: string }) {
+  const short =
+    title.match(
+      /^(Chương\s+(?:[IVXLCDM]+|\d+))(?=\s*(?:[:·.\-–—]|$))/iu,
+    )?.[1] ?? title;
+  return (
+    <h3 title={title} aria-label={title}>
+      {short}
+    </h3>
   );
 }
 
@@ -135,6 +147,15 @@ export function ChapterLevelTimeline({ chapter }: { chapter: Chapter }) {
               aria-current={index + 1 === stage.level ? "step" : undefined}
             >
               <StudentLevelIcon level={index + 1} />
+              {index === 4 && stage.level === 5 && (
+                <span
+                  className="level-completion-mark"
+                  title="Đã hoàn thành chương"
+                  aria-label="Đã hoàn thành chương"
+                >
+                  <CheckCircle2 size={18} />
+                </span>
+              )}
               {index + 1 !== stage.level && (
                 <span
                   className="level-state-mark"
@@ -208,9 +229,17 @@ export function ChapterLevelTimeline({ chapter }: { chapter: Chapter }) {
         </div>
       </div>
       <div className="chapter-level-summary">
-        <span>
+        <span
+          className={
+            stage.seconds > maximum ? "chapter-time-exceeded" : undefined
+          }
+          title={
+            stage.seconds > maximum
+              ? "Thời gian học đã vượt mốc Kết Trái"
+              : undefined
+          }
+        >
           {duration(stage.seconds)} / {duration(maximum)} · {chapter.total} lượt
-          luyện tập
         </span>
         <strong>
           Cấp {stage.level} · {stage.name}
@@ -218,7 +247,7 @@ export function ChapterLevelTimeline({ chapter }: { chapter: Chapter }) {
       </div>
       <p className="chapter-level-next">
         {stage.level === 5
-          ? "Đã đạt Kết Trái trong chương này."
+          ? "Đã đạt Kết Trái."
           : `Còn ${duration(stage.remainingSeconds)} để lên ${STUDENT_LEVEL_NAMES[stage.level]}.`}
       </p>
     </div>
@@ -236,13 +265,10 @@ export function StudentLevelCard({ classroom }: { classroom: Classroom }) {
       <h2>
         {classroom.name} · {classroom.subject}
       </h2>
-      <p>
-        Mỗi chương có cấp riêng, tính từ thời gian học được ghi nhận trong
-        chương đó.
-      </p>
+      <p>Cấp từng chương tính theo thời gian học được ghi nhận.</p>
       {classroom.chapters.map((chapter) => (
         <article className="chapter-level-card" key={chapter.id}>
-          <h3>{chapter.title}</h3>
+          <ChapterTitle title={chapter.title} />
           <ChapterLevelTimeline chapter={chapter} />
         </article>
       ))}

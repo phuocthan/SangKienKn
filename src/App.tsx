@@ -47,6 +47,7 @@ import {
   LinkButton,
   Logo,
   Modal,
+  Motto,
   SectionTitle,
   SkipLink,
 } from "./components";
@@ -67,8 +68,13 @@ import {
   StudentLevelCard,
   StudentLevelIcon,
   BloomingTreeIcon,
+  ChapterTitle,
 } from "./StudentLevel";
-import { STUDENT_LEVEL_NAMES } from "../shared/student-levels";
+import {
+  STUDENT_LEVEL_NAMES,
+  studentLevel,
+  levelStepSeconds,
+} from "../shared/student-levels";
 import { GardenGoal } from "./GardenGoal";
 import { searchText } from "./search";
 import { GardenNote } from "./GardenNote";
@@ -850,9 +856,10 @@ export default function App() {
                 ) : (
                   <div className="student-home">
                     <PageHeading
+                      motto
                       eyebrow="HỌC MỘT CHÚT · LỚN MỘT CHÚT"
                       title={`Chào ${user.name.split(" ").slice(-2).join(" ")}, hôm nay mình học gì?`}
-                      text="Khu vườn nhỏ đang lớn lên từ những cố gắng của bạn."
+                      text="Khu vườn lớn lên từ cố gắng của bạn."
                     />
                     <div className="garden-welcome-grid">
                       <div className="garden-hero student-welcome-hero">
@@ -861,11 +868,15 @@ export default function App() {
                             <Leaf size={14} />
                             KHU VƯỜN KIẾN THỨC
                           </span>
-                          <h2>Gieo nỗ lực hôm nay, đón tri thức ngày mai.</h2>
+                          <h2>
+                            <Motto>
+                              Gieo nỗ lực hôm nay, đón tri thức ngày mai.
+                            </Motto>
+                          </h2>
                           <p>
                             {totalSeconds
-                              ? `Bạn đã dành ${duration(totalSeconds)} để chăm khu vườn ${current.subject}. Tiếp tục hành trình của mình nhé.`
-                              : "Khu vườn đang chờ những hạt mầm đầu tiên. Bắt đầu một bài luyện tập để thấy mình tiến bộ mỗi ngày."}
+                              ? `Bạn đã học ${duration(totalSeconds)} ở môn ${current.subject}. Tiếp tục chăm vườn nhé.`
+                              : "Khu vườn chờ hạt mầm đầu tiên. Bắt đầu luyện tập để tiến bộ mỗi ngày."}
                           </p>
                           <div className="garden-hero-actions">
                             <button
@@ -914,7 +925,7 @@ export default function App() {
                     >
                       <SectionTitle
                         title="Hành trình của tôi"
-                        description={`Mỗi ${current.levelMinutes ?? 60} phút học có hoạt động trong chương tăng một cấp, tối đa cấp 5.`}
+                        description={`${current.levelMinutes ?? 60} phút học có hoạt động/chương tăng một cấp, tối đa 5.`}
                       />
                       <div className="card progress-table">
                         {!current.chapters.length && (
@@ -925,7 +936,7 @@ export default function App() {
                         )}
                         {current.chapters.map((ch) => (
                           <article className="chapter-level-card" key={ch.id}>
-                            <h3>{ch.title}</h3>
+                            <ChapterTitle title={ch.title} />
                             <ChapterLevelTimeline chapter={ch} />
                           </article>
                         ))}
@@ -954,9 +965,10 @@ export default function App() {
               {page === "practice" && (
                 <>
                   <PageHeading
+                    motto
                     eyebrow="CHĂM CÂY BẰNG KIẾN THỨC"
                     title="Hôm nay bạn muốn học gì?"
-                    text="Chọn một chương và luyện tập theo nhịp của riêng mình."
+                    text="Chọn chương, luyện tập theo nhịp của bạn."
                   />
                   <ChapterGrid
                     classroom={current}
@@ -978,9 +990,10 @@ export default function App() {
               {page === "classes" && (
                 <>
                   <PageHeading
+                    motto
                     eyebrow="CÙNG NHAU GIEO TRI THỨC"
                     title="Lớp học của tôi"
-                    text="Theo dõi học sinh và cùng chăm khu vườn của lớp."
+                    text="Theo dõi học sinh, cùng chăm vườn lớp."
                     action={
                       <button
                         className="button primary"
@@ -1186,9 +1199,10 @@ export default function App() {
               {page === "questions" && (
                 <>
                   <PageHeading
+                    motto
                     eyebrow="NỀN TẢNG CỦA MỖI BÀI HỌC"
                     title="Ngân hàng câu hỏi"
-                    text="Câu hỏi rõ ràng và lời giải tốt giúp học sinh tự học hiệu quả hơn."
+                    text="Câu hỏi rõ, lời giải tốt giúp học sinh tự học hiệu quả."
                     action={
                       <button
                         className="button primary"
@@ -1390,19 +1404,23 @@ function PageHeading({
   text,
   action,
   className = "",
+  motto = false,
 }: {
   eyebrow: string;
   title: string;
   text?: string;
   action?: ReactNode;
   className?: string;
+  motto?: boolean;
 }) {
   return (
     <WorkspaceHeading className={`page-heading ${className}`}>
       <div>
         <h1>{title}</h1>
-        <span className="eyebrow">{eyebrow}</span>
-        {text && <p>{text}</p>}
+        <span className="eyebrow">
+          {motto ? <Motto>{eyebrow}</Motto> : eyebrow}
+        </span>
+        {text && <p>{motto ? <Motto>{text}</Motto> : text}</p>}
       </div>
       {action}
     </WorkspaceHeading>
@@ -1716,100 +1734,117 @@ function ChapterGrid({
     );
   return (
     <div className="chapter-grid">
-      {classroom.chapters.map((ch, i) => (
-        <article className="chapter-card card" key={ch.id}>
-          <div className={`chapter-art art-${i % 3}`}>
-            <span className="garden-chapter-number" aria-hidden="true">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <span className="pill chapter-level">
-              Cấp {ch.level} · {stages[ch.level - 1]}
-            </span>
-            <StudentLevelIcon level={ch.level} />
-          </div>
-          <div className="chapter-body">
-            <h3>{ch.title}</h3>
-            <div className="chapter-meta">
-              <span>
-                <Clock3 size={14} />
-                {duration(ch.seconds)}
+      {classroom.chapters.map((ch, i) => {
+        const stage = studentLevel(ch.seconds, ch.levelMinutes);
+        const percent = Math.min(
+          100,
+          (stage.seconds / (4 * levelStepSeconds(ch.levelMinutes))) * 100,
+        );
+        const state =
+          stage.seconds === 0
+            ? "untouched"
+            : stage.level === 5
+              ? "complete"
+              : "growing";
+        return (
+          <article
+            className="chapter-card card"
+            key={ch.id}
+            data-progress-state={state}
+          >
+            <div className={`chapter-art art-${i % 3}`}>
+              <span className="garden-chapter-number" aria-hidden="true">
+                {String(i + 1).padStart(2, "0")}
               </span>
-              <span>
-                <BookOpen size={14} />
-                {ch.questionCount} câu hỏi
+              <span className="pill chapter-level">
+                Cấp {stage.level} · {stage.name}
               </span>
-            </div>
-            <div
-              className="progress-track"
-              role="progressbar"
-              aria-label={`Tiến độ ${ch.title}`}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={Math.round(
-                Math.min(
-                  100,
-                  (ch.seconds / (4 * (ch.levelMinutes ?? 60) * 60)) * 100,
-                ),
+              <StudentLevelIcon level={stage.level} />
+              {stage.level === 5 && (
+                <span
+                  className="chapter-completion-mark"
+                  title="Đã đạt Kết Trái"
+                  aria-label="Đã đạt Kết Trái"
+                >
+                  <CheckCircle2 size={24} />
+                </span>
               )}
-            >
-              <span
-                style={{
-                  width: `${Math.min(100, (ch.seconds / (4 * (ch.levelMinutes ?? 60) * 60)) * 100)}%`,
-                }}
-              />
             </div>
-            <div className="chapter-progress">
-              <span>
-                {ch.level === 5
-                  ? "Đã đạt Kết Trái."
-                  : `Còn ${duration(ch.level * (ch.levelMinutes ?? 60) * 60 - ch.seconds)} để lên ${stages[ch.level]}.`}
-              </span>
-              <strong>
-                {Math.round(
-                  Math.min(
-                    100,
-                    (ch.seconds / (4 * (ch.levelMinutes ?? 60) * 60)) * 100,
-                  ),
-                )}
-                %
-              </strong>
-            </div>
-            {ch.lessons.length > 0 && (
-              <select
-                className="lesson-select"
-                aria-label={`Luyện tập theo bài · ${ch.title}`}
-                value={selectedLessons[ch.id] ?? ""}
-                onChange={(e) =>
-                  setSelectedLessons((previous) => ({
-                    ...previous,
-                    [ch.id]: e.target.value,
-                  }))
-                }
+            <div className="chapter-body">
+              <h3>{ch.title}</h3>
+              <div className="chapter-meta">
+                <span>
+                  <Clock3 size={14} />
+                  {duration(ch.seconds)}
+                </span>
+                <span>
+                  <BookOpen size={14} />
+                  {ch.questionCount} câu hỏi
+                </span>
+              </div>
+              <div
+                className="progress-track"
+                role="progressbar"
+                aria-label={`Tiến độ ${ch.title}`}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.floor(percent)}
               >
-                <option value="">Luyện tập toàn chương</option>
-                {ch.lessons.map((l) => (
-                  <option key={l.title} value={l.title}>
-                    {l.title} · {l.questionCount} câu
-                  </option>
-                ))}
-              </select>
-            )}
-            <button
-              className="button outline full"
-              disabled={
-                !ch.questionCount ||
-                (!!selectedLessons[ch.id] &&
-                  !ch.lessons.find((l) => l.title === selectedLessons[ch.id])
-                    ?.questionCount)
-              }
-              onClick={() => onStudy(ch, selectedLessons[ch.id] || undefined)}
-            >
-              {ch.questionCount ? "Chăm cây · Luyện tập" : "Đang chờ câu hỏi"}
-              <ArrowRight size={17} />
-            </button>
-          </div>
-        </article>
-      ))}
+                <span
+                  style={{
+                    width: `${percent}%`,
+                  }}
+                />
+              </div>
+              <div className="chapter-progress">
+                <span>
+                  {stage.level === 5
+                    ? "Đã đạt Kết Trái."
+                    : `Còn ${duration(stage.remainingSeconds)} để lên ${stages[stage.level]}.`}
+                </span>
+                <strong>{Math.floor(percent)}%</strong>
+              </div>
+              {ch.lessons.length > 0 && (
+                <select
+                  className="lesson-select"
+                  aria-label={`Luyện tập theo bài · ${ch.title}`}
+                  value={selectedLessons[ch.id] ?? ""}
+                  onChange={(e) =>
+                    setSelectedLessons((previous) => ({
+                      ...previous,
+                      [ch.id]: e.target.value,
+                    }))
+                  }
+                >
+                  <option value="">Luyện tập toàn chương</option>
+                  {ch.lessons.map((l) => (
+                    <option key={l.title} value={l.title}>
+                      {l.title} · {l.questionCount} câu
+                    </option>
+                  ))}
+                </select>
+              )}
+              <button
+                className="button outline full"
+                disabled={
+                  !ch.questionCount ||
+                  (!!selectedLessons[ch.id] &&
+                    !ch.lessons.find((l) => l.title === selectedLessons[ch.id])
+                      ?.questionCount)
+                }
+                onClick={() => onStudy(ch, selectedLessons[ch.id] || undefined)}
+              >
+                {ch.questionCount
+                  ? stage.level === 5
+                    ? "Ôn tập lại"
+                    : "Luyện tập"
+                  : "Chờ câu hỏi"}
+                <ArrowRight size={17} />
+              </button>
+            </div>
+          </article>
+        );
+      })}
     </div>
   );
 }
@@ -1852,6 +1887,7 @@ function TeacherHome({
   return (
     <div className="teacher-home">
       <PageHeading
+        motto
         eyebrow="CÙNG HỌC SINH GIEO NHỮNG MẦM XANH"
         title="Một lớp học, nhiều cơ hội lớn lên."
       />
@@ -1862,14 +1898,13 @@ function TeacherHome({
             TRANG GIÁO VIÊN
           </span>
           <h2>
-            Bài học tốt bắt đầu
-            <br />
-            từ sự quan tâm.
+            <Motto>
+              Bài học tốt bắt đầu
+              <br />
+              từ sự quan tâm.
+            </Motto>
           </h2>
-          <p>
-            Chuẩn bị câu hỏi, nhìn thấy nỗ lực và giúp học sinh vượt qua từng
-            lỗi sai.
-          </p>
+          <p>Chuẩn bị câu hỏi, ghi nhận nỗ lực và giúp học sinh sửa sai.</p>
           <button
             className="button primary"
             onClick={() => onPage("questions")}
@@ -2020,9 +2055,10 @@ function Corrections({
   return (
     <>
       <PageHeading
+        motto
         eyebrow="BIẾN LỖI SAI THÀNH KIẾN THỨC"
         title="Sổ tay sửa sai"
-        text="Một câu chưa đúng không phải điểm kết thúc. Đó là nơi để bắt đầu hiểu sâu hơn."
+        text="Mỗi câu chưa đúng là cơ hội để hiểu sâu hơn."
       />
       <div className="correction-filter">
         <label>

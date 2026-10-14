@@ -264,7 +264,7 @@ test("teacher imports with preview and network retry, edits/hides/restores; stud
   await page.getByLabel("Mật khẩu mới", { exact: true }).fill("OwnPass123!");
   await page.getByLabel("Nhập lại mật khẩu mới").fill("OwnPass123!");
   await page.getByRole("button", { name: "Lưu mật khẩu" }).click();
-  await page.getByRole("button", { name: "Chăm cây · Luyện tập" }).click();
+  await page.locator(".chapter-grid").getByRole("button", { name: /^(Luyện tập|Ôn tập lại)$/ }).click();
   await page.getByRole("button", { name: "B 2", exact: true }).click();
   await page.getByRole("button", { name: "Kiểm tra đáp án" }).click();
   await expect(
@@ -345,7 +345,7 @@ test("teacher imports with preview and network retry, edits/hides/restores; stud
   await page
     .getByLabel(`Luyện tập theo bài · ${chapterName}`)
     .selectOption("Bài CSV");
-  await page.getByRole("button", { name: "Chăm cây · Luyện tập" }).click();
+  await page.locator(".chapter-grid").getByRole("button", { name: /^(Luyện tập|Ôn tập lại)$/ }).click();
   await expect(
     page.getByRole("heading", { name: "Câu đã sửa sang phiên bản mới?" }),
   ).toBeVisible();
@@ -376,7 +376,8 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
   ).toBeTruthy();
   await navigateTo(page, { name: "Luyện tập", exact: true });
   await page
-    .getByRole("button", { name: "Chăm cây · Luyện tập" })
+    .locator(".chapter-grid")
+    .getByRole("button", { name: /^(Luyện tập|Ôn tập lại)$/ })
     .first()
     .click();
   await expect(
@@ -617,7 +618,7 @@ test("teacher creates content and student account; student changes password, lea
   await page
     .getByLabel("Luyện tập theo bài · Chương 1 · Đại số")
     .selectOption("Bài 1 · Phép cộng");
-  await page.getByRole("button", { name: "Chăm cây · Luyện tập" }).click();
+  await page.locator(".chapter-grid").getByRole("button", { name: /^(Luyện tập|Ôn tập lại)$/ }).click();
   await page.getByRole("button", { name: "B 2", exact: true }).click();
   await page.getByRole("button", { name: "Kiểm tra đáp án" }).click();
   await expect(

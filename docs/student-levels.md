@@ -1,5 +1,11 @@
 # Cấp icon học sinh theo lớp, môn và chương
 
+## Hiển thị bổ sung theo góp ý — 14/10/2026
+
+Thẻ chương phân biệt chưa học0giây (xám), đang học (màu cũ) và đủ mốc cấp5 (xanh/viền đậm/thanh xanh/dấu hoàn thành). Trước mốc cuối tỷ lệ hiển thị làm tròn xuống để không báo100% sớm; cấp và thời gian vẫn dùng studentLevel/levelStepSeconds hiện có. Nút Ôn tập lại của chương đã KếtTrái mở cùng phiên practice, không tạo loại phiên hoặc cách tính giờ mới.
+
+Roadmap: ĐơmHoa1,2×CâyNon, KếtTrái1,2×ĐơmHoa; chỉ tăng kích thước trên timeline, giữ căn tâm với tick/đường. Icon cấp5 thêm hai quả (tổng5) và xanh tán đậm hơn, dùng chung SVG cũ. Dấu hoàn thành chỉ xuất hiện tại mốc5 đã đạt. Nhãn đạt cấp5 nền xanh, thời gian vượt mốc màu đỏ để nhận biết đã học thêm. Tiêu đề hiện tiền tố Chương I/Chương1 nếu nhận được, đầy đủ ở tooltip/aria; container hẹp thêm khoảng trống cho nhãn. Không đổi progress/điểm/ngưỡng hoặc dữ liệu lịch sử. Thiết kế và QA mới tại đầu app-design/session-handoff.
+
 ## Hình thức icon mới — 13/10/2026
 
 Bộ SVG năm cấp đã được vẽ lại đồng bộ theo khu vườn, dùng chung trong tiến độ/roster/xếp hạng/tài khoản và vườn. Thống kê Cây đã ra hoa dùng cây đơm hoa kèm dấu+. Đây là thay hình hiển thị; giữ tên, số giây, công thức, phạm vi chương, MAX đại diện vườn và thưởng/vé cũ. Thiết kế mới và QA ở [app-design.md](app-design.md), [redesign-qa-20261013.md](redesign-qa-20261013.md).

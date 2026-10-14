@@ -93,7 +93,9 @@
   color: #164b35;
 }
 
-.chapter-level-milestones .current > span:not(.level-state-mark) {
+.chapter-level-milestones
+  .current
+  > span:not(.level-state-mark, .level-completion-mark) {
   padding-inline: 8px;
   border-radius: 8px;
   background: #e8f4de;

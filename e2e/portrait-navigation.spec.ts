@@ -29,6 +29,8 @@ for (const role of ["teacher", "student", "admin"] as const) {
       { width: 1024, height: 1366 },
     ]) {
       await page.setViewportSize(viewport);
+      await expect(header.locator(".profile .avatar")).toHaveCSS("width", viewport.width <= 700 ? "51px" : "60px");
+      await expect(header.locator(".profile strong")).toHaveCSS("font-size", "21px");
       await page.evaluate(() => {
         window.scrollTo(0, 0);
         document.querySelector("[data-scroll-fixture]")?.remove();

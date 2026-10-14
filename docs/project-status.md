@@ -1,5 +1,27 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Chốt push các chỉnh giao diện theo ảnh — 14/10/2026
+
+Theo yêu cầu push remote, gom các thay đổi lời dẫn/thẻ/roadmap/Top1, avatar-header1,5× và Top3 thấp/chỉ icon cấp cùng test/tài liệu để commit/push **origin/main**. Fetch trước commit: main local/remote cùng915f7d6, git diff --check đạt; không kèm .local/database/secrets. Trạng thái “chưa push” của các lượt dưới đã được thay bởi đợt chốt này. QA là các lượt đã chạy vừa trước yêu cầu push, không chạy lại hoặc báo thành kết quả mới trong phiên Git. Chưa xác minh Railway phục vụ bundle mới từ thao tác push; chi tiết ở đầu session-handoff.
+
+## Điều chỉnh dữ liệu theo yêu cầu: Dau Tay lớp 11/2 — 14/10/2026
+
+Đã đặt thời gian học của **Dau Tay trong Lớp 11/2 ♥** thành **3600giây ở mỗi4chương đang dùng**, tổng14400giây, trên database Railway thật. Có backup WAL-safe và audit trước/sau trên volume; transaction commit và kết nối chỉ đọc độc lập xác nhận đủ4giá trị. Chỉ sửa progress.seconds của đúng tài khoản/chương, không sửa điểm/attempts/corrections. Không đổi mã, push/deploy hay database local. Chi tiết và đường dẫn backup ở đầu [session-handoff.md](session-handoff.md).
+
+## Hiện hành: Top3 gọn chiều cao, cấp chỉ icon — 14/10/2026
+
+Theo ảnh mới, giảm bục Top3 còn188/174/160px desktop và168/156/144px khung hẹp, bỏ khoảng tên ngắn/gap/padding thừa. Bỏ chữ Cấp+n trong Top10, giữ icon có nhãn accessibility. Crown/medal/goldframe, thứ hạng/chỉ số/bar/tên dài và avatar header1,5× giữ đúng yêu cầu trước. Chỉ CSS/JSX, không backend/dữ liệu mới. TypeScript/build và14/14 E2E desktop/mobile đạt; đã xem ảnh, chi tiết ở đầu session-handoff. Local5173/HMR, chưa commit/push.
+
+## Hiện hành: avatar và tên tài khoản header lớn1,5× — 14/10/2026
+
+Avatar header51px mobile/60px màn lớn và tên21px, tăng1,5× so với34/40px và14px cũ. Scoped ba vai trò, giữ vai trò nhỏ/ảnh ở bảng/Top10/tài khoản. Header portrait tự tăng chiều cao, giữ lớp/nút tài khoản, offset và khoảng focus theo chiều cao thật. TypeScript/build và14/14 E2E portrait/account desktop/mobile mới đạt; sau scroll-margin cuối build và8/8 E2E portrait đạt, đã xem ảnh. Chi tiết ở đầu session-handoff. Local5173/HMR phục vụ CSS200, chỉ frontend; chưa commit/push, giữ đợt ảnh trước.
+
+## Hiện hành: lời dẫn gọn, màu tiến độ và vinh danh rõ hơn — 14/10/2026
+
+Theo bốn ảnh và lời góp ý mới: châm ngôn in nghiêng/nhạt/ngoặc kép, rút lời dẫn (16 notes giảm~22% từ). Thẻ chương0giây xám, đang học màu cũ, cấp5 xanh/viền đậm/thanh xanh/check và CTA Ôn tập lại; giữ phiên practice/cấp/thời gian thật, không hiển thị100% sớm do làm tròn. Timeline nhãn chương gọn/bo6px, đạt KếtTrái xanh, thời gian học thêm sau mốc đỏ; mốc4 và5 mỗi mốc lớn thêm20%, cấp5 nhiều quả/dấu hoàn thành. Giữ tâm đường và thêm khoảng trống container hẹp. Top1 có crown/viền vàng/bục sáng, hạng4–10 có thanh tỷ lệ đúng xanh/sai đỏ theo correct/total, dữ liệu thiếu giữ—/không bar giả.
+
+Chỉ React/CSS/SVG frontend, không API/migration/điểm/dữ liệu/quyền mới. TypeScript/build riêng và6/6 comparator đạt; lượt đầu26/26 E2E desktop/mobile đạt. Sau chỉnh spacing, hồi quy UI/cấp/Top10 và4ca workflow đạt; ca online cập nhật harness cho popup/lối quay lại danh sách hiện hành, **2/2 desktop/mobile cuối đạt**. Chi tiết các lượt12/18,16/18 và xác nhận cuối ở đầu session-handoff, không báo toàn repository E2E đạt. Local5173/HMR phục vụ mã mới200, API-DB vẫn Railway; không ghi thử production. Chưa commit/push đợt mới. Thiết kế current ở đầu app-design; quyết định palette trước đó không ghi đè màu theo trạng thái mới.
+
 ## Hiện hành: chương có thứ tự lưu, tạo chương hiển thị danh sách — 14/10/2026
 
 Hộp tạo chương liệt kê chương hiện có và vị trí cuối của chương mới. Quản lý chương có ô chọn Vị trí1–N, lưu thứ tự server, tự dịch các chương còn lại và giữ qua reload; trạng thái gửi/lỗi/thử lại rõ ràng. Xóa icon44px ngay trước tên, giữ xác nhận/archive. Xem tiến độ Tổng quan giáo viên mở Lớp học của tôi → Khu vườn của lớp, thay lối tắt Quản lý lớp cũ; roster vẫn trong Quản lý học sinh.

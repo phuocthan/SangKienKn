@@ -1,6 +1,10 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { X, Leaf, Sprout, ArrowRight } from "./icons";
 
+export function Motto({ children }: { children: ReactNode }) {
+  return <q className="motto-copy">{children}</q>;
+}
+
 export function SkipLink({ target }: { target: string }) {
   return (
     <a

@@ -11,8 +11,33 @@ async function login(page: Page, teacher: boolean) {
   await page
     .getByLabel("Mật khẩu", { exact: true })
     .fill(teacher ? "GreenEdu123!" : "LearningTest123!");
+  const noticeResponse = teacher
+    ? null
+    : page.waitForResponse(
+        (response) =>
+          response.url().endsWith("/api/learning/exam-notices") &&
+          response.ok(),
+      );
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
+  if (noticeResponse) {
+    const data = await (await noticeResponse).json();
+    if (
+      data.notices.some(
+        (notice: { closesAt: number }) => notice.closesAt > data.serverNow,
+      )
+    ) {
+      const invitation = page.getByRole("dialog", {
+        name: "Có kiểm tra online từ giáo viên",
+        exact: true,
+      });
+      await expect(invitation).toBeVisible();
+      await invitation
+        .getByRole("button", { name: /^(Đã hiểu|Để sau)$/ })
+        .click();
+      await expect(invitation).toHaveCount(0);
+    }
+  }
   if (teacher)
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
   await navigateTo(page, {
@@ -103,7 +128,8 @@ test("each exam groups counts and runs; tab auto-submit restores practice time b
     );
     await navigateTo(student, { name: "Luyện tập", exact: true });
     await student
-      .getByRole("button", { name: "Chăm cây · Luyện tập", exact: true })
+      .locator(".chapter-grid")
+      .getByRole("button", { name: /^(Luyện tập|Ôn tập lại)$/, exact: true })
       .first()
       .click();
     await expect(student.locator(".practice-layout")).toBeVisible();
@@ -124,11 +150,8 @@ test("each exam groups counts and runs; tab auto-submit restores practice time b
       .getByRole("button", { name: "Kết thúc phiên", exact: true })
       .click();
     await navigateTo(student, { name: "Kiểm tra online", exact: true });
-    // The saved room remains reachable when returning from practice; exit it
-    // using the same control as the student to inspect the grouped list.
-    await student
-      .getByRole("button", { name: "Về danh sách", exact: true })
-      .click();
+    // Returning from practice opens the grouped list; the submitted run stays saved.
+    await expect(student.locator(".exam-room")).toHaveCount(0);
     const myGroup = student.locator(`[data-exam-id="${a}"]`);
     await expect(myGroup.locator(".online-exam-state")).toHaveText("Đang thi");
     await expect(

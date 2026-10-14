@@ -126,6 +126,7 @@ test("top ten has gold above silver on left and bronze on right, followed by ran
     honors.locator('.honors-podium-place[data-position="3"] h3'),
   ).toHaveText(fixtures[2].name);
   await expect(honors.locator(".honors-list li")).toHaveCount(7);
+  await expect(honors.locator(".honors-tree > span")).toHaveCount(0);
   await expect(
     honors.locator(".honors-list .honors-stats-compact"),
   ).toHaveCount(0);
@@ -172,7 +173,7 @@ test("top ten has gold above silver on left and bronze on right, followed by ran
     expect(silver.y).toBeLessThan(bronze.y);
     expect(silver.y - gold.y).toBeGreaterThanOrEqual(12);
     expect(bronze.y - silver.y).toBeGreaterThanOrEqual(12);
-    expect(gold.height).toBeLessThanOrEqual(260);
+    expect(gold.height).toBeLessThanOrEqual(190);
     expect(
       (await honors.locator(".honors-podium").boundingBox())!.width,
     ).toBeLessThanOrEqual(800);

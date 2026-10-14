@@ -4,6 +4,7 @@ import { Clock3, Users } from "./icons";
 import { api, duration, errorMessage } from "./api";
 import { BloomingTreeIcon } from "./StudentLevel";
 import { ClassHonors } from "./ClassHonors";
+import { Motto } from "./components";
 import type { HonorsStudent } from "../shared/class-honors";
 import { StudentGarden } from "./StudentGarden";
 import type {
@@ -117,9 +118,11 @@ export function ClassCommunity({
           <div>
             <h1>Khu vườn của lớp</h1>
             <span className="eyebrow">
-              CÙNG NHAU LỚN LÊN · {classroom.name}
+              <Motto>CÙNG NHAU LỚN LÊN · {classroom.name}</Motto>
             </span>
-            <p>Mỗi bạn một cây, cùng nhau chăm khu vườn của lớp.</p>
+            <p>
+              <Motto>Mỗi bạn một cây, cùng chăm vườn lớp.</Motto>
+            </p>
           </div>
         </WorkspaceHeading>
       )}
@@ -141,7 +144,7 @@ export function ClassCommunity({
               </span>
               <span className="stat-label">Cây đã ra hoa</span>
               <strong>{data.board.bloomedTrees}</strong>
-              <small>Mỗi cây ứng với một học sinh và một chương</small>
+              <small>Một cây cho mỗi học sinh/chương</small>
             </div>
             <div className="stat-card card">
               <span className="stat-icon">
@@ -151,7 +154,7 @@ export function ClassCommunity({
               <strong>
                 {data.board.activeStudents}/{data.board.participantCount}
               </strong>
-              <small>Đã học hoặc khắc phục lỗi sai trong lớp này</small>
+              <small>Đã học hoặc sửa sai trong lớp</small>
             </div>
             <div className="stat-card card">
               <span className="stat-icon blue">
@@ -159,7 +162,7 @@ export function ClassCommunity({
               </span>
               <span className="stat-label">Thời gian học của lớp</span>
               <strong>{studyTime(data.board.totalSeconds)}</strong>
-              <small>Tổng thời gian có hoạt động đã được ghi nhận</small>
+              <small>Thời gian học có hoạt động được ghi nhận</small>
             </div>
           </div>
           <ClassHonors

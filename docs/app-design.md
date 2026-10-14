@@ -1,5 +1,23 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: bục Top3 thấp hơn, cấp chỉ còn icon — 14/10/2026
+
+Theo ảnh mới “quá cao”, bục vàng/bạc/đồng giảm **188/174/160px** ở khung rộng, **168/156/144px** trong container≤600px (thay242/226/210 và218/204/190). Bỏ chữ Cấp+n ở cả Top3 và hạng4–10; icon vẫn có tên cấp cho trình đọc màn hình. Bỏ min-height dành sẵn hai dòng cho tên ngắn; giữ giới hạn hai dòng/tooltip tên đầy đủ. Giảm gap2px, padding thân, khoảng header→bục và bục→danh sách, avatar Top3 còn44px/36px. Giữ ba bục chung chân, vàng cao nhất, crown/medal/khung vàng và chỉ số/tỷ lệ thật. Avatar/tên header1,5× của đợt trước không đổi. QA mới ở đầu session-handoff.
+
+## Hiện hành: avatar và tên header lớn1,5lần — 14/10/2026
+
+Theo ảnh mới, chỉ avatar và tên tài khoản trong header được phóng1,5×: avatar34→51px trên viewport≤700px,40→60px ở màn lớn; tên14→21px theo biến text-label, line-height1,3 và xuống dòng cân bằng. Áp dụng header giáo viên/học sinh/Admin. Vai trò nhỏ và avatar trong roster/Top10/Tài khoản giữ cỡ hiện có. Nút avatar không bị co; portrait vẫn cùng hàng với ba nút tài khoản, lớp ở hàng dưới, chiều cao sticky tự tăng và offset đo lại. Khoảng cuộn cho focus lấy chiều cao header thật qua workspace-sticky-offset. QA mới ở đầu session-handoff.
+
+## Hiện hành: châm ngôn nhẹ, thẻ theo tiến độ và Top1 — 14/10/2026
+
+Theo bốn ảnh góp ý mới, câu châm ngôn/lời dẫn động viên ở tổng quan, luyện tập, lớp/vườn, ngân hàng, sổ tay, mục tiêu và ô lời nhắn dùng **chữ nghiêng, màu xanh dịu, opacity0,82 và ngoặc kép “…”** qua Motto. Nhãn thao tác, số liệu và thông báo nghiệp vụ giữ rõ. Rút gọn lời dẫn; riêng16 nội dung lời nhắn giảm174→136 từ tách bằng khoảng trắng (~22%), giữ16 chủ đề/8 hình, timer10giây và nút dừng. Đây là giảm lượng lời dẫn, không giảm20% cỡ chữ toàn app.
+
+Thẻ chương Luyện tập theo thời gian thật: **0 giây = xám**, **đang học = palette hiện có**, **đủ mốc Kết Trái = nền xanh nhạt/viền xanh đậm, header xanh, thanh tiến độ xanh và dấu hoàn thành**. Nút rút còn Luyện tập, hoàn thành ghi Ôn tập lại (vẫn mở phiên practice như cũ); chương/bài không có câu vẫn disabled. Trước mốc cuối chỉ hiển thị tối đa99%, không làm tròn sớm thành100% rồi vẫn thẻ đang học. Không đổi thời gian/cấp/điểm.
+
+Tiêu đề chương trên Hành trình/Tài khoản rút về Chương I/Chương1 khi nhận được tiền tố có số, giữ đầy đủ ở title/aria-label; tên đặc thù không có tiền tố giữ nguyên. Nhãn chương giảm bo còn6px. Đã đạt Kết Trái nền xanh; thời gian học vượt mốc cuối màu đỏ (thể hiện học thêm, không đánh dấu vi phạm). Đơm Hoa lớn hơn Cây Non20%, Kết Trái lớn hơn Đơm Hoa20% trên roadmap; icon vẫn căn tâm X/Y vào đường. Kết Trái có5 quả vàng/tán xanh đậm hơn, thêm dấu hoàn thành phía trên cây khi đã đạt. Container≤600px dùng base36px, chiều cao216px để tên/thời gian xuống dòng không chạm summary; màn rộng base48px/208px. Roster/menu giữ kích thước icon cũ.
+
+Top1 có vương miện trên avatar, viền vàng đậm/khung trong vàng và màu bục sáng hơn; giữ Top3 chung chân, giới hạn800px và thứ tự bạc–vàng–đồng. Hạng4–10 thêm thanh đúng xanh/sai đỏ ngay dưới tỷ lệ, tỷ lệ thật correct/total; total0 giữ dấu— và không dựng thanh0% giả. Không đổi comparator/dữ liệu/quyền. QA mới và phạm vi triển khai ở đầu session-handoff; các quyết định palette chung trước đây được thay đúng tại các trạng thái trên.
+
 ## Hiện hành: danh sách và thứ tự chương, lối tắt khu vườn — 14/10/2026
 
 Hộp **Thêm chương học** (cả nút Tạo chương học ở Tổng quan và Thêm chương trong Quản lý lớp) liệt kê chương hiện có bằng danh sách đánh số theo thứ tự đã lưu. Danh sách dài cuộn trong hộp, tên dài xuống dòng; lớp chưa có chương có thông báo riêng. Hiển thị vị trí cuối mà chương mới sẽ được thêm vào.

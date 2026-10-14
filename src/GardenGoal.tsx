@@ -3,6 +3,7 @@ import { studentLevel, STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { duration } from "./api";
 import { StudentLevelIcon } from "./StudentLevel";
 import type { Chapter, Classroom } from "./types";
+import { Motto } from "./components";
 
 export function GardenGoal({
   classroom,
@@ -38,8 +39,8 @@ export function GardenGoal({
         <h2>Những hạt mầm đang được chuẩn bị</h2>
         <p>
           {classroom.chapters.length
-            ? "Giáo viên đang chuẩn bị câu hỏi. Khi có bài luyện tập, mục tiêu tiếp theo sẽ xuất hiện ở đây."
-            : "Giáo viên sẽ thêm chương và câu hỏi để bạn bắt đầu hành trình."}
+            ? "Giáo viên đang chuẩn bị câu hỏi. Mục tiêu sẽ xuất hiện khi có bài luyện tập."
+            : "Giáo viên sẽ thêm chương và câu hỏi để bạn bắt đầu."}
         </p>
       </section>
     );
@@ -50,7 +51,9 @@ export function GardenGoal({
         <span className="goal-symbol">
           <Target size={24} aria-hidden="true" />
         </span>
-        <span className="eyebrow">TỪNG CHÚT MỖI NGÀY</span>
+        <span className="eyebrow">
+          <Motto>TỪNG CHÚT MỖI NGÀY</Motto>
+        </span>
       </div>
       <h2>
         {stage.level === 5
@@ -65,7 +68,7 @@ export function GardenGoal({
           </strong>
           <p>
             {stage.level === 5
-              ? "Bạn đã đạt cấp cao nhất trong chương này."
+              ? "Đã đạt cấp cao nhất trong chương."
               : `Còn ${duration(stage.remainingSeconds)} để lên ${STUDENT_LEVEL_NAMES[stage.level]}.`}
           </p>
         </div>

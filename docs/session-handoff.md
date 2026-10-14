@@ -1,5 +1,43 @@
 # Bàn giao session GreenEdu
 
+## Chốt Git cho các chỉnh giao diện theo ảnh — 14/10/2026
+
+Người dùng yêu cầu push remote sau các đợt châm ngôn/thẻ/roadmap/Top1, avatar-header1,5× và thu thấp Top3. Gom mã, CSS, test và tài liệu của cả ba đợt để commit/push **origin/main**. Fetch trước commit xác nhận HEAD và origin/main cùng915f7d6, không có commit remote mới cần ghép; git diff --check đạt. Chỉ gồm docs/e2e/src, không kèm .local/database/file học sinh/secrets. Các đoạn “chưa commit/push” bên dưới là trạng thái trước yêu cầu push này.
+
+Phiên chốt Git không chạy lại kiểm thử: QA mới đã chạy ở các lượt giao diện ngay dưới (TypeScript/build,26/26 UI ban đầu, các hồi quy workflow/online đã sửa harness,14/14 header và8/8 xác nhận,14/14 compact-honors cuối). Không báo chúng thành lượt test mới của phiên push hoặc toàn bộ E2E repository đạt. Đây là thay đổi frontend, không thêm backend/migration; push không chứng minh Railway đã phát hành bundle mới. Local5173/HMR/API-DB Railway giữ cấu hình hiện hành; chưa kiểm thử ghi production.
+
+## Điều chỉnh thời gian Dau Tay lớp 11/2 theo yêu cầu — 14/10/2026
+
+Người dùng yêu cầu đặt thời gian học của dautay trong lớp11/2 thành1giờ mỗi chương, sau đó đăng nhập Railway để tiếp tục. Đã xác định duy nhất tài khoản **Dau Tay**, thuộc **Lớp 11/2 ♥ / Vật Lý**, và4 chương đang dùng. Thao tác trực tiếp đúng zooming-light/production/SangKienKn, SQLite `/data/greenedu.sqlite`, qua Console đã đăng nhập; không dùng database local.
+
+Sao lưu WAL-safe `/data/backups/adjust-study-time-dautay-11-2-1791961677559.sqlite`. Transaction có guard tài khoản/membership/danh sách4chương/không có phiên học, chỉ UPDATE4 hàng progress.seconds thành3600; COMMIT thành công. Audit trước/sau tại `/data/backups/adjust-study-time-dautay-11-2-1791961677559.json`. Kết nối chỉ đọc độc lập sau commit xác nhận DAO ĐỘNG, SÓNG, ĐIỆN TRƯỜNG, DÒNG ĐIỆN–MẠCH ĐIỆN đều3600giây, tổng14400giây. Không sửa attempts/corrections/điểm hoặc tài khoản khác. Đây là điều chỉnh dữ liệu thật do người dùng chỉ định, không phải seed/test hay bằng chứng đã học thêm.
+
+Ảnh xác nhận `.local/dautay-time-verified-20261014.png`, không đưa database/ảnh dữ liệu lên Git. Không sửa mã ứng dụng, push, deploy hoặc restart. Giữ toàn bộ thay đổi UI và công việc có sẵn; không báo kết quả kiểm thử cũ thành mới cho thao tác dữ liệu này.
+
+## Thu thấp Top3, bỏ chữ cấp và khoảng trắng thừa — 14/10/2026
+
+Yêu cầu mới theo ảnh Top10: bục quá cao, chỉ icon cấp, bỏ space không cần thiết. Giữ toàn bộ thay đổi local của các đợt ảnh/header chưa commit. ClassHonors bỏ span Cấp+n ở Top3 và4–10; SVG aria-label cấp vẫn có. CSS giảm podium vàng/bạc/đồng188/174/160px desktop,168/156/144px khung≤600; gap người2px, bỏ min-height tên2dòng (tên dài vẫn clamp2/title), avatar44/36px, icon cấp24/22px; giảm padding card/thân, khoảng heading→bục20→10 và danh sách22→12px. Gold padding24/22px giữ crown bên trong; màu/medal/goldframe, ba bục chung chân và comparator/chỉ số/bar giữ nguyên. Không đổi avatar/tên header lớn của đợt trước.
+
+QA mới: TypeScript/build .local/compact-honors-20261014-build đạt; **14/14 E2E desktop/mobile đạt (59,5giây)** gồm class-honors/class-community-layout/learning-feedback. Assertion không còn span cấp và bục vàng≤190px, geometry10 kích thước320–1920/portrait/landscape kiểm tra tên dài/chỉ số một hàng/chung chân/crown không tràn. Có ca hai vai trò/thứ tự khu vực/empty/nguồn lỗi/retry, giữ bar chính xác và các thay đổi thẻ/roadmap trước. Đã xem ảnh mobile390: bục gọn, chỉ icon cấp, số không bị cắt. Test server/database riêng, không ghi Railway/database chính; chỉ frontend. Local5173 HMR, chưa commit/push.
+
+## Avatar/tên tài khoản header phóng1,5lần — 14/10/2026
+
+Theo ảnh mới “avatar, name hơi nhỏ, cần phóng to x1.5”, sửa scoped trong portrait-navigation.css: .topbar .profile avatar34→51px mobile≤700,40→60px màn lớn; tên calc(text-label×1,5)=21px, line-height1,3/text-wrap balance. Nút avatar flex không co, áp dụng ba vai trò; giữ avatar roster/Top10/form tài khoản và chữ vai trò. Giữ mọi thay đổi chưa commit của đợt bốn ảnh trước. Sticky header/offset tự đo ResizeObserver hiện có, scroll-margin focus đổi từ130px cố định sang offset header+16px.
+
+QA mới: TypeScript và build riêng .local/profile-size-20261014-build đạt; **14/14 E2E desktop/mobile đạt (57,6giây)** gồm portrait-navigation/account-popups, có assertion avatar51/60 và tên21px tại320/390/768/1024, không chạm nút tài khoản/không tràn ngang/scroll/menu/modal ba vai trò. Sau chỉnh scroll-margin cuối, build .local/profile-size-20261014-final và **8/8 E2E portrait desktop/mobile đạt (43,8giây)**. Đã xem ảnh student portrait: tên đủ, avatar lớn hơn, nút và chọn lớp tách rõ. Chỉ test trên server/database riêng, không ghi Railway hoặc database local chính; không sửa backend. Local5173 HMR theo chế độ Railway, GET portrait-navigation.css mới200. Chưa commit/push đợt này.
+
+## Hiện hành: bốn ảnh chỉnh thẻ/roadmap/vinh danh, châm ngôn và chữ gọn — 14/10/2026
+
+Yêu cầu mới sau915f7d6: châm ngôn chữ nghiêng/nhạt/ngoặc kép, giảm khoảng20% lượng chữ, đồng thời bốn ảnh có yêu cầu màu thẻ theo tiến độ, nhãn chương gọn, mốc cây lớn dần, Top1 vương miện/viền vàng và thanh tỷ lệ đúng. Git đầu đợt sạch. Dùng tiếp hai skill thiết kế, guideline lấy mới; làm React/CSS/SVG hiện có, không imagegen hoặc thư viện mới. Đã thông báo hiểu giảm số chữ là rút lời dẫn, giữ tên chức năng/số liệu.
+
+Motto dùng q/quote CSS, italic/font-synthesis/opacity0,82 cho lời dẫn động viên trong các trang và16 lời nhắn. Rút lời dẫn tổng quan/mục tiêu/sổ tay/vườn; riêng16 nội dung notes174→136 từ (~22%, đo tách khoảng trắng), vẫn16 chủ đề/8 hình/timer10giây/pause. Giữ headline Gieo nỗ lực… đã duyệt. Thẻ luyện dùng studentLevel/levelStepSeconds thật để xám0giây, màu cũ đang học, xanh cấp5 với viền/header/progress/check; tỷ lệ chưa đủ mốc floor≤99%, CTA Luyện tập/Ôn tập lại/Chờ câu hỏi. Ôn tập lại vẫn practice như cũ, disabled giữ khi thiếu câu/bài.
+
+ChapterTitle rút tiền tố Chương I/số khi nhận được và giữ aria/title đầy đủ; pill bo6px. Timeline nhãn hoàn thành xanh, summary thời gian >mốc cuối đỏ (học thêm, không vi phạm), lượt luyện rút còn lượt. Mốc4 lớn1,2×mốc3, mốc5 lớn1,2×mốc4, cấp5 thêm2quả/tán xanh đậm/dấu hoàn thành trên cây. CSS biến kích thước từng li để tâm vẫn khớp tick/đường; container hẹp base36/height216 để chữ không chạm summary. ClassHonors Top1 crown/viền vàng/khung trong/avatar sáng; hạng4–10 progress đúng xanh/sai đỏ dưới tỷ lệ, không bar khi total0. Comparator, quyền, cấp, điểm, progress/database và snapshot không đổi.
+
+QA mới: TypeScript/build riêng .local/learning-feedback-20261014-verified đạt;6/6 shared comparator đạt. Lượt E2E đầu26/26 desktop/mobile đạt (learning-feedback, student-levels, class-honors, garden-note, app-polish). Đã xem ảnh desktop/mobile; sau ảnh tăng khoảng trống timeline/container và thêm assertion không chạm summary tại320/390/740landscape/768/1440. Lượt hồi quy bổ sung12/18 do selector toàn trang trùng Luyện tập với menu sau rút CTA; đã giới hạn vào chapter-grid. Hai lượt tiếp theo16/18: toàn bộ UI/cấp/Top10 và4ca workflow luyện/sửa/tạo tài khoản mới đạt;2ca online còn dùng bước cũ không xác nhận popup mời thi và chờ Về danh sách dù đã về danh sách sau practice. Đã sửa harness theo UI hiện hành, giữ kiểm tra server tự nộp/ghi giờ/nhóm/Excel và không sửa nghiệp vụ thi; **lượt online cuối2/2 desktop/mobile đạt (42,9giây)**. Không báo một lượt18/18 hoặc toàn bộ E2E repository đạt. Mọi test/fixtures dùng server/database E2E riêng, không ghi Railway/.local/greenedu.sqlite. Không lấy134 backend của đợt trước làm QA mới; không đổi backend đợt này. Ảnh cô lập timeline/Top10 dùng screenshot style tạm ẩn chrome ngoài section để header/dock không che chi tiết; geometry vẫn đo layout thật với chrome.
+
+Local5173 đang chạy/HMR, GET App.tsx/learning-feedback.css trả200; API/DB vẫn Railway. Chỉ frontend nên không cần backend mới cho các chỉnh này. Chưa commit/push/deploy đợt ảnh mới; yêu cầu push của đợt trước đã hoàn tất915f7d6. Tài liệu current nằm đầu app-design/project-status/student-levels; tiếp tục theo yêu cầu mới của người dùng, không dùng mô tả palette/lời dẫn cũ để triển khai lại.
+
 ## Hiện hành: danh sách khi tạo chương, đổi vị trí và lối tắt khu vườn — 14/10/2026
 
 Yêu cầu mới: hiển thị chương hiện có lúc tạo, đổi index hiển thị trong Quản lý chương, chương mới cuối danh sách, xóa bên trái đầu tên và Xem tiến độ mở khu vườn trong Lớp học của tôi; hoàn tất rồi push remote. Git đầu đợt sạch, main192f631; đã đọc tài liệu hiện hành và hai skill redesign-existing-projects/web-design-guidelines (guideline lấy mới). Không phục hồi các quyết định cũ đã bị thay.

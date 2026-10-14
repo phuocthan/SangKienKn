@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Motto } from "./components";
 import {
   Bird,
   BookOpen,
@@ -14,97 +15,97 @@ import {
 const notes = [
   {
     title: "Mỗi ngày, một chút xanh",
-    text: "Không cần đi thật nhanh. Chỉ cần tiếp tục lớn lên.",
+    text: "Không cần đi thật nhanh. Cứ tiếp tục lớn lên.",
     icon: Leaf,
     art: "fox",
   },
   {
     title: "Mở sách, mở một khu rừng",
-    text: "Mỗi trang sách là một lối đi mới để khám phá.",
+    text: "Mỗi trang sách mở một lối đi mới.",
     icon: BookOpen,
     art: "owl",
   },
   {
     title: "Tò mò là một siêu năng lực",
-    text: "Một câu hỏi nhỏ có thể mở ra cả bầu trời.",
+    text: "Một câu hỏi nhỏ mở ra cả bầu trời.",
     icon: Lightbulb,
     art: "firefly",
   },
   {
     title: "Chậm thôi, vẫn tiến tới",
-    text: "Đi từng bước nhỏ, rồi bạn sẽ thấy mình đi xa.",
+    text: "Từng bước nhỏ đưa bạn đi xa.",
     icon: Compass,
     art: "turtle",
   },
   {
     title: "Sai một chút, hiểu thêm chút",
-    text: "Lỗi sai là chiếc lá chỉ đường cho lần thử tiếp theo.",
+    text: "Lỗi sai chỉ đường cho lần thử tiếp theo.",
     icon: Leaf,
     art: "hedgehog",
   },
   {
     title: "Gom từng hạt hiểu biết",
-    text: "Một điều mới hôm nay, một kho báu cho ngày mai.",
+    text: "Điều mới hôm nay, kho báu ngày mai.",
     icon: BookOpen,
     art: "squirrel",
   },
   {
     title: "Nắng nhỏ cho ngày mới",
-    text: "Thử một bài vừa sức để khởi động thật vui nhé.",
+    text: "Thử bài vừa sức, khởi động thật vui.",
     icon: Sun,
     art: "rabbit",
   },
   {
     title: "Học cùng nhau, vui hơn",
-    text: "Chia sẻ một điều hay, cả khu rừng cùng lớn.",
+    text: "Chia sẻ điều hay, cả khu rừng cùng lớn.",
     icon: Bird,
     art: "bear",
   },
   {
     title: "Cho ý tưởng được nở hoa",
-    text: "Cứ thử cách của bạn. Điều hay bắt đầu từ tò mò.",
+    text: "Cứ thử cách của bạn. Điều hay từ tò mò.",
     icon: Flower2,
     art: "fox",
   },
   {
     title: "Cú nhỏ đang chờ nghe",
-    text: "Kể lại điều vừa học bằng lời của mình nhé.",
+    text: "Kể điều vừa học bằng lời của mình.",
     icon: BookOpen,
     art: "owl",
   },
   {
     title: "Thắp sáng một điều mới",
-    text: "Hiểu thêm một chút là ngày đã sáng hơn rồi.",
+    text: "Hiểu thêm một chút, ngày sáng hơn.",
     icon: Lightbulb,
     art: "firefly",
   },
   {
     title: "Bền bỉ như rùa nhỏ",
-    text: "Không cần hơn ai. Hôm nay thử tốt hơn hôm qua.",
+    text: "Hôm nay thử tốt hơn hôm qua.",
     icon: Compass,
     art: "turtle",
   },
   {
     title: "Nhím nhỏ cũng biết nghỉ",
-    text: "Thả lỏng vai, hít thở sâu rồi học tiếp nhé.",
+    text: "Thả lỏng vai, thở sâu rồi học tiếp.",
     icon: Sun,
     art: "hedgehog",
   },
   {
     title: "Kho báu nằm trong câu hỏi",
-    text: "Chưa hiểu thì hỏi. Sóc nhỏ cũng học bằng tò mò.",
+    text: "Chưa hiểu thì hỏi. Sóc cũng học bằng tò mò.",
     icon: Lightbulb,
     art: "squirrel",
   },
   {
     title: "Chăm điều nhỏ, đón điều hay",
-    text: "Một chút tập trung cũng đủ nuôi một ý tưởng lớn.",
+    text: "Chút tập trung nuôi một ý tưởng lớn.",
     icon: Flower2,
     art: "rabbit",
   },
   {
     title: "Bạn đã cố gắng hôm nay",
-    text: "Gấu nhỏ gửi bạn một cái ôm. Mình tiếp tục nhé!",
+    text: "Gấu nhỏ gửi một cái ôm. Mình tiếp tục nhé.",
     icon: Bird,
     art: "bear",
   },
@@ -572,11 +573,15 @@ export function GardenNote({ isTeacher }: { isTeacher: boolean }) {
         <span className="note-leaf">
           <Icon size={19} aria-hidden="true" />
         </span>
-        <strong>{note.title}</strong>
+        <strong>
+          <Motto>{note.title}</Motto>
+        </strong>
         <p>
-          {index === 0 && isTeacher
-            ? "Cùng học sinh gieo những hạt mầm tri thức."
-            : note.text}
+          <Motto>
+            {index === 0 && isTeacher
+              ? "Cùng học sinh gieo mầm tri thức."
+              : note.text}
+          </Motto>
         </p>
         <NoteIllustration art={note.art} />
       </div>

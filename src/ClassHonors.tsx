@@ -1,4 +1,5 @@
 import { Avatar } from "./Avatars";
+import { Motto } from "./components";
 import { BookOpen, CheckCircle2, Notebook, Trophy } from "./icons";
 import { StudentLevelIcon } from "./StudentLevel";
 import {
@@ -97,6 +98,19 @@ function HonorStats({
           {student.total
             ? `${(student.accuracy * 100).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}%`
             : "—"}
+          {!compact && student.total > 0 && (
+            <span
+              className="honors-accuracy-bar"
+              role="progressbar"
+              aria-label={`Tỷ lệ đúng · ${student.name}`}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={student.accuracy * 100}
+              aria-valuetext={`${student.correct}/${student.total} lượt đúng`}
+            >
+              <span style={{ width: `${student.accuracy * 100}%` }} />
+            </span>
+          )}
         </dd>
       </div>
       <div>
@@ -143,7 +157,9 @@ export function ClassHonors({
           <Trophy size={27} />
         </span>
         <div>
-          <span className="eyebrow">CÙNG NHAU VƯƠN LÊN</span>
+          <span className="eyebrow">
+            <Motto>CÙNG NHAU VƯƠN LÊN</Motto>
+          </span>
           <h2 id="class-honors-title">Vinh danh Top 10</h2>
         </div>
       </header>
@@ -183,6 +199,27 @@ export function ClassHonors({
                     <span className="sr-only">Hạng {position}</span>
                     <div className="honors-winner">
                       <div className="honors-avatar-medal">
+                        {position === 1 && (
+                          <svg
+                            className="honors-crown"
+                            viewBox="0 0 40 26"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="m4 7 8 6L20 3l8 10 8-6-3 16H7Z"
+                              fill="#ffc944"
+                              stroke="#97641c"
+                              strokeWidth="2"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M9 19h22"
+                              stroke="#fff4b2"
+                              strokeWidth="2"
+                            />
+                            <circle cx="20" cy="15" r="2.5" fill="#e97753" />
+                          </svg>
+                        )}
                         <Avatar
                           name={student.name}
                           avatarId={student.avatarId}
@@ -192,7 +229,6 @@ export function ClassHonors({
                       <h3 title={student.name}>{student.name}</h3>
                       <div className="honors-tree">
                         <StudentLevelIcon level={student.treeLevel} />
-                        <span>Cấp {student.treeLevel}</span>
                       </div>
                       <HonorStats student={student} compact />
                     </div>
@@ -217,7 +253,6 @@ export function ClassHonors({
                   </div>
                   <div className="honors-tree">
                     <StudentLevelIcon level={student.treeLevel} />
-                    <span>Cấp {student.treeLevel}</span>
                   </div>
                   <HonorStats student={student} />
                 </li>
@@ -225,7 +260,7 @@ export function ClassHonors({
             </ol>
           )}
           <p className="honors-tie-note">
-            Cấp cây cao nhất trong lớp. Cùng cả bốn tiêu chí: theo thứ tự tên.
+            Cấp cây cao nhất. Bằng bốn tiêu chí: xếp theo tên.
           </p>
         </>
       )}

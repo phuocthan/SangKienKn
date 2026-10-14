@@ -72,7 +72,7 @@ export function LevelArtwork({ stage }: { stage: number }) {
           />
           <path
             d="M20 45C8 42 10 28 20 26c-1-13 13-18 22-10 8-9 22-4 22 9 12 4 12 18 1 22-5 9-19 10-25 2-6 8-17 5-20-4Z"
-            fill={stage === 3 ? "#9ac475" : "#70ab64"}
+            fill={stage === 3 ? "#9ac475" : stage === 5 ? "#4f9c61" : "#70ab64"}
             stroke="#386a46"
             strokeWidth="2.8"
             strokeLinejoin="round"
@@ -111,9 +111,11 @@ export function LevelArtwork({ stage }: { stage: number }) {
         ))}
       {stage === 5 &&
         [
-          [25, 34],
-          [48, 27],
-          [56, 43],
+          [21, 32],
+          [40, 25],
+          [58, 34],
+          [30, 46],
+          [49, 47],
         ].map(([x, y]) => (
           <g key={x} transform={`translate(${x} ${y})`}>
             <path
