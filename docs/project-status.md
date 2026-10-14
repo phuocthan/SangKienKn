@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: Top3 nằm trong bục, gọn hai hướng màn hình — 14/10/2026
+
+Theo ảnh mới, đưa avatar/tên/cấp/chỉ số vào trong bục vàng/bạc/đồng, bỏ medal lớn lặp. Cụm tối đa800px, vàng cao nhất/bạc trái/đồng phải chung chân; chênh cao16px desktop,14px khung hẹp. Container query thích ứng cả mobile/desktop portrait/landscape, giữ tên dài/title và số thập phân/4chữ số trong khung. Không backend/migration/dữ liệu mới; danh sách4–10 và xếp hạng giữ nguyên. TypeScript/build và10/10 E2E desktop/mobile mới đạt, đã xem ảnh ba hướng/kích thước tiêu biểu. Mã/tài liệu đợt này được push origin/main theo yêu cầu; QA và deployment thực tế ở đầu [session-handoff.md](session-handoff.md).
+
 ## Hiện hành: Top10 chung và Quản lý học sinh đúng tab — 14/10/2026
 
 Theo yêu cầu mới nhất, **bỏ quyết định skip chuyển roster của đợt trước**. Giáo viên/học sinh đều thấy **thông tin chung → Vinh danh Top10 → Vinh danh Kết Trái → Khu vườn chung**. Bỏ hai bảng xếp hạng cũ của học sinh. Giáo viên có **Quản lý cấp độ → Quản lý chương → Quản lý học sinh** trong Quản lý lớp, giữ search/CSV/Thêm học sinh/sổ tay/reset và thống kê khắc phục. Không chuyển dropdown chọn lớp.

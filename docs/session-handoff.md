@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Hiện hành: đưa người vào bục Top3 và thu gọn — 14/10/2026
+
+Yêu cầu sau commit83a19cf: dùng skill để avatar/tên/cấp/chỉ số nằm trong bục, cân diện tích cho mobile/desktop dọc/ngang và push Git. Áp dụng redesign-existing-projects cùng web-design-guidelines (đọc guideline mới). ClassHonors chuyển honors-winner vào honors-step, bỏ huy chương lớn lặp cuối bục, giữ medal số bên avatar/aria hạng. Cụm ba bục max800px/căn giữa, vàng242/bạc226/đồng210px, chung chân, bạc trái/vàng giữa/đồng phải. CSS container-type:inline-size và query khung≤600px dùng218/204/190px, font cqi/cột tỷ lệ rộng hơn; thích ứng landscape có sidebar chứ không chỉ theo viewport. Tên2dòng/title, ba metric icon+số một hàng. Hạng4–10/comparator/quyền/API/thứ tự thống kê→Top10→KếtTrái→vườn giữ nguyên; không thay database hoặc tiến độ.
+
+QA mới: TypeScript/build riêng .local/podium-contained-20261014 đạt. Geometry ca Top10 mở rộng320×740,360×800,390×844,740×320,844×390,768×1024,1024×768,900×1440,1440×900,1920×1080: toàn bộ người/medal nằm trong khung, cao vàng≤260px/cụm≤800px, chênh≥12px, chung chân, metrics cùng hàng/không wrap/không overflow. Lượt đầu phát hiện97,4% wrap ở320px và số4chữ số ở landscape740px; chỉnh chia cột/font theo container, ca desktop qua sau sửa. Đã xem ảnh320px/landscape740px/desktop1440px. **Lượt cuối10/10 E2E desktop/mobile đạt (28giây)**: gồm geometry tất cả kích thước, hai vai trò/thứ tự4khu vực, ít người/rỗng/thiếu metric, nguồn lỗi/retry và focus đổi hạng. Chỉ test trên server/SQLite riêng, không ghi Railway hoặc chạy API local mặc định. Không cần chạy lại backend129test cho thay đổi JSX/CSS này; kết quả129 của đợt trước là lịch sử.
+
+Fetch/pull và push origin/main theo yêu cầu, tài liệu đi cùng mã/test. Giữ file khóa PowerPoint ngoài Git; không đưa .local/secrets/file học sinh. Push chưa chứng minh Railway đã deploy; API honors từ đợt83a19cf vẫn cần backend tương ứng, bố cục mới hiệu lực qua HMR frontend local5173.
+
 ## Hiện hành: đồng bộ vinh danh hai vai trò và chuyển Quản lý học sinh — 14/10/2026
 
 **Yêu cầu mới nhất thay quyết định skip roster của commit124cb18/f0ecf42:** giáo viên và học sinh tại Lớp học của tôi/Khu vườn của lớp chỉ thấy **thống kê chung → Vinh danh Top10 → Vinh danh Kết Trái cấp5 → Khu vườn chung**. ClassHonors chuyển vào ClassCommunity dùng chung. Bỏ hai bảng Những người chăm vườn/Bác sĩ cây trồng còn ở trang học sinh; không bỏ thống kê hoặc khung KếtTrái. Giữ huy chương,3 bục vàng/bạc/đồng, hạng4–10 và comparator **MAX cấp chương → câu practice đã làm riêng biệt → tỷ lệ đúng chưa làm tròn → resolved**, bằng cả4 theo tên/ID. Không tạo số liệu/đủ10 người giả.

@@ -143,8 +143,19 @@ test("top ten has gold above silver on left and bronze on right, followed by ran
         nodes.map((node) => node.getAttribute("data-position")),
       ),
   ).toEqual(["4", "5", "6", "7", "8", "9", "10"]);
-  for (const width of [320, 360, 390, 768, 1024, 1440, 1920]) {
-    await page.setViewportSize({ width, height: width === 1440 ? 1000 : 1100 });
+  for (const [width, height] of [
+    [320, 740],
+    [360, 800],
+    [390, 844],
+    [740, 320],
+    [844, 390],
+    [768, 1024],
+    [1024, 768],
+    [900, 1440],
+    [1440, 900],
+    [1920, 1080],
+  ]) {
+    await page.setViewportSize({ width, height });
     await honors.scrollIntoViewIfNeeded();
     const silver = (await honors
       .locator(".honors-silver .honors-step")
@@ -159,6 +170,12 @@ test("top ten has gold above silver on left and bronze on right, followed by ran
     expect(gold.x).toBeLessThan(bronze.x);
     expect(gold.y).toBeLessThan(silver.y);
     expect(silver.y).toBeLessThan(bronze.y);
+    expect(silver.y - gold.y).toBeGreaterThanOrEqual(12);
+    expect(bronze.y - silver.y).toBeGreaterThanOrEqual(12);
+    expect(gold.height).toBeLessThanOrEqual(260);
+    expect(
+      (await honors.locator(".honors-podium").boundingBox())!.width,
+    ).toBeLessThanOrEqual(800);
     expect(
       Math.max(
         silver.y + silver.height,
@@ -186,9 +203,6 @@ test("top ten has gold above silver on left and bronze on right, followed by ran
           const medal = place
             .querySelector(".honors-step .honors-medal")!
             .getBoundingClientRect();
-          const stats = place
-            .querySelector(".honors-stats")!
-            .getBoundingClientRect();
           const cells = Array.from(
             place.querySelectorAll(".honors-stats > div"),
           ).map((node) => node.getBoundingClientRect());
@@ -201,8 +215,19 @@ test("top ten has gold above silver on left and bronze on right, followed by ran
               medal.bottom <= step.bottom &&
               medal.left >= step.left &&
               medal.right <= step.right,
-            statsAbove:
-              stats.bottom <= step.top && step.top - stats.bottom <= 11,
+            winnerInside: Array.from(
+              place.querySelectorAll(
+                ".honors-winner, .honors-winner .avatar, .honors-winner h3, .honors-tree, .honors-stats",
+              ),
+            ).every((node) => {
+              const rect = node.getBoundingClientRect();
+              return (
+                rect.top >= step.top &&
+                rect.bottom <= step.bottom &&
+                rect.left >= step.left &&
+                rect.right <= step.right
+              );
+            }),
             sameRow:
               Math.max(...cells.map((cell) => cell.top)) -
                 Math.min(...cells.map((cell) => cell.top)) <
@@ -219,17 +244,19 @@ test("top ten has gold above silver on left and bronze on right, followed by ran
     expect(fits).toEqual(
       Array(3).fill({
         medalInside: true,
-        statsAbove: true,
+        winnerInside: true,
         sameRow: true,
         numbersFit: true,
       }),
     );
     await honors.screenshot({
-      path: info.outputPath(`honors-${width}.png`),
+      path: info.outputPath(`honors-${width}x${height}.png`),
       style: ".sidebar, .topbar, .skip-link { visibility: hidden !important; }",
     });
   }
-  await page.route("**/api/classrooms/class-demo/students", (route) => route.fulfill({ json: roster }));
+  await page.route("**/api/classrooms/class-demo/students", (route) =>
+    route.fulfill({ json: roster }),
+  );
   await navigateTo(page, { name: "Quản lý lớp", exact: true });
   await page.getByLabel("Tìm học sinh").fill("vinh danh 13");
   await expect(page.locator(".roster-card tbody tr")).toHaveCount(1);

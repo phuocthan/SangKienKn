@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: người nằm trong bục Top3 gọn — 14/10/2026
+
+Avatar, huy chương có số, tên, cấp cây và ba chỉ số Top3 nằm **bên trong** khung màu vàng/bạc/đồng, không còn cụm người phía trên + bục trống/huy chương lớn lặp bên dưới. Giữ bạc trái/vàng giữa/đồng phải, chung chân; vàng cao hơn bạc16px, bạc cao hơn đồng16px trên khung rộng. Cụm ba bục tối đa800px/căn giữa, cao242/226/210px (vàng/bạc/đồng) thay tổng chiều cao người + bục cũ. Tên tối đa2dòng, title/nhãn trợ năng giữ tên đầy đủ; giữ avatar/huy chương và màu chủ đề.
+
+Responsive theo **container khung vinh danh**, không chỉ viewport: khung≤600px dùng cao218/204/190px, avatar42px/huy chương22px, chỉ số theo cqi và cột tỷ lệ rộng hơn, giữ một hàng và số không wrap. Dùng container-type:inline-size; cả landscape có sidebar lẫn portrait có dock đều tự thích ứng. Không ép chiều cao cắt nội dung; min-height cho phép font/nội dung mở rộng. Không thêm chuyển động. Hạng4–10, comparator/API/quyền/thứ tự4khu vực giữ nguyên. Ghi nhận này thay bố cục người trên bục/huy chương56px ở lịch sử bên dưới; QA mới tại bàn giao.
+
 ## Hiện hành: vườn lớp chung hai vai trò và quản lý học sinh — 14/10/2026
 
 Quyết định mới nhất thay yêu cầu skip chuyển roster của đợt Git trước: **Lớp học của tôi → Khu vườn của lớp** của giáo viên và học sinh chỉ có **thống kê chung → Vinh danh Top 10 → Vinh danh Kết Trái · Cấp 5 → Khu vườn chung**. Top10 nằm trong ClassCommunity dùng chung, không phụ thuộc roster giáo viên. Bỏ cả bảng Những người chăm vườn/Bác sĩ cây trồng của học sinh. Giữ menu/submenu, huy chương, Top3 icon/số cùng hàng và hạng4–10; ưu tiên cấp cây → câu practice riêng biệt đã làm → tỷ lệ đúng chưa làm tròn → câu khắc phục. Không thay thưởng/tiến độ hoặc tạo học sinh giả.

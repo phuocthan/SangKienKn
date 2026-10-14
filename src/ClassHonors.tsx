@@ -179,21 +179,23 @@ export function ClassHonors({
                   key={student.id}
                   aria-label={`Hạng ${position} · ${student.name}`}
                 >
-                  <div className="honors-winner">
-                    <div className="honors-avatar-medal">
-                      <Avatar name={student.name} avatarId={student.avatarId} />
-                      <HonorsMedal position={position} />
-                    </div>
-                    <h3 title={student.name}>{student.name}</h3>
-                    <div className="honors-tree">
-                      <StudentLevelIcon level={student.treeLevel} />
-                      <span>Cấp {student.treeLevel}</span>
-                    </div>
-                    <HonorStats student={student} compact />
-                  </div>
                   <div className="honors-step">
                     <span className="sr-only">Hạng {position}</span>
-                    <HonorsMedal position={position} />
+                    <div className="honors-winner">
+                      <div className="honors-avatar-medal">
+                        <Avatar
+                          name={student.name}
+                          avatarId={student.avatarId}
+                        />
+                        <HonorsMedal position={position} />
+                      </div>
+                      <h3 title={student.name}>{student.name}</h3>
+                      <div className="honors-tree">
+                        <StudentLevelIcon level={student.treeLevel} />
+                        <span>Cấp {student.treeLevel}</span>
+                      </div>
+                      <HonorStats student={student} compact />
+                    </div>
                   </div>
                 </article>
               );
