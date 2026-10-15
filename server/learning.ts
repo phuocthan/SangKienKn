@@ -12,7 +12,7 @@ import { chapterIsArchived } from "./chapter-archive.js";
 import { randomInt, randomUUID, createHash } from "node:crypto";
 import { questionInput } from "../shared/questions.js";
 import { sampleByTopic } from "../shared/question-topics.js";
-import { lessonIsArchived } from "./lesson-catalog.js";
+import { lessonIsArchived, resolveQuestionLesson } from "./lesson-catalog.js";
 import { zipSync, strToU8 } from "fflate";
 import type { AppRequest, Row } from "./app.js";
 import { studentLevel, levelStepSeconds } from "../shared/student-levels.js";
@@ -639,10 +639,13 @@ export function registerLearningRoutes(
       canConfigureLevels: req.user!.role === "teacher",
       examCreation: true,
       onlineExams: true,
+      reviewPapers: true,
       matrix: matrix(c.id),
       blueprints: db
         .prepare(
-          "SELECT * FROM review_blueprints WHERE classroom_id=? ORDER BY created_at DESC",
+          `SELECT b.*,p.blueprint_id AS paper_id FROM review_blueprints b
+          LEFT JOIN review_papers p ON p.blueprint_id=b.id
+          WHERE b.classroom_id=? ORDER BY b.created_at DESC,b.rowid DESC`,
         )
         .all(c.id)
         .map((p) => ({
@@ -651,6 +654,8 @@ export function registerLearningRoutes(
           chapterIds: json(p.chapter_ids),
           questionCount: p.question_count,
           weights: json(p.weights),
+          source: p.paper_id ? "upload" : "bank",
+          createdAt: p.created_at,
         })),
       exams: db
         .prepare(
@@ -1147,6 +1152,148 @@ export function registerLearningRoutes(
     ).run(ch.id, semester, basis);
     res.json({ ok: true });
   });
+  app.post("/api/classrooms/:id/review-papers", (req: AppRequest, res) => {
+    teacher(req);
+    const c = classroom(req, String(req.params.id));
+    const title = text(req.body?.title, "Tiêu đề bài ôn", 120);
+    const key = text(req.body?.requestId, "Mã tạo bài ôn", 100);
+    const fingerprint = createHash("sha256")
+      .update(JSON.stringify(req.body))
+      .digest("hex");
+    const existing = db
+      .prepare(
+        `SELECT p.*,b.classroom_id FROM review_papers p
+      JOIN review_blueprints b ON b.id=p.blueprint_id WHERE p.request_id=?`,
+      )
+      .get(key);
+    if (existing) {
+      if (
+        existing.teacher_id !== req.user!.id ||
+        existing.classroom_id !== c.id ||
+        existing.fingerprint !== fingerprint
+      )
+        fail(409, "Mã tạo bài ôn đã dùng cho nội dung khác.");
+      return res.json({ id: existing.blueprint_id });
+    }
+    const ids = chapterIds(String(c.id), req.body?.chapterIds);
+    if (
+      !Array.isArray(req.body?.questions) ||
+      !req.body.questions.length ||
+      req.body.questions.length > 100
+    )
+      fail(400, "Đề ôn cần 1–100 câu hợp lệ.");
+    const uploaded = req.body.questions.map(
+      (row: { chapterId?: string; question?: unknown } | null) => {
+        if (
+          !row ||
+          typeof row.chapterId !== "string" ||
+          !ids.includes(row.chapterId)
+        )
+          fail(403, "Câu tải lên phải thuộc chương đã chọn.");
+        let content: ReturnType<typeof questionInput>;
+        try {
+          content = questionInput(row.question);
+        } catch (e) {
+          fail(400, e instanceof Error ? e.message : "Câu ôn không hợp lệ.");
+        }
+        content = {
+          ...content,
+          lesson: resolveQuestionLesson(db, row.chapterId, content.lesson),
+        };
+        if (lessonIsArchived(db, row.chapterId, content.lesson))
+          fail(409, "Bài trong đề ôn đã bị xóa; thêm lại bài trước.");
+        return { chapterId: row.chapterId, content };
+      },
+    );
+    const usedIds = [
+      ...new Set<string>(
+        uploaded.map((row: { chapterId: string }) => row.chapterId),
+      ),
+    ];
+    if (usedIds.length !== ids.length)
+      fail(400, "Mỗi chương đã chọn cần có câu hỏi trong đề ôn.");
+    if (
+      new Set(
+        uploaded.map(
+          (row: {
+            chapterId: string;
+            content: ReturnType<typeof questionInput>;
+          }) =>
+            JSON.stringify([
+              row.chapterId,
+              row.content.text
+                .normalize("NFC")
+                .toLocaleLowerCase("vi")
+                .replace(/\s+/g, " "),
+            ]),
+        ),
+      ).size !== uploaded.length
+    )
+      fail(400, "Đề ôn có câu trùng trong cùng chương.");
+    const id = randomUUID();
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const questions: Snapshot[] = uploaded.map(
+        ({
+          chapterId,
+          content,
+        }: {
+          chapterId: string;
+          content: ReturnType<typeof questionInput>;
+        }) => {
+          const questionId = randomUUID();
+          // Private questions keep attempts/notebooks valid without entering the study bank.
+          db.prepare(
+            `INSERT INTO questions(id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,changed_at,topic,kind,correct_answer)
+          VALUES(?,?,?,?,?,?,?,0,1,1,?,?,?,?)`,
+          ).run(
+            questionId,
+            chapterId,
+            content.text,
+            JSON.stringify(content.choices),
+            content.correctIndex,
+            content.explanation,
+            content.lesson,
+            now(),
+            content.topic ?? "",
+            content.kind ?? "multiple-choice",
+            content.correctAnswer ?? null,
+          );
+          return {
+            ...content,
+            id: questionId,
+            chapterId,
+            chapterTitle: String(
+              db
+                .prepare("SELECT title FROM chapters WHERE id=?")
+                .get(chapterId)!.title,
+            ),
+          };
+        },
+      );
+      db.prepare("INSERT INTO review_blueprints VALUES(?,?,?,?,?,?,?)").run(
+        id,
+        c.id,
+        title,
+        JSON.stringify(usedIds),
+        questions.length,
+        "{}",
+        now(),
+      );
+      db.prepare("INSERT INTO review_papers VALUES(?,?,?,?,?)").run(
+        id,
+        req.user!.id,
+        key,
+        fingerprint,
+        JSON.stringify(questions),
+      );
+      db.exec("COMMIT");
+    } catch (e) {
+      db.exec("ROLLBACK");
+      throw e;
+    }
+    res.status(201).json({ id });
+  });
   app.post("/api/classrooms/:id/blueprints", (req: AppRequest, res) => {
     teacher(req);
     const c = classroom(req, String(req.params.id)),
@@ -1185,6 +1332,7 @@ export function registerLearningRoutes(
       return res.json({ id: existing.id });
     }
     let ids: string[], count: number, weights: unknown, title: string;
+    let paper: Row | undefined;
     if (req.body?.blueprintId) {
       const p = db
         .prepare(
@@ -1196,6 +1344,10 @@ export function registerLearningRoutes(
       count = Number(p.question_count);
       weights = json(p.weights);
       title = String(p.title);
+      paper = db
+        .prepare("SELECT * FROM review_papers WHERE blueprint_id=?")
+        .get(p.id);
+      if (paper) chapterIds(String(c.id), ids);
     } else {
       ids = chapterIds(c.id, req.body?.chapterIds);
       count = number(req.body?.questionCount ?? 0, "Số câu", 0, 100);
@@ -1203,11 +1355,33 @@ export function registerLearningRoutes(
       title = ids.length === 1 ? "Ôn chương" : "Ôn kỳ";
     }
     for (const id of ids) requirePractice(db, id);
-    const questions = sample(ids, count, weights),
+    const questions = paper
+        ? shuffle(json<Snapshot[]>(paper.questions))
+        : sample(ids, count, weights),
       id = randomUUID();
-    db.prepare(
-      "INSERT INTO review_sessions(id,student_id,classroom_id,title,questions,request_id,created_at) VALUES(?,?,?,?,?,?,?)",
-    ).run(id, req.user!.id, c.id, title, JSON.stringify(questions), key, now());
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.prepare(
+        "INSERT INTO review_sessions(id,student_id,classroom_id,title,questions,request_id,created_at) VALUES(?,?,?,?,?,?,?)",
+      ).run(
+        id,
+        req.user!.id,
+        c.id,
+        title,
+        JSON.stringify(questions),
+        key,
+        now(),
+      );
+      if (paper)
+        db.prepare("INSERT INTO review_paper_sessions VALUES(?,?)").run(
+          id,
+          paper.blueprint_id,
+        );
+      db.exec("COMMIT");
+    } catch (e) {
+      db.exec("ROLLBACK");
+      throw e;
+    }
     res.status(201).json({ id });
   });
   function review(req: AppRequest) {
@@ -1241,24 +1415,43 @@ export function registerLearningRoutes(
       return res.json({ id: existing.id });
     }
     const old = json<Snapshot[]>(original.questions);
-    const available = bank([...new Set(old.map((q) => q.chapterId))]);
+    const paper = db
+      .prepare(
+        "SELECT blueprint_id FROM review_paper_sessions WHERE session_id=?",
+      )
+      .get(original.id);
+    const available = paper
+      ? old
+      : bank([...new Set(old.map((q) => q.chapterId))]);
     const questions = old
       .map((q) => available.find((current) => current.id === q.id))
       .filter((q): q is Snapshot => !!q);
     if (!questions.length)
       fail(409, "Bộ ôn đã được cập nhật. Hãy chọn lại bộ ôn.");
     const id = randomUUID();
-    db.prepare(
-      "INSERT INTO review_sessions(id,student_id,classroom_id,title,questions,request_id,created_at) VALUES(?,?,?,?,?,?,?)",
-    ).run(
-      id,
-      req.user!.id,
-      original.classroom_id,
-      original.title,
-      JSON.stringify(shuffle(questions)),
-      requestId,
-      now(),
-    );
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.prepare(
+        "INSERT INTO review_sessions(id,student_id,classroom_id,title,questions,request_id,created_at) VALUES(?,?,?,?,?,?,?)",
+      ).run(
+        id,
+        req.user!.id,
+        original.classroom_id,
+        original.title,
+        JSON.stringify(shuffle(questions)),
+        requestId,
+        now(),
+      );
+      if (paper)
+        db.prepare("INSERT INTO review_paper_sessions VALUES(?,?)").run(
+          id,
+          paper.blueprint_id,
+        );
+      db.exec("COMMIT");
+    } catch (e) {
+      db.exec("ROLLBACK");
+      throw e;
+    }
     res.status(201).json({ id });
   });
   app.get("/api/learning/reviews/:id", (req: AppRequest, res) => {

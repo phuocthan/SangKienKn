@@ -1,5 +1,11 @@
 # Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
+## Nhập sau khi xóa và tạo lại bài — 15/10/2026
+
+Khi bài đang dùng có tên tương đương với bài đã xóa (ví dụ `Bài 1: Dao động điều hoà` và `Bài 1 - Dao động điều hòa`), API ưu tiên ghép câu nhập/tạo/sửa vào tên bài đang dùng. Tên cũ trong lịch sử không được chọn trước chỉ vì trùng chính xác tên trong file và không làm bài đang dùng trở thành tên mơ hồ. Nếu thực sự có nhiều bài đang dùng tương đương, vẫn cần chọn chính xác bài nhận.
+
+Chỉ tải file không khôi phục bài đã xóa: nếu chưa tạo lại bài tương ứng, API vẫn từ chối. Không đổi tên hoặc hiện lại câu cũ, không sửa lượt làm/sổ tay/snapshot. Các quy tắc chống trùng, transaction và gửi lại giữ nguyên. Không migration hoặc chỉnh dữ liệu thật; cần backend mới trên Railway để áp dụng. QA/Git theo đầu [session-handoff.md](session-handoff.md).
+
 ## Thứ tự hiển thị chương và thêm chương cuối danh sách — 14/10/2026
 
 Hộp tạo chương hiển thị danh sách chương hiện có theo thứ tự lưu. Theo yêu cầu tiếp theo cùng ngày, Quản lý lớp → Quản lý chương **bỏ select Vị trí ở từng thẻ**. Nút **Sắp xếp** cạnh **Thêm chương** mở popup kéo thả chuột/cảm ứng, kèm nút lên/xuống và phím mũi tên cho bàn phím. **Lưu thứ tự** gửi một danh sách đầy đủ; **Hủy/X/Escape** bỏ nháp. Busy chặn đóng/gửi lặp, lỗi giữ nháp; capability máy chủ cũ khóa nút. Chương mới thêm cuối danh sách. Nút xóa icon nằm ngay trước tên, giữ xác nhận/archive và nhãn truy cập.

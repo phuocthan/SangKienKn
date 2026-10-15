@@ -9,8 +9,13 @@ export async function navigateTo(
   await navigation.waitFor({ state: "visible" });
   const direct = navigation.getByRole("button", options);
   if (await direct.count()) return direct.click();
-  const teacher = await navigation.getByRole("button", { name: "Ngân hàng câu hỏi", exact: true }).count() > 0;
+  const teacher =
+    (await navigation
+      .getByRole("button", { name: "Ngân hàng câu hỏi", exact: true })
+      .count()) > 0;
   const destinations = [
+    ["Ôn tập", "Ôn tập & kiểm tra"],
+    ["Kiểm tra săn thưởng", "Ôn tập & kiểm tra"],
     ["Hoạt động nhóm", "Lớp học của tôi"],
     ["Sổ tay sửa sai", "Luyện tập"],
     ["Khu vườn của lớp", "Lớp học của tôi"],
@@ -29,7 +34,10 @@ export async function navigateTo(
   await navigation.getByRole("button", { name: match[1], exact: true }).click();
   if (match[0] === "Tiến độ học tập" || match[0] === "Hành trình của tôi")
     return;
-  if (match[0] === "Xếp hạng chăm chỉ" || (teacher && match[0] === "Khu vườn của lớp")) {
+  if (
+    match[0] === "Xếp hạng chăm chỉ" ||
+    (teacher && match[0] === "Khu vườn của lớp")
+  ) {
     return;
   }
   await page.getByRole("tab", options).click();

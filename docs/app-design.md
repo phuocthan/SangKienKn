@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: tách Ôn tập / Kiểm tra săn thưởng / Kiểm tra online — 15/10/2026
+
+Ba tab trong khu vực ôn/thi, giữ thanh điều hướng chính5vị trí, icon không dịch khi đổi tab. Tab mobile cùng hàng, nhãn tối đa2dòng, nút44px; không thêm slogan hoặc khối giới thiệu lớn. URL lưu mục đang mở và giữ mã lượt thi khi reload.
+
+Ôn tập có tiêu đề trang/Tạo bài ôn, Đang ôn và danh sách Bài ôn của lớp với tiêu đề/số câu/chương/nút bắt đầu. Form tạo trong modal: tiêu đề, Word/CSV mặc định, mẫu/đọc file/xem câu đã đọc/lưu; lỗi giữ nháp và focus lỗi, busy chặn gửi/đóng, retry không tạo bài trùng. Ngân hàng là nguồn tùy chọn; ôn chương/kỳ mở bằng details. Tên bài xuất hiện trong phiên ôn. Săn thưởng giữ thẻ điều kiện/vé, có quản lý đề ngay tại tab giáo viên; phần duyệt điểm/lượt săn không còn ở Ôn tập. Online giữ form/popup/phòng thi hiện có, các lịch đã lưu trước nằm tại đây để tiếp tục quản lý. Luồng hiện hành này thay trang gộp ôn/ma trận/thi/săn ở các mục lịch sử. [Đặc tả chức năng](review-papers.md).
+
 ## Hiện hành: giao diện ưu tiên tác vụ và chữ ngắn — 15/10/2026
 
 Người dùng duyệt đề xuất dùng `redesign-existing-projects` + `web-design-guidelines` rồi yêu cầu triển khai. Giữ màu rừng/kem, Be Vietnam Pro, Phosphor Duotone, cấp cây và navbar portrait84px/ô đều/tối đa hai dòng. Tên trang đi thẳng vào công việc: Tổng quan, Khu vườn của tôi, Luyện tập; bỏ khẩu hiệu/đoạn giới thiệu lặp ở các trang nghiệp vụ. Đăng nhập giữ câu chuyện thương hiệu riêng; thông tin hạn, điều kiện vào thi và hậu quả vi phạm vẫn hiện ở đúng thao tác.

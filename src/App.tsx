@@ -37,6 +37,7 @@ import {
   ShieldCheck,
   Sprout,
   TrendingUp,
+  Trophy,
   Users,
   X,
 } from "./icons";
@@ -106,6 +107,11 @@ import { loginEmail } from "../shared/login-email";
 const Learning = lazy(() =>
   import("./Learning").then((module) => ({ default: module.Learning })),
 );
+const ReviewLibrary = lazy(() =>
+  import("./ReviewLibrary").then((module) => ({
+    default: module.ReviewLibrary,
+  })),
+);
 const GroupActivities = lazy(() =>
   import("./GroupActivities").then((module) => ({
     default: module.GroupActivities,
@@ -119,6 +125,7 @@ type Page =
   | "home"
   | "practice"
   | "learning"
+  | "hunt"
   | "online-exams"
   | "corrections"
   | "classes"
@@ -158,13 +165,20 @@ export default function App() {
   const [page, setPage] = useState<Page>(() => {
     const params = new URLSearchParams(location.hash.slice(1));
     if (params.has("learning"))
-      return params.get("workspace") === "online" ? "online-exams" : "learning";
+      return params.get("workspace") === "online"
+        ? "online-exams"
+        : params.get("workspace") === "hunt" || params.has("exam")
+          ? "hunt"
+          : "learning";
     const section = params.get("section") as Page;
     if (section === "leaderboard") return "garden";
     if (section === "progress") return "home";
     return [
       "home",
       "practice",
+      "learning",
+      "hunt",
+      "online-exams",
       "corrections",
       "classes",
       "class-settings",
@@ -360,9 +374,19 @@ export default function App() {
     if (!user || user.role === "admin" || !current || study) return;
     const params = new URLSearchParams(location.hash.slice(1));
     if (
+      params.get("learning") === current.id &&
+      params.has("exam") &&
+      ((page === "online-exams" && params.get("workspace") === "online") ||
+        (page === "hunt" && params.get("workspace") !== "online"))
+    )
+      return;
+    if (
       [
         "home",
         "practice",
+        "learning",
+        "hunt",
+        "online-exams",
         "corrections",
         "classes",
         "class-settings",
@@ -564,21 +588,23 @@ export default function App() {
         { id: "garden", label: "Lớp học của tôi", icon: TreeIcon },
       ];
   const parentPage: Page =
-    page === "leaderboard"
-      ? "garden"
-      : isTeacher &&
-          (page === "groups" ||
-            page === "progress" ||
-            page === "garden" ||
-            page === "class-settings")
-        ? "classes"
-        : !isTeacher && page === "corrections"
-          ? "practice"
-          : !isTeacher && page === "groups"
-            ? "garden"
-            : !isTeacher && page === "progress"
-              ? "home"
-              : page;
+    page === "hunt"
+      ? "learning"
+      : page === "leaderboard"
+        ? "garden"
+        : isTeacher &&
+            (page === "groups" ||
+              page === "progress" ||
+              page === "garden" ||
+              page === "class-settings")
+          ? "classes"
+          : !isTeacher && page === "corrections"
+            ? "practice"
+            : !isTeacher && page === "groups"
+              ? "garden"
+              : !isTeacher && page === "progress"
+                ? "home"
+                : page;
   const tabGroups: {
     parent: Page;
     label: string;
@@ -624,7 +650,24 @@ export default function App() {
       ];
   const activeTabs =
     !study && current
-      ? tabGroups.find((group) => group.parent === parentPage)
+      ? ["learning", "hunt", "online-exams"].includes(page)
+        ? {
+            label: "Ôn tập và kiểm tra",
+            items: [
+              { id: "learning" as const, label: "Ôn tập", icon: BookOpen },
+              {
+                id: "hunt" as const,
+                label: "Kiểm tra săn thưởng",
+                icon: Trophy,
+              },
+              {
+                id: "online-exams" as const,
+                label: "Kiểm tra online",
+                icon: ClipboardList,
+              },
+            ],
+          }
+        : tabGroups.find((group) => group.parent === parentPage)
       : undefined;
   const totalSeconds =
     current?.chapters.reduce((n, c) => n + c.seconds, 0) ?? 0;
@@ -729,7 +772,10 @@ export default function App() {
               key={user.id}
               userId={user.id}
               inLearning={
-                (page === "learning" || page === "online-exams") && !study
+                (page === "learning" ||
+                  page === "hunt" ||
+                  page === "online-exams") &&
+                !study
               }
               onJoin={async (classroomId, runId) => {
                 if (
@@ -966,10 +1012,20 @@ export default function App() {
                     </section>
                   </div>
                 ))}
-              {(page === "learning" || page === "online-exams") && (
+              {page === "learning" && (
+                <ReviewLibrary
+                  key={current.id}
+                  classroom={current}
+                  user={user}
+                  onReview={(reviewId, chapter) =>
+                    setStudy({ chapter, mode: "practice", reviewId })
+                  }
+                />
+              )}
+              {(page === "hunt" || page === "online-exams") && (
                 <Learning
                   key={`${current.id}-${page}`}
-                  view={page === "online-exams" ? "online" : "learning"}
+                  view={page === "online-exams" ? "online" : "hunt"}
                   classroom={current}
                   user={user}
                   entryRunId={
@@ -978,9 +1034,6 @@ export default function App() {
                   onExamExit={() => setEntryRunId("")}
                   onCorrections={(chapterId) =>
                     navigate("corrections", chapterId)
-                  }
-                  onReview={(reviewId, chapter) =>
-                    setStudy({ chapter, mode: "practice", reviewId })
                   }
                 />
               )}

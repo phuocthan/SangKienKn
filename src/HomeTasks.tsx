@@ -5,7 +5,8 @@ import type { Classroom } from "./types";
 import type { LearningOverview } from "../shared/learning";
 import type { GroupActivitySummary } from "../shared/group-activities";
 
-type Destination = "groups" | "learning" | "online-exams" | "corrections";
+type Destination =
+  "groups" | "learning" | "hunt" | "online-exams" | "corrections";
 type Task = {
   id: string;
   title: string;
@@ -77,7 +78,7 @@ export function HomeTasks({
           id: `exam-${exam.id}`,
           title: exam.title,
           detail: `${exam.startsAt > now ? "Bắt đầu" : "Kết thúc"} ${deadline(exam.startsAt > now ? exam.startsAt : exam.closesAt)}`,
-          page: exam.delivery === "online" ? "online-exams" : "learning",
+          page: "online-exams",
           due: exam.startsAt > now ? exam.startsAt : exam.closesAt,
         });
       }
@@ -90,7 +91,7 @@ export function HomeTasks({
           id: "rewards",
           title: `${pending} điểm thưởng chờ duyệt`,
           detail: "Xem và duyệt đề xuất",
-          page: "learning",
+          page: "hunt",
           due: Infinity,
         });
     }

@@ -1,5 +1,9 @@
 # Quản lý lớp: quyền học tập và quy tắc phiên
 
+## Điều hướng săn thưởng — 15/10/2026
+
+Giáo viên có thể mở/khóa/upload/dùng lại đề ngay tại **Kiểm tra săn thưởng → Đề săn thưởng theo chương**, ngoài các nút Quản lý lớp hiện có. Cùng `HuntAccess` và API/quyền/chính sách bên dưới; không thêm gate hoặc thay đổi vé/điểm. Thiết lập học kỳ/cách tính tỷ lệ nằm trong **Thiết lập chương** của tab này. Ôn tập theo tiêu đề/upload đã tách riêng; [quy trình hiện hành](review-papers.md).
+
 Cập nhật 15/10/2026 theo yêu cầu mới. Các quy tắc dưới thay mô tả cũ “mở/khóa kiểm tra chương” và “rời tab một lần là kết thúc luyện tập”. Mã/test trong checkout không đồng nghĩa backend Railway đã phát hành.
 
 ## Giao diện quản lý — 15/10/2026

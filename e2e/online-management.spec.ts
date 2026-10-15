@@ -107,7 +107,7 @@ test("online manager requires one source and supports whole chapter plus selecte
   await acknowledgeOnlineExamCreated(page);
   await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
   await expect(
-    page.getByRole("heading", { name: "Ôn tập & kiểm tra", exact: true }),
+    page.getByRole("heading", { name: "Ôn tập", exact: true }),
   ).toBeVisible();
   await expect(page.getByText(payload.title, { exact: true })).toHaveCount(0);
 });

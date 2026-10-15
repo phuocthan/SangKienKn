@@ -139,6 +139,7 @@ export function createApp(
   app.use("/api/chapters/:id/questions/delete", express.json({ limit: "1mb" }));
   app.use("/api/chapters/:id/hunt-access", express.json({ limit: "1mb" }));
   app.use("/api/classrooms/:id/exams", express.json({ limit: "4mb" }));
+  app.use("/api/classrooms/:id/review-papers", express.json({ limit: "4mb" }));
   app.use(express.json({ limit: "100kb" }));
   app.use("/api", (req, _res, next) => {
     if (!["GET", "HEAD", "OPTIONS"].includes(req.method)) {

@@ -2,6 +2,7 @@ import { navigateTo } from "./navigation";
 import { test, expect, type Page } from "@playwright/test";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { unzipSync, strFromU8 } from "fflate";
+import type { QuestionAnswer } from "../shared/question-types";
 
 test.afterEach(async ({ request }) => {
   // Close this scenario's exam windows before reusing the dedicated student in another project.
@@ -42,7 +43,7 @@ async function login(page: Page, teacher = false) {
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
   await navigateTo(page, { name: "Ôn tập & kiểm tra" });
   await expect(
-    page.getByRole("heading", { name: "Ôn tập & kiểm tra", exact: true }),
+    page.getByRole("heading", { name: "Ôn tập", exact: true }),
   ).toBeVisible();
 }
 async function noOverflow(page: Page) {
@@ -59,7 +60,7 @@ async function repairPublishedNotebook(page: Page) {
   const overview = await (
     await page.request.get("/api/classrooms/learning-class/learning")
   ).json();
-  const answers = new Map<string, number>();
+  const answers = new Map<string, QuestionAnswer>();
   for (const run of overview.runs.filter(
     (run: { status: string }) => run.status === "submitted",
   )) {
@@ -67,10 +68,16 @@ async function repairPublishedNotebook(page: Page) {
       await page.request.get(`/api/learning/exam-runs/${run.id}`)
     ).json();
     for (const row of result.results ?? [])
-      answers.set(row.questionId, row.correctIndex);
+      answers.set(row.questionId, row.correctAnswer ?? row.correctIndex);
   }
   const corrections = await (await page.request.get("/api/corrections")).json();
   for (const question of corrections) {
+    if (
+      !overview.chapters.some(
+        (chapter: { id: string }) => chapter.id === question.chapterId,
+      )
+    )
+      continue;
     const response = await page.request.post("/api/attempts", {
       data: {
         questionId: question.id,
@@ -79,54 +86,67 @@ async function repairPublishedNotebook(page: Page) {
         requestId: crypto.randomUUID(),
       },
     });
-    expect(response.ok()).toBe(true);
-    expect((await response.json()).correct).toBe(true);
+    const result = await response.json();
+    expect(response.ok(), JSON.stringify(result)).toBe(true);
+    expect(result.correct).toBe(true);
   }
 }
 
-test("teacher selects individual lessons or uploads a private exam and manually opens it", async ({
+test("saved scheduled papers retain individual lessons, private uploads and manual opening under Online", async ({
   page,
 }, info) => {
   await login(page, true);
-  const form = page.locator(".learning-form");
-  await form.getByLabel("Loại bộ câu").selectOption("exam");
-  await form
-    .getByRole("radio", { name: "Chọn từ ngân hàng", exact: true })
-    .check();
-  await form.getByLabel("Chương ôn I", { exact: true }).check();
-  await form.getByLabel("Toàn chương · Chương ôn I", { exact: true }).uncheck();
-  await expect(
-    form.getByRole("button", { name: "Lưu lịch kiểm tra" }),
-  ).toBeDisabled();
-  await form.getByLabel("Chương ôn I · Bài 1", { exact: false }).check();
-  await form.getByLabel("Số câu", { exact: true }).fill("2");
   const bankTitle = `Bài chọn ${info.project.name} ${Date.now()}`;
-  await form.getByLabel("Tên bộ câu").fill(bankTitle);
-  await form.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
-  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Đã tạo kiểm tra",
+  const bankResponse = await page.request.post(
+    "/api/classrooms/learning-class/exams",
+    {
+      data: {
+        title: bankTitle,
+        chapterIds: ["learning-ch1"],
+        source: "bank",
+        questionCount: 2,
+        lessonKeys: ["learning-ch1::Bài 1"],
+        manualOpen: true,
+        startsAt: Date.now(),
+        closesAt: Date.now() + 3600000,
+      },
+    },
   );
+  expect(bankResponse.ok()).toBeTruthy();
+  const uploadTitle = `Đề riêng ${info.project.name} ${Date.now()}`;
+  const uploadResponse = await page.request.post(
+    "/api/classrooms/learning-class/exams",
+    {
+      data: {
+        title: uploadTitle,
+        chapterIds: ["learning-ch1"],
+        source: "upload",
+        manualOpen: true,
+        startsAt: Date.now(),
+        closesAt: Date.now() + 3600000,
+        questions: [
+          {
+            chapterId: "learning-ch1",
+            question: {
+              lesson: "Bài tải riêng",
+              text: "Câu riêng không phát hành",
+              choices: ["A", "B", "C", "D"],
+              correctIndex: 2,
+              explanation: "Chọn C",
+            },
+          },
+        ],
+      },
+    },
+  );
+  expect(uploadResponse.ok()).toBeTruthy();
+  await navigateTo(page, { name: "Kiểm tra online", exact: true });
   const bank = page
     .locator(".learning-row")
     .filter({ has: page.getByText(bankTitle, { exact: true }) })
     .first();
   await expect(bank).toContainText("2 câu");
   await expect(bank).toContainText("Đã đóng");
-  await form.getByRole("radio", { name: "Upload file", exact: true }).check();
-  const uploadTitle = `Đề riêng ${info.project.name} ${Date.now()}`;
-  await form.getByLabel("Tên bộ câu").fill(uploadTitle);
-  await form.getByLabel("File đề (.docx hoặc .csv)").setInputFiles({
-    name: "de.csv",
-    mimeType: "text/csv",
-    buffer: Buffer.from(
-      "Bài học,Câu hỏi,A,B,C,D,Đáp án,Lời giải\nBài tải riêng,Câu riêng không phát hành,A,B,C,D,C,Chọn C\n",
-    ),
-  });
-  await expect(form).toContainText("1 câu đã chọn / tối đa 100");
-  await form.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
-  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Đã tạo kiểm tra",
-  );
   const row = page
     .locator(".learning-row")
     .filter({ has: page.getByText(uploadTitle, { exact: true }) })
@@ -137,6 +157,14 @@ test("teacher selects individual lessons or uploads a private exam and manually 
     "Đã mở kiểm tra",
   );
   await expect(row).toContainText("Đang mở");
+  const bankQuestions = await (
+    await page.request.get("/api/chapters/learning-ch1/questions")
+  ).json();
+  expect(
+    bankQuestions.some(
+      (q: { text: string }) => q.text === "Câu riêng không phát hành",
+    ),
+  ).toBe(false);
   await noOverflow(page);
 });
 
@@ -145,9 +173,13 @@ test("practice clock advances, pauses while hidden or offline, and wrong answers
   context,
 }) => {
   await login(page);
+  await page.getByText("Ôn từ ngân hàng", { exact: true }).click();
   await page.clock.install();
   await page.getByLabel("Chương ôn I", { exact: true }).check();
-  await page.getByRole("button", { name: "Bắt đầu ôn", exact: true }).click();
+  await page
+    .locator(".review-bank")
+    .getByRole("button", { name: "Bắt đầu ôn", exact: true })
+    .click();
   await expect(page.locator(".question-card")).toBeVisible();
   const clock = page.getByLabel("Thời gian phiên học").locator("time");
   await expect(clock).toHaveText("00:00:00");
@@ -203,6 +235,7 @@ test("student reviews semester, resumes exact question and repairs without revea
   page,
 }, info) => {
   await login(page);
+  await page.getByText("Ôn từ ngân hàng", { exact: true }).click();
   await page
     .getByRole("combobox", { name: "Học kỳ", exact: true })
     .selectOption("Học kỳ I");
@@ -246,7 +279,7 @@ test("student reviews semester, resumes exact question and repairs without revea
       ).ok(),
     ).toBeTruthy();
   const corrections = await (await page.request.get("/api/corrections")).json();
-  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
+  await navigateTo(page, { name: "Kiểm tra săn thưởng", exact: true });
   // The API setup happens after the learning view mounts on ending the review.
   await page.bringToFront();
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
@@ -321,6 +354,7 @@ test("student uses hunt ticket and teacher approves the earned point", async ({
     ).ok(),
   ).toBeTruthy();
   await login(page);
+  await navigateTo(page, { name: "Kiểm tra săn thưởng", exact: true });
   await repairPublishedNotebook(page);
   for (let i = 0; i < 8; i++)
     await page.request.post("/api/attempts", {
@@ -340,7 +374,9 @@ test("student uses hunt ticket and teacher approves the earned point", async ({
   await expect(
     chapter.getByRole("button", { name: "Săn thưởng", exact: true }),
   ).toBeEnabled();
-  await chapter.getByRole("button", { name: "Săn thưởng", exact: true }).click();
+  await chapter
+    .getByRole("button", { name: "Săn thưởng", exact: true })
+    .click();
   await expect(page.locator(".exam-room")).toBeVisible();
   for (let i = 0; i < 4; i++) {
     await page.locator(".choices .choice").first().click();
@@ -353,6 +389,7 @@ test("student uses hunt ticket and teacher approves the earned point", async ({
   await page.getByRole("button", { name: "Về danh sách", exact: true }).click();
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
   await login(page, true);
+  await navigateTo(page, { name: "Kiểm tra săn thưởng", exact: true });
   const reward = page
     .locator(".learning-row")
     .filter({ hasText: "Săn điểm đạt từ 8,0" })
@@ -373,40 +410,43 @@ test("student uses hunt ticket and teacher approves the earned point", async ({
   });
 });
 
-test("teacher creates matrix and scheduled exam; student autosaves offline and resumes, teacher closes and exports Excel", async ({
+test("teacher creates a bank review and manages a saved scheduled exam; student autosaves offline and resumes, teacher closes and exports Excel", async ({
   page,
   browser,
 }, info) => {
   await login(page, true);
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
-  const permission = page.locator(".chapter-list");
-  const openChapter = permission.getByRole("button", {
-    name: "Mở kiểm tra · Chương ôn I",
-    exact: true,
-  });
-  if (await openChapter.count()) await openChapter.click();
-  await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
-  await page.getByLabel("Tên bộ câu").fill(`Ôn ma trận ${info.project.name}`);
-  await page
-    .locator("fieldset")
-    .getByLabel("Chương ôn I", { exact: true })
-    .check();
-  await page.getByLabel("Số câu", { exact: true }).fill("4");
-  await page.getByRole("button", { name: "Lưu ma trận" }).click();
+  await page.getByRole("button", { name: "Tạo bài ôn", exact: true }).click();
+  const form = page.getByRole("dialog", { name: "Tạo bài ôn", exact: true });
+  await form
+    .getByLabel("Tiêu đề bài ôn")
+    .fill(`Ôn ma trận ${info.project.name}`);
+  await form.getByLabel("Nguồn câu hỏi").selectOption("bank");
+  await form.getByLabel("Chương ôn I", { exact: true }).check();
+  await form
+    .getByLabel("Số câu (0 = toàn bộ, tối đa 100)", { exact: true })
+    .fill("4");
+  await form.getByRole("button", { name: "Lưu bài ôn", exact: true }).click();
+  await expect(form).toHaveCount(0);
   await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Đã lưu ma trận",
+    "Đã tạo bài ôn",
   );
-  await page.getByLabel("Loại bộ câu").selectOption("exam");
-  await page
-    .getByRole("radio", { name: "Chọn từ ngân hàng", exact: true })
-    .check();
-  await page.getByLabel("Chương ôn I", { exact: true }).check();
   const title = `Thi ${info.project.name} ${Date.now()}`;
-  await page.getByLabel("Tên bộ câu").fill(title);
-  await page.getByRole("button", { name: "Lưu lịch kiểm tra" }).click();
-  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Đã tạo kiểm tra",
+  const created = await page.request.post(
+    "/api/classrooms/learning-class/exams",
+    {
+      data: {
+        title,
+        chapterIds: ["learning-ch1"],
+        source: "bank",
+        questionCount: 4,
+        manualOpen: true,
+        startsAt: Date.now(),
+        closesAt: Date.now() + 3600000,
+      },
+    },
   );
+  expect(created.ok()).toBeTruthy();
+  await navigateTo(page, { name: "Kiểm tra online", exact: true });
   await page
     .locator(".learning-row")
     .filter({ has: page.getByText(title, { exact: true }) })
@@ -425,6 +465,7 @@ test("teacher creates matrix and scheduled exam; student autosaves offline and r
   const student = await studentContext.newPage();
   try {
     await login(student);
+    await navigateTo(student, { name: "Kiểm tra online", exact: true });
     await student
       .locator(".learning-row")
       .filter({ has: student.getByText(title, { exact: true }) })
@@ -541,6 +582,7 @@ test("leaving the tab four times submits and warnings survive reload", async ({
   expect(response.ok()).toBeTruthy();
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
   await login(page);
+  await navigateTo(page, { name: "Kiểm tra online", exact: true });
   await page
     .locator(".learning-row")
     .filter({ has: page.getByText(title, { exact: true }) })

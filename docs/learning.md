@@ -1,5 +1,9 @@
 # Cấp độ ôn tập và kiểm tra
 
+## Hiện hành: ba mục ôn/thi và bài ôn có tiêu đề — 15/10/2026
+
+Tách thành **Ôn tập → Kiểm tra săn thưởng → Kiểm tra online**. Giáo viên tạo bài ôn có tiêu đề và upload Word/CSV; học sinh chọn theo tiêu đề, tiếp tục/làm lại giữ lịch sử. Câu upload dùng bộ riêng, không tự đưa vào ngân hàng luyện tập. Bộ ôn ngân hàng cũ vẫn truy cập được; ôn chương/kỳ nằm trong Ôn từ ngân hàng. Săn thưởng có quản lý đề/điều kiện/vé/lượt thi/duyệt điểm riêng; online giữ tạo đề/thông báo/kết quả và các lịch kiểm tra đã lưu. Quy trình/API/migration/quyền tại [review-papers.md](review-papers.md). Các chỉ dẫn ma trận/thi theo lịch chung một trang phía dưới là luồng cũ.
+
 ## Hiện hành: quyền luyện tập/săn thưởng và quy tắc phiên của lớp — 15/10/2026
 
 Hai quyền chương tách biệt: Luyện tập mở/khóa luyện–ôn–sửa sai; Săn thưởng mở qua upload đề hoặc dùng lại đề có thời điểm tải, cài X/Y/ngưỡng tab, khóa bằng popup có tùy chọn xóa đề cấu hình. Giữ điều kiện cấp/tỷ lệ/sổ tay/vé; kiểm tra chính thức dùng lịch/quyền riêng. Quản lý chung giữ phút/cấp và cấu hình nhắc/đóng theo tab/idle. Khi vi phạm luyện tập, chỉ giờ của phiên đó bị loại khỏi progress và lịch sử ngày; câu trả lời/sổ tay và giờ các phiên trước giữ nguyên. Bài thi tự nộp đáp án đã lưu; polling không gia hạn idle, đáp án gửi sau đóng bị bỏ qua. [Quy tắc và tương thích đầy đủ](class-management.md). Thay mô tả rời tab một lần là thoát ở các mục lịch sử; không áp hình phạt tài khoản hay tạo dữ liệu học tập giả.

@@ -1,5 +1,5 @@
 import type { QuestionKind, QuestionAnswer } from "./question-types";
-import type { SessionPolicy } from './session-policy';
+import type { SessionPolicy } from "./session-policy";
 export type LearningQuestion = {
   kind?: QuestionKind;
   id: string;
@@ -18,7 +18,17 @@ export type MatrixRow = {
 };
 export type LearningChapter = {
   practiceAllowed?: boolean;
-  hunt?: {hasQuestions:boolean;uploadedAt:number;title:string;startsAt:number;closesAt:number;durationMinutes:number;preparationMinutes:number;tabLimit:number;open:boolean}|null;
+  hunt?: {
+    hasQuestions: boolean;
+    uploadedAt: number;
+    title: string;
+    startsAt: number;
+    closesAt: number;
+    durationMinutes: number;
+    preparationMinutes: number;
+    tabLimit: number;
+    open: boolean;
+  } | null;
   levelMinutes?: number;
   id: string;
   title: string;
@@ -85,6 +95,7 @@ export type LearningReward = {
   createdAt: number;
 };
 export type LearningOverview = {
+  reviewPapers?: boolean;
   classManagement?: boolean;
   sessionPolicy?: SessionPolicy;
   serverNow?: number;
@@ -101,6 +112,8 @@ export type LearningOverview = {
     chapterIds: string[];
     questionCount: number;
     weights: Record<string, number>;
+    source?: "upload" | "bank";
+    createdAt?: number;
   }[];
   exams: ExamDefinition[];
   runs: {

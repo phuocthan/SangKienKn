@@ -140,9 +140,9 @@ test("magnifier opens the selected student; common settings persist and practice
   await page.reload();
   await page.getByLabel("Chọn lớp học").selectOption("management-class");
   await navigateTo(page, { name: "Quản lý lớp", exact: true });
-  await expect(form.getByLabel("Nhắc nhở khi không tương tác (giây)")).toHaveValue(
-    "20",
-  );
+  await expect(
+    form.getByLabel("Nhắc nhở khi không tương tác (giây)"),
+  ).toHaveValue("20");
   await expect(
     page.getByRole("button", {
       name: "Mở luyện tập · Chương chính sách",
@@ -207,7 +207,7 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
   let runId = "";
   try {
     await login(student);
-    await navigateTo(student, { name: "Ôn tập & kiểm tra" });
+    await navigateTo(student, { name: "Kiểm tra săn thưởng", exact: true });
     const card = student
       .locator(".hunt-chapter")
       .filter({ hasText: "Chương chính sách" });

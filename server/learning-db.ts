@@ -22,6 +22,16 @@ export function ensureLearningSchema(db: DatabaseSync) {
       current_index INTEGER NOT NULL DEFAULT 0, completed INTEGER NOT NULL DEFAULT 0,
       request_id TEXT UNIQUE NOT NULL, created_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS review_papers (
+      blueprint_id TEXT PRIMARY KEY REFERENCES review_blueprints(id),
+      teacher_id TEXT NOT NULL REFERENCES users(id),
+      request_id TEXT UNIQUE NOT NULL, fingerprint TEXT NOT NULL,
+      questions TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS review_paper_sessions (
+      session_id TEXT PRIMARY KEY REFERENCES review_sessions(id),
+      blueprint_id TEXT NOT NULL REFERENCES review_papers(blueprint_id)
+    );
     CREATE TABLE IF NOT EXISTS learning_tickets (
       student_id TEXT NOT NULL REFERENCES users(id), chapter_id TEXT NOT NULL REFERENCES chapters(id),
       level INTEGER NOT NULL CHECK(level IN (3,4,5)), used_by TEXT UNIQUE, granted_at INTEGER NOT NULL,

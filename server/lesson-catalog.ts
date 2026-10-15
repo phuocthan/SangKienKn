@@ -1,6 +1,9 @@
 import type { DatabaseSync } from "node:sqlite";
 import { randomUUID } from "node:crypto";
-import { matchingLessonTitle } from "../shared/lesson-titles.js";
+import {
+  lessonTitleKey,
+  matchingLessonTitle,
+} from "../shared/lesson-titles.js";
 
 export function ensureLessonSchema(db: DatabaseSync) {
   db.exec(`CREATE TABLE IF NOT EXISTS lessons (
@@ -81,9 +84,22 @@ export function resolveQuestionLesson(
   title: string,
 ) {
   try {
+    const titles = lessonNames(db, chapterId).map((row) => String(row.title));
+    const archived = new Set(
+      db
+        .prepare("SELECT title FROM archived_lessons WHERE chapter_id=?")
+        .all(chapterId)
+        .map((row) => canonical(String(row.title))),
+    );
+    const available = titles.filter((value) => !archived.has(canonical(value)));
+    // A recreated lesson can have different punctuation/tone placement. Historical
+    // aliases must not win an exact match or create ambiguity with its active title.
+    // Keep archived names as a fallback so importing alone cannot restore a lesson.
     return matchingLessonTitle(
       title,
-      lessonNames(db, chapterId).map((row) => String(row.title)),
+      available.some((value) => lessonTitleKey(value) === lessonTitleKey(title))
+        ? available
+        : titles,
     );
   } catch (error) {
     throw new LessonError(

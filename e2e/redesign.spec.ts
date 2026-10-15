@@ -185,6 +185,7 @@ test("student review and garden keep actions, all levels and decorative fence", 
     0,
   );
   await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
+  await page.getByText("Ôn từ ngân hàng", { exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Bắt đầu ôn", exact: true }),
   ).toBeVisible();

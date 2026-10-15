@@ -40,6 +40,7 @@ export function Practice({
   onProgress: () => void;
 }) {
   const [reviewId, setReviewId] = useState(initialReviewId);
+  const [reviewTitle, setReviewTitle] = useState("");
   const repeatRequest = useRef(crypto.randomUUID());
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,6 +82,7 @@ export function Practice({
     if (mode === "correction") query.set("mode", "correction");
     if (reviewId) {
       api<{
+        title: string;
         questions: Question[];
         currentIndex: number;
         completed: boolean;
@@ -88,6 +90,7 @@ export function Practice({
       }>(`/learning/reviews/${reviewId}`)
         .then((r) => {
           if (!alive) return;
+          setReviewTitle(r.title);
           setQuestions(r.questions);
           setIndex(r.currentIndex);
           setDone(r.completed);
@@ -641,9 +644,15 @@ export function Practice({
         </div>
       )}
       <div className="card question-card">
+        {reviewId && <p className="review-session-title">{reviewTitle}</p>}
         <div className="question-meta">
           <span className="eyebrow">
-            {mode === "correction" ? "SỔ TAY SỬA SAI" : "LUYỆN TẬP"} ·{" "}
+            {mode === "correction"
+              ? "SỔ TAY SỬA SAI"
+              : reviewId
+                ? "ÔN TẬP"
+                : "LUYỆN TẬP"}{" "}
+            ·{" "}
             {(q as Question & { chapterTitle?: string }).chapterTitle ??
               chapter.title}
           </span>

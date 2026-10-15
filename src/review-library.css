@@ -1,0 +1,45 @@
+.review-library .learning-section {
+  min-width: 0;
+}
+.review-library .learning-row > div {
+  min-width: 0;
+}
+.review-library .learning-row h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 16px;
+}
+.review-library .learning-row p {
+  margin: 5px 0 0;
+  color: var(--muted, #5c6b58);
+}
+.review-library .learning-row button {
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.review-bank > summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 44px;
+  align-content: center;
+}
+.review-create-fields {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+  margin: 0;
+}
+.review-library .learning-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 700px) {
+  .review-library .learning-row {
+    align-items: stretch;
+  }
+  .review-library .learning-row button {
+    align-self: flex-start;
+  }
+}

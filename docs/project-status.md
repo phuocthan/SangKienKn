@@ -1,5 +1,21 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Chốt push ba mục ôn/thi và sửa nhập bài — 15/10/2026
+
+Theo yêu cầu mới, chốt toàn bộ tính năng bài ôn/tách ba mục cùng sửa nhập sau xóa/tạo lại bài lên origin/main. Các ghi nhận “chưa push” bên dưới thuộc thời điểm trước yêu cầu này; đối chiếu Git và đầu session-handoff để tiếp tục. Không kèm database/.local/secrets và không coi push là xác nhận Railway đã deploy. Các kiểm tra chức năng đã hoàn tất trong lượt triển khai, không báo thành kiểm tra mới ở bước Git.
+
+## Hiện hành: Ôn tập theo tiêu đề/upload và ba mục ôn/thi — 15/10/2026
+
+Đã tách **Ôn tập / Kiểm tra săn thưởng / Kiểm tra online** thành ba tab, giữ5vị trí icon chính và nhãn tối đa2dòng. Giáo viên tạo bài ôn có tiêu đề + Word/CSV/mẫu, học sinh chọn theo tiêu đề/tiếp tục/làm lại giữ lịch sử. Bộ upload dùng snapshot/câu riêng, không phát hành vào ngân hàng. Giữ bộ ôn ngân hàng cũ/ôn chương-kỳ dạng mở rộng. Săn thưởng có quản lý đề/tái dùng/khóa cùng điều kiện-vé-lượt/duyệt điểm riêng. Online giữ popup/thông báo/phòng thi, đồng thời giữ truy cập các lịch đã lưu. [Quy trình/API/migration](review-papers.md), thiết kế ở đầu [app-design.md](app-design.md).
+
+TypeScript/Vite build và **161/161 backend đạt**. Lượt rộng80E2E:78đạt/2lỗi harness mobile, đã sửa scope/các loại đáp án và xác nhận **12/12 đạt trên DB E2E cũ**, gồm hai ca archive hết chương mới. Sau chỉnh nhãn săn thưởng hết hạn, build cuối và **2/2 desktop/mobile đạt**; xem bằng chứng/giới hạn ở đầu [session-handoff.md](session-handoff.md). Không cộng lượt trùng hoặc báo toàn bộ E2E repository đạt. Bản sửa import bài xóa/tạo lại của lượt trước được giữ nguyên. Chưa commit/push/deploy; cần backend Railway mới, không sửa dữ liệu thật.
+
+## Sửa lỗi upload sau khi xóa/tạo lại bài — 15/10/2026
+
+Đã tái hiện và sửa API ghép tên bài: ưu tiên bài đang dùng thay vì tên tương đương đã archive (khác dấu phân cách hoặc cách đặt dấu tiếng Việt). Nhập Word/CSV sau tạo lại không bị tên bài cũ chặn; chưa tạo lại thì vẫn chặn, không hiện lại câu cũ hoặc đổi lịch sử. Giữ kiểm tra trùng/retry/phân quyền, không migration hay sửa dữ liệu thật. Chi tiết [question-bank.md](question-bank.md).
+
+QA mới: TypeScript/Vite build, **19/19 backend liên quan** và **10/10 E2E desktop/mobile** đạt trên database/server riêng; có thao tác xóa/tạo lại/upload Word và CSV qua UI. Chưa commit/push/deploy trong lượt này; bản sửa cần backend Railway mới. Report và cách tiếp tục ở đầu [session-handoff.md](session-handoff.md).
+
 ## Hiện hành: triển khai đề xuất tối ưu UI/UX — 15/10/2026
 
 Tiếp tục từ remote `bce44bc` sau khi pull11commit, giữ toàn bộ quyền học tập/đề săn thưởng/thống kê mới. Đã rút gọn tiêu đề/khẩu hiệu/mô tả; thêm việc cần làm từ dữ liệu thật; thu nhỏ hero/thẻ luyện; nhập Word/CSV một luồng, lời giải/hướng dẫn mở khi cần; nhóm thành bốn tab giữ draft/file; quản lý lớp có đường tới ba khu vực và ngưỡng nhắc/đóng theo cặp. Giữ navbar hai dòng/icon cố định và badge đỏ. React.lazy tải ba phân hệ khi mở, giữ điều hướng và có phục hồi lỗi tải. Thiết kế tại [app-design.md](app-design.md); QA/Git/deploy theo bản ghi mới đầu [session-handoff.md](session-handoff.md), không lấy các kết quả cũ bên dưới làm kết quả đợt này.
