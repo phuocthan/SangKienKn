@@ -1,5 +1,9 @@
 # Đối chiếu quy định ôn tập và kiểm tra GreenEdu
 
+## Quyết định mới thay xử lý tab/idle cũ — 15/10/2026
+
+Đã triển khai policy theo lớp: ngưỡng nhắc/đóng cho tab và không tương tác trong Quản lý chung, popup và worker server, ledger loại giờ đúng phiên luyện bị đóng; phòng thi tự nộp đáp án đã lưu và xử lý sự kiện tab trước đáp án chờ gửi. Quyền luyện tập/săn thưởng tách biệt; kiểm tra chính thức có quyền riêng. Phạm vi, mặc định, giới hạn phát hiện offline/client và tương thích tại [class-management.md](class-management.md). Phần audit dưới là bằng chứng lịch sử; không triển khai lại quy tắc cũ từ đó. Chưa thêm AI hỗ trợ sai nhiều lần, nhật ký vi phạm đầy đủ/ngoại lệ cho giáo viên hoặc hình phạt tài khoản. QA và Railway xem đầu session-handoff, không coi việc có mã là đã deploy.
+
 ## Chỉnh chính sách phiên học — 13/10/2026
 
 Yêu cầu mới thay logout khi idle: luyện/ôn/sửa sai rời tab hoặc máy nghỉ sẽ kết thúc phiên, đưa về trang chính và báo trong popup; idle120 giây cũng vậy, giữ đăng nhập. Không cộng đuôi giờ cho phiên hết hạn. Cảnh báo thi khi rời tab và ngưỡng tự nộp giữ nguyên; idle chỉ rời giao diện thi. Các mô tả logout, pause/resume và đếm tail trong phần lịch sử bên dưới không còn là quyết định hiện hành. Kiểm thử sửa phạm vi này trên server/SQLite riêng, chưa ghi thử Railway hoặc thiết bị thật.

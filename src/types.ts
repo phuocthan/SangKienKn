@@ -11,6 +11,7 @@ export type User = {
   uploadedAvatarId?: string | null;
 };
 export type Chapter = {
+  practiceAllowed?: boolean;
   levelMinutes?: number;
   id: string;
   title: string;

@@ -1,5 +1,9 @@
 # Ca kiểm thử chức năng GreenEdu
 
+## Quản lý lớp và policy phiên — 15/10/2026
+
+Ca mới ở server/class-management.test.ts và e2e/class-management.spec.ts: kính lúp chọn đúng học sinh/đóng trả focus; lưu ngưỡng/bất hợp lệ/chỉ owner; khóa luyện tập chặn card/URL/đáp án/review và kết thúc phiên giữ giờ đã ghi; săn thưởng đề riêng/X/Y/dùng lại/timestamp/xóa/khóa thu bài, không khóa thi chính thức; tab dedup/nhắc2–đóng3, idle nhắc5–đóng8trong E2E, polling không kéo dài; ledger chỉ loại giờ phiên vi phạm qua hai ngày, retry/offline muộn không trừ phiên mới/người khác; upload sai/chéo chương/trùng/retry ID; migration activity grace không kéo deadline hoặc reset mốc cũ. Bằng chứng154backend/64hồi quy/12release tại đầu bàn giao, test chỉ dùng SQLite riêng. [Nghiệp vụ](class-management.md).
+
 ## Nhóm buổi thi, export riêng và luyện tập sau tự nộp — 12/10/2026
 
 - ONLINE-GROUP: đúng examId dù trùng tên; trạng thái Chuẩn bị/Đang thi/Kết thúc, trước phát yêu cầu không hết hạn và thời gian Chưa ấn định; giờ mở/hạn chung; số tham gia/đã nộp đầy đủ, một em nộp không kết thúc buổi. Hai thẻ rời được gộp, danh sách bài mở trong nhóm, không tràn ngang.

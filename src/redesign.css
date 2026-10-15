@@ -171,22 +171,10 @@
   margin-bottom: 0;
 }
 .chapter-list .chapter-row {
-  grid-template-columns: 64px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
 }
-.chapter-order-control {
-  align-self: start;
-  display: grid;
-  gap: 4px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-}
-.chapter-order-control select {
-  width: 100%;
-  min-height: 44px;
-  padding: 8px 4px;
-  font-variant-numeric: tabular-nums;
+.chapter-list .chapter-row > * {
+  grid-column: 1;
 }
 .chapter-title-row {
   display: flex;

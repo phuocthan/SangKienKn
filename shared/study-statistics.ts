@@ -14,6 +14,10 @@ export type StudyStatistics = {
   buckets: StudyBucket[];
 };
 
+export type ClassroomStudyStatistics = StudyStatistics & {
+  members: { id: string; name: string; statistics: StudyStatistics }[];
+};
+
 export const STUDY_DAY_MS = 86400000;
 export const VIETNAM_OFFSET_MS = 7 * 3600000;
 export const studyDate = (timestamp: number) =>

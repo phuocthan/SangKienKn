@@ -198,122 +198,7 @@ test("practice clock advances, pauses while hidden or offline, and wrong answers
   await page.getByRole("button", { name: "Kết thúc phiên" }).click();
 });
 
-test("teacher controls chapter access; qualified students wait, opening another chapter does not unlock it, and stale starts are rejected", async ({
-  page,
-  browser,
-}, info) => {
-  await login(page, true);
-  // Make this scenario independent of previous desktop/mobile scenarios.
-  for (const id of ["learning-ch1", "learning-ch2"])
-    expect(
-      (
-        await page.request.post(`/api/chapters/${id}/exam-access`, {
-          data: { enabled: false },
-        })
-      ).ok(),
-    ).toBeTruthy();
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
-  const permission = page.locator(".chapter-list");
-  const studentContext = await browser.newContext({
-    viewport: page.viewportSize()!,
-  });
-  const student = await studentContext.newPage();
-  try {
-    await login(student);
-    // Earlier scenarios can leave notebook errors in the shared E2E student.
-    // Restore personal eligibility before asserting only the teacher gate.
-    await repairPublishedNotebook(student);
-    for (let i = 0; i < 8; i++)
-      expect(
-        (
-          await student.request.post("/api/attempts", {
-            data: {
-              questionId: "learning-ch1-q1",
-              selected: 0,
-              mode: "practice",
-              requestId: crypto.randomUUID(),
-            },
-          })
-        ).ok(),
-      ).toBeTruthy();
-    await student.bringToFront();
-    await student.evaluate(() => window.dispatchEvent(new Event("focus")));
-    const chapter = student
-      .locator(".learning-chapter")
-      .filter({ hasText: "Chương ôn I" })
-      .first();
-    const hunt = chapter.getByRole("button", { name: "Săn điểm", exact: true });
-    await expect(chapter).toContainText("Chờ giáo viên mở kiểm tra");
-    await expect(chapter.locator(".learning-exam-access.waiting")).toHaveCSS(
-      "background-color", "rgb(255, 240, 236)",
-    );
-    await expect(hunt).toBeDisabled();
-    await permission
-      .getByRole("button", { name: "Mở kiểm tra · Chương ôn II", exact: true })
-      .click();
-    await expect(
-      permission.getByRole("button", {
-        name: "Khóa kiểm tra · Chương ôn II",
-        exact: true,
-      }),
-    ).toBeEnabled();
-    await student.bringToFront();
-    await student.evaluate(() => window.dispatchEvent(new Event("focus")));
-    await expect(hunt).toBeDisabled();
-    await permission
-      .getByRole("button", { name: "Mở kiểm tra · Chương ôn I", exact: true })
-      .click();
-    await expect(
-      permission.getByRole("button", {
-        name: "Khóa kiểm tra · Chương ôn I",
-        exact: true,
-      }),
-    ).toBeEnabled();
-    await student.bringToFront();
-    await student.evaluate(() => window.dispatchEvent(new Event("focus")));
-    await expect(hunt).toBeEnabled();
-    await expect(chapter.locator(".learning-exam-access.open")).toHaveText(
-      "Giáo viên đã mở kiểm tra",
-    );
-    await expect(chapter.locator(".learning-exam-access.open")).toHaveCSS(
-      "background-color", "color(srgb 0.791373 0.852549 0.781961)",
-    );
-    await student.reload();
-    await navigateTo(student, { name: "Ôn tập & kiểm tra" });
-    await expect(hunt).toBeEnabled();
-    await permission
-      .getByRole("button", { name: "Khóa kiểm tra · Chương ôn I", exact: true })
-      .click();
-    await expect(
-      permission.getByRole("button", {
-        name: "Mở kiểm tra · Chương ôn I",
-        exact: true,
-      }),
-    ).toBeEnabled();
-    // The student has not refreshed; server must independently reject their stale button.
-    await hunt.click();
-    await expect(student.getByRole("alert")).toContainText(
-      "Giáo viên chưa mở kiểm tra",
-    );
-    await expect(student.locator(".exam-room")).toHaveCount(0);
-    await student.bringToFront();
-    await student.evaluate(() => window.dispatchEvent(new Event("focus")));
-    await expect(hunt).toBeDisabled();
-    await noOverflow(page);
-    await noOverflow(student);
-    await page.screenshot({
-      path: info.outputPath("chapter-access-teacher.png"),
-      fullPage: true,
-    });
-    await student.screenshot({
-      path: info.outputPath("chapter-access-student.png"),
-      fullPage: true,
-    });
-  } finally {
-    await studentContext.close();
-  }
-});
-
+// Independent practice/hunt opening, paper reuse and stale starts are covered in class-management.spec.ts.
 test("student reviews semester, resumes exact question and repairs without revealing a wrong answer", async ({
   page,
 }, info) => {
@@ -453,9 +338,9 @@ test("student uses hunt ticket and teacher approves the earned point", async ({
     .filter({ hasText: "Chương ôn I" })
     .first();
   await expect(
-    chapter.getByRole("button", { name: "Săn điểm", exact: true }),
+    chapter.getByRole("button", { name: "Săn thưởng", exact: true }),
   ).toBeEnabled();
-  await chapter.getByRole("button", { name: "Săn điểm", exact: true }).click();
+  await chapter.getByRole("button", { name: "Săn thưởng", exact: true }).click();
   await expect(page.locator(".exam-room")).toBeVisible();
   for (let i = 0; i < 4; i++) {
     await page.locator(".choices .choice").first().click();

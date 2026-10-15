@@ -2,7 +2,7 @@
 
 ## Thứ tự hiển thị chương và thêm chương cuối danh sách — 14/10/2026
 
-Hộp tạo chương hiển thị danh sách chương hiện có theo thứ tự lưu. Quản lý lớp → Quản lý chương cho chọn vị trí1–N; chương được chuyển đến vị trí đã chọn, các chương còn lại tự dịch. Chương mới thêm cuối danh sách. Nút xóa icon nằm ngay trước tên, giữ xác nhận/archive và nhãn truy cập.
+Hộp tạo chương hiển thị danh sách chương hiện có theo thứ tự lưu. Theo yêu cầu tiếp theo cùng ngày, Quản lý lớp → Quản lý chương **bỏ select Vị trí ở từng thẻ**. Nút **Sắp xếp** cạnh **Thêm chương** mở popup kéo thả chuột/cảm ứng, kèm nút lên/xuống và phím mũi tên cho bàn phím. **Lưu thứ tự** gửi một danh sách đầy đủ; **Hủy/X/Escape** bỏ nháp. Busy chặn đóng/gửi lặp, lỗi giữ nháp; capability máy chủ cũ khóa nút. Chương mới thêm cuối danh sách. Nút xóa icon nằm ngay trước tên, giữ xác nhận/archive và nhãn truy cập.
 
 Migration bổ sung **chapter_display_order(chapter_id,position)**, khởi tạo dữ liệu cũ theo rowid trong từng lớp và giữ nguyên bảng chapters3cột/ID/lịch sử. Trigger AFTER INSERT gán vị trí cuối riêng mỗi lớp; chạy migration lại không reset thứ tự đã lưu. **POST /api/classrooms/:id/chapters/order {chapterIds}** chỉ giáo viên sở hữu lớp, yêu cầu toàn bộ ID chương đang dùng đúng một lần. Payload sai/trùng bị400; thiếu/thừa/ID khác lớp/chương archive hoặc danh sách cũ sau thêm/xóa bị409, toàn bộ transaction rollback. Lưu không thay câu hỏi/điểm/progress/attempts/corrections/snapshot. Các nguồn hiển thị chương dùng thứ tự này; không đổi thứ tự câu trong đề đã chốt.
 

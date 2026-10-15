@@ -50,9 +50,23 @@ test("creation lists existing chapters; reorder persists, new chapters append an
   await expect(dialog).toHaveCount(0);
   await navigateTo(page, { name: "Quản lý lớp", exact: true });
   await expect(titles(page)).toHaveText([...names, "Chương mới"]);
-  await page
-    .getByLabel("Vị trí chương · Chương mới", { exact: true })
-    .selectOption("2");
+  await expect(page.getByLabel(/Vị trí chương/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Sắp xếp", exact: true }).click();
+  const sortDialog = page.getByRole("dialog", {
+    name: "Sắp xếp chương",
+    exact: true,
+  });
+  await sortDialog
+    .getByRole("button", { name: "Lên · Chương mới", exact: true })
+    .click();
+  await sortDialog
+    .getByRole("button", { name: "Lên · Chương mới", exact: true })
+    .click();
+  await expect(titles(page)).toHaveText([...names, "Chương mới"]);
+  await sortDialog
+    .getByRole("button", { name: "Lưu thứ tự", exact: true })
+    .click();
+  await expect(sortDialog).toHaveCount(0);
   const ordered = [names[0], "Chương mới", names[1], names[2]];
   await expect(titles(page)).toHaveText(ordered);
   await expect(
@@ -126,18 +140,36 @@ test("failed ordering keeps current positions and permits a retry", async ({
       json: { error: "Không lưu được thứ tự. Thử lại." },
     }),
   );
-  const control = page.getByLabel(`Vị trí chương · ${names[2]}`, {
+  await page.getByRole("button", { name: "Sắp xếp", exact: true }).click();
+  const dialog = page.getByRole("dialog", {
+    name: "Sắp xếp chương",
     exact: true,
   });
-  await control.selectOption("1");
+  const handle = dialog.getByRole("button", {
+    name: `Kéo sắp xếp · ${names[2]}`,
+    exact: true,
+  });
+  await handle.focus();
+  await page.keyboard.press("ArrowUp");
+  await page.keyboard.press("ArrowUp");
+  const control = dialog.getByRole("button", {
+    name: "Lưu thứ tự",
+    exact: true,
+  });
+  await control.click();
   await expect(
     page.getByRole("alert").filter({ hasText: "Không lưu được thứ tự" }),
   ).toBeVisible();
-  await expect(control).toHaveValue("3");
   await expect(control).toBeEnabled();
+  await expect(dialog.locator("li strong")).toHaveText([
+    names[2],
+    names[0],
+    names[1],
+  ]);
   await expect(titles(page)).toHaveText(names);
   await page.unroute("**/api/classrooms/*/chapters/order");
-  await control.selectOption("1");
+  await control.click();
+  await expect(dialog).toHaveCount(0);
   await expect(titles(page)).toHaveText([names[2], names[0], names[1]]);
 });
 
@@ -162,11 +194,83 @@ test("empty class creation and old server order capability have clear states", a
   await page.reload();
   await navigateTo(page, { name: "Quản lý lớp", exact: true });
   await expect(
-    page.getByLabel("Vị trí chương · Chương đầu", { exact: true }),
+    page.getByRole("button", { name: "Sắp xếp", exact: true }),
   ).toBeDisabled();
   await expect(
     page.getByText("Đổi thứ tự chương đang chờ cập nhật máy chủ.", {
       exact: true,
     }),
   ).toBeVisible();
+});
+
+test("drag works with mouse and touch, cancel discards draft and save persists", async ({
+  page,
+}, info) => {
+  const id = await classroom(page, `drag-${info.project.name}`, names);
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await page.getByRole("button", { name: "Sắp xếp", exact: true }).click();
+  const dialog = page.getByRole("dialog", {
+    name: "Sắp xếp chương",
+    exact: true,
+  });
+  const from = await dialog
+    .getByRole("button", { name: `Kéo sắp xếp · ${names[2]}`, exact: true })
+    .boundingBox();
+  const to = await dialog.locator("li").first().boundingBox();
+  const x = from!.x + from!.width / 2,
+    y = from!.y + from!.height / 2;
+  if (info.project.name === "mobile") {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x, y }],
+    });
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [{ x, y: to!.y + 12 }],
+    });
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await cdp.detach();
+  } else {
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x, to!.y + 12, { steps: 12 });
+    await page.mouse.up();
+  }
+  await expect(dialog.locator("li strong")).toHaveText([
+    names[2],
+    names[0],
+    names[1],
+  ]);
+  const classes = await (await page.request.get("/api/classrooms")).json();
+  expect(
+    classes
+      .find((c: { id: string }) => c.id === id)
+      .chapters.map((ch: { title: string }) => ch.title),
+  ).toEqual(names);
+  for (const width of [320, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(
+      await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth),
+    ).toBe(true);
+    if (width === 320 || width === 1440)
+      await dialog.screenshot({ path: info.outputPath(`sort-${width}.png`) });
+  }
+  await dialog.getByRole("button", { name: "Hủy", exact: true }).click();
+  await expect(titles(page)).toHaveText(names);
+  await expect(
+    page.getByRole("button", { name: "Sắp xếp", exact: true }),
+  ).toBeFocused();
+  await page.getByRole("button", { name: "Sắp xếp", exact: true }).click();
+  await expect(dialog.locator("li strong")).toHaveText(names);
+  await dialog
+    .getByRole("button", { name: `Lên · ${names[1]}`, exact: true })
+    .click();
+  await dialog.getByRole("button", { name: "Lưu thứ tự", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await page.reload();
+  await expect(titles(page)).toHaveText([names[1], names[0], names[2]]);
 });

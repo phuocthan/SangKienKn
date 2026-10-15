@@ -432,7 +432,7 @@ test("teacher authors typed questions; student answers, repeats and teacher open
   ).toBe(0);
   await login(page, true);
   await page.getByLabel("Chọn lớp học").selectOption(classroom.id);
-  await navigateTo(page, { name: "Lớp học của tôi", exact: true });
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
   await expect(
     page.getByRole("columnheader", { name: "Số câu đã làm", exact: true }),
   ).toBeVisible();
@@ -473,7 +473,7 @@ test("leaving study or becoming idle ends only the study session and shows an in
     .filter({
       has: page.getByRole("heading", { name: "Chương ôn I", exact: true }),
     })
-    .getByRole("button", { name: /Luyện tập/ })
+    .getByRole("button", { name: /Luyện tập|Ôn tập lại/ })
     .click();
   const started = await start;
   const sessionId = (await started.json()).sessionId;
@@ -483,11 +483,10 @@ test("leaving study or becoming idle ends only the study session and shows an in
     (r) => r.url().endsWith("/api/study/stop") && r.ok(),
   );
   await page.evaluate(() => {
-    Object.defineProperty(document, "hasFocus", {
-      configurable: true,
-      value: () => false,
-    });
-    window.dispatchEvent(new Event("blur"));
+    for(let i=0;i<4;i++){
+      Object.defineProperty(document,'hasFocus',{configurable:true,value:()=>false});window.dispatchEvent(new Event('blur'));
+      Object.defineProperty(document,'hasFocus',{configurable:true,value:()=>true});window.dispatchEvent(new Event('focus'));
+    }
   });
   await stop;
   const stopped = await page.request.post("/api/study/heartbeat", {
@@ -496,7 +495,7 @@ test("leaving study or becoming idle ends only the study session and shows an in
   expect(stopped.status()).toBe(409);
   await expect(
     page.getByRole("dialog", { name: "Phiên học đã kết thúc" }),
-  ).toContainText("rời trang học");
+  ).toContainText("giới hạn rời tab");
   await expect(
     page.getByRole("heading", { name: /hôm nay mình học gì/ }),
   ).toBeVisible();
@@ -517,7 +516,7 @@ test("leaving study or becoming idle ends only the study session and shows an in
     .filter({
       has: page.getByRole("heading", { name: "Chương ôn I", exact: true }),
     })
-    .getByRole("button", { name: /Luyện tập/ })
+    .getByRole("button", { name: /Luyện tập|Ôn tập lại/ })
     .click();
   await expect(clock).toBeVisible();
   await page.clock.runFor(106000);
@@ -532,7 +531,7 @@ test("leaving study or becoming idle ends only the study session and shows an in
   await page.clock.runFor(15000);
   await expect(
     page.getByRole("dialog", { name: "Phiên học đã kết thúc" }),
-  ).toContainText("2 phút");
+  ).toContainText("không tương tác");
   await expect(
     page.getByRole("heading", { name: /hôm nay mình học gì/ }),
   ).toBeVisible();
@@ -554,11 +553,12 @@ test("leaving study or becoming idle ends only the study session and shows an in
     .filter({
       has: page.getByRole("heading", { name: "Chương ôn I", exact: true }),
     })
-    .getByRole("button", { name: /Luyện tập/ })
+    .getByRole("button", { name: /Luyện tập|Ôn tập lại/ })
     .click();
   await expect(page.getByLabel("Thời gian phiên học")).toBeVisible();
   await page.clock.fastForward(60000);
+  await page.clock.runFor(61000);
   await expect(
     page.getByRole("dialog", { name: "Phiên học đã kết thúc" }),
-  ).toContainText("thời gian vắng mặt");
+  ).toContainText("không tương tác");
 });

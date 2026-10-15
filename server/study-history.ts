@@ -1,4 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
+import { recordSessionCredit } from './class-management.js';
 import {
   STUDY_DAY_MS,
   studyDate,
@@ -8,6 +9,7 @@ import {
   type StudyPeriod,
   type StudyBucket,
   type StudyStatistics,
+  type ClassroomStudyStatistics,
 } from "../shared/study-statistics.js";
 
 export function ensureStudyHistorySchema(db: DatabaseSync) {
@@ -24,6 +26,65 @@ export function ensureStudyHistorySchema(db: DatabaseSync) {
     );
     CREATE INDEX IF NOT EXISTS study_daily_time_student_day ON study_daily_time(student_id,day);
   `);
+}
+
+export function classroomStudyStatistics(
+  db: DatabaseSync,
+  classroomId: string,
+  period: StudyPeriod,
+  date: string,
+): ClassroomStudyStatistics {
+  const members = db
+    .prepare(
+      `SELECT u.id,u.name FROM memberships m
+    JOIN users u ON u.id=m.student_id WHERE m.classroom_id=? ORDER BY u.name,u.id`,
+    )
+    .all(classroomId)
+    .map((row) => ({
+      id: String(row.id),
+      name: String(row.name),
+      statistics: studentStudyStatistics(
+        db,
+        classroomId,
+        String(row.id),
+        period,
+        date,
+      ),
+    }));
+  // All members share the same calendar and tracking start. Even an empty
+  // class must distinguish a period before tracking from a confirmed zero.
+  const template =
+    members[0]?.statistics ??
+    studentStudyStatistics(db, classroomId, "", period, date);
+  const totalBucket = (
+    bucket: StudyBucket,
+    pick: (s: StudyStatistics) => StudyBucket,
+  ): StudyBucket => ({
+    ...bucket,
+    seconds:
+      bucket.seconds === null
+        ? null
+        : members.reduce(
+            (sum, m) => sum + (pick(m.statistics).seconds ?? 0),
+            0,
+          ),
+  });
+  return {
+    ...template,
+    lifetimeSeconds: members.reduce(
+      (sum, m) => sum + m.statistics.lifetimeSeconds,
+      0,
+    ),
+    summaries: {
+      day: totalBucket(template.summaries.day, (s) => s.summaries.day),
+      week: totalBucket(template.summaries.week, (s) => s.summaries.week),
+      month: totalBucket(template.summaries.month, (s) => s.summaries.month),
+    },
+    buckets: template.buckets.map((bucket, index) =>
+      totalBucket(bucket, (s) => s.buckets[index]),
+    ),
+    members,
+  };
 }
 
 export function startStudyHistory(db: DatabaseSync, timestamp: number) {
@@ -50,6 +111,7 @@ export function creditStudyInterval(
   );
   db.exec("BEGIN IMMEDIATE");
   try {
+    const creditedDays: Record<string, number> = {};
     db.prepare(
       "INSERT INTO progress VALUES (?,?,?) ON CONFLICT(student_id,chapter_id) DO UPDATE SET seconds=seconds+excluded.seconds",
     ).run(studentId, chapterId, creditedMs / 1000);
@@ -62,8 +124,10 @@ export function creditStudyInterval(
         `INSERT INTO study_daily_time VALUES(?,?,?,?)
         ON CONFLICT(student_id,chapter_id,day) DO UPDATE SET credited_ms=credited_ms+excluded.credited_ms`,
       ).run(studentId, chapterId, day, Math.round(next - cursor));
+      creditedDays[day] = (creditedDays[day] ?? 0) + Math.round(next - cursor);
       cursor = next;
     }
+    recordSessionCredit(db, studentId, chapterId, creditedMs, creditedDays);
     finishSession();
     db.exec("COMMIT");
   } catch (error) {

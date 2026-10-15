@@ -21,6 +21,78 @@
   flex-wrap: wrap;
   gap: 10px;
 }
+.session-policy-fields {
+  flex-basis: 100%;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #cbdcc2;
+  border-radius: 12px;
+  background: #f2f6e9;
+}
+.session-policy-fields label,
+.hunt-access-form > label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.session-policy-fields p,
+.session-policy-fields small {
+  grid-column: 1/-1;
+}
+.class-management-card .session-policy-fields input {
+  width: 100%;
+}
+.hunt-access-form {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.hunt-access-form fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid #cbdcc2;
+  border-radius: 12px;
+}
+.hunt-access-form .exam-upload {
+  border: 0;
+  padding: 0;
+}
+.hunt-access-form legend {
+  padding: 0 4px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.hunt-access-form .checkbox-label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.hunt-access-form .checkbox-label input {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
+.roster-statistics-search {
+  min-width: 44px;
+  min-height: 44px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+@media (max-width: 600px) {
+  .roster-time-cell .roster-statistics-search {
+    display: flex;
+    margin: 0;
+  }
+  .session-policy-fields {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+}
 
 .class-management-card form label {
   font-weight: 600;

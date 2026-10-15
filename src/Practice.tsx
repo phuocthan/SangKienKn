@@ -1,3 +1,8 @@
+import {
+  DEFAULT_SESSION_POLICY,
+  type SessionPolicy,
+} from "../shared/session-policy";
+import { closeInvalidStudy, flushStudyClosures } from "./session-end";
 import { AnswerFields } from "./AnswerFields";
 import { answerComplete, type QuestionAnswer } from "../shared/question-types";
 import { WorkspaceHeading } from "./WorkspaceHeading";
@@ -13,8 +18,8 @@ import {
   Sparkles,
   X,
 } from "./icons";
-import { api, errorMessage } from "./api";
-import { Empty } from "./components";
+import { api, ApiError, errorMessage } from "./api";
+import { Empty, Modal } from "./components";
 import type { Chapter, Question, Result } from "./types";
 
 export function Practice({
@@ -53,6 +58,12 @@ export function Practice({
   const [recordedSeconds, setRecordedSeconds] = useState<number | null>(null);
   const [hidden, setHidden] = useState(document.hidden);
   const [offline, setOffline] = useState(!navigator.onLine);
+  const studySession = useRef<string | undefined>(undefined);
+  const activePolicy = useRef<SessionPolicy>({ ...DEFAULT_SESSION_POLICY });
+  const [tabCount, setTabCount] = useState(0),
+    [tabWarning, setTabWarning] = useState(false);
+  const tabCountRef = useRef(0);
+  tabCountRef.current = tabCount;
   const lastInteraction = useRef(Date.now());
   const interacted = useRef(true);
   const pausedRef = useRef(false);
@@ -137,85 +148,123 @@ export function Practice({
     let sessionId: string | undefined,
       disposed = false,
       sending = false,
-      failed = false;
+      failed = false,
+      exited = false,
+      away = false;
     let lastTick = performance.now(),
-      exited = false;
-    const exitStudy = (reason: "idle" | "away") => {
-      if (exited || disposed) return;
+      pendingTabs: string[] = [];
+    let policy = { ...DEFAULT_SESSION_POLICY };
+    let termination: string | undefined;
+    let flushing = false,
+      supportsRules = false;
+    const exitStudy = (
+      reason: "idle" | "tabs" | "locked" | "away" | "ended",
+    ) => {
+      if (disposed || exited) return;
       exited = true;
+      termination = reason;
       pausedRef.current = true;
       setPaused(true);
-      // Unmounting stops the server session with active:false. It must not
-      // credit the period spent in a hidden tab or a sleeping browser.
+      if (sessionId) closeInvalidStudy(sessionId, reason);
       window.dispatchEvent(
         new CustomEvent("greenedu-study-exit", { detail: { reason } }),
       );
     };
+    const updatePolicy = (p?: SessionPolicy) => {
+      if (p) {
+        policy = p;
+        activePolicy.current = p;
+      }
+    };
+    async function syncTabs() {
+      if (!sessionId || !supportsRules || flushing || disposed) return;
+      flushing = true;
+      try {
+        while (pendingTabs.length && !disposed && !exited) {
+          const eventId = pendingTabs[0];
+          const r = await api<{
+            tabs: number;
+            closed: boolean;
+            policy: SessionPolicy;
+          }>(`/study/${sessionId}/tab`, { eventId });
+          pendingTabs.shift();
+          updatePolicy(r.policy);
+          const count = Math.max(
+            r.tabs + pendingTabs.length,
+            tabCountRef.current,
+          );
+          tabCountRef.current = count;
+          setTabCount(count);
+          if (r.closed) {
+            exitStudy("tabs");
+            break;
+          }
+        }
+      } catch (e) {
+        if (!disposed) setSessionError(errorMessage(e));
+      } finally {
+        flushing = false;
+      }
+    }
+    async function heartbeat() {
+      if (!sessionId || sending || disposed || exited) return;
+      sending = true;
+      const activity = interacted.current;
+      interacted.current = false;
+      try {
+        await syncTabs();
+        if (exited) return;
+        const response = await api<{
+          creditedSeconds?: number;
+          policy?: SessionPolicy;
+        }>("/study/heartbeat", {
+          sessionId,
+          active:
+            !document.hidden &&
+            document.hasFocus() &&
+            !pausedRef.current &&
+            !doneRef.current &&
+            Date.now() - lastInteraction.current <
+              policy.closeIdleSeconds * 1000,
+          interacted: activity,
+        });
+        updatePolicy(response.policy);
+        if (!disposed) {
+          failed = false;
+          setSessionError("");
+          if (typeof response.creditedSeconds === "number")
+            setRecordedSeconds(
+              (s) => (s ?? 0) + Math.max(0, response.creditedSeconds!),
+            );
+          onProgressRef.current();
+        }
+      } catch (e) {
+        if (!disposed) {
+          failed = true;
+          interacted.current ||= activity;
+          setSessionError(errorMessage(e));
+          if (e instanceof ApiError && (e.status === 403 || e.status === 409))
+            exitStudy(
+              Date.now() - lastInteraction.current >=
+                policy.closeIdleSeconds * 1000
+                ? "idle"
+                : e.status === 403
+                  ? "locked"
+                  : "ended",
+            );
+        }
+      } finally {
+        sending = false;
+      }
+    }
     lastInteraction.current = Date.now();
     interacted.current = true;
     pausedRef.current = false;
     setPaused(false);
     setWarning(null);
     setSessionError("");
-    async function heartbeat() {
-      if (!sessionId || sending || disposed) return;
-      if (performance.now() - lastTick > 2000) {
-        pausedRef.current = true;
-        setPaused(true);
-      }
-      sending = true;
-      const activity = interacted.current;
-      interacted.current = false;
-      try {
-        const response = await api<{ creditedSeconds?: number }>(
-          "/study/heartbeat",
-          {
-            sessionId,
-            active:
-              !document.hidden &&
-              document.hasFocus() &&
-              !pausedRef.current &&
-              !doneRef.current &&
-              Date.now() - lastInteraction.current < 120000,
-            interacted: activity,
-          },
-        );
-        if (!disposed) {
-          failed = false;
-          if (
-            typeof response.creditedSeconds === "number" &&
-            Number.isFinite(response.creditedSeconds)
-          )
-            setRecordedSeconds(
-              (seconds) =>
-                (seconds ?? 0) + Math.max(0, response.creditedSeconds!),
-            );
-          setSessionError("");
-          onProgressRef.current();
-        }
-      } catch (e) {
-        if (!disposed) {
-          failed = true;
-          setSessionError(errorMessage(e));
-          interacted.current ||= activity;
-        }
-      } finally {
-        sending = false;
-      }
-    }
-    function activity(event: Event) {
-      if (
-        event.isTrusted &&
-        !pausedRef.current &&
-        !document.hidden &&
-        document.hasFocus()
-      ) {
-        lastInteraction.current = Date.now();
-        interacted.current = true;
-        setWarning(null);
-      }
-    }
-    api<{ sessionId: string }>("/study/start", {
+    setTabCount(0);
+    api<{ sessionId: string; policy?: SessionPolicy }>("/study/start", {
       chapterId: studyChapterId,
       questionId: questions[index]?.id,
     })
@@ -228,26 +277,50 @@ export function Practice({
           return;
         }
         sessionId = s.sessionId;
+        supportsRules = !!s.policy;
+        studySession.current = s.sessionId;
+        updatePolicy(s.policy);
         lastTick = performance.now();
+        void syncTabs();
       })
       .catch((e) => {
-        if (!disposed) setSessionError(errorMessage(e));
+        if (!disposed) {
+          setSessionError(errorMessage(e));
+          pausedRef.current = true;
+          setPaused(true);
+        }
       });
+    const activity = (event: Event) => {
+      if (
+        event.isTrusted &&
+        !pausedRef.current &&
+        !document.hidden &&
+        document.hasFocus()
+      ) {
+        lastInteraction.current = Date.now();
+        interacted.current = true;
+        setWarning(null);
+      }
+    };
     const timer = window.setInterval(() => {
-      const tick = performance.now();
-      const delta = (tick - lastTick) / 1000;
+      const tick = performance.now(),
+        delta = (tick - lastTick) / 1000;
       lastTick = tick;
-      const idle = Math.floor((Date.now() - lastInteraction.current) / 1000);
-      if (idle >= 120) {
+      const idle = (Date.now() - lastInteraction.current) / 1000;
+      if (idle >= policy.closeIdleSeconds) {
         exitStudy("idle");
         return;
       }
-      if (delta > 2 && !pausedRef.current) {
-        exitStudy("away");
-        return;
+      if (idle >= policy.warningIdleSeconds)
+        setWarning(Math.ceil(policy.closeIdleSeconds - idle));
+      if (delta > 2) {
+        pausedRef.current = true;
+        setPaused(true);
+        void heartbeat();
       }
       if (
         disposed ||
+        exited ||
         pausedRef.current ||
         document.hidden ||
         !document.hasFocus() ||
@@ -257,29 +330,49 @@ export function Practice({
         !navigator.onLine
       )
         return;
-      // Display an estimate only; server heartbeats remain authoritative.
-      // A suspended browser must not catch up wall-clock time on wake.
-      if (delta > 0 && delta <= 2)
-        setElapsedSeconds((seconds) => seconds + delta);
-      if (idle >= 105) setWarning(120 - idle);
+      if (delta > 0 && delta <= 2) setElapsedSeconds((s) => s + delta);
     }, 1000);
-    const pulse = window.setInterval(() => void heartbeat(), 15000);
+    const pulse = window.setInterval(() => void heartbeat(), 5000);
     const visibility = () => {
       lastTick = performance.now();
       setHidden(document.hidden);
-      if (document.hidden || !document.hasFocus()) {
-        exitStudy("away");
-        return;
+      const left = document.hidden || !document.hasFocus();
+      if (left && !away && !exited) {
+        if (sessionId && !supportsRules) {
+          exitStudy("away");
+          return;
+        }
+        away = true;
+        pausedRef.current = true;
+        setPaused(true);
+        const id = crypto.randomUUID();
+        pendingTabs.push(id);
+        const count = tabCountRef.current + 1;
+        tabCountRef.current = count;
+        setTabCount(count);
+        if (count >= policy.closeTabs) {
+          exitStudy("tabs");
+          return;
+        }
+        if (count >= policy.warningTabs) setTabWarning(true);
+        void syncTabs();
+        void heartbeat();
+      } else if (!left) {
+        away = false;
+        void heartbeat();
       }
     };
     const connection = () => {
-      lastTick = performance.now();
       setOffline(!navigator.onLine);
-      if (navigator.onLine) void heartbeat();
+      lastTick = performance.now();
+      if (navigator.onLine) {
+        void flushStudyClosures();
+        void heartbeat();
+      }
     };
-    const events = ["pointerdown", "keydown", "scroll"];
-    events.forEach((name) =>
-      window.addEventListener(name, activity, { passive: true, capture: true }),
+    const events = ["pointerdown", "keydown", "wheel", "touchmove"];
+    events.forEach((n) =>
+      window.addEventListener(n, activity, { passive: true, capture: true }),
     );
     document.addEventListener("visibilitychange", visibility);
     window.addEventListener("blur", visibility);
@@ -290,39 +383,34 @@ export function Practice({
       disposed = true;
       clearInterval(timer);
       clearInterval(pulse);
-      events.forEach((name) =>
-        window.removeEventListener(name, activity, true),
-      );
+      events.forEach((n) => window.removeEventListener(n, activity, true));
       document.removeEventListener("visibilitychange", visibility);
       window.removeEventListener("blur", visibility);
       window.removeEventListener("focus", visibility);
       window.removeEventListener("online", connection);
       window.removeEventListener("offline", connection);
-      if (sessionId)
-        void api("/study/stop", {
-          sessionId,
-          active:
-            !pausedRef.current &&
-            !document.hidden &&
-            document.hasFocus() &&
-            navigator.onLine,
-        }).catch(() => {});
+      if (sessionId) {
+        if (termination) closeInvalidStudy(sessionId, termination);
+        else
+          void api("/study/stop", {
+            sessionId,
+            active:
+              !pausedRef.current &&
+              !document.hidden &&
+              document.hasFocus() &&
+              navigator.onLine,
+          }).catch(() => {});
+      }
       onProgressRef.current();
     };
   }, [studyChapterId, canStudy]);
-
   function resume() {
-    if (Date.now() - lastInteraction.current >= 120000) {
-      window.dispatchEvent(
-        new CustomEvent("greenedu-study-exit", { detail: { reason: "idle" } }),
-      );
-      return;
-    }
     lastInteraction.current = Date.now();
     interacted.current = true;
     pausedRef.current = false;
     setPaused(false);
     setWarning(null);
+    setTabWarning(false);
   }
   async function submit() {
     if (
@@ -344,6 +432,7 @@ export function Practice({
           selected,
           mode,
           requestId: requestId.current,
+          studySessionId: studySession.current,
         },
       );
       setResult(r);
@@ -491,6 +580,18 @@ export function Practice({
   const q = questions[index];
   return (
     <div className="practice-layout">
+      {(tabWarning || warning !== null) && (
+        <Modal title="Nhắc nhở phiên học" onClose={resume}>
+          <p>
+            {tabWarning
+              ? `Bạn đã rời tab ${tabCount}/${activePolicy.current.closeTabs} lần. Tới ngưỡng, phiên sẽ đóng và không được tính giờ.`
+              : `Không có tương tác. Phiên sẽ tự đóng sau ${warning} giây và không được tính giờ.`}
+          </p>
+          <button className="button primary" onClick={resume}>
+            Tiếp tục học
+          </button>
+        </Modal>
+      )}
       <WorkspaceHeading className="practice-top">
         <button className="text-button" onClick={onFinish}>
           <ArrowLeft size={16} />
@@ -529,10 +630,10 @@ export function Practice({
           <Pause size={20} />
           <span>
             {paused
-              ? "Phiên học đang kết thúc vì bạn đã rời trang hoặc máy nghỉ."
+              ? "Phiên đang tạm dừng sau khi rời tab hoặc máy nghỉ."
               : `Bạn còn đang học chứ? Phiên học kết thúc sau ${warning} giây nếu không tương tác.`}
           </span>
-          {!paused && (
+          {paused && (
             <button className="button primary small" onClick={resume}>
               Tiếp tục học
             </button>

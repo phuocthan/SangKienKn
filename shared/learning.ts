@@ -1,4 +1,5 @@
 import type { QuestionKind, QuestionAnswer } from "./question-types";
+import type { SessionPolicy } from './session-policy';
 export type LearningQuestion = {
   kind?: QuestionKind;
   id: string;
@@ -16,6 +17,8 @@ export type MatrixRow = {
   available: number;
 };
 export type LearningChapter = {
+  practiceAllowed?: boolean;
+  hunt?: {hasQuestions:boolean;uploadedAt:number;title:string;startsAt:number;closesAt:number;durationMinutes:number;preparationMinutes:number;tabLimit:number;open:boolean}|null;
   levelMinutes?: number;
   id: string;
   title: string;
@@ -48,6 +51,7 @@ export type ExamDefinition = {
   blockedChapters: { id: string; title: string }[];
 };
 export type ExamRun = {
+  policy?: SessionPolicy;
   practiceAfterSubmission?: boolean;
   delivery?: "online" | "scheduled";
   id: string;
@@ -81,6 +85,8 @@ export type LearningReward = {
   createdAt: number;
 };
 export type LearningOverview = {
+  classManagement?: boolean;
+  sessionPolicy?: SessionPolicy;
   serverNow?: number;
   onlineExamGroups?: boolean;
   onlineExams?: boolean;

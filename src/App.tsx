@@ -1,6 +1,7 @@
 import { StudentNotebook } from "./StudentNotebook";
 import { useStudentActivity } from "./useStudentActivity";
 import { StudentStudyStatistics } from "./StudentStudyStatistics";
+import { ChapterSort } from "./ChapterSort";
 import { ChapterDelete } from "./ChapterDelete";
 import {
   useCallback,
@@ -11,6 +12,7 @@ import {
 } from "react";
 import {
   ArrowRight,
+  ArrowsDownUp,
   BookOpen,
   Books,
   ClassroomIcon,
@@ -82,6 +84,9 @@ import { searchText } from "./search";
 import { GardenNote } from "./GardenNote";
 import type { LearningOverview } from "../shared/learning";
 import { ClassLevelSettings } from "./ClassLevelSettings";
+import { HuntAccess } from "./HuntAccess";
+import { DEFAULT_SESSION_POLICY } from "../shared/session-policy";
+import { flushStudyClosures } from "./session-end";
 import {
   WorkspaceHeading,
   WorkspaceFrame,
@@ -162,6 +167,15 @@ export default function App() {
       : "home";
   });
   const [study, setStudy] = useState<Study | null>(null);
+  const [huntChapter, setHuntChapter] = useState<string | null>(null);
+  useEffect(() => {
+    const flush = () => {
+      void flushStudyClosures();
+    };
+    flush();
+    window.addEventListener("online", flush);
+    return () => window.removeEventListener("online", flush);
+  }, []);
   const [entryRunId, setEntryRunId] = useState("");
   const [entryClassId, setEntryClassId] = useState("");
   const [error, setError] = useState("");
@@ -248,33 +262,36 @@ export default function App() {
   const [classLearning, setClassLearning] = useState<LearningOverview | null>(
     null,
   );
+  useEffect(() => {
+    if (user?.role !== "student" || user.mustChange) return;
+    let alive = true,
+      inFlight = false;
+    const update = async () => {
+      if (!alive || inFlight || document.hidden || !navigator.onLine) return;
+      inFlight = true;
+      try {
+        const rows = await api<Classroom[]>("/classrooms");
+        if (alive) setClasses(rows);
+      } catch {
+      } finally {
+        inFlight = false;
+      }
+    };
+    const timer = setInterval(() => void update(), 10000);
+    window.addEventListener("focus", update);
+    window.addEventListener("online", update);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+      window.removeEventListener("focus", update);
+      window.removeEventListener("online", update);
+      document.removeEventListener("visibilitychange", update);
+    };
+  }, [user?.id, user?.role, user?.mustChange]);
   const [classLearningError, setClassLearningError] = useState("");
   const [classLearningBusy, setClassLearningBusy] = useState(false);
-  const [chapterOrderBusy, setChapterOrderBusy] = useState(false);
-  const [chapterOrderError, setChapterOrderError] = useState("");
-  useEffect(() => setChapterOrderError(""), [current?.id]);
-  async function moveChapter(chapterId: string, position: number) {
-    if (!current || chapterOrderBusy) return;
-    const classId = current.id;
-    const ids = current.chapters.map((ch) => ch.id);
-    const from = ids.indexOf(chapterId);
-    if (from < 0 || from === position - 1) return;
-    ids.splice(from, 1);
-    ids.splice(position - 1, 0, chapterId);
-    setChapterOrderBusy(true);
-    setChapterOrderError("");
-    try {
-      await api(`/classrooms/${classId}/chapters/order`, { chapterIds: ids });
-      const rows = await api<Classroom[]>("/classrooms");
-      setClasses(rows);
-      setRevision((value) => value + 1);
-      setNotice("Đã lưu thứ tự hiển thị chương.");
-    } catch (error) {
-      setChapterOrderError(errorMessage(error));
-    } finally {
-      setChapterOrderBusy(false);
-    }
-  }
+  const [sortingClassId, setSortingClassId] = useState<string | null>(null);
   useEffect(() => {
     if (!isTeacher || !current || page !== "class-settings") return;
     let active = true;
@@ -322,7 +339,8 @@ export default function App() {
   }, [current?.id]);
   useEffect(() => {
     if (
-      questionChapter && current &&
+      questionChapter &&
+      current &&
       !current.chapters.some((chapter) => chapter.id === questionChapter)
     ) {
       setQuestionChapter(current.chapters[0]?.id ?? "");
@@ -406,7 +424,13 @@ export default function App() {
       setStudyExitNotice(
         reason === "away"
           ? "Bạn đã rời trang học. Phiên học đã kết thúc và thời gian vắng mặt không được tính."
-          : "Bạn đã không tương tác quá 2 phút. Phiên học đã kết thúc và thời gian không hoạt động không được tính.",
+          : reason === "tabs"
+            ? "Phiên luyện tập đã đóng do đạt giới hạn rời tab. Thời gian của phiên này không được tính."
+            : reason === "locked"
+              ? "Giáo viên đã khóa luyện tập chương này."
+              : reason === "ended"
+                ? "Phiên học không còn hiệu lực. Hãy mở phiên mới để tiếp tục."
+                : "Phiên luyện tập đã đóng do không tương tác. Thời gian của phiên này không được tính.",
       );
     };
     window.addEventListener("greenedu-study-exit", studyExit);
@@ -1032,42 +1056,92 @@ export default function App() {
                   )}
                   {classLearning ? (
                     <ClassLevelSettings
-                      key={`${current.id}-${classLearning.levelMinutes ?? 60}`}
+                      key={`${current.id}-${classLearning.levelMinutes ?? 60}-${JSON.stringify(classLearning.sessionPolicy)}`}
                       minutes={classLearning.levelMinutes ?? 60}
                       enabled={classLearning.canConfigureLevels === true}
                       busy={classLearningBusy}
-                      onSave={(minutes) =>
+                      policy={classLearning.sessionPolicy}
+                      canConfigurePolicy={
+                        classLearning.classManagement === true
+                      }
+                      onSave={(minutes, policy) =>
                         updateClassLearning(
-                          `/classrooms/${current.id}/level-settings`,
-                          { minutes },
-                          "Đã lưu thời gian tăng cấp cho lớp.",
+                          `/classrooms/${current.id}/${classLearning.classManagement ? "general-settings" : "level-settings"}`,
+                          { minutes, policy },
+                          "Đã lưu cài đặt chung cho lớp.",
                         )
                       }
                     />
                   ) : !classLearningError ? (
                     <div className="loading-panel">Đang tải cài đặt lớp…</div>
                   ) : null}
+                  {huntChapter &&
+                    classLearning?.chapters.some((c) => c.id === huntChapter) &&
+                    current.chapters.some((c) => c.id === huntChapter) && (
+                      <HuntAccess
+                        key={huntChapter}
+                        chapter={current.chapters.find(
+                          (c) => c.id === huntChapter,
+                        )!}
+                        state={classLearning.chapters.find(
+                          (c) => c.id === huntChapter,
+                        )!}
+                        policy={
+                          classLearning.sessionPolicy ?? DEFAULT_SESSION_POLICY
+                        }
+                        onClose={() => setHuntChapter(null)}
+                        onSaved={async () => {
+                          await reload();
+                          setRevision((r) => r + 1);
+                          setNotice("Đã cập nhật quyền săn thưởng.");
+                        }}
+                      />
+                    )}
                   <SectionTitle
                     title="Quản lý chương"
                     action={
-                      <button
-                        className="button outline small"
-                        onClick={() => setEditor("chapter")}
-                      >
-                        <Plus size={16} />
-                        Thêm chương
-                      </button>
+                      <div className="button-group">
+                        <button
+                          className="button outline small"
+                          disabled={
+                            current.chapters.length < 2 ||
+                            !current.chapters.every(
+                              (ch) => ch.canReorderChapter,
+                            )
+                          }
+                          title={
+                            current.chapters.some((ch) => !ch.canReorderChapter)
+                              ? "Đổi thứ tự chương đang chờ cập nhật máy chủ."
+                              : undefined
+                          }
+                          onClick={() => setSortingClassId(current.id)}
+                        >
+                          <ArrowsDownUp size={16} />
+                          Sắp xếp
+                        </button>
+                        <button
+                          className="button outline small"
+                          onClick={() => setEditor("chapter")}
+                        >
+                          <Plus size={16} />
+                          Thêm chương
+                        </button>
+                      </div>
                     }
                   />
+                  {sortingClassId === current.id && (
+                    <ChapterSort
+                      key={`sort-${current.id}`}
+                      classroom={current}
+                      onClose={() => setSortingClassId(null)}
+                      onSaved={async () => {
+                        setClasses(await api<Classroom[]>("/classrooms"));
+                        setRevision((value) => value + 1);
+                        setNotice("Đã lưu thứ tự hiển thị chương.");
+                      }}
+                    />
+                  )}
                   <div className="chapter-list">
-                    {chapterOrderError && (
-                      <div className="error-banner" role="alert">
-                        {chapterOrderError}
-                      </div>
-                    )}
-                    {chapterOrderBusy && (
-                      <p role="status">Đang lưu thứ tự chương…</p>
-                    )}
                     {current.chapters.length > 0 &&
                       !current.chapters[0].canReorderChapter && (
                         <p className="form-intro">
@@ -1075,37 +1149,12 @@ export default function App() {
                         </p>
                       )}
                     {current.chapters.length ? (
-                      current.chapters.map((ch, i) => {
+                      current.chapters.map((ch) => {
                         const access = classLearning?.chapters.find(
                           (row) => row.id === ch.id,
                         );
                         return (
                           <div className="card chapter-row" key={ch.id}>
-                            <label className="chapter-order-control">
-                              <span>Vị trí</span>
-                              <select
-                                name={`chapter-order-${ch.id}`}
-                                aria-label={`Vị trí chương · ${ch.title}`}
-                                value={i + 1}
-                                disabled={
-                                  chapterOrderBusy ||
-                                  !ch.canReorderChapter ||
-                                  current.chapters.length < 2
-                                }
-                                onChange={(event) =>
-                                  void moveChapter(
-                                    ch.id,
-                                    Number(event.target.value),
-                                  )
-                                }
-                              >
-                                {current.chapters.map((item, index) => (
-                                  <option key={item.id} value={index + 1}>
-                                    {index + 1}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
                             <div className="chapter-row-main">
                               <div className="chapter-row-copy">
                                 <div className="chapter-title-row">
@@ -1151,33 +1200,59 @@ export default function App() {
                             </div>
                             <div className="class-chapter-access">
                               <span
-                                className={`chapter-exam-status ${access?.examAllowed ? "open" : "locked"}`}
+                                className={`chapter-exam-status ${access?.practiceAllowed ? "open" : "locked"}`}
                               >
-                                {access?.examAllowed
-                                  ? "Kiểm tra đang mở"
-                                  : "Kiểm tra đang khóa"}
+                                {access?.practiceAllowed
+                                  ? "Luyện tập đang mở"
+                                  : "Luyện tập đang khóa"}
                               </span>
                               <button
-                                className={`button ${access?.examAllowed ? "danger" : "primary"} small`}
+                                className={`button ${access?.practiceAllowed ? "danger" : "primary"} small`}
                                 disabled={
                                   classLearningBusy ||
-                                  typeof access?.examAllowed !== "boolean"
+                                  !classLearning?.classManagement
                                 }
-                                aria-label={`${access?.examAllowed ? "Khóa" : "Mở"} kiểm tra · ${ch.title}`}
+                                aria-label={`${access?.practiceAllowed ? "Khóa" : "Mở"} luyện tập · ${ch.title}`}
                                 onClick={() =>
                                   void updateClassLearning(
-                                    `/chapters/${ch.id}/exam-access`,
-                                    { enabled: !access?.examAllowed },
-                                    access?.examAllowed
-                                      ? "Đã khóa kiểm tra chương."
-                                      : "Đã mở kiểm tra chương.",
+                                    `/chapters/${ch.id}/practice-access`,
+                                    { enabled: !access?.practiceAllowed },
+                                    access?.practiceAllowed
+                                      ? "Đã khóa luyện tập chương."
+                                      : "Đã mở luyện tập chương.",
                                   )
                                 }
                               >
-                                {access?.examAllowed
-                                  ? "Khóa kiểm tra"
-                                  : "Mở kiểm tra"}
+                                {access?.practiceAllowed
+                                  ? "Khóa luyện tập"
+                                  : "Mở luyện tập"}
                               </button>
+                              <span
+                                className={`chapter-exam-status ${(access?.hunt?.open ?? access?.examAllowed) ? "open" : "locked"}`}
+                              >
+                                {(access?.hunt?.open ?? access?.examAllowed)
+                                  ? "Săn thưởng đang mở"
+                                  : "Săn thưởng đang khóa"}
+                              </span>
+                              <button
+                                className={`button ${(access?.hunt?.open ?? access?.examAllowed) ? "danger" : "primary"} small`}
+                                disabled={
+                                  !classLearning?.classManagement ||
+                                  classLearningBusy
+                                }
+                                aria-label={`${(access?.hunt?.open ?? access?.examAllowed) ? "Khóa" : "Mở"} săn thưởng · ${ch.title}`}
+                                onClick={() => setHuntChapter(ch.id)}
+                              >
+                                {(access?.hunt?.open ?? access?.examAllowed)
+                                  ? "Khóa săn thưởng"
+                                  : "Mở săn thưởng"}
+                              </button>
+                              {!classLearning?.classManagement && (
+                                <small>
+                                  Quyền luyện tập/săn thưởng đang chờ cập nhật
+                                  máy chủ.
+                                </small>
+                              )}
                             </div>
                           </div>
                         );
@@ -1829,6 +1904,7 @@ function ChapterGrid({
               <button
                 className="button outline full"
                 disabled={
+                  ch.practiceAllowed === false ||
                   !ch.questionCount ||
                   (!!selectedLessons[ch.id] &&
                     !ch.lessons.find((l) => l.title === selectedLessons[ch.id])
@@ -1836,11 +1912,13 @@ function ChapterGrid({
                 }
                 onClick={() => onStudy(ch, selectedLessons[ch.id] || undefined)}
               >
-                {ch.questionCount
-                  ? stage.level === 5
-                    ? "Ôn tập lại"
-                    : "Luyện tập"
-                  : "Chờ câu hỏi"}
+                {ch.practiceAllowed === false
+                  ? "Luyện tập đang khóa"
+                  : ch.questionCount
+                    ? stage.level === 5
+                      ? "Ôn tập lại"
+                      : "Luyện tập"
+                    : "Chờ câu hỏi"}
                 <ArrowRight size={17} />
               </button>
             </div>
@@ -2132,7 +2210,13 @@ function Corrections({
                       .find((c) => c.id === q.chapterId);
                     if (!chapter) {
                       void api<Chapter>(`/chapters/${q.chapterId}`)
-                        .then((archived) => onStudy({ chapter: archived, mode: "correction", questionId: q.id }))
+                        .then((archived) =>
+                          onStudy({
+                            chapter: archived,
+                            mode: "correction",
+                            questionId: q.id,
+                          }),
+                        )
                         .catch((e) => setError(errorMessage(e)));
                     }
                     if (chapter)
@@ -2168,7 +2252,8 @@ function Roster({
   const [leaderboard, setLeaderboard] = useState<ClassLeaderboard>();
   const [boardError, setBoardError] = useState("");
   const [notebookStudent, setNotebookStudent] = useState<Student | null>(null);
-  const [statisticsStudent, setStatisticsStudent] = useState<Student | null>(null);
+  const [statisticsOpen, setStatisticsOpen] = useState(false);
+  const [statisticsStudent, setStatisticsStudent] = useState("");
   const [rowsReceivedAt, setRowsReceivedAt] = useState(0);
   const [rows, setRows] = useState<Student[]>([]),
     [error, setError] = useState(""),
@@ -2282,6 +2367,17 @@ function Roster({
               <Download size={16} />
               {exporting ? "Đang xuất…" : "Xuất CSV"}
             </button>
+            <button
+              className="button outline small"
+              disabled={loading || !!error}
+              onClick={() => {
+                setStatisticsStudent("");
+                setStatisticsOpen(true);
+              }}
+            >
+              <TrendingUp size={16} />
+              Thống kê
+            </button>
             <button className="button primary small" onClick={onAdd}>
               <Plus size={16} />
               Thêm học sinh
@@ -2383,6 +2479,17 @@ function Roster({
                       data-recorded-seconds={recordedSeconds(s)}
                     >
                       {duration(recordedSeconds(s))}
+                      <button
+                        className="text-button roster-statistics-search"
+                        aria-label={`Xem thống kê · ${s.name}`}
+                        title={`Xem thống kê · ${s.name}`}
+                        onClick={() => {
+                          setStatisticsStudent(s.id);
+                          setStatisticsOpen(true);
+                        }}
+                      >
+                        <Search size={18} />
+                      </button>
                       <small className="roster-time-detail">
                         {Math.floor(recordedSeconds(s) % 60)} giây
                       </small>
@@ -2391,13 +2498,6 @@ function Roster({
                           Đang luyện tập
                         </span>
                       )}
-                      <button
-                        className="text-button roster-statistics-button"
-                        aria-label={`Thống kê thời gian học · ${s.name}`}
-                        onClick={() => setStatisticsStudent(s)}
-                      >
-                        Thống kê
-                      </button>
                     </td>
                     <td>{s.answeredQuestions ?? s.total}</td>
                     <td>
@@ -2463,11 +2563,13 @@ function Roster({
           onClose={() => setNotebookStudent(null)}
         />
       )}
-      {statisticsStudent && (
+      {statisticsOpen && (
         <StudentStudyStatistics
+          key={statisticsStudent}
           classroom={classroom}
-          student={statisticsStudent}
-          onClose={() => setStatisticsStudent(null)}
+          students={rows}
+          initialStudentId={statisticsStudent}
+          onClose={() => setStatisticsOpen(false)}
         />
       )}
     </>

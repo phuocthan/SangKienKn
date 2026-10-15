@@ -1,5 +1,31 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: quản lý lớp, luyện tập/săn thưởng và quy tắc phiên — 15/10/2026
+
+Đã thêm kính lúp thống kê đúng học sinh (giữ toolbar cả lớp), đổi **Quản lý cấp độ → Quản lý chung** với phút/cấp + ngưỡng nhắc/đóng tab–idle. Hai quyền **Mở/Khóa luyện tập** và **Mở/Khóa săn thưởng** riêng theo chương, kiểm tra ở server. Săn thưởng upload Word/CSV hoặc dùng lại đề có thời điểm tải, X/Y/ngưỡng tab; khóa xác nhận có tùy chọn xóa đề cấu hình và thu bài, giữ lịch sử. Kiểm tra chính thức dùng quyền/lịch riêng. Vi phạm luyện tập loại giờ đúng phiên khỏi tổng/ngày, giữ phiên trước/câu trả lời/sổ tay; giáo viên chủ động khóa thì giữ giờ đã ghi. Thi tự nộp đáp án đã lưu, polling không gia hạn idle; có worker, replay/idempotency và tương thích server cũ.
+
+TypeScript/build riêng đạt; **154/154 backend**, **64/64 E2E hồi quy desktop/mobile**, **12/12 E2E release cuối** (8ca mới +4ca khôi phục ôn/hunt) đạt. Không cộng lượt chồng nhau thành tổngsuite; nhật ký lỗi harness/lượt xác nhận ở đầu session-handoff. Đã kiểm tra ảnh mobile/focus/không tràn; chưa chạy toàn bộ mọi E2E repository. Không sửa database thật/deploy/restart Railway; chuẩn bị push main theo yêu cầu, chưa xác minh backend phát hành. Bản push gồm thống kê toàn lớp/CSV và sắp xếp chương đã hoàn tất từ trước. Quyết định hiện hành [class-management.md](class-management.md), [app-design.md](app-design.md); các mô tả gate kiểm tra chương và thoát ngay sau1lần rời tab phía dưới là lịch sử.
+
+## Rà soát kích hoạt tài khoản — 14/10/2026, 23:53 UTC+7
+
+Đọc Railway chỉ đọc:27/85học sinh còn must_change=1 (5Lớp11/2♥,22Lớp11/6),58không còn cờ yêu cầu đổi. Database chưa có lịch sử login đầy đủ; không coi thiếu session là chắc chắn chưa đăng nhập. Danh sách riêng .local/reports/hoc-sinh-chua-doi-mat-khau-20261014.md khôngGit; không đọc/xuất mật khẩu/hash/token hoặc đổi tài khoản. Chi tiết/snapshot ở đầu [session-handoff.md](session-handoff.md).
+
+## Dau Tay đủ điều kiện Săn điểm Chương I — 14/10/2026, 23:36 UTC+7
+
+Theo yêu cầu cập nhật sau chẩn đoán, đã điều chỉnh thủ công đúng1hàng progress ChươngI trên Railway lên **7200giây/2giờ**. Backup/audit trên volume, transaction/so sánh progress và40bảng khác giữ nguyên, quick_check/FKđạt; kết nối chỉ đọc xác nhận **eligible=true**,79,5%đúng/0câu cần sửa/3vé/kiểm tra mở. Không tạo phiên học/lịch sử theo ngày/điểm/vé hoặc dùng vé/bắt đầu bài thi.2/2ca script độc lập đạt, không đổi mã/deploy/push; giữ phần UI đang sửa. Chi tiết ở đầu [session-handoff.md](session-handoff.md). Chẩn đoán thiếu giờ bên dưới là snapshot trước cập nhật.
+
+## Chẩn đoán quyền Săn điểm Dau Tay — 14/10/2026, 23:29 UTC+7
+
+Đọc Railway chỉ đọc xác nhận ChươngI của Dau Tay còn thiếu thời gian:3828,673/7200giây, thiếu~56phút11giây (UI57phút); lớp60phút/cấp. Mở kiểm tra/79,5%đúng/0câu cần sửa/3vé đều đã đạt. Không sửa tiến độ, vé hoặc điều kiện; snapshot có thể thay đổi khi học tiếp. Chi tiết/cách đọc lại ở đầu [session-handoff.md](session-handoff.md).
+
+## Hiện hành: thống kê ở toolbar, sắp xếp chương kéo thả — 14/10/2026
+
+Quản lý học sinh dùng **Thống kê** cạnh **Thêm học sinh**, bỏ nút từng dòng. Popup chọn cả lớp/một người từ roster đầy đủ, giữ ngày/tuần/tháng/ngày xem, tổng/bảng kỳ; cả lớp có bảng từng học sinh và popup rộng880px desktop. Xuất CSV trong popup đúng lựa chọn, giữ lịch sử chưa biết rỗng. Quản lý chương bỏ select Vị trí, thêm **Sắp xếp** cạnh Thêm chương: kéo chuột/cảm ứng hoặc nút/phím lên xuống, Lưu thứ tự/Hủy và lỗi/busy/focus. Không thay ID/thời gian/điểm hoặc thêm thư viện/migration. API tổng lớp mới teacher-only; cần backend Railway mới, cá nhân và lưu thứ tự dùng API cũ. Frontend local5173/HMR; chưa commit/push/deploy. QA mới: TypeScript/build/14API đạt, lượt trước22/22E2E có ca trạng thái hoạt động; **lượt xác nhận cuối18/18E2E thống kê/sắp xếp desktop/mobile đạt** trên build cuối, đã xem ảnh và kiểm tra bảng đủ cột desktop/mobile không overflow. Chi tiết ở đầu [session-handoff.md](session-handoff.md). Giữ ghi chú điều chỉnh dữ liệu từ công việc đồng thời bên dưới.
+
+## Điều chỉnh tỷ lệ đúng Dau Tay Chương I — 14/10/2026
+
+Theo lựa chọn rõ của người dùng, sửa10lượt sai đã có ở ChươngI lớp11/2 của Dau Tay để thành **28/31 đúng≈90,3%** (trước18/31≈58,1%). Tổng số lượt/thời điểm không đổi; giữ sổ tay, giờ/điểm/vé, dữ liệu các chương/tài khoản khác. Điều chỉnh thủ công có backup/audit, không coi là lượt học mới. Kiểm tra scope40bảng/attempts, integrity/FK và kết nối chỉ đọc độc lập đạt; không sửa app/push/deploy. Chi tiết ở đầu [session-handoff.md](session-handoff.md).
+
 ## Hiện hành: popup tạo online với Bắt đầu ngay/Đã hiểu — 14/10/2026
 
 Thay banner sau lưu online bằng popup đúng nội dung người dùng, hai lựa chọn Bắt đầu ngay/Đã hiểu. Bắt đầu dùng ID vừa trả từ create, API open hiện có và X/Y cũ; lỗi trong popup/thử lại, khóa khi gửi, đóng thành công/cập nhật danh sách. Đã hiểu giữ bản chưa bắt đầu; focus về Tạo bài kiểm tra. QA mới: TypeScript/build đạt;14ca hồi quy online đạt, lượt xác nhận cuối6/6 popup desktop/mobile đạt sau sửa harness reload chọn lại lớp/page. Có bank/upload/trùng tên/start/lỗi/busy/ack/reload/geometry/focus. Không thêm backend/migration ở thay đổi popup. Phần thống kê trước đã commit riêng03f8cec để push cùng đợt theo yêu cầu; không database/secrets/deploy. Chi tiết mới ở đầu session-handoff.

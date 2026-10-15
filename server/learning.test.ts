@@ -19,6 +19,7 @@ async function fixture(t: TestContext) {
   db.prepare(
     "INSERT INTO classrooms VALUES ('other-class','Other','Math','10','other-teacher')",
   ).run();
+  db.prepare('INSERT INTO classroom_session_policy VALUES(?,?,?,?)').run('class-demo',JSON.stringify({warningTabs:2,closeTabs:4,warningIdleSeconds:3500,closeIdleSeconds:3600}),'teacher-demo',0);
   let clock = 1000000;
   const server = createApp(db, { now: () => clock }).listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
@@ -790,7 +791,7 @@ test("chapter exams default closed; only owning teacher can open, without bypass
   assert.equal(ch.examAllowed, false);
   assert.equal(ch.eligible, false);
   assert.equal(ch.tickets.remaining, 3);
-  assert.deepEqual(ch.missing, ["Giáo viên chưa mở kiểm tra chương này"]);
+  assert.deepEqual(ch.missing, ["Giáo viên chưa mở săn thưởng chương này"]);
   const denied = await f.request(
     "/classrooms/class-demo/exam-runs",
     {
@@ -929,7 +930,7 @@ test("locking a chapter prevents new starts but preserves the active run, answer
   assert.equal(f.db.prepare("SELECT COUNT(*) AS n FROM exam_runs").get()!.n, 1);
 });
 
-test("scheduled exams require every chapter in their snapshot to be opened, while keeping existing schedule and resume rules", async (t) => {
+test("scheduled exams keep their own schedule and resume rules independently of practice and hunt switches", async (t) => {
   const f = await fixture(t);
   const e = await f.post(
     "/classrooms/class-demo/exams",
@@ -942,41 +943,12 @@ test("scheduled exams require every chapter in their snapshot to be opened, whil
     },
     f.teacher,
   );
-  let exam = (await f.read("/classrooms/class-demo/learning")).exams[0];
-  assert.equal(exam.blockedChapters.length, 2);
-  assert.equal(
-    (
-      await f.request(
-        "/classrooms/class-demo/exam-runs",
-        {
-          examId: e.id,
-          requestId: randomUUID(),
-        },
-        f.student,
-      )
-    ).status,
-    403,
-  );
-  await f.post("/chapters/chapter-1/exam-access", { enabled: true }, f.teacher);
-  exam = (await f.read("/classrooms/class-demo/learning")).exams[0];
-  assert.deepEqual(
-    exam.blockedChapters.map((ch: any) => ch.id),
-    ["chapter-2"],
-  );
-  assert.equal(
-    (
-      await f.request(
-        "/classrooms/class-demo/exam-runs",
-        {
-          examId: e.id,
-          requestId: randomUUID(),
-        },
-        f.student,
-      )
-    ).status,
-    403,
-  );
-  await f.post("/chapters/chapter-2/exam-access", { enabled: true }, f.teacher);
+  const exam = (await f.read('/classrooms/class-demo/learning')).exams[0];
+  assert.deepEqual(exam.blockedChapters, []);
+  await f.post('/chapters/chapter-1/practice-access',{enabled:false},f.teacher);
+  await f.post('/chapters/chapter-2/exam-access',{enabled:false},f.teacher);
+  const preview = await f.request('/classrooms/class-demo/exam-runs',{examId:e.id,requestId:randomUUID()},f.peer);
+  assert.equal(preview.status,201,'Official exam is independent of chapter practice/hunt switches');
   await f.post(`/learning/exams/${e.id}/state`, { enabled: false }, f.teacher);
   assert.equal(
     (

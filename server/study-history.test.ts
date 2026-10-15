@@ -60,6 +60,118 @@ async function fixture(
 }
 const path = "/classrooms/class-demo/students/student-demo/study-statistics";
 
+test("class statistics sum current members, include archived class history and exclude other classes and former members", async (t) => {
+  const f = await fixture(t);
+  f.db
+    .prepare(
+      "DELETE FROM memberships WHERE classroom_id='class-demo' AND student_id<>'student-demo'",
+    )
+    .run();
+  f.db
+    .prepare(
+      "INSERT INTO users VALUES('second','second@fixture.test','Second',?,'student',0)",
+    )
+    .run(hashPassword("GreenEdu123!"));
+  f.db.prepare("INSERT INTO memberships VALUES('class-demo','second')").run();
+  f.db
+    .prepare(
+      "INSERT INTO classrooms VALUES('other-class','Other','Math','10','teacher-demo')",
+    )
+    .run();
+  f.db
+    .prepare(
+      "INSERT INTO chapters VALUES('other-chapter','other-class','Other')",
+    )
+    .run();
+  f.db.prepare("INSERT INTO memberships VALUES('other-class','second')").run();
+  const start = studyDayStart("2026-10-14") + 3600000;
+  for (const [studentId, chapterId, ms] of [
+    ["student-demo", "chapter-1", 15000],
+    ["second", "chapter-2", 45000],
+    ["second", "other-chapter", 999000],
+  ] as const)
+    creditStudyInterval(
+      f.db,
+      studentId,
+      chapterId,
+      start,
+      start + ms,
+      () => {},
+    );
+  f.db
+    .prepare(
+      "INSERT INTO archived_chapters VALUES('chapter-2','teacher-demo',?)",
+    )
+    .run(start);
+  const endpoint = "/classrooms/class-demo/study-statistics";
+  const response = await f.request(endpoint, f.teacher);
+  assert.equal(response.status, 200);
+  assert.equal(response.data.members.length, 2);
+  assert.equal(response.data.lifetimeSeconds, 60);
+  assert.equal(response.data.summaries.day.seconds, 60);
+  assert.equal(response.data.buckets.at(-1).seconds, 60);
+  assert.equal(response.data.buckets.at(-2).seconds, null);
+  assert.deepEqual(
+    response.data.members.map((m: any) => Object.keys(m).sort()),
+    [
+      ["id", "name", "statistics"],
+      ["id", "name", "statistics"],
+    ],
+  );
+  f.db
+    .prepare(
+      "DELETE FROM memberships WHERE classroom_id='class-demo' AND student_id='second'",
+    )
+    .run();
+  const after = (await f.request(endpoint, f.teacher)).data;
+  assert.equal(after.members.length, 1);
+  assert.equal(after.lifetimeSeconds, 15);
+  assert.equal(after.summaries.day.seconds, 15);
+  const old = (await f.request(endpoint + "?date=2026-01-01", f.teacher)).data;
+  assert.equal(old.summaries.month.seconds, null);
+  assert.equal(old.lifetimeSeconds, 15);
+  assert.equal(
+    f.db.prepare("SELECT COUNT(*) AS n FROM study_daily_time").get()!.n,
+    3,
+  );
+});
+
+test("class statistics enforce teacher ownership, validate filters and describe empty classes", async (t) => {
+  const f = await fixture(t);
+  const endpoint = "/classrooms/class-demo/study-statistics";
+  f.db
+    .prepare(
+      "INSERT INTO users VALUES('other','other@fixture.test','Other',?,'teacher',0)",
+    )
+    .run(hashPassword("GreenEdu123!"));
+  const other = await f.login("other@fixture.test");
+  assert.equal((await f.request(endpoint, "")).status, 401);
+  assert.equal((await f.request(endpoint, f.student)).status, 403);
+  assert.equal((await f.request(endpoint, other)).status, 403);
+  assert.equal(
+    (await f.request(endpoint.replace("class-demo", "unknown"), f.teacher))
+      .status,
+    404,
+  );
+  for (const query of [
+    "period=year",
+    "period=day&period=week",
+    "date=2026-02-30",
+    "date=2026-10-15",
+    "date=2026-10-14&date=2026-10-14",
+  ])
+    assert.equal(
+      (await f.request(`${endpoint}?${query}`, f.teacher)).status,
+      400,
+    );
+  f.db.prepare("DELETE FROM memberships WHERE classroom_id='class-demo'").run();
+  const empty = (await f.request(endpoint, f.teacher)).data;
+  assert.deepEqual(empty.members, []);
+  assert.equal(empty.lifetimeSeconds, 0);
+  assert.equal(empty.summaries.day.seconds, 0);
+  assert.equal(empty.buckets.at(-2).seconds, null);
+});
+
 test("a session surviving rollout keeps lifetime credit but only tracks history after the feature starts", async (t) => {
   const startedAt = studyDayStart("2026-10-14") + 5000;
   const f = await fixture(t, startedAt);

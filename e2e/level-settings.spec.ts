@@ -39,8 +39,8 @@ test("teacher saves class level minutes and persisted student milestones agree",
   ).toBeDisabled();
   await input.fill("30");
   await form.getByRole("button", { name: "Lưu thay đổi" }).click();
-  await expect(page.getByRole("status")).toContainText(
-    "Đã lưu thời gian tăng cấp cho lớp.",
+  await expect(page.locator(".toast[role=status]")).toContainText(
+    "Đã lưu cài đặt chung cho lớp.",
   );
   await page.reload();
   // Page selection resets after a normal reload; reopen the teacher settings.

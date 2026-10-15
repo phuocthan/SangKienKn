@@ -163,7 +163,7 @@ test("live polling reads only credited study seconds; heartbeat and stop update 
   );
 });
 
-test("lost heartbeat and two-minute idle expire presence without changing progress or deleting data", async (t) => {
+test("lost heartbeat expires presence; idle policy removes the session and discards only its credit", async (t) => {
   const f = await fixture(t);
   const path = "/classrooms/class-demo/student-activity";
   const start = await f.request("/study/start", f.student, {
@@ -198,9 +198,9 @@ test("lost heartbeat and two-minute idle expire presence without changing progre
     (member: any) => member.id === "student-demo",
   );
   assert.equal(expired.activeForMs, 0);
-  assert.equal(expired.seconds, nearIdle.seconds);
+  assert.equal(expired.seconds, 0);
   assert.equal(
     f.db.prepare("SELECT COUNT(*) AS n FROM study_sessions").get()!.n,
-    1,
+    0,
   );
 });

@@ -4,6 +4,14 @@ if (!process.env.DATABASE_PATH?.startsWith(".local/e2e-"))
   throw new Error("Browser tests require a dedicated e2e database.");
 const db = openDatabase(process.env.DATABASE_PATH);
 seedDemo(db);
+// Independent classroom for access/policy scenarios; never inserted in live data.
+db.prepare('INSERT INTO users VALUES(?,?,?,?,?,0)').run('management-student','management@greenedu.test','Học sinh chính sách',hashPassword('ManagementTest123!'),'student');
+db.prepare('INSERT INTO classrooms VALUES(?,?,?,?,?)').run('management-class','Lớp quản lý kiểm thử','Vật lý','11','teacher-demo');
+db.prepare('INSERT INTO memberships VALUES(?,?)').run('management-class','management-student');
+db.prepare('INSERT INTO chapters VALUES(?,?,?)').run('management-ch','management-class','Chương chính sách');
+for(let i=1;i<=2;i++)db.prepare('INSERT INTO questions(id,chapter_id,text,choices,correct_index,explanation,lesson) VALUES(?,?,?,?,0,?,?)').run(`management-q${i}`,'management-ch',`Câu chính sách ${i}`,JSON.stringify(['Đúng','Sai B','Sai C','Sai D']),'Giải thích kiểm thử','Bài 1');
+db.prepare('INSERT INTO progress VALUES(?,?,?)').run('management-student','management-ch',14400);
+db.prepare("INSERT INTO attempts VALUES(?,?,?,?,1,'practice',0)").run('management-attempt','management-student','management-q1',0);
 db.prepare("INSERT INTO users VALUES (?,?,?,?,?,0)").run(
   "admin-e2e",
   "admin@greenedu.test",

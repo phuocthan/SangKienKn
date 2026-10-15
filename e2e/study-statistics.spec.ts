@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { navigateTo } from "./navigation";
+import { readFile } from "node:fs/promises";
 
 async function openStatistics(page: Page) {
   await page.request.post("/api/auth/login", {
@@ -8,20 +9,18 @@ async function openStatistics(page: Page) {
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
   await navigateTo(page, { name: "Quản lý lớp", exact: true });
-  const row = page
-    .getByRole("table", { name: "Danh sách học sinh", exact: true })
-    .getByRole("row")
-    .filter({ hasText: "learning@greenedu.test" });
-  await row
-    .getByRole("button", {
-      name: "Thống kê thời gian học · Học sinh ôn thi",
-      exact: true,
-    })
-    .click();
-  return page.getByRole("dialog", {
-    name: "Thống kê thời gian học · Học sinh ôn thi",
+  await expect(
+    page.locator(".roster-card").getByRole("button", { name: /Thống kê/ }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Thống kê", exact: true }).click();
+  const dialog = page.getByRole("dialog", {
+    name: "Thống kê thời gian học",
     exact: true,
   });
+  await dialog
+    .getByLabel("Học sinh", { exact: true })
+    .selectOption("learning-student");
+  return dialog;
 }
 
 test("teacher opens per-student day/week/month statistics, old time is preserved without invented history", async ({
@@ -60,18 +59,165 @@ test("teacher opens per-student day/week/month statistics, old time is preserved
   await expect(dialog).toHaveCount(0);
   await expect(
     page.getByRole("button", {
-      name: "Thống kê thời gian học · Học sinh ôn thi",
+      name: "Thống kê",
       exact: true,
     }),
   ).toBeFocused();
 });
 
+test("toolbar statistics includes the full roster despite search and CSV follows student, period and date", async ({
+  page,
+}, info) => {
+  await page.request.post("/api/auth/login", {
+    data: { email: "giaovien@greenedu.nk", password: "GreenEdu123!" },
+  });
+  const created = await page.request.post("/api/classrooms", {
+    data: {
+      name: `Thống kê ${info.project.name}`,
+      subject: "Vật lý",
+      grade: "10",
+    },
+  });
+  const { id } = await created.json();
+  const students: { id: string; name: string }[] = [];
+  for (const name of ["=SUM(1,2)", 'Bạn "An", lớp 10']) {
+    const email = `stats-${Date.now()}-${students.length}@fixture.test`;
+    const response = await page.request.post(`/api/classrooms/${id}/students`, {
+      data: { name, email, password: "StatsTest123!" },
+    });
+    expect(response.ok()).toBe(true);
+    students.push({ id: (await response.json()).id, name });
+  }
+  await page.goto("/");
+  await page.getByLabel("Chọn lớp học").selectOption(id);
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await page
+    .getByPlaceholder("Tìm theo tên hoặc email…")
+    .fill("Không tìm thấy");
+  await page.getByRole("button", { name: "Thống kê", exact: true }).click();
+  const dialog = page.getByRole("dialog", {
+    name: "Thống kê thời gian học",
+    exact: true,
+  });
+  const select = dialog.getByLabel("Học sinh", { exact: true });
+  await expect(select.locator("option")).toHaveCount(3);
+  await expect(
+    dialog
+      .getByRole("table", { name: "Thống kê từng học sinh", exact: true })
+      .getByRole("row"),
+  ).toHaveCount(3);
+  const downloadCsv = async () => {
+    const pending = page.waitForEvent("download");
+    await dialog.getByRole("button", { name: "Xuất CSV", exact: true }).click();
+    const download = await pending;
+    return {
+      text: await readFile((await download.path())!, "utf8"),
+      filename: download.suggestedFilename(),
+    };
+  };
+  const all = await downloadCsv();
+  expect(all.filename).toContain("ca-lop-day");
+  expect(all.text.split("\r\n")).toHaveLength(29);
+  expect(all.text).toContain('"\'=SUM(1,2)"');
+  expect(all.text).toContain('"Bạn ""An"", lớp 10"');
+  for (const s of students) expect(all.text).toContain(s.id);
+  const endpoint = `**/api/classrooms/${id}/study-statistics?**`;
+  await page.route(endpoint, (route) =>
+    route.fulfill({ status: 404, json: { error: "Máy chủ cũ" } }),
+  );
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(dialog.getByRole("alert")).toContainText("Cần cập nhật máy chủ");
+  await expect(
+    dialog.getByRole("button", { name: "Xuất CSV", exact: true }),
+  ).toBeDisabled();
+  await select.selectOption(students[1].id);
+  await dialog.getByRole("button", { name: "Tuần", exact: true }).click();
+  await dialog.getByLabel("Ngày xem", { exact: true }).fill("2026-01-01");
+  await expect(
+    dialog
+      .getByRole("table", { name: "Thời gian luyện tập theo kỳ", exact: true })
+      .getByRole("row"),
+  ).toHaveCount(9);
+  const single = await downloadCsv();
+  expect(single.filename).toContain(`${students[1].id}-week-2026-01-01`);
+  expect(single.text.split("\r\n")).toHaveLength(9);
+  expect(single.text).not.toContain(students[0].id);
+  expect(single.text).toContain('"Chưa có lịch sử"');
+  await page.unroute(endpoint);
+  await select.selectOption("");
+  await expect(
+    dialog.getByRole("table", { name: "Thống kê từng học sinh", exact: true }),
+  ).toBeVisible();
+  for (const width of [320, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(
+      await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth),
+    ).toBe(true);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    if (width === 1440) {
+      expect(
+        await dialog
+          .locator(".table-scroll")
+          .first()
+          .evaluate((el) => el.scrollWidth <= el.clientWidth),
+      ).toBe(true);
+    }
+    if (width === 320 || width === 1440)
+      await dialog.screenshot({
+        path: info.outputPath(`statistics-all-${width}.png`),
+      });
+  }
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Thống kê", exact: true }),
+  ).toBeFocused();
+});
+
+test("empty class statistics display a clear empty state and disable export", async ({
+  page,
+}, info) => {
+  await page.request.post("/api/auth/login", {
+    data: { email: "giaovien@greenedu.nk", password: "GreenEdu123!" },
+  });
+  const response = await page.request.post("/api/classrooms", {
+    data: {
+      name: `Thống kê rỗng ${info.project.name}`,
+      subject: "Vật lý",
+      grade: "10",
+    },
+  });
+  const { id } = await response.json();
+  await page.goto("/");
+  await page.getByLabel("Chọn lớp học").selectOption(id);
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await page.getByRole("button", { name: "Thống kê", exact: true }).click();
+  const dialog = page.getByRole("dialog", {
+    name: "Thống kê thời gian học",
+    exact: true,
+  });
+  await expect(
+    dialog.getByText("Lớp chưa có học sinh.", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: "Xuất CSV", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    dialog.getByLabel("Học sinh", { exact: true }).locator("option"),
+  ).toHaveCount(1);
+});
+
 test("statistics refresh credited practice time while open and keep confirmed data through errors", async ({
   page,
   playwright,
+  baseURL,
 }) => {
   const learner = await playwright.request.newContext({
-    baseURL: "http://127.0.0.1:3101",
+    baseURL,
   });
   await learner.post("/api/auth/login", {
     data: { email: "learning@greenedu.test", password: "LearningTest123!" },

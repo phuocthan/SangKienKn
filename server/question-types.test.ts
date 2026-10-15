@@ -387,7 +387,7 @@ test("study credit stays in the question chapter, excludes focus loss and sleep 
         "SELECT seconds FROM progress WHERE student_id='student-demo' AND chapter_id='chapter-1'",
       )
       .get()!.seconds,
-    15,
+    0,
   );
   assert.equal(
     f.db

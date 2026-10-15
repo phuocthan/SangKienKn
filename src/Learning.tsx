@@ -1,3 +1,4 @@
+import { DEFAULT_SESSION_POLICY } from "../shared/session-policy";
 import { AnswerFields } from "./AnswerFields";
 import { answerComplete, type QuestionAnswer } from "../shared/question-types";
 import {
@@ -505,9 +506,22 @@ export function Learning({
                         className={`pill learning-exam-access ${ch.examAllowed ? "open" : "waiting"}`}
                       >
                         {ch.examAllowed
-                          ? "Giáo viên đã mở kiểm tra"
-                          : "Chờ giáo viên mở kiểm tra"}
+                          ? "Giáo viên đã mở săn thưởng"
+                          : "Chờ giáo viên mở săn thưởng"}
                       </span>
+                      {ch.hunt && (
+                        <p className="muted">
+                          {ch.hunt.title} · {ch.hunt.durationMinutes} phút ·{" "}
+                          {new Intl.DateTimeFormat("vi-VN", {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          }).format(ch.hunt.startsAt)}{" "}
+                          –{" "}
+                          {new Intl.DateTimeFormat("vi-VN", {
+                            timeStyle: "short",
+                          }).format(ch.hunt.closesAt)}
+                        </p>
+                      )}
                       {ch.eligible && ch.examAllowed ? (
                         <p className="learning-ready">
                           Đã đủ điều kiện Săn điểm.
@@ -553,7 +567,7 @@ export function Learning({
                           void act(() => startRun({ chapterId: ch.id }))
                         }
                       >
-                        <Trophy size={17} /> Săn điểm
+                        <Trophy size={17} /> Săn thưởng
                       </button>
                     </article>
                   );
@@ -1135,7 +1149,7 @@ export function Learning({
                           </small>
                           {!!ex.blockedChapters?.length && (
                             <p>
-                              Chờ giáo viên mở kiểm tra:{" "}
+                              Chờ giáo viên mở săn thưởng:{" "}
                               {ex.blockedChapters
                                 .map((ch) => ch.title)
                                 .join(" · ")}
@@ -1400,6 +1414,9 @@ function ExamRoom({
   const [tabWarning, setTabWarning] = useState("");
   const [idleWarning, setIdleWarning] = useState<number | null>(null);
   const lastActivity = useRef(Date.now());
+  const activityDirty = useRef(false),
+    idleLocked = useRef(false);
+  const [warningPopup, setWarningPopup] = useState(false);
   const storageKey = "greenedu-exam:" + user.id + ":" + id;
   const [initial] = useState<{
     answers: Record<string, QuestionAnswer>;
@@ -1468,6 +1485,25 @@ function ExamRoom({
     if (!current.current)
       accept(await api<ExamRun>(`/learning/exam-runs/${id}`));
     if (teacher || current.current!.status !== "active") return;
+    while (tabs.current.length && current.current!.status === "active") {
+      const eventId = tabs.current[0];
+      const r = await api<ExamRun>(`/learning/exam-runs/${id}/tab`, {
+        eventId,
+      });
+      if (tabs.current[0] === eventId) tabs.current.shift();
+      accept(r);
+      persist();
+    }
+    if (current.current!.status !== "active") return;
+    if (
+      activityDirty.current &&
+      !idleLocked.current &&
+      current.current!.policy
+    ) {
+      accept(await api<ExamRun>(`/learning/exam-runs/${id}/activity`, {}));
+      activityDirty.current = false;
+    }
+    if (current.current!.status !== "active") return;
     if (Object.keys(dirty.current).length) {
       const snapshot = { ...dirty.current };
       let r: ExamRun;
@@ -1489,15 +1525,6 @@ function ExamRoom({
       accept(r);
       persist();
     }
-    while (tabs.current.length && current.current!.status === "active") {
-      const eventId = tabs.current[0];
-      const r = await api<ExamRun>(`/learning/exam-runs/${id}/tab`, {
-        eventId,
-      });
-      if (tabs.current[0] === eventId) tabs.current.shift();
-      accept(r);
-      persist();
-    }
     if (mounted.current) setError("");
   }
   useEffect(() => {
@@ -1516,6 +1543,7 @@ function ExamRoom({
     const interaction = (event: Event) => {
       if (event.isTrusted && !document.hidden && document.hasFocus()) {
         lastActivity.current = Date.now();
+        activityDirty.current = true;
         setIdleWarning(null);
       }
     };
@@ -1525,15 +1553,24 @@ function ExamRoom({
       );
       if (teacher || current.current?.status !== "active") return;
       const idle = (Date.now() - lastActivity.current) / 1000;
-      if (idle >= 120 && !idleExited) {
+      const policy = current.current.policy ?? DEFAULT_SESSION_POLICY;
+      if (idle >= policy.closeIdleSeconds && !idleExited) {
         idleExited = true;
-        void enqueue(sync);
-        window.dispatchEvent(
-          new CustomEvent("greenedu-study-exit", {
-            detail: { reason: "idle" },
-          }),
-        );
-      } else if (idle >= 105) setIdleWarning(Math.ceil(120 - idle));
+        idleLocked.current = true;
+        setIdleWarning(0);
+        setWarningPopup(true);
+        void enqueue(async () => {
+          await sync();
+          accept(
+            current.current?.policy
+              ? await api<ExamRun>(`/learning/exam-runs/${id}`)
+              : await api<ExamRun>(`/learning/exam-runs/${id}/submit`, {}),
+          );
+        });
+      } else if (idle >= policy.warningIdleSeconds && !idleExited) {
+        setIdleWarning(Math.ceil(policy.closeIdleSeconds - idle));
+        setWarningPopup(true);
+      }
     }, 1000);
     const visibility = () => {
       const left = document.hidden || !document.hasFocus();
@@ -1541,11 +1578,17 @@ function ExamRoom({
         away = true;
         tabs.current.push(crypto.randomUUID());
         const warnings = current.current.warnings + tabs.current.length;
-        setTabWarning(
-          warnings >= current.current.tabLimit
-            ? "Bài đã khóa do đạt giới hạn rời tab. Đáp án đã lưu sẽ được nộp khi có mạng."
-            : "Không rời tab hoặc mở cửa sổ khác trong khi làm bài.",
-        );
+        if (
+          warnings >=
+          (current.current.policy ?? DEFAULT_SESSION_POLICY).warningTabs
+        ) {
+          setWarningPopup(true);
+          setTabWarning(
+            warnings >= current.current.tabLimit
+              ? "Bài đã khóa do đạt giới hạn rời tab. Đáp án đã lưu sẽ được nộp khi có mạng."
+              : `Bạn đã rời tab ${warnings}/${current.current.tabLimit} lần. Bài sẽ tự nộp khi đạt giới hạn.`,
+          );
+        }
         persist();
         void enqueue(sync);
       } else if (!left) {
@@ -1553,7 +1596,7 @@ function ExamRoom({
         void refresh();
       }
     };
-    ["pointerdown", "keydown", "scroll"].forEach((name) =>
+    ["pointerdown", "keydown", "wheel", "touchmove"].forEach((name) =>
       window.addEventListener(name, interaction, {
         passive: true,
         capture: true,
@@ -1577,7 +1620,7 @@ function ExamRoom({
       document.removeEventListener("visibilitychange", visibility);
       window.removeEventListener("blur", visibility);
       window.removeEventListener("focus", visibility);
-      ["pointerdown", "keydown", "scroll"].forEach((name) =>
+      ["pointerdown", "keydown", "wheel", "touchmove"].forEach((name) =>
         window.removeEventListener(name, interaction, true),
       );
       window.removeEventListener("online", online);
@@ -1586,6 +1629,7 @@ function ExamRoom({
   }, [id]);
   function choose(questionId: string, value: QuestionAnswer) {
     if (
+      idleLocked.current ||
       !current.current ||
       current.current.status !== "active" ||
       current.current.warnings + tabs.current.length >=
@@ -1635,7 +1679,8 @@ function ExamRoom({
     );
   const active = run.status === "active";
   const tabLocked =
-    active && run.warnings + tabs.current.length >= run.tabLimit;
+    active &&
+    (idleLocked.current || run.warnings + tabs.current.length >= run.tabLimit);
   if (!run.questions.length)
     return (
       <div className="card learning-section">
@@ -1656,6 +1701,33 @@ function ExamRoom({
   );
   return (
     <div className="exam-room">
+      {warningPopup && (
+        <Modal
+          title="Nhắc nhở bài kiểm tra"
+          onClose={() => setWarningPopup(false)}
+        >
+          <p>
+            {idleLocked.current
+              ? "Đã đạt ngưỡng không tương tác. Bài thi bị khóa và tự nộp với đáp án đã lưu khi có kết nối."
+              : idleWarning !== null
+                ? `Không có tương tác. Bài sẽ tự nộp sau ${idleWarning} giây.`
+                : tabWarning}
+          </p>
+          <button
+            className="button primary"
+            onClick={() => {
+              setWarningPopup(false);
+              if (!idleLocked.current) {
+                lastActivity.current = Date.now();
+                activityDirty.current = true;
+                setIdleWarning(null);
+              }
+            }}
+          >
+            {idleLocked.current ? "Đã hiểu" : "Tiếp tục làm bài"}
+          </button>
+        </Modal>
+      )}
       {tabWarning && (
         <p className="error-banner" role="alert">
           {tabWarning}
@@ -1695,7 +1767,7 @@ function ExamRoom({
         <p>
           {active
             ? `${run.questions.filter((question) => answerComplete(question, answers[question.id])).length}/${run.questions.length} câu đã chọn · ${pending ? `${pending} thay đổi chưa đồng bộ` : "Đáp án đã lưu"}. Rời tab ${run.warnings}/${run.tabLimit}; đến lần ${run.tabLimit} bài sẽ tự nộp.`
-            : `${run.score == null ? "Chờ công bố điểm" : `Điểm ${run.score.toFixed(1)} / 10`} · ${run.reason === "tabs" ? "Tự nộp do rời tab" : run.reason === "deadline" ? "Tự nộp khi hết giờ" : run.reason === "teacher" ? "Giáo viên đã đóng bài thi" : "Đã hoàn thành"}.`}
+            : `${run.score == null ? "Chờ công bố điểm" : `Điểm ${run.score.toFixed(1)} / 10`} · ${run.reason === "tabs" ? "Tự nộp do rời tab" : run.reason === "deadline" ? "Tự nộp khi hết giờ" : run.reason === "teacher" ? "Giáo viên đã đóng bài thi" : run.reason === "idle" ? "Tự nộp do không tương tác" : "Đã hoàn thành"}.`}
         </p>
       </div>
       {!active && !run.results && (

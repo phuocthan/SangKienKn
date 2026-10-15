@@ -1,4 +1,11 @@
-import { answerCorrect, statementCorrectness, storedAnswer, validateQuestionAnswer, type QuestionKind, type QuestionAnswer } from "../shared/question-types.js";
+import {
+  answerCorrect,
+  statementCorrectness,
+  storedAnswer,
+  validateQuestionAnswer,
+  type QuestionKind,
+  type QuestionAnswer,
+} from "../shared/question-types.js";
 import type { Express } from "express";
 import type { DatabaseSync } from "node:sqlite";
 import { chapterIsArchived } from "./chapter-archive.js";
@@ -11,6 +18,14 @@ import type { AppRequest, Row } from "./app.js";
 import { studentLevel, levelStepSeconds } from "../shared/student-levels.js";
 import { classroomLevelMinutes } from "./level-settings.js";
 import { examResultsWorkbook } from "./exam-results.js";
+import {
+  sessionPolicy,
+  practiceAllowed,
+  requirePractice,
+  guardStudy,
+  terminateStudy,
+} from "./class-management.js";
+import { validSessionPolicy } from "../shared/session-policy.js";
 
 type Context = {
   now: () => number;
@@ -42,8 +57,12 @@ const shuffle = <T>(values: T[]) => {
   }
   return result;
 };
-const cleanQuestion = ({ correctIndex: _c, correctAnswer: _a, explanation: _e, ...q }: Snapshot) =>
-  q;
+const cleanQuestion = ({
+  correctIndex: _c,
+  correctAnswer: _a,
+  explanation: _e,
+  ...q
+}: Snapshot) => q;
 const studyFeedback = (answer: {
   selected: QuestionAnswer;
   statementCorrectness?: boolean[];
@@ -77,6 +96,15 @@ export function grantLearningMilestones(
     )
     .all(studentId);
   for (const row of rows) {
+    const provisional =
+      Number(
+        db
+          .prepare(
+            `SELECT COALESCE(SUM(c.credited_ms),0) n FROM study_session_controls c JOIN study_sessions s ON s.id=c.session_id WHERE c.student_id=? AND c.chapter_id=? AND c.closed_reason IS NULL`,
+          )
+          .get(studentId, row.chapter_id)!.n,
+      ) / 1000;
+    row.seconds = Math.max(0, Number(row.seconds) - provisional);
     const minutes = classroomLevelMinutes(db, String(row.classroom_id));
     const step = levelStepSeconds(minutes);
     for (const level of [3, 4, 5])
@@ -121,8 +149,8 @@ function finalize(
   if (run.status !== "active") return;
   const questions = json<Snapshot[]>(run.questions),
     answers = json<Record<string, QuestionAnswer>>(run.answers);
-  const correct = questions.filter(
-    (q) => answerCorrect(q, answers[q.id]),
+  const correct = questions.filter((q) =>
+    answerCorrect(q, answers[q.id]),
   ).length;
   const score = questions.length
     ? Math.round((correct / questions.length) * 100) / 10
@@ -159,6 +187,40 @@ export function sweepLearningExams(db: DatabaseSync, timestamp = Date.now()) {
     .prepare("SELECT * FROM exam_runs WHERE status='active' AND deadline_at<=?")
     .all(timestamp))
     finalize(db, run, "deadline", timestamp);
+  for (const run of db
+    .prepare("SELECT * FROM exam_runs WHERE status='active'")
+    .all()) {
+    const policy = sessionPolicy(db, String(run.classroom_id));
+    const tabs = Number(
+      db
+        .prepare("SELECT COUNT(*) n FROM exam_tab_events WHERE run_id=?")
+        .get(run.id)!.n,
+    );
+    const activity = db
+      .prepare("SELECT last_activity FROM exam_activity WHERE run_id=?")
+      .get(run.id);
+    const hunt =
+      run.kind === "hunt"
+        ? db
+            .prepare("SELECT * FROM chapter_hunt_settings WHERE chapter_id=?")
+            .get(run.chapter_id)
+        : undefined;
+    if (
+      hunt &&
+      (Number(hunt.closes_at) <= timestamp ||
+        db
+          .prepare("SELECT enabled FROM chapter_exam_access WHERE chapter_id=?")
+          .get(run.chapter_id)?.enabled === 0)
+    )
+      finalize(db, run, "teacher", timestamp);
+    else if (tabs >= Math.min(Number(run.tab_limit), policy.closeTabs))
+      finalize(db, run, "tabs", timestamp);
+    else if (
+      timestamp - Number(activity?.last_activity ?? run.started_at) >=
+      policy.closeIdleSeconds * 1000
+    )
+      finalize(db, run, "idle", timestamp);
+  }
   for (const run of db
     .prepare(
       `SELECT r.* FROM exam_runs r JOIN exam_definitions e ON e.id=r.exam_id
@@ -216,14 +278,20 @@ export function registerLearningRoutes(
     for (const id of value)
       if (
         !db
-          .prepare("SELECT 1 FROM chapters WHERE id=? AND classroom_id=? AND id NOT IN (SELECT chapter_id FROM archived_chapters)")
+          .prepare(
+            "SELECT 1 FROM chapters WHERE id=? AND classroom_id=? AND id NOT IN (SELECT chapter_id FROM archived_chapters)",
+          )
           .get(id, classId)
       )
         fail(403, "Chương không thuộc lớp này.");
     return value as string[];
   }
   function answerValue(q: Snapshot, value: unknown, partial = false) {
-    try { return validateQuestionAnswer(q, value, partial); } catch (e) { return fail(400, (e as Error).message); }
+    try {
+      return validateQuestionAnswer(q, value, partial);
+    } catch (e) {
+      return fail(400, (e as Error).message);
+    }
   }
   function bank(ids: string[]): Snapshot[] {
     return db
@@ -335,9 +403,9 @@ export function registerLearningRoutes(
     );
   }
   function blockedExamChapters(questions: Snapshot[]) {
-    return [...new Map(questions.map((q) => [q.chapterId, q.chapterTitle]))]
-      .filter(([id]) => !examAllowed(id))
-      .map(([id, title]) => ({ id, title }));
+    // Official sessions have their own teacher-controlled opening; practice
+    // and reward-hunt switches never close an unrelated official exam.
+    return [] as { id: string; title: string }[];
   }
   function eligibility(ch: Row, userId: string) {
     const levelMinutes = classroomLevelMinutes(db, String(ch.classroom_id));
@@ -381,8 +449,17 @@ export function registerLearningRoutes(
       .get(userId, ch.id)!;
     const remaining = Number(tickets.granted) - Number(tickets.used ?? 0);
     const missing: string[] = [];
-    const allowed = examAllowed(String(ch.id));
-    if (!allowed) missing.push("Giáo viên chưa mở kiểm tra chương này");
+    const hunt = db
+      .prepare("SELECT * FROM chapter_hunt_settings WHERE chapter_id=?")
+      .get(ch.id);
+    const allowed =
+      examAllowed(String(ch.id)) &&
+      (!hunt ||
+        (json<Snapshot[]>(hunt.questions).length > 0 &&
+          Number(hunt.closes_at) > now()));
+    if (!allowed) missing.push("Giáo viên chưa mở săn thưởng chương này");
+    if (hunt && Number(hunt.starts_at) > now())
+      missing.push("Săn thưởng chưa đến giờ bắt đầu");
     if (seconds < requiredSeconds)
       missing.push(
         `Cần thêm ${Math.ceil((requiredSeconds - seconds) / 60)} phút học`,
@@ -397,6 +474,25 @@ export function registerLearningRoutes(
       semester: settings?.semester ?? "",
       accuracyBasis: settings?.accuracy_basis ?? "all",
       examAllowed: allowed,
+      practiceAllowed: practiceAllowed(db, String(ch.id)),
+      hunt: (() => {
+        const h = db
+          .prepare("SELECT * FROM chapter_hunt_settings WHERE chapter_id=?")
+          .get(ch.id);
+        return h
+          ? {
+              hasQuestions: json<Snapshot[]>(h.questions).length > 0,
+              uploadedAt: h.uploaded_at,
+              title: h.title,
+              startsAt: h.starts_at,
+              closesAt: h.closes_at,
+              durationMinutes: h.duration_minutes,
+              preparationMinutes: h.preparation_minutes,
+              tabLimit: h.tab_limit,
+              open: allowed && Number(h.closes_at) > now(),
+            }
+          : null;
+      })(),
       seconds,
       levelMinutes,
       level: studentLevel(seconds, levelMinutes).level,
@@ -460,7 +556,11 @@ export function registerLearningRoutes(
           .prepare("SELECT COUNT(*) AS n FROM exam_tab_events WHERE run_id=?")
           .get(fresh.id)?.n,
       ),
-      tabLimit: fresh.tab_limit,
+      tabLimit: Math.min(
+        Number(fresh.tab_limit),
+        sessionPolicy(db, String(fresh.classroom_id)).closeTabs,
+      ),
+      policy: sessionPolicy(db, String(fresh.classroom_id)),
       questions: questions.map(cleanQuestion),
       answers,
       revision: fresh.revision,
@@ -522,7 +622,9 @@ export function registerLearningRoutes(
     if (req.user!.role === "student")
       grantLearningMilestones(db, req.user!.id, now());
     const chapters = db
-      .prepare("SELECT ch.* FROM chapters ch JOIN chapter_display_order o ON o.chapter_id=ch.id WHERE ch.classroom_id=? AND ch.id NOT IN (SELECT chapter_id FROM archived_chapters) ORDER BY o.position,ch.rowid")
+      .prepare(
+        "SELECT ch.* FROM chapters ch JOIN chapter_display_order o ON o.chapter_id=ch.id WHERE ch.classroom_id=? AND ch.id NOT IN (SELECT chapter_id FROM archived_chapters) ORDER BY o.position,ch.rowid",
+      )
       .all(c.id)
       .map((ch) => eligibility(ch, req.user!.id));
     const own = req.user!.role === "teacher" ? "" : " AND r.student_id=?";
@@ -531,6 +633,8 @@ export function registerLearningRoutes(
       chapters,
       serverNow: now(),
       onlineExamGroups: true,
+      classManagement: true,
+      sessionPolicy: sessionPolicy(db, String(c.id)),
       levelMinutes: classroomLevelMinutes(db, String(c.id)),
       canConfigureLevels: req.user!.role === "teacher",
       examCreation: true,
@@ -739,7 +843,9 @@ export function registerLearningRoutes(
     ];
     students.forEach((s, index) => {
       const questions = s.runId ? json<Snapshot[]>(s.questions) : [];
-      const answers = s.runId ? json<Record<string, QuestionAnswer>>(s.answers) : {};
+      const answers = s.runId
+        ? json<Record<string, QuestionAnswer>>(s.answers)
+        : {};
       results.push([
         index + 1,
         s.name,
@@ -786,6 +892,224 @@ export function registerLearningRoutes(
     ).run(c.id, minutes, req.user!.id, now());
     res.json({ ok: true, levelMinutes: minutes });
   });
+  app.post("/api/classrooms/:id/general-settings", (req: AppRequest, res) => {
+    teacher(req);
+    const c = classroom(req, String(req.params.id));
+    const minutes = req.body?.minutes,
+      p = req.body?.policy;
+    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440)
+      fail(400, "Thời gian tăng cấp phải từ 1 đến 1440 phút.");
+    if (!validSessionPolicy(p))
+      fail(
+        400,
+        "Ngưỡng cảnh báo phải nhỏ hơn ngưỡng đóng: rời tab 1–20 lần; không tương tác 5–3600 giây.",
+      );
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.prepare(
+        "INSERT INTO classroom_level_settings VALUES(?,?,?,?) ON CONFLICT(classroom_id) DO UPDATE SET minutes=excluded.minutes,updated_by=excluded.updated_by,updated_at=excluded.updated_at",
+      ).run(c.id, minutes, req.user!.id, now());
+      db.prepare(
+        "INSERT INTO classroom_session_policy VALUES(?,?,?,?) ON CONFLICT(classroom_id) DO UPDATE SET policy=excluded.policy,updated_by=excluded.updated_by,updated_at=excluded.updated_at",
+      ).run(c.id, JSON.stringify(p), req.user!.id, now());
+      db.exec("COMMIT");
+    } catch (e) {
+      db.exec("ROLLBACK");
+      throw e;
+    }
+    res.json({ ok: true });
+  });
+  function managedChapter(req: AppRequest) {
+    teacher(req);
+    const ch = db
+      .prepare("SELECT * FROM chapters WHERE id=?")
+      .get(String(req.params.id));
+    if (!ch || chapterIsArchived(db, String(ch.id)))
+      fail(404, "Không tìm thấy chương đang dùng.");
+    classroom(req, String(ch.classroom_id));
+    return ch;
+  }
+  app.post("/api/chapters/:id/practice-access", (req: AppRequest, res) => {
+    const ch = managedChapter(req);
+    if (typeof req.body?.enabled !== "boolean")
+      fail(400, "Trạng thái không hợp lệ.");
+    db.prepare(
+      "INSERT INTO chapter_practice_access VALUES(?,?,?,?) ON CONFLICT(chapter_id) DO UPDATE SET enabled=excluded.enabled,updated_by=excluded.updated_by,updated_at=excluded.updated_at",
+    ).run(ch.id, Number(req.body.enabled), req.user!.id, now());
+    if (!req.body.enabled)
+      for (const s of db
+        .prepare("SELECT id FROM study_sessions WHERE chapter_id=?")
+        .all(ch.id))
+        terminateStudy(db, String(s.id), "locked");
+    res.json({ ok: true });
+  });
+  app.post("/api/chapters/:id/hunt-access", (req: AppRequest, res) => {
+    const ch = managedChapter(req);
+    if (
+      typeof req.body?.enabled !== "boolean" ||
+      (req.body?.deleteQuestions !== undefined &&
+        typeof req.body.deleteQuestions !== "boolean")
+    )
+      fail(400, "Trạng thái không hợp lệ.");
+    const old = db
+      .prepare("SELECT * FROM chapter_hunt_settings WHERE chapter_id=?")
+      .get(ch.id);
+    const requestId =
+      req.body?.requestId === undefined
+        ? null
+        : text(req.body.requestId, "Mã mở săn thưởng", 100);
+    const fingerprint = createHash("sha256")
+      .update(JSON.stringify(req.body))
+      .digest("hex");
+    if (requestId) {
+      const prior = db
+        .prepare("SELECT * FROM chapter_hunt_requests WHERE request_id=?")
+        .get(requestId);
+      if (prior) {
+        if (
+          prior.chapter_id !== ch.id ||
+          prior.teacher_id !== req.user!.id ||
+          prior.fingerprint !== fingerprint
+        )
+          fail(409, "Mã mở đã dùng cho nội dung khác.");
+        return res.json({ ok: true });
+      }
+    }
+    if (!req.body.enabled) {
+      db.prepare(
+        "INSERT INTO chapter_exam_access VALUES(?,?,?,?) ON CONFLICT(chapter_id) DO UPDATE SET enabled=excluded.enabled,updated_by=excluded.updated_by,updated_at=excluded.updated_at",
+      ).run(ch.id, 0, req.user!.id, now());
+      if (req.body.deleteQuestions)
+        db.prepare(
+          "UPDATE chapter_hunt_settings SET questions='[]',uploaded_at=0,title='' WHERE chapter_id=?",
+        ).run(ch.id);
+      for (const r of db
+        .prepare(
+          "SELECT * FROM exam_runs WHERE chapter_id=? AND kind='hunt' AND status='active'",
+        )
+        .all(ch.id))
+        finalize(db, r, "teacher", now());
+      return res.json({ ok: true });
+    }
+    if (old && examAllowed(String(ch.id)) && Number(old.closes_at) > now())
+      fail(
+        409,
+        "Săn thưởng đang mở. Hãy khóa trước khi thay bộ đề hoặc giờ mở.",
+      );
+    const preparation = number(
+        req.body.preparationMinutes ?? 0,
+        "Thời gian chuẩn bị",
+        0,
+        60,
+      ),
+      duration = number(
+        req.body.durationMinutes ?? 20,
+        "Thời gian làm bài",
+        1,
+        180,
+      ),
+      tabs = number(
+        req.body.tabLimit ??
+          sessionPolicy(db, String(ch.classroom_id)).closeTabs,
+        "Số lần rời tab",
+        1,
+        20,
+      );
+    const title = text(
+      req.body.title ?? "Săn thưởng · " + ch.title,
+      "Tên bộ đề",
+      120,
+    );
+    let questions: Snapshot[] = [];
+    let uploadTime = now();
+    const incoming = req.body.questions;
+    if (req.body.reuse === true) {
+      if (!old || !json<Snapshot[]>(old.questions).length)
+        fail(409, "Chưa có bộ đề để sử dụng lại. Hãy tải đề lên.");
+      questions = json<Snapshot[]>(old.questions);
+      uploadTime = Number(old.uploaded_at);
+    } else {
+      if (!Array.isArray(incoming) || !incoming.length || incoming.length > 100)
+        fail(400, "Tải lên đề có 1–100 câu hỏi hợp lệ.");
+      questions = incoming.map((row: any) => {
+        if (row?.chapterId !== ch.id)
+          fail(403, "Đề săn thưởng chỉ thuộc chương đang mở.");
+        let content: ReturnType<typeof questionInput>;
+        try {
+          content = questionInput(row.question);
+        } catch (e) {
+          fail(400, (e as Error).message);
+        }
+        if (lessonIsArchived(db, String(ch.id), content.lesson))
+          fail(409, "Bài trong đề đã bị xóa.");
+        return {
+          ...content,
+          id: randomUUID(),
+          chapterId: String(ch.id),
+          chapterTitle: String(ch.title),
+        };
+      });
+      if (
+        new Set(
+          questions.map((q) =>
+            JSON.stringify([
+              q.text,
+              q.choices,
+              q.correctIndex,
+              q.correctAnswer,
+            ]),
+          ),
+        ).size !== questions.length
+      )
+        fail(400, "Bộ đề có câu hỏi trùng nhau.");
+    }
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      if (req.body.reuse !== true)
+        for (const q of questions)
+          db.prepare(
+            `INSERT INTO questions(id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,kind,correct_answer) VALUES(?,?,?,?,?,?,?,0,0,1,?,?)`,
+          ).run(
+            q.id,
+            q.chapterId,
+            q.text,
+            JSON.stringify(q.choices),
+            q.correctIndex,
+            q.explanation,
+            q.lesson,
+            q.kind ?? "multiple-choice",
+            q.correctAnswer ?? null,
+          );
+      db.prepare(
+        "INSERT INTO chapter_hunt_settings VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(chapter_id) DO UPDATE SET questions=excluded.questions,uploaded_at=excluded.uploaded_at,title=excluded.title,duration_minutes=excluded.duration_minutes,preparation_minutes=excluded.preparation_minutes,tab_limit=excluded.tab_limit,starts_at=excluded.starts_at,closes_at=excluded.closes_at",
+      ).run(
+        ch.id,
+        JSON.stringify(questions),
+        uploadTime,
+        title,
+        duration,
+        preparation,
+        tabs,
+        now() + preparation * 60000,
+        now() + (preparation + duration) * 60000,
+      );
+      db.prepare(
+        "INSERT INTO chapter_exam_access VALUES(?,?,?,?) ON CONFLICT(chapter_id) DO UPDATE SET enabled=excluded.enabled,updated_by=excluded.updated_by,updated_at=excluded.updated_at",
+      ).run(ch.id, 1, req.user!.id, now());
+      if (requestId)
+        db.prepare("INSERT INTO chapter_hunt_requests VALUES(?,?,?,?)").run(
+          requestId,
+          ch.id,
+          req.user!.id,
+          fingerprint,
+        );
+      db.exec("COMMIT");
+    } catch (e) {
+      db.exec("ROLLBACK");
+      throw e;
+    }
+    res.json({ ok: true });
+  });
   app.post("/api/chapters/:id/exam-access", (req: AppRequest, res) => {
     teacher(req);
     const ch = db
@@ -793,7 +1117,8 @@ export function registerLearningRoutes(
       .get(String(req.params.id));
     if (!ch) fail(404, "Không tìm thấy chương.");
     classroom(req, String(ch.classroom_id));
-    if (chapterIsArchived(db, String(ch.id))) fail(409, "Chương đã được xóa khỏi danh sách đang dùng.");
+    if (chapterIsArchived(db, String(ch.id)))
+      fail(409, "Chương đã được xóa khỏi danh sách đang dùng.");
     if (typeof req.body?.enabled !== "boolean")
       fail(400, "Trạng thái không hợp lệ.");
     db.prepare(
@@ -810,7 +1135,8 @@ export function registerLearningRoutes(
       .get(String(req.params.id));
     if (!ch) fail(404, "Không tìm thấy chương.");
     classroom(req, String(ch.classroom_id));
-    if (chapterIsArchived(db, String(ch.id))) fail(409, "Chương đã được xóa khỏi danh sách đang dùng.");
+    if (chapterIsArchived(db, String(ch.id)))
+      fail(409, "Chương đã được xóa khỏi danh sách đang dùng.");
     const semester =
       req.body?.semester === "" ? "" : text(req.body?.semester, "Học kỳ", 80);
     const basis = req.body?.accuracyBasis ?? "all";
@@ -876,6 +1202,7 @@ export function registerLearningRoutes(
       weights = {};
       title = ids.length === 1 ? "Ôn chương" : "Ôn kỳ";
     }
+    for (const id of ids) requirePractice(db, id);
     const questions = sample(ids, count, weights),
       id = randomUUID();
     db.prepare(
@@ -890,25 +1217,49 @@ export function registerLearningRoutes(
       .get(String(req.params.id), req.user!.id);
     if (!r) fail(404, "Không tìm thấy phiên ôn.");
     classroom(req, String(r.classroom_id));
+    for (const id of new Set(
+      json<Snapshot[]>(r.questions).map((q) => q.chapterId),
+    ))
+      requirePractice(db, id);
     return r;
   }
-  app.post('/api/learning/reviews/:id/repeat', (req: AppRequest, res) => {
+  app.post("/api/learning/reviews/:id/repeat", (req: AppRequest, res) => {
     const original = review(req);
-    if (!original.completed) fail(409, 'Hoàn thành bộ ôn trước khi làm lại.');
-    if (learningAnswersLocked(db, req.user!.id, now())) fail(409, 'Hãy nộp bài thi trước khi ôn tập.');
-    const requestId = text(req.body?.requestId, 'Mã phiên', 100);
-    const existing = db.prepare('SELECT * FROM review_sessions WHERE request_id=?').get(requestId);
+    if (!original.completed) fail(409, "Hoàn thành bộ ôn trước khi làm lại.");
+    if (learningAnswersLocked(db, req.user!.id, now()))
+      fail(409, "Hãy nộp bài thi trước khi ôn tập.");
+    const requestId = text(req.body?.requestId, "Mã phiên", 100);
+    const existing = db
+      .prepare("SELECT * FROM review_sessions WHERE request_id=?")
+      .get(requestId);
     if (existing) {
-      if (existing.student_id !== req.user!.id || existing.classroom_id !== original.classroom_id) fail(409, 'Mã phiên đã dùng.');
-      return res.json({id:existing.id});
+      if (
+        existing.student_id !== req.user!.id ||
+        existing.classroom_id !== original.classroom_id
+      )
+        fail(409, "Mã phiên đã dùng.");
+      return res.json({ id: existing.id });
     }
     const old = json<Snapshot[]>(original.questions);
-    const available = bank([...new Set(old.map(q => q.chapterId))]);
-    const questions = old.map(q => available.find(current => current.id === q.id)).filter((q): q is Snapshot => !!q);
-    if (!questions.length) fail(409, 'Bộ ôn đã được cập nhật. Hãy chọn lại bộ ôn.');
+    const available = bank([...new Set(old.map((q) => q.chapterId))]);
+    const questions = old
+      .map((q) => available.find((current) => current.id === q.id))
+      .filter((q): q is Snapshot => !!q);
+    if (!questions.length)
+      fail(409, "Bộ ôn đã được cập nhật. Hãy chọn lại bộ ôn.");
     const id = randomUUID();
-    db.prepare('INSERT INTO review_sessions(id,student_id,classroom_id,title,questions,request_id,created_at) VALUES(?,?,?,?,?,?,?)').run(id, req.user!.id, original.classroom_id, original.title, JSON.stringify(shuffle(questions)), requestId, now());
-    res.status(201).json({id});
+    db.prepare(
+      "INSERT INTO review_sessions(id,student_id,classroom_id,title,questions,request_id,created_at) VALUES(?,?,?,?,?,?,?)",
+    ).run(
+      id,
+      req.user!.id,
+      original.classroom_id,
+      original.title,
+      JSON.stringify(shuffle(questions)),
+      requestId,
+      now(),
+    );
+    res.status(201).json({ id });
   });
   app.get("/api/learning/reviews/:id", (req: AppRequest, res) => {
     const r = review(req);
@@ -946,6 +1297,7 @@ export function registerLearningRoutes(
     const q = qs.find((q) => q.id === req.body?.questionId);
     if (!q) fail(400, "Câu không thuộc bộ ôn.");
     const selected = answerValue(q, req.body?.selected);
+    guardStudy(db, req.user!.id, q.chapterId, now(), req.body?.studySessionId);
     if (answers[q.id]) {
       if (answers[q.id].selected !== selected) fail(409, "Câu đã trả lời.");
       return res.json(studyFeedback(answers[q.id]));
@@ -1358,18 +1710,33 @@ export function registerLearningRoutes(
       examId = String(e.id);
     } else {
       const ch = db
-        .prepare("SELECT * FROM chapters WHERE id=? AND classroom_id=? AND id NOT IN (SELECT chapter_id FROM archived_chapters)")
+        .prepare(
+          "SELECT * FROM chapters WHERE id=? AND classroom_id=? AND id NOT IN (SELECT chapter_id FROM archived_chapters)",
+        )
         .get(req.body?.chapterId, c.id);
       if (!ch) fail(404, "Không tìm thấy chương.");
       grantLearningMilestones(db, req.user!.id, now());
       const state = eligibility(ch, req.user!.id);
       if (!state.eligible) fail(403, state.missing.join(" · "));
-      questions = sample(
-        [String(ch.id)],
-        Math.min(20, bank([String(ch.id)]).length),
-        {},
-      );
-      deadline = now() + 1200000;
+      const hunt = db
+        .prepare("SELECT * FROM chapter_hunt_settings WHERE chapter_id=?")
+        .get(ch.id);
+      questions = hunt
+        ? shuffle(json<Snapshot[]>(hunt.questions))
+        : sample(
+            [String(ch.id)],
+            Math.min(20, bank([String(ch.id)]).length),
+            {},
+          );
+      deadline = hunt
+        ? Math.min(
+            now() + Number(hunt.duration_minutes) * 60000,
+            Number(hunt.closes_at),
+          )
+        : now() + 1200000;
+      tabLimit = hunt
+        ? Number(hunt.tab_limit)
+        : sessionPolicy(db, String(c.id)).closeTabs;
       title = `Săn điểm · ${ch.title}`;
       chapterId = String(ch.id);
     }
@@ -1406,6 +1773,7 @@ export function registerLearningRoutes(
       db.prepare("DELETE FROM study_sessions WHERE student_id=?").run(
         req.user!.id,
       );
+      db.prepare("INSERT INTO exam_activity VALUES(?,?)").run(id, now());
       db.exec("COMMIT");
     } catch (e) {
       db.exec("ROLLBACK");
@@ -1416,6 +1784,19 @@ export function registerLearningRoutes(
   app.get("/api/learning/exam-runs/:id", (req: AppRequest, res) => {
     const r = ownedRun(req);
     sweepLearningExams(db, now());
+    res.json(viewRun(r, req.user!.role));
+  });
+  app.post("/api/learning/exam-runs/:id/activity", (req: AppRequest, res) => {
+    student(req);
+    const r = ownedRun(req);
+    sweepLearningExams(db, now());
+    if (
+      db.prepare("SELECT status FROM exam_runs WHERE id=?").get(r.id)
+        ?.status === "active"
+    )
+      db.prepare(
+        "INSERT INTO exam_activity VALUES(?,?) ON CONFLICT(run_id) DO UPDATE SET last_activity=excluded.last_activity",
+      ).run(r.id, now());
     res.json(viewRun(r, req.user!.role));
   });
   app.post("/api/learning/exam-runs/:id/answers", (req: AppRequest, res) => {
@@ -1434,12 +1815,15 @@ export function registerLearningRoutes(
       answers = json<Record<string, QuestionAnswer>>(r.answers);
     for (const [id, value] of Object.entries(incoming)) {
       if (!ids.has(id)) fail(400, "Câu không thuộc đề thi.");
-      const q = json<Snapshot[]>(r.questions).find(q => q.id === id)!;
+      const q = json<Snapshot[]>(r.questions).find((q) => q.id === id)!;
       answers[id] = answerValue(q, value, true);
     }
     db.prepare(
       "UPDATE exam_runs SET answers=?,revision=revision+1 WHERE id=?",
     ).run(JSON.stringify(answers), r.id);
+    db.prepare(
+      "INSERT INTO exam_activity VALUES(?,?) ON CONFLICT(run_id) DO UPDATE SET last_activity=excluded.last_activity",
+    ).run(r.id, now());
     res.json(viewRun(r, req.user!.role));
   });
   app.post("/api/learning/exam-runs/:id/tab", (req: AppRequest, res) => {
@@ -1460,7 +1844,13 @@ export function registerLearningRoutes(
           .prepare("SELECT COUNT(*) AS n FROM exam_tab_events WHERE run_id=?")
           .get(r.id)?.n,
       );
-      if (n >= Number(r.tab_limit))
+      if (
+        n >=
+        Math.min(
+          Number(r.tab_limit),
+          sessionPolicy(db, String(r.classroom_id)).closeTabs,
+        )
+      )
         finalize(
           db,
           db.prepare("SELECT * FROM exam_runs WHERE id=?").get(r.id) as Row,

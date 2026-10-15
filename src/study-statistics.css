@@ -1,6 +1,10 @@
 .study-statistics {
   min-width: 0;
 }
+.modal.study-statistics-modal {
+  width: min(880px, 100%);
+  max-width: 880px;
+}
 .study-statistics-class {
   color: var(--text-muted, #647565);
   margin-top: 0;
@@ -22,7 +26,8 @@
   gap: 4px;
   font-size: 13px;
 }
-.study-statistics-filters input {
+.study-statistics-filters input,
+.study-statistics-filters select {
   min-height: 44px;
   max-width: 100%;
 }
@@ -55,6 +60,7 @@
   margin-top: 4px;
 }
 .study-statistics-note {
+  margin: 12px 0;
   font-size: 12px;
   color: #647565;
   line-height: 1.7;
@@ -87,9 +93,39 @@
   border-radius: inherit;
   background: #497349;
 }
-.roster-time-cell .roster-statistics-button {
-  display: block;
+.study-student-filter {
+  width: 100%;
+  min-width: 0;
+}
+.study-statistics-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.study-statistics-toolbar p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.study-members-table {
+  margin-bottom: 16px;
+}
+.study-members-table .text-button {
   min-height: 44px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.study-members-table th,
+.study-members-table td {
+  min-width: 100px;
+}
+.study-members-table th:first-child {
+  min-width: 150px;
+}
+.study-statistics .table-scroll {
+  overscroll-behavior-x: contain;
 }
 @media (max-width: 600px) {
   .study-statistics-summary {

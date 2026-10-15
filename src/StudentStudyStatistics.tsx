@@ -1,17 +1,25 @@
 import { useEffect, useState } from "react";
 import { api, ApiError, duration, errorMessage } from "./api";
 import { Modal } from "./components";
+import { Download } from "./icons";
 import type { Classroom, Student } from "./types";
 import {
   studyDate,
   type StudyBucket,
   type StudyPeriod,
   type StudyStatistics,
+  type ClassroomStudyStatistics,
 } from "../shared/study-statistics";
 import "./study-statistics.css";
 
+const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: "Asia/Ho_Chi_Minh",
+});
 const dateLabel = (date: string) =>
-  `${date.slice(8, 10)}/${date.slice(5, 7)}/${date.slice(0, 4)}`;
+  dateFormatter.format(new Date(`${date}T00:00:00+07:00`));
 const timeLabel = (seconds: number | null) =>
   seconds === null
     ? "Chưa có lịch sử"
@@ -23,16 +31,28 @@ const rangeLabel = (bucket: StudyBucket) =>
 
 export function StudentStudyStatistics({
   classroom,
-  student,
+  students,
+  initialStudentId = '',
   onClose,
 }: {
   classroom: Classroom;
-  student: Student;
+  students: Student[];
+  initialStudentId?: string;
   onClose: () => void;
 }) {
   const [period, setPeriod] = useState<StudyPeriod>("day");
+  const [studentId, setStudentId] = useState(initialStudentId);
+  const student = students.find((s) => s.id === studentId);
   const [date, setDate] = useState(() => studyDate(Date.now()));
-  const [data, setData] = useState<StudyStatistics>();
+  const [snapshot, setData] = useState<
+    ClassroomStudyStatistics & { selectedStudentId: string }
+  >();
+  const data =
+    snapshot?.selectedStudentId === studentId &&
+    snapshot.period === period &&
+    snapshot.date === date
+      ? snapshot
+      : undefined;
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [retry, setRetry] = useState(0);
@@ -51,11 +71,25 @@ export function StudentStudyStatistics({
       }
       inFlight = true;
       try {
-        const result = await api<StudyStatistics>(
-          `/classrooms/${classroom.id}/students/${student.id}/study-statistics?period=${period}&date=${date}`,
+        const result = await api<StudyStatistics | ClassroomStudyStatistics>(
+          `/classrooms/${classroom.id}${studentId ? `/students/${studentId}` : ""}/study-statistics?period=${period}&date=${date}`,
         );
         if (alive) {
-          setData(result);
+          setData(
+            "members" in result
+              ? { ...result, selectedStudentId: studentId }
+              : {
+                  ...result,
+                  selectedStudentId: studentId,
+                  members: [
+                    {
+                      id: studentId,
+                      name: student?.name ?? "Học sinh",
+                      statistics: result,
+                    },
+                  ],
+                },
+          );
           setError("");
         }
       } catch (problem) {
@@ -87,18 +121,111 @@ export function StudentStudyStatistics({
       window.removeEventListener("focus", update);
       document.removeEventListener("visibilitychange", update);
     };
-  }, [classroom.id, student.id, period, date, retry]);
+  }, [classroom.id, studentId, student?.name, period, date, retry]);
+  function exportCsv() {
+    if (!data || loading || error) return;
+    const coverageLabel = {
+      none: "Chưa có lịch sử",
+      partial: "Lịch sử chưa đủ kỳ",
+      full: "Đã theo dõi",
+    };
+    const periodLabel = { day: "Ngày", week: "Tuần", month: "Tháng" };
+    const records: (string | number | null)[][] = [
+      [
+        "Lớp",
+        "Môn",
+        "Mã học sinh",
+        "Học sinh",
+        "Kỳ",
+        "Ngày xem",
+        "Từ ngày",
+        "Đến ngày",
+        "Thời gian (giây)",
+        "Lịch sử",
+        "Tổng ngày (giây)",
+        "Tổng tuần (giây)",
+        "Tổng tháng (giây)",
+        "Tổng tích lũy (giây)",
+        "Bắt đầu theo dõi (giờ Việt Nam)",
+      ],
+    ];
+    for (const member of data.members) {
+      for (const bucket of member.statistics.buckets.slice().reverse()) {
+        records.push([
+          classroom.name,
+          classroom.subject,
+          member.id,
+          member.name,
+          periodLabel[data.period],
+          data.date,
+          bucket.start,
+          bucket.end,
+          bucket.seconds,
+          coverageLabel[bucket.coverage],
+          member.statistics.summaries.day.seconds,
+          member.statistics.summaries.week.seconds,
+          member.statistics.summaries.month.seconds,
+          member.statistics.lifetimeSeconds,
+          new Date(member.statistics.trackingStartedAt).toLocaleString(
+            "vi-VN",
+            { timeZone: "Asia/Ho_Chi_Minh", hour12: false },
+          ),
+        ]);
+      }
+    }
+    // Quoting protects delimiters; prefix spreadsheet formulas in user text.
+    const csv =
+      "\uFEFF" +
+      records
+        .map((row) =>
+          row
+            .map((value) => {
+              const text = String(value ?? "");
+              return `"${(/^[\s]*[=+@-]/.test(text) ? "'" + text : text).replace(/"/g, '""')}"`;
+            })
+            .join(","),
+        )
+        .join("\r\n");
+    const url = URL.createObjectURL(
+      new Blob([csv], { type: "text/csv;charset=utf-8" }),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `greenedu-thong-ke-${studentId || "ca-lop"}-${data.period}-${data.date}.csv`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
   const maximum = Math.max(
     1,
     ...(data?.buckets.map((bucket) => bucket.seconds ?? 0) ?? []),
   );
   return (
-    <Modal title={`Thống kê thời gian học · ${student.name}`} onClose={onClose}>
+    <Modal
+      title="Thống kê thời gian học"
+      onClose={onClose}
+      className={studentId ? "" : "study-statistics-modal"}
+    >
       <div className="study-statistics">
         <p className="study-statistics-class">
           {classroom.name} · {classroom.subject}
         </p>
         <div className="study-statistics-filters">
+          <label className="study-student-filter">
+            Học sinh
+            <select
+              aria-label="Học sinh"
+              name="statistics-student"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+            >
+              <option value="">Tất cả học sinh</option>
+              {students.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} · {s.email}
+                </option>
+              ))}
+            </select>
+          </label>
           <div
             className="study-periods"
             role="group"
@@ -126,6 +253,7 @@ export function StudentStudyStatistics({
             Ngày xem
             <input
               type="date"
+              name="statistics-date"
               value={date}
               min="2000-01-01"
               max={studyDate(Date.now())}
@@ -134,6 +262,20 @@ export function StudentStudyStatistics({
               }}
             />
           </label>
+        </div>
+        <div className="study-statistics-toolbar">
+          <p>
+            {student ? student.name : "Tất cả học sinh"}
+            {data && !loading ? ` · ${data.members.length} học sinh` : ""}
+          </p>
+          <button
+            type="button"
+            className="button outline small"
+            disabled={!data || loading || !!error || data.members.length === 0}
+            onClick={exportCsv}
+          >
+            <Download size={16} /> Xuất CSV
+          </button>
         </div>
         {error && (
           <div className="error-banner" role="alert">
@@ -144,7 +286,9 @@ export function StudentStudyStatistics({
           </div>
         )}
         {loading ? (
-          <div className="loading-panel">Đang tải thống kê…</div>
+          <div className="loading-panel" role="status">
+            Đang tải thống kê…
+          </div>
         ) : (
           data && (
             <>
@@ -175,6 +319,56 @@ export function StudentStudyStatistics({
                 . Thời gian cũ chưa được chia theo ngày. Tuần bắt đầu thứ Hai,
                 theo giờ Việt Nam.
               </p>
+              {!studentId &&
+                (data.members.length ? (
+                  <div className="table-scroll">
+                    <table
+                      className="study-statistics-table study-members-table"
+                      aria-label="Thống kê từng học sinh"
+                    >
+                      <thead>
+                        <tr>
+                          <th scope="col">Học sinh</th>
+                          <th scope="col">Ngày</th>
+                          <th scope="col">Tuần</th>
+                          <th scope="col">Tháng</th>
+                          <th scope="col">Tích lũy</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.members.map((member) => (
+                          <tr key={member.id}>
+                            <th scope="row">
+                              <button
+                                type="button"
+                                className="text-button"
+                                onClick={() => setStudentId(member.id)}
+                              >
+                                {member.name}
+                              </button>
+                            </th>
+                            {(["day", "week", "month"] as const).map((p) => (
+                              <td key={p}>
+                                {timeLabel(
+                                  member.statistics.summaries[p].seconds,
+                                )}
+                                {member.statistics.summaries[p].coverage ===
+                                  "partial" && (
+                                  <small>Lịch sử chưa đủ kỳ</small>
+                                )}
+                              </td>
+                            ))}
+                            <td>
+                              {timeLabel(member.statistics.lifetimeSeconds)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p role="status">Lớp chưa có học sinh.</p>
+                ))}
               <div className="table-scroll">
                 <table
                   className="study-statistics-table"

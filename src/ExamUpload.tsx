@@ -18,11 +18,13 @@ export function ExamUpload({
   questions,
   onChange,
   onReadingChange,
+  singleChapter = false,
 }: {
   chapters: Chapter[];
   questions: UploadedExamQuestion[];
   onChange: (questions: UploadedExamQuestion[]) => void;
   onReadingChange: (reading: boolean) => void;
+  singleChapter?: boolean;
 }) {
   const [chapterId, setChapterId] = useState(chapters[0]?.id ?? "");
   const [errors, setErrors] = useState<string[]>([]);
@@ -118,8 +120,11 @@ export function ExamUpload({
       <legend>Tải đề của giáo viên</legend>
       <p>
         Dùng Word/CSV theo mẫu, có đủ lựa chọn và đáp án để chấm tự động. Mỗi
-        file gắn với chương được chọn bên dưới; tải thêm file để tạo đề nhiều
-        chương. Câu tải lên chỉ dùng cho đề này.
+        file gắn với chương được chọn bên dưới;{" "}
+        {singleChapter
+          ? "có thể thêm file cùng chương."
+          : "tải thêm file để tạo đề nhiều chương."}{" "}
+        Câu tải lên chỉ dùng cho đề này.
       </p>
       <div className="learning-actions">
         <a

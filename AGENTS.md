@@ -13,6 +13,8 @@ Khi làm ngân hàng câu hỏi hoặc hoạt động nhóm, đọc thêm `docs/
 
 Khi làm góp ý riêng hoặc phản biện nhóm, đọc thêm `docs/feedback-discussion.md`; mã đã có hai luồng này, không dùng mô tả “chưa phản biện” trong nhật ký cũ để triển khai lại. Slide/poster hiện hành và nguồn ở `artifacts/presentations/README.md`, `artifacts/posters/README.md`.
 
+Quản lý lớp từ15/10/2026: đọc `docs/class-management.md` về hai quyền Luyện tập/Săn thưởng, đề tải lên/dùng lại và Quản lý chung với ngưỡng nhắc/đóng tab–idle. Quy tắc này thay mô tả lịch sử “rời tab một lần là kết thúc luyện tập”; không áp lại gate chương cho kiểm tra chính thức. Việc có mã/test không xác nhận Railway đã phát hành.
+
 Giao tiếp với người dùng bằng tiếng Việt. Lấy yêu cầu mới nhất của người dùng làm mục tiêu; bản bàn giao không thay thế yêu cầu mới hoặc tự chọn một tính năng chưa được yêu cầu. Kiểm tra Git và mã hiện tại trước khi tiếp tục vì tài liệu bàn giao là ảnh chụp trạng thái tại thời điểm viết.
 
 Giữ dữ liệu và thay đổi có sẵn. Database `.local/greenedu.sqlite` chứa cả file hoạt động nhóm; không xóa/reset để cập nhật tính năng và không đưa database, file học sinh hay secrets lên Git. Dùng migration bổ sung khi cần. Không tạo tiến độ, điểm hoặc sản phẩm giả trong dữ liệu người dùng.
