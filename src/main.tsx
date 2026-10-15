@@ -21,6 +21,7 @@ import "./mobile-density.css";
 import "./app-polish.css";
 import "./redesign.css";
 import "./learning-feedback.css";
+import "./workspace-clarity.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

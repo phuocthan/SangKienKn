@@ -113,8 +113,8 @@ export function Feedback({
           <h1>{teacher ? "Quản lý góp ý" : "Góp ý với giáo viên"}</h1>
           <p>
             {teacher
-              ? "Lắng nghe học sinh, phản hồi và theo dõi việc xử lý theo từng lớp."
-              : `Gửi ý kiến riêng đến ${classroom.teacherName}. Chỉ bạn và giáo viên phụ trách lớp đọc được.`}
+              ? "Ý kiến riêng của học sinh trong lớp."
+              : `Chỉ bạn và ${classroom.teacherName} đọc được.`}
           </p>
         </div>
         <div className="button-group">

@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { acknowledgeOnlineExamCreated } from "./online-exam-created";
 import { navigateTo } from "./navigation";
 
 async function teacher(page: Page) {
@@ -66,9 +67,7 @@ test("online creation opens on demand, keeps draft on failure and saves without 
     .getByRole("button", { name: "Lưu bài kiểm tra", exact: true })
     .click();
   await expect(dialog).toHaveCount(0);
-  await expect(page.locator('.learning-notice[role="status"]')).toContainText(
-    "Có thể bắt đầu bất cứ lúc nào",
-  );
+  await acknowledgeOnlineExamCreated(page);
   const row = page
     .locator(".online-exam-group")
     .filter({ has: page.getByText(title, { exact: true }) });

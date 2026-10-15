@@ -20,6 +20,7 @@ import {
 import { api, errorMessage } from "./api";
 import { Avatar } from "./Avatars";
 import { Empty, Modal, SectionTitle } from "./components";
+import { SectionTabs } from "./SectionTabs";
 import { GroupDiscussion } from "./GroupDiscussion";
 import "./group-activities.css";
 import type { Classroom, User } from "./types";
@@ -75,6 +76,13 @@ export function GroupActivities({
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [groupFilter, setGroupFilter] = useState("all");
+  const [detailSection, setDetailSection] = useState<
+    "requirements" | "members" | "submissions" | "discussion"
+  >("requirements");
+  useEffect(() => {
+    setDetailSection("requirements");
+    setGroupFilter("all");
+  }, [selected]);
   const sequence = useRef(0);
   const anchor = useRef({ server: 0, elapsed: performance.now() });
   const [now, setNow] = useState(0);
@@ -224,7 +232,6 @@ export function GroupActivities({
                   ? "—"
                   : activities.filter((a) => now < a.deadlineAt).length}
               </strong>
-              <small>Còn thời gian nộp sản phẩm</small>
             </div>
             <div className="card workspace-stat">
               <span>{teacher ? "Nhóm đã nộp" : "Hoạt động đã nộp"}</span>
@@ -238,9 +245,6 @@ export function GroupActivities({
                       0,
                     )}
               </strong>
-              <small>
-                {teacher ? "Trong tất cả hoạt động" : "Sản phẩm của nhóm bạn"}
-              </small>
             </div>
           </div>
           <div className="workspace-filters group-list-filters">
@@ -379,11 +383,17 @@ export function GroupActivities({
                 Hạn nộp sản phẩm
               </span>
               <strong>{date(detail.deadlineAt)}</strong>
-              <small>
-                {now >= detail.deadlineAt
-                  ? "Cần gia hạn để nộp thêm"
-                  : "Đại diện nộp bài trước thời gian này"}
-              </small>
+              {now >= detail.deadlineAt && (
+                <small>Cần gia hạn để nộp thêm</small>
+              )}
+              {!teacher && ownGroup && now < detail.deadlineAt && (
+                <button
+                  className="button primary small"
+                  onClick={() => setDetailSection("submissions")}
+                >
+                  Nộp bài
+                </button>
+              )}
               {teacher && (
                 <button
                   className="button outline small"
@@ -415,238 +425,311 @@ export function GroupActivities({
               )}
             </div>
           </section>
-          <div className="info-panel" role="status">
-            {detail.discussionOpen
-              ? "Đã mở đọc chéo và phản biện. Xem sản phẩm của các nhóm, gửi câu hỏi hoặc góp ý; nhóm phụ trách trả lời trong phần trao đổi."
-              : detail.canDiscuss
-                ? "Đọc chéo và phản biện sẽ mở khi đã gia hạn ít nhất một lần và hết hạn nộp mới."
-                : "Đọc chéo và phản biện đang chờ cập nhật server Railway."}
-          </div>
-          <div className="group-detail-layout">
-            <section className="card group-requirements">
-              <h3 className="group-panel-title">
-                <FileText size={20} />
-                Yêu cầu hoạt động
-              </h3>
-              {detail.instructions && (
-                <div className="group-instructions">{detail.instructions}</div>
-              )}
-              {detail.requirementText && (
-                <div className="group-word-text">{detail.requirementText}</div>
-              )}
-              {detail.requirementFile && (
-                <>
-                  <FileLink file={detail.requirementFile} />
-                  <p className="subtle-note">
-                    Nội dung chữ từ Word được hiển thị ở trên. Tải bản gốc để
-                    xem hình ảnh và bố cục đầy đủ.
-                  </p>
-                </>
-              )}
-              {!!detail.extensions.length && (
-                <details className="group-extensions">
-                  <summary>
-                    Lịch sử gia hạn ({detail.extensions.length})
-                  </summary>
-                  {detail.extensions.map((extension, index) => (
-                    <p key={index}>
-                      {date(extension.oldDeadlineAt)} →{" "}
-                      <strong>{date(extension.deadlineAt)}</strong>
-                      <br />
-                      <small>
-                        {extension.changedBy} · {date(extension.changedAt)}
-                        {extension.reason && ` · ${extension.reason}`}
-                      </small>
-                    </p>
-                  ))}
-                </details>
-              )}
-            </section>
-            <div className="group-products-panel">
-              <SectionTitle
-                title={
-                  teacher || detail.discussionOpen
-                    ? `Danh sách ${detail.groupCount} nhóm`
-                    : "Nhóm của bạn"
-                }
-                description={
-                  detail.discussionOpen
-                    ? "Cùng đọc sản phẩm và trao đổi sau thời gian nộp bài. Nhóm của bạn được đánh dấu riêng."
-                    : teacher
-                      ? "Nhóm được chia ngẫu nhiên và giữ cố định. Đại diện đứng đầu danh sách thành viên."
-                      : "Cùng chuẩn bị sản phẩm và nộp bài cho nhóm trước hạn."
-                }
-              />
-              {teacher && (
-                <div className="group-tabs" aria-label="Lọc nhóm">
-                  {[
-                    ["all", `Tất cả (${detail.groups.length})`],
-                    [
-                      "pending",
-                      `Chưa nộp (${detail.groups.length - submitted})`,
-                    ],
-                    ["submitted", `Đã nộp (${submitted})`],
-                  ].map(([value, label]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      aria-pressed={groupFilter === value}
-                      className={groupFilter === value ? "active" : ""}
-                      onClick={() => setGroupFilter(value)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {!detail.groups.length && (
-                <Empty
-                  title="Bạn chưa được phân nhóm"
-                  text="Danh sách nhóm được chốt khi tạo hoạt động. Hãy liên hệ giáo viên nếu bạn vào lớp sau thời điểm đó."
-                />
-              )}
-              <div className="group-roster-grid">
-                {visibleGroups.map((group) => (
-                  <section
-                    className={`card group-roster ${group.submissions.length ? "submitted" : "pending"}`}
-                    key={group.id}
-                  >
-                    <div className="group-section-head">
-                      <div>
-                        <h3>
-                          Nhóm {group.number}
-                          {group.id === ownGroup?.id && " · Nhóm của bạn"}
-                        </h3>
-                        <small>
-                          {group.members.filter((m) => m.active).length} thành
-                          viên trong lớp
-                        </small>
-                      </div>
-                      <span
-                        className={`group-status ${group.submissions.length ? "done" : "pending"}`}
-                      >
-                        {group.submissions.length
-                          ? "Đã nộp bài"
-                          : "Chưa nộp bài"}
-                      </span>
-                    </div>
-                    <ul className="group-members">
-                      {representativeFirst(group).map((member) => (
-                        <li key={member.id}>
-                          <Avatar
-                            name={member.name}
-                            avatarId={
-                              member.id === user.id
-                                ? user.avatarId
-                                : member.avatarId
-                            }
-                            className="group-member-avatar"
-                          />
-                          <span>
-                            {member.name}
-                            {!member.active && " · Đã rời lớp"}
-                          </span>
-                          {member.id === group.representativeId && (
-                            <small>Đại diện</small>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                    {teacher ? (
-                      <Representative
-                        key={group.representativeId}
-                        activity={detail}
-                        group={group}
-                        onUpdate={() => updated("Đã cập nhật đại diện nhóm.")}
-                      />
-                    ) : group.id === ownGroup?.id &&
-                      group.members.some(
-                        (member) => member.id === user.id && member.active,
-                      ) ? (
-                      now < detail.deadlineAt ? (
-                        detail.memberSubmissions ||
-                        group.representativeId === user.id ? (
-                          <SubmissionForm
-                            activity={detail}
-                            group={group}
-                            onUpdate={() =>
-                              updated("Đã nhận bài nộp của nhóm.")
-                            }
-                            onRefresh={() => refresh(selected, true)}
-                          />
-                        ) : (
-                          <p className="subtle-note" role="status">
-                            Hiện tại chỉ đại diện nộp được. Quyền nộp cho tất cả
-                            thành viên đang chờ cập nhật hệ thống.
-                          </p>
-                        )
-                      ) : (
-                        <p className="subtle-note" role="status">
-                          Đã hết hạn nộp bài. Giáo viên cần gia hạn để nhóm nộp
-                          thêm.
-                        </p>
-                      )
-                    ) : null}
-                    <h4 className="group-products-title">
-                      Sản phẩm đã nộp <span>{group.submissions.length}</span>
-                    </h4>
-                    {!group.submissions.length && (
-                      <div className="group-no-product">
-                        <FileText size={22} />
-                        <p>Chưa có sản phẩm.</p>
-                        <small>
-                          File hoặc link sẽ xuất hiện tại đây khi nhóm nộp bài.
-                        </small>
+          <SectionTabs
+            label="Nội dung hoạt động"
+            value={detailSection}
+            onChange={setDetailSection}
+            items={[
+              {
+                id: "requirements",
+                label: "Yêu cầu",
+                content: (
+                  <section className="card group-requirements">
+                    <h3 className="group-panel-title">
+                      <FileText size={20} />
+                      Yêu cầu hoạt động
+                    </h3>
+                    {detail.instructions && (
+                      <div className="group-instructions">
+                        {detail.instructions}
                       </div>
                     )}
-                    {group.submissions.map((submission, index) => (
-                      <article className="group-submission" key={submission.id}>
-                        <strong>
-                          Lần {submission.version}
-                          {index === 0 && " · Mới nhất"}
-                        </strong>
-                        <p>
-                          <small>
-                            {submission.submittedBy} ·{" "}
-                            {date(submission.submittedAt)}
-                          </small>
+                    {detail.requirementText && (
+                      <div className="group-word-text">
+                        {detail.requirementText}
+                      </div>
+                    )}
+                    {detail.requirementFile && (
+                      <>
+                        <FileLink file={detail.requirementFile} />
+                        <p className="subtle-note">
+                          Tải bản gốc để xem hình ảnh và bố cục đầy đủ.
                         </p>
-                        {submission.file && <FileLink file={submission.file} />}
-                        {submission.link && (
-                          <a
-                            className="group-product-link"
-                            href={submission.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Mở sản phẩm: {submission.link}
-                          </a>
-                        )}
-                        {submission.note && (
-                          <p className="group-instructions">
-                            {submission.note}
+                      </>
+                    )}
+                    {!!detail.extensions.length && (
+                      <details className="group-extensions">
+                        <summary>
+                          Lịch sử gia hạn ({detail.extensions.length})
+                        </summary>
+                        {detail.extensions.map((extension, index) => (
+                          <p key={index}>
+                            {date(extension.oldDeadlineAt)} →{" "}
+                            <strong>{date(extension.deadlineAt)}</strong>
+                            <br />
+                            <small>
+                              {extension.changedBy} ·{" "}
+                              {date(extension.changedAt)}
+                              {extension.reason && ` · ${extension.reason}`}
+                            </small>
                           </p>
-                        )}
-                      </article>
-                    ))}
-                    {detail.discussionOpen && group.submissions.length > 0 && (
-                      <GroupDiscussion
-                        activity={detail}
-                        group={group}
-                        user={user}
-                      />
+                        ))}
+                      </details>
                     )}
                   </section>
-                ))}
-                {!!detail.groups.length && !visibleGroups.length && (
-                  <Empty
-                    title="Không có nhóm ở trạng thái này"
-                    text="Chọn bộ lọc khác để xem các nhóm."
-                  />
-                )}
-              </div>
-            </div>
-          </div>
+                ),
+              },
+              ...(["members", "submissions", "discussion"] as const).map(
+                (section) => ({
+                  id: section,
+                  label:
+                    section === "members"
+                      ? "Thành viên"
+                      : section === "submissions"
+                        ? "Bài nộp"
+                        : "Trao đổi",
+                  content: (
+                    <div className="group-products-panel">
+                      {section === "discussion" && (
+                        <p className="info-panel" role="status">
+                          {detail.discussionOpen
+                            ? "Xem bài nộp và gửi câu hỏi cho các nhóm."
+                            : detail.canDiscuss
+                              ? "Phản biện mở khi đã gia hạn ít nhất một lần và hết hạn nộp mới."
+                              : "Trao đổi chưa khả dụng. Vui lòng thử lại sau."}
+                        </p>
+                      )}
+                      <SectionTitle
+                        title={
+                          teacher || detail.discussionOpen
+                            ? `Danh sách ${detail.groupCount} nhóm`
+                            : "Nhóm của bạn"
+                        }
+                      />
+                      {teacher && section !== "members" && (
+                        <div
+                          className="group-tabs"
+                          aria-label={`Lọc nhóm · ${section === "submissions" ? "Bài nộp" : "Trao đổi"}`}
+                        >
+                          {[
+                            ["all", `Tất cả (${detail.groups.length})`],
+                            [
+                              "pending",
+                              `Chưa nộp (${detail.groups.length - submitted})`,
+                            ],
+                            ["submitted", `Đã nộp (${submitted})`],
+                          ].map(([value, label]) => (
+                            <button
+                              key={value}
+                              type="button"
+                              aria-pressed={groupFilter === value}
+                              className={groupFilter === value ? "active" : ""}
+                              onClick={() => setGroupFilter(value)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {!detail.groups.length && (
+                        <Empty
+                          title="Bạn chưa được phân nhóm"
+                          text="Liên hệ giáo viên nếu bạn vào lớp sau khi chia nhóm."
+                        />
+                      )}
+                      <div className="group-roster-grid">
+                        {(section === "members"
+                          ? detail.groups
+                          : visibleGroups
+                        ).map((group) => (
+                          <section
+                            className={`card ${section === "members" ? "group-member-card" : section === "submissions" ? "group-roster" : "group-discussion-card"} ${group.submissions.length ? "submitted" : "pending"}`}
+                            key={group.id}
+                          >
+                            <div className="group-section-head">
+                              <div>
+                                <h3>
+                                  Nhóm {group.number}
+                                  {group.id === ownGroup?.id &&
+                                    " · Nhóm của bạn"}
+                                </h3>
+                                <small>
+                                  {
+                                    group.members.filter(
+                                      (member) => member.active,
+                                    ).length
+                                  }{" "}
+                                  thành viên
+                                </small>
+                              </div>
+                              <span
+                                className={`group-status ${group.submissions.length ? "done" : "pending"}`}
+                              >
+                                {group.submissions.length
+                                  ? "Đã nộp bài"
+                                  : "Chưa nộp bài"}
+                              </span>
+                            </div>
+                            {section === "members" ? (
+                              <>
+                                <ul className="group-members">
+                                  {representativeFirst(group).map((member) => (
+                                    <li key={member.id}>
+                                      <Avatar
+                                        name={member.name}
+                                        avatarId={
+                                          member.id === user.id
+                                            ? user.avatarId
+                                            : member.avatarId
+                                        }
+                                        className="group-member-avatar"
+                                      />
+                                      <span>
+                                        {member.name}
+                                        {!member.active && " · Đã rời lớp"}
+                                      </span>
+                                      {member.id === group.representativeId && (
+                                        <small>Đại diện</small>
+                                      )}
+                                    </li>
+                                  ))}
+                                </ul>
+
+                                {teacher && (
+                                  <Representative
+                                    key={group.representativeId}
+                                    activity={detail}
+                                    group={group}
+                                    onUpdate={() =>
+                                      updated("Đã cập nhật đại diện nhóm.")
+                                    }
+                                  />
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                {section === "submissions" && !teacher && (
+                                  <>
+                                    {group.id === ownGroup?.id &&
+                                    group.members.some(
+                                      (member) =>
+                                        member.id === user.id && member.active,
+                                    ) ? (
+                                      now < detail.deadlineAt ? (
+                                        detail.memberSubmissions ||
+                                        group.representativeId === user.id ? (
+                                          <SubmissionForm
+                                            activity={detail}
+                                            group={group}
+                                            onUpdate={() =>
+                                              updated(
+                                                "Đã nhận bài nộp của nhóm.",
+                                              )
+                                            }
+                                            onRefresh={() =>
+                                              refresh(selected, true)
+                                            }
+                                          />
+                                        ) : (
+                                          <p
+                                            className="subtle-note"
+                                            role="status"
+                                          >
+                                            Hiện tại chỉ đại diện nộp được.
+                                            Quyền nộp cho tất cả thành viên đang
+                                            chờ cập nhật hệ thống.
+                                          </p>
+                                        )
+                                      ) : (
+                                        <p
+                                          className="subtle-note"
+                                          role="status"
+                                        >
+                                          Đã hết hạn nộp bài. Giáo viên cần gia
+                                          hạn để nhóm nộp thêm.
+                                        </p>
+                                      )
+                                    ) : null}
+                                  </>
+                                )}
+                                <h4 className="group-products-title">
+                                  Sản phẩm đã nộp{" "}
+                                  <span>{group.submissions.length}</span>
+                                </h4>
+                                {!group.submissions.length && (
+                                  <div className="group-no-product">
+                                    <FileText size={22} />
+                                    <p>Chưa có sản phẩm.</p>
+                                    <small>
+                                      File hoặc link sẽ xuất hiện tại đây khi
+                                      nhóm nộp bài.
+                                    </small>
+                                  </div>
+                                )}
+                                {group.submissions.map((submission, index) => (
+                                  <article
+                                    className="group-submission"
+                                    key={submission.id}
+                                  >
+                                    <strong>
+                                      Lần {submission.version}
+                                      {index === 0 && " · Mới nhất"}
+                                    </strong>
+                                    <p>
+                                      <small>
+                                        {submission.submittedBy} ·{" "}
+                                        {date(submission.submittedAt)}
+                                      </small>
+                                    </p>
+                                    {submission.file && (
+                                      <FileLink file={submission.file} />
+                                    )}
+                                    {submission.link && (
+                                      <a
+                                        className="group-product-link"
+                                        href={submission.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        Mở sản phẩm: {submission.link}
+                                      </a>
+                                    )}
+                                    {submission.note && (
+                                      <p className="group-instructions">
+                                        {submission.note}
+                                      </p>
+                                    )}
+                                  </article>
+                                ))}
+
+                                {section === "discussion" &&
+                                  detail.discussionOpen &&
+                                  group.submissions.length > 0 && (
+                                    <GroupDiscussion
+                                      activity={detail}
+                                      group={group}
+                                      user={user}
+                                    />
+                                  )}
+                              </>
+                            )}
+                          </section>
+                        ))}
+                        {section !== "members" &&
+                          !!detail.groups.length &&
+                          !visibleGroups.length && (
+                            <Empty
+                              title="Không có nhóm ở trạng thái này"
+                              text="Chọn bộ lọc khác để xem các nhóm."
+                            />
+                          )}
+                      </div>
+                    </div>
+                  ),
+                }),
+              ),
+            ]}
+          />
         </>
       )}
       {creating && (

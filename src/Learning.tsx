@@ -371,16 +371,6 @@ export function Learning({
                 : "Kiểm tra online"
               : "Ôn tập & kiểm tra"}
           </h1>
-          <span className="eyebrow">HỌC VỮNG · THI TỰ TIN</span>
-          <p>
-            {onlinePage
-              ? teacher
-                ? "Chuẩn bị đề, thông báo cho lớp và theo dõi các lượt thi."
-                : "Theo dõi buổi thi sắp bắt đầu, vào làm bài và xem kết quả của bạn."
-              : teacher
-                ? "Thiết lập ma trận, lịch thi và ghi nhận nỗ lực của học sinh."
-                : "Theo dõi điều kiện từng chương, tiếp tục ôn tập và làm bài kiểm tra."}
-          </p>
         </div>
         {teacher && onlinePage && (
           <button
@@ -415,10 +405,7 @@ export function Learning({
           dismissible={!busy}
           onClose={dismissCreatedOnlineExam}
         >
-          <p>
-            Bạn đã tạo bài kiểm tra thành công và lưu vào danh sách. Có thể bắt
-            đầu bất cứ lúc nào ở trong danh sách.
-          </p>
+          <p>Đã lưu bài kiểm tra. Bạn có thể bắt đầu ngay hoặc để sau.</p>
           {createdExamError && (
             <p className="error-banner" role="alert">
               {createdExamError}
@@ -439,7 +426,7 @@ export function Learning({
               disabled={busy}
               onClick={dismissCreatedOnlineExam}
             >
-              Đã hiểu
+              Để sau
             </button>
           </div>
         </Modal>
@@ -455,9 +442,8 @@ export function Learning({
                 Săn thưởng
               </h2>
               <p>
-                Đạt cấp độ yêu cầu và có vé Săn thưởng để bắt đầu khi giáo viên
-                mở kiểm tra. Bài thi dài 20 phút; thời gian thi không cộng vào
-                cây.
+                Cần đủ cấp độ và vé để tham gia. Thời gian làm bài hiển thị ở
+                từng đề, không tính vào thời gian nuôi cây.
               </p>
               <div className="learning-grid">
                 {data.chapters.map((ch) => {

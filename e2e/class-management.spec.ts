@@ -102,7 +102,7 @@ test("magnifier opens the selected student; common settings persist and practice
   await expect(
     page.getByRole("heading", { name: "Quản lý chung", exact: true }),
   ).toBeVisible();
-  await form.getByLabel("Nhắc khi không tương tác (giây)").fill("20");
+  await form.getByLabel("Nhắc nhở khi không tương tác (giây)").fill("20");
   await form.getByRole("button", { name: "Lưu thay đổi", exact: true }).click();
   await expect(page.locator(".toast[role=status]")).toContainText(
     "Đã lưu cài đặt chung",
@@ -140,7 +140,7 @@ test("magnifier opens the selected student; common settings persist and practice
   await page.reload();
   await page.getByLabel("Chọn lớp học").selectOption("management-class");
   await navigateTo(page, { name: "Quản lý lớp", exact: true });
-  await expect(form.getByLabel("Nhắc khi không tương tác (giây)")).toHaveValue(
+  await expect(form.getByLabel("Nhắc nhở khi không tương tác (giây)")).toHaveValue(
     "20",
   );
   await expect(

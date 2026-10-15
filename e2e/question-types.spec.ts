@@ -497,7 +497,7 @@ test("leaving study or becoming idle ends only the study session and shows an in
     page.getByRole("dialog", { name: "Phiên học đã kết thúc" }),
   ).toContainText("giới hạn rời tab");
   await expect(
-    page.getByRole("heading", { name: /hôm nay mình học gì/ }),
+    page.getByRole("heading", { name: "Khu vườn của tôi", level: 1 }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Đăng xuất", exact: true }),
@@ -533,7 +533,7 @@ test("leaving study or becoming idle ends only the study session and shows an in
     page.getByRole("dialog", { name: "Phiên học đã kết thúc" }),
   ).toContainText("không tương tác");
   await expect(
-    page.getByRole("heading", { name: /hôm nay mình học gì/ }),
+    page.getByRole("heading", { name: "Khu vườn của tôi", level: 1 }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Đăng nhập", exact: true }),
@@ -545,7 +545,7 @@ test("leaving study or becoming idle ends only the study session and shows an in
     .click();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: /hôm nay mình học gì/ }),
+    page.getByRole("heading", { name: "Khu vườn của tôi", level: 1 }),
   ).toBeVisible();
   await navigateTo(page, { name: "Luyện tập", exact: true });
   await page

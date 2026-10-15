@@ -82,7 +82,7 @@ test("successful creation shows the exact popup; understood keeps the exam unsta
     popup.getByRole("button", { name: "Bắt đầu ngay", exact: true }),
   ).toBeEnabled();
   await expect(
-    popup.getByRole("button", { name: "Đã hiểu", exact: true }),
+    popup.getByRole("button", { name: "Để sau", exact: true }),
   ).toBeEnabled();
   await popup.screenshot({ path: info.outputPath("online-created-popup.png") });
   for (const width of [320, 390, 768, 1440]) {
@@ -161,7 +161,7 @@ test("start now retries safely, locks both choices while pending, and starts onl
     popup.getByRole("button", { name: "Đang bắt đầu…", exact: true }),
   ).toBeDisabled();
   await expect(
-    popup.getByRole("button", { name: "Đã hiểu", exact: true }),
+    popup.getByRole("button", { name: "Để sau", exact: true }),
   ).toBeDisabled();
   await page.keyboard.press("Escape");
   await expect(popup).toBeVisible();

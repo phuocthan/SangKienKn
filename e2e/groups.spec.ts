@@ -96,9 +96,11 @@ test("older server keeps representative first and blocks unsupported member subm
     .locator(".group-activity-card")
     .filter({ hasText: activity.title })
     .click();
+  await page.getByRole("tab", { name: "Thành viên", exact: true }).click();
   await expect(page.locator(".group-members li").first()).toContainText(
     group.members.find((entry) => entry.id === group.representativeId)!.name,
   );
+  await page.getByRole("tab", { name: "Bài nộp", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Nộp bài nhóm", exact: true }),
   ).toHaveCount(0);
@@ -186,9 +188,10 @@ test("teacher changes representative to first; another member uploads and retrie
   const activity: GroupActivity = await response.json();
   const group = activity.groups.find((g) => g.members.length === 2)!;
   const nextId = group.members.find((m) => m.id !== group.representativeId)!.id;
+  await page.getByRole("tab", { name: "Thành viên", exact: true }).click();
   await page.getByLabel(`Đại diện · Nhóm ${group.number}`).selectOption(nextId);
   await page
-    .locator(".group-roster")
+    .locator(".group-member-card")
     .filter({
       has: page.getByRole("heading", {
         name: `Nhóm ${group.number}`,
@@ -201,7 +204,7 @@ test("teacher changes representative to first; another member uploads and retrie
   const representativeName = group.members.find(
     (member) => member.id === nextId,
   )!.name;
-  const teacherGroup = page.locator(".group-roster").filter({
+  const teacherGroup = page.locator(".group-member-card").filter({
     has: page.getByRole("heading", {
       name: `Nhóm ${group.number}`,
       exact: true,
@@ -223,9 +226,11 @@ test("teacher changes representative to first; another member uploads and retrie
       .filter({ hasText: "Thiết kế năng lượng xanh" })
       .click();
     await expect(student.locator(".group-roster")).toHaveCount(1);
+    await student.getByRole("tab", { name: "Thành viên", exact: true }).click();
     await expect(student.locator(".group-members li").first()).toContainText(
       representativeName,
     );
+    await student.getByRole("tab", { name: "Bài nộp", exact: true }).click();
     await expect(
       student.getByRole("button", { name: "Nộp bài nhóm" }),
     ).toBeVisible();
@@ -249,21 +254,21 @@ test("teacher changes representative to first; another member uploads and retrie
       { times: 1 },
     );
     await student.getByRole("button", { name: "Nộp bài nhóm" }).click();
-    await expect(student.locator(".group-submission")).toHaveCount(1);
+    await expect(student.locator(".group-roster .group-submission")).toHaveCount(1);
     await expect(
       student.locator(".group-submit-form").getByRole("alert"),
     ).toBeVisible();
     await student.getByRole("button", { name: "Nộp bài nhóm" }).click();
     await expect(student.getByText("Đã nhận bài nộp của nhóm.")).toBeVisible();
-    await expect(student.locator(".group-submission")).toHaveCount(1);
+    await expect(student.locator(".group-roster .group-submission")).toHaveCount(1);
     await student.getByLabel("Hình thức nộp").selectOption("link");
     await student
       .getByLabel("Link sản phẩm")
       .fill("https://www.canva.com/design/greenedu-demo/view");
     await student.getByLabel("Ghi chú").fill("Bản Canva hoàn thiện");
     await student.getByRole("button", { name: "Nộp bài nhóm" }).click();
-    await expect(student.locator(".group-submission")).toHaveCount(2);
-    await expect(student.locator(".group-submission").first()).toContainText(
+    await expect(student.locator(".group-roster .group-submission")).toHaveCount(2);
+    await expect(student.locator(".group-roster .group-submission").first()).toContainText(
       "Lần 2 · Mới nhất",
     );
     await expect(
@@ -272,10 +277,12 @@ test("teacher changes representative to first; another member uploads and retrie
     await student.reload();
     await openGroups(student);
     await student.locator(".group-activity-card").click();
-    await expect(student.locator(".group-submission")).toHaveCount(2);
+    await student.getByRole("tab", { name: "Bài nộp", exact: true }).click();
+    await expect(student.locator(".group-roster .group-submission")).toHaveCount(2);
     await page.bringToFront();
     await page.evaluate(() => window.dispatchEvent(new Event("focus")));
-    await expect(page.locator(".group-submission")).toHaveCount(2);
+    await expect(page.locator(".group-roster .group-submission")).toHaveCount(2);
+    await page.getByRole("tab", { name: "Bài nộp", exact: true }).click();
     const downloadEvent = page.waitForEvent("download");
     await page.getByRole("link", { name: /Mô hình xanh.pdf/ }).click();
     const file = await downloadEvent;
@@ -336,11 +343,13 @@ test("expired activity hides student submission despite wrong device clock; teac
     await studentLogin(student, email);
     await openGroups(student);
     await student.locator(".group-activity-card").click();
+    await student.getByRole("tab", { name: "Bài nộp", exact: true }).click();
     await expect(
       student.getByText(
         "Đã hết hạn nộp bài. Giáo viên cần gia hạn để nhóm nộp thêm.",
       ),
     ).toBeVisible();
+    await student.getByRole("tab", { name: "Bài nộp", exact: true }).click();
     await expect(
       student.getByRole("button", { name: "Nộp bài nhóm" }),
     ).toHaveCount(0);
@@ -355,6 +364,7 @@ test("expired activity hides student submission despite wrong device clock; teac
     );
     await student.bringToFront();
     await student.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await student.getByRole("tab", { name: "Bài nộp", exact: true }).click();
     await expect(
       student.getByRole("button", { name: "Nộp bài nhóm" }),
     ).toBeVisible();
@@ -363,7 +373,7 @@ test("expired activity hides student submission despite wrong device clock; teac
       .getByLabel("Link sản phẩm")
       .fill("https://www.canva.com/design/extended/view");
     await student.getByRole("button", { name: "Nộp bài nhóm" }).click();
-    await expect(student.locator(".group-submission")).toHaveCount(1);
+    await expect(student.locator(".group-roster .group-submission")).toHaveCount(1);
     const response = await page.request.get(
       `/api/group-activities/${activity.id}`,
     );

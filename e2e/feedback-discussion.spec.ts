@@ -211,7 +211,8 @@ test("students read other groups after the extended deadline and the responsible
     await peer.bringToFront();
     await peer.evaluate(() => window.dispatchEvent(new Event("focus")));
     await expect(peer.locator(".group-roster")).toHaveCount(2);
-    const card = peer.locator(".group-roster").filter({
+    await peer.getByRole("tab", { name: "Trao đổi", exact: true }).click();
+    const card = peer.locator(".group-discussion-card").filter({
       has: peer.getByRole("heading", {
         name: `Nhóm ${target.number}`,
         exact: true,
@@ -237,8 +238,9 @@ test("students read other groups after the extended deadline and the responsible
       .locator(".group-activity-card")
       .filter({ hasText: title })
       .click();
+    await owner.getByRole("tab", { name: "Trao đổi", exact: true }).click();
     const ownerCard = owner
-      .locator(".group-roster")
+      .locator(".group-discussion-card")
       .filter({ hasText: "Nhóm của bạn" });
     await ownerCard
       .getByRole("button", { name: "Trao đổi & phản biện" })

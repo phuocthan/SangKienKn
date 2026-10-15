@@ -2,6 +2,10 @@
 
 Cập nhật 15/10/2026 theo yêu cầu mới. Các quy tắc dưới thay mô tả cũ “mở/khóa kiểm tra chương” và “rời tab một lần là kết thúc luyện tập”. Mã/test trong checkout không đồng nghĩa backend Railway đã phát hành.
 
+## Giao diện quản lý — 15/10/2026
+
+Ba nút **Học sinh / Chương học / Cài đặt chung** ở đầu Quản lý lớp di chuyển và focus đúng khu vực, không xóa bản nháp. Cài phiên học chia hai cặp **Rời tab · lần** và **Không tương tác · giây**, mỗi cặp Nhắc nhở/Tự đóng; nhãn đầy đủ cho trình đọc màn hình. Giữ min/max, điều kiện ngưỡng nhắc nhỏ hơn ngưỡng đóng và quyền lưu ở phần nghiệp vụ bên dưới.
+
 ## Thống kê học sinh
 
 Trong Quản lý học sinh, kính lúp ở ô thời gian mở hộp thống kê với đúng học sinh đã chọn. Dùng lại thống kê ngày/tuần/tháng, CSV và API cá nhân hiện có. Nút Thống kê chung vẫn mở toàn lớp, bộ chọn vẫn có toàn bộ roster, không phụ thuộc tìm kiếm. Giữ quyền giáo viên sở hữu lớp.

@@ -1,9 +1,11 @@
+import { HomeTasks } from "./HomeTasks";
 import { StudentNotebook } from "./StudentNotebook";
 import { useStudentActivity } from "./useStudentActivity";
 import { StudentStudyStatistics } from "./StudentStudyStatistics";
 import { ChapterSort } from "./ChapterSort";
 import { ChapterDelete } from "./ChapterDelete";
 import {
+  lazy,
   useCallback,
   useEffect,
   useState,
@@ -51,16 +53,13 @@ import {
   LinkButton,
   Logo,
   Modal,
-  Motto,
   SectionTitle,
   SkipLink,
 } from "./components";
 import { Practice } from "./Practice";
 import { Lessons } from "./Lessons";
-import { Learning } from "./Learning";
 import { ExamNotices } from "./ExamNotices";
 import { ClassCommunity } from "./ClassCommunity";
-import { GroupActivities } from "./GroupActivities";
 import { Feedback } from "./Feedback";
 import { AdminWorkspace } from "./Accounts";
 import { PortraitActions } from "./PortraitActions";
@@ -92,7 +91,6 @@ import {
   WorkspaceFrame,
   WorkspaceHeadingSlot,
 } from "./WorkspaceHeading";
-import { QuestionBank } from "./QuestionBank";
 import { QuestionFields, readQuestionForm } from "./QuestionFields";
 import type {
   Chapter,
@@ -104,6 +102,18 @@ import type {
 } from "./types";
 import { WorkspaceContent, type WorkspaceTab } from "./WorkspaceTabs";
 import { loginEmail } from "../shared/login-email";
+
+const Learning = lazy(() =>
+  import("./Learning").then((module) => ({ default: module.Learning })),
+);
+const GroupActivities = lazy(() =>
+  import("./GroupActivities").then((module) => ({
+    default: module.GroupActivities,
+  })),
+);
+const QuestionBank = lazy(() =>
+  import("./QuestionBank").then((module) => ({ default: module.QuestionBank })),
+);
 
 type Page =
   | "home"
@@ -516,8 +526,7 @@ export default function App() {
       <div className="password-screen">
         <Logo />
         <div className="card">
-          <span className="eyebrow">BẢO VỆ TÀI KHOẢN CỦA BẠN</span>
-          <h1>Đặt mật khẩu của riêng bạn</h1>
+          <h1>Đổi mật khẩu tạm</h1>
           <p>Đổi mật khẩu tạm được cung cấp trước khi sử dụng GreenEdu.</p>
           <PasswordForm onUpdate={setUser} />
           <button className="text-button" onClick={() => void logout()}>
@@ -778,11 +787,7 @@ export default function App() {
             />
           ) : page === "settings" ? (
             <>
-              <PageHeading
-                eyebrow="GÓC RIÊNG CỦA BẠN"
-                title="Tài khoản & bảo mật"
-                text="Giữ tài khoản an toàn để hành trình học tập luôn được lưu lại."
-              />
+              <PageHeading title="Tài khoản & bảo mật" />
               <div className="card settings-card">
                 <h2>Thông tin tài khoản</h2>
                 <div className="account-info">
@@ -836,11 +841,7 @@ export default function App() {
             <div className="loading-panel">Đang tải lớp học…</div>
           ) : !current ? (
             <>
-              <PageHeading
-                eyebrow="CHÀO MỪNG ĐẾN GREENEDU"
-                title={`Xin chào, ${user.name}!`}
-                text="Một hành trình mới đang chờ bạn."
-              />
+              <PageHeading title={`Xin chào, ${user.name}!`} />
               <Empty
                 title={
                   isTeacher
@@ -881,35 +882,30 @@ export default function App() {
                   />
                 ) : (
                   <div className="student-home">
-                    <PageHeading
-                      motto
-                      eyebrow="HỌC MỘT CHÚT · LỚN MỘT CHÚT"
-                      title={`Chào ${user.name.split(" ").slice(-2).join(" ")}, hôm nay mình học gì?`}
-                      text="Khu vườn lớn lên từ cố gắng của bạn."
+                    <PageHeading title="Khu vườn của tôi" />
+                    <HomeTasks
+                      key={current.id}
+                      classroom={current}
+                      teacher={false}
+                      onNavigate={navigate}
                     />
                     <div className="garden-welcome-grid">
                       <div className="garden-hero student-welcome-hero">
                         <div className="hero-copy">
-                          <span className="pill hero-pill">
-                            <Leaf size={14} />
-                            KHU VƯỜN KIẾN THỨC
-                          </span>
-                          <h2>
-                            <Motto>
-                              Gieo nỗ lực hôm nay, đón tri thức ngày mai.
-                            </Motto>
-                          </h2>
+                          <h2>Tiếp tục học</h2>
                           <p>
                             {totalSeconds
-                              ? `Bạn đã học ${duration(totalSeconds)} ở môn ${current.subject}. Tiếp tục chăm vườn nhé.`
-                              : "Khu vườn chờ hạt mầm đầu tiên. Bắt đầu luyện tập để tiến bộ mỗi ngày."}
+                              ? `${duration(totalSeconds)} đã học · ${current.subject}`
+                              : "Chọn một chương để bắt đầu."}
                           </p>
                           <div className="garden-hero-actions">
                             <button
                               className="button primary"
                               onClick={() => navigate("practice")}
                             >
-                              Tiếp tục luyện tập
+                              {totalSeconds
+                                ? "Tiếp tục luyện tập"
+                                : "Bắt đầu luyện tập"}
                               <ArrowRight size={18} />
                             </button>
                             <button
@@ -990,12 +986,7 @@ export default function App() {
               )}
               {page === "practice" && (
                 <>
-                  <PageHeading
-                    motto
-                    eyebrow="CHĂM CÂY BẰNG KIẾN THỨC"
-                    title="Hôm nay bạn muốn học gì?"
-                    text="Chọn chương, luyện tập theo nhịp của bạn."
-                  />
+                  <PageHeading title="Luyện tập" />
                   <ChapterGrid
                     classroom={current}
                     onStudy={(ch, lesson) =>
@@ -1016,10 +1007,7 @@ export default function App() {
               {page === "classes" && (
                 <>
                   <PageHeading
-                    motto
-                    eyebrow="CÙNG NHAU GIEO TRI THỨC"
                     title="Lớp học của tôi"
-                    text="Theo dõi học sinh, cùng chăm vườn lớp."
                     action={
                       <button
                         className="button primary"
@@ -1044,37 +1032,65 @@ export default function App() {
               )}
               {page === "class-settings" && (
                 <>
-                  <PageHeading
-                    eyebrow="QUẢN LÝ LỚP"
-                    title="Quản lý lớp"
-                    text={`Tổ chức chương học và điều chỉnh nhịp tăng cấp cho ${current.name}.`}
-                  />
-                  {classLearningError && (
-                    <div className="error-banner" role="alert">
-                      {classLearningError}
-                    </div>
-                  )}
-                  {classLearning ? (
-                    <ClassLevelSettings
-                      key={`${current.id}-${classLearning.levelMinutes ?? 60}-${JSON.stringify(classLearning.sessionPolicy)}`}
-                      minutes={classLearning.levelMinutes ?? 60}
-                      enabled={classLearning.canConfigureLevels === true}
-                      busy={classLearningBusy}
-                      policy={classLearning.sessionPolicy}
-                      canConfigurePolicy={
-                        classLearning.classManagement === true
-                      }
-                      onSave={(minutes, policy) =>
-                        updateClassLearning(
-                          `/classrooms/${current.id}/${classLearning.classManagement ? "general-settings" : "level-settings"}`,
-                          { minutes, policy },
-                          "Đã lưu cài đặt chung cho lớp.",
-                        )
-                      }
-                    />
-                  ) : !classLearningError ? (
-                    <div className="loading-panel">Đang tải cài đặt lớp…</div>
-                  ) : null}
+                  <PageHeading title="Quản lý lớp" />
+                  <div
+                    className="class-section-links"
+                    role="group"
+                    aria-label="Nội dung quản lý lớp"
+                  >
+                    {[
+                      ["class-students", "Học sinh"],
+                      ["class-chapters", "Chương học"],
+                      ["class-general", "Cài đặt chung"],
+                    ].map(([id, label]) => (
+                      <button
+                        className="button outline small"
+                        key={id}
+                        onClick={() => {
+                          const section = document.getElementById(id);
+                          section?.focus({ preventScroll: true });
+                          section?.scrollIntoView({
+                            block: "start",
+                            behavior: "auto",
+                          });
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <section
+                    id="class-general"
+                    tabIndex={-1}
+                    aria-label="Cài đặt chung"
+                  >
+                    {classLearningError && (
+                      <div className="error-banner" role="alert">
+                        {classLearningError}
+                      </div>
+                    )}
+                    {classLearning ? (
+                      <ClassLevelSettings
+                        key={`${current.id}-${classLearning.levelMinutes ?? 60}-${JSON.stringify(classLearning.sessionPolicy)}`}
+                        minutes={classLearning.levelMinutes ?? 60}
+                        enabled={classLearning.canConfigureLevels === true}
+                        busy={classLearningBusy}
+                        policy={classLearning.sessionPolicy}
+                        canConfigurePolicy={
+                          classLearning.classManagement === true
+                        }
+                        onSave={(minutes, policy) =>
+                          updateClassLearning(
+                            `/classrooms/${current.id}/${classLearning.classManagement ? "general-settings" : "level-settings"}`,
+                            { minutes, policy },
+                            "Đã lưu cài đặt chung cho lớp.",
+                          )
+                        }
+                      />
+                    ) : !classLearningError ? (
+                      <div className="loading-panel">Đang tải cài đặt lớp…</div>
+                    ) : null}
+                  </section>
                   {huntChapter &&
                     classLearning?.chapters.some((c) => c.id === huntChapter) &&
                     current.chapters.some((c) => c.id === huntChapter) && (
@@ -1097,189 +1113,201 @@ export default function App() {
                         }}
                       />
                     )}
-                  <SectionTitle
-                    title="Quản lý chương"
-                    action={
-                      <div className="button-group">
-                        <button
-                          className="button outline small"
-                          disabled={
-                            current.chapters.length < 2 ||
-                            !current.chapters.every(
-                              (ch) => ch.canReorderChapter,
-                            )
-                          }
-                          title={
-                            current.chapters.some((ch) => !ch.canReorderChapter)
-                              ? "Đổi thứ tự chương đang chờ cập nhật máy chủ."
-                              : undefined
-                          }
-                          onClick={() => setSortingClassId(current.id)}
-                        >
-                          <ArrowsDownUp size={16} />
-                          Sắp xếp
-                        </button>
-                        <button
-                          className="button outline small"
-                          onClick={() => setEditor("chapter")}
-                        >
-                          <Plus size={16} />
-                          Thêm chương
-                        </button>
-                      </div>
-                    }
-                  />
-                  {sortingClassId === current.id && (
-                    <ChapterSort
-                      key={`sort-${current.id}`}
-                      classroom={current}
-                      onClose={() => setSortingClassId(null)}
-                      onSaved={async () => {
-                        setClasses(await api<Classroom[]>("/classrooms"));
-                        setRevision((value) => value + 1);
-                        setNotice("Đã lưu thứ tự hiển thị chương.");
-                      }}
+                  <section
+                    id="class-chapters"
+                    tabIndex={-1}
+                    aria-label="Chương học"
+                  >
+                    <SectionTitle
+                      title="Quản lý chương"
+                      action={
+                        <div className="button-group">
+                          <button
+                            className="button outline small"
+                            disabled={
+                              current.chapters.length < 2 ||
+                              !current.chapters.every(
+                                (ch) => ch.canReorderChapter,
+                              )
+                            }
+                            title={
+                              current.chapters.some(
+                                (ch) => !ch.canReorderChapter,
+                              )
+                                ? "Đổi thứ tự chương đang chờ cập nhật máy chủ."
+                                : undefined
+                            }
+                            onClick={() => setSortingClassId(current.id)}
+                          >
+                            <ArrowsDownUp size={16} />
+                            Sắp xếp
+                          </button>
+                          <button
+                            className="button outline small"
+                            onClick={() => setEditor("chapter")}
+                          >
+                            <Plus size={16} />
+                            Thêm chương
+                          </button>
+                        </div>
+                      }
                     />
-                  )}
-                  <div className="chapter-list">
-                    {current.chapters.length > 0 &&
-                      !current.chapters[0].canReorderChapter && (
-                        <p className="form-intro">
-                          Đổi thứ tự chương đang chờ cập nhật máy chủ.
-                        </p>
-                      )}
-                    {current.chapters.length ? (
-                      current.chapters.map((ch) => {
-                        const access = classLearning?.chapters.find(
-                          (row) => row.id === ch.id,
-                        );
-                        return (
-                          <div className="card chapter-row" key={ch.id}>
-                            <div className="chapter-row-main">
-                              <div className="chapter-row-copy">
-                                <div className="chapter-title-row">
-                                  <ChapterDelete
-                                    compact
-                                    chapter={ch}
-                                    onChange={async () => {
-                                      await reload();
-                                      setRevision((value) => value + 1);
-                                      setNotice(
-                                        "Đã xóa chương khỏi danh sách đang dùng.",
-                                      );
-                                    }}
-                                  />
-                                  <h3>{ch.title}</h3>
-                                </div>
-                                <p className="chapter-counts">
-                                  <span className="chapter-count lessons">
-                                    <strong>{ch.lessons.length}</strong> bài
-                                  </span>
-                                  <span className="chapter-count questions">
-                                    <strong>{ch.questionCount}</strong> câu hỏi
-                                  </span>
-                                </p>
-                              </div>
-                              <Lessons
-                                chapter={ch}
-                                onChange={async () => {
-                                  await reload();
-                                  setRevision((value) => value + 1);
-                                }}
-                              />
-                            </div>
-                            <div className="chapter-row-actions">
-                              <LinkButton
-                                onClick={() => {
-                                  setQuestionChapter(ch.id);
-                                  navigate("questions");
-                                }}
-                              >
-                                Quản lý câu hỏi
-                              </LinkButton>
-                            </div>
-                            <div className="class-chapter-access">
-                              <span
-                                className={`chapter-exam-status ${access?.practiceAllowed ? "open" : "locked"}`}
-                              >
-                                {access?.practiceAllowed
-                                  ? "Luyện tập đang mở"
-                                  : "Luyện tập đang khóa"}
-                              </span>
-                              <button
-                                className={`button ${access?.practiceAllowed ? "danger" : "primary"} small`}
-                                disabled={
-                                  classLearningBusy ||
-                                  !classLearning?.classManagement
-                                }
-                                aria-label={`${access?.practiceAllowed ? "Khóa" : "Mở"} luyện tập · ${ch.title}`}
-                                onClick={() =>
-                                  void updateClassLearning(
-                                    `/chapters/${ch.id}/practice-access`,
-                                    { enabled: !access?.practiceAllowed },
-                                    access?.practiceAllowed
-                                      ? "Đã khóa luyện tập chương."
-                                      : "Đã mở luyện tập chương.",
-                                  )
-                                }
-                              >
-                                {access?.practiceAllowed
-                                  ? "Khóa luyện tập"
-                                  : "Mở luyện tập"}
-                              </button>
-                              <span
-                                className={`chapter-exam-status ${(access?.hunt?.open ?? access?.examAllowed) ? "open" : "locked"}`}
-                              >
-                                {(access?.hunt?.open ?? access?.examAllowed)
-                                  ? "Săn thưởng đang mở"
-                                  : "Săn thưởng đang khóa"}
-                              </span>
-                              <button
-                                className={`button ${(access?.hunt?.open ?? access?.examAllowed) ? "danger" : "primary"} small`}
-                                disabled={
-                                  !classLearning?.classManagement ||
-                                  classLearningBusy
-                                }
-                                aria-label={`${(access?.hunt?.open ?? access?.examAllowed) ? "Khóa" : "Mở"} săn thưởng · ${ch.title}`}
-                                onClick={() => setHuntChapter(ch.id)}
-                              >
-                                {(access?.hunt?.open ?? access?.examAllowed)
-                                  ? "Khóa săn thưởng"
-                                  : "Mở săn thưởng"}
-                              </button>
-                              {!classLearning?.classManagement && (
-                                <small>
-                                  Quyền luyện tập/săn thưởng đang chờ cập nhật
-                                  máy chủ.
-                                </small>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <Empty
-                        title="Thêm chương học đầu tiên"
-                        text="Chia nội dung thành các chương để tổ chức câu hỏi và theo dõi tiến độ."
+                    {sortingClassId === current.id && (
+                      <ChapterSort
+                        key={`sort-${current.id}`}
+                        classroom={current}
+                        onClose={() => setSortingClassId(null)}
+                        onSaved={async () => {
+                          setClasses(await api<Classroom[]>("/classrooms"));
+                          setRevision((value) => value + 1);
+                          setNotice("Đã lưu thứ tự hiển thị chương.");
+                        }}
                       />
                     )}
-                  </div>
-                  <Roster
-                    key={current.id}
-                    classroom={current}
-                    revision={revision}
-                    onAdd={() => setEditor("student")}
-                    onReset={(s) => setEditor({ student: s })}
-                  />
+                    <div className="chapter-list">
+                      {current.chapters.length > 0 &&
+                        !current.chapters[0].canReorderChapter && (
+                          <p className="form-intro">
+                            Đổi thứ tự chương đang chờ cập nhật máy chủ.
+                          </p>
+                        )}
+                      {current.chapters.length ? (
+                        current.chapters.map((ch) => {
+                          const access = classLearning?.chapters.find(
+                            (row) => row.id === ch.id,
+                          );
+                          return (
+                            <div className="card chapter-row" key={ch.id}>
+                              <div className="chapter-row-main">
+                                <div className="chapter-row-copy">
+                                  <div className="chapter-title-row">
+                                    <ChapterDelete
+                                      compact
+                                      chapter={ch}
+                                      onChange={async () => {
+                                        await reload();
+                                        setRevision((value) => value + 1);
+                                        setNotice(
+                                          "Đã xóa chương khỏi danh sách đang dùng.",
+                                        );
+                                      }}
+                                    />
+                                    <h3>{ch.title}</h3>
+                                  </div>
+                                  <p className="chapter-counts">
+                                    <span className="chapter-count lessons">
+                                      <strong>{ch.lessons.length}</strong> bài
+                                    </span>
+                                    <span className="chapter-count questions">
+                                      <strong>{ch.questionCount}</strong> câu
+                                      hỏi
+                                    </span>
+                                  </p>
+                                  <div className="chapter-row-actions">
+                                    <LinkButton
+                                      onClick={() => {
+                                        setQuestionChapter(ch.id);
+                                        navigate("questions");
+                                      }}
+                                    >
+                                      Quản lý câu hỏi
+                                    </LinkButton>
+                                  </div>
+                                </div>
+                                <Lessons
+                                  chapter={ch}
+                                  onChange={async () => {
+                                    await reload();
+                                    setRevision((value) => value + 1);
+                                  }}
+                                />
+                              </div>
+                              <div className="class-chapter-access">
+                                <span
+                                  className={`chapter-exam-status ${access?.practiceAllowed ? "open" : "locked"}`}
+                                >
+                                  {access?.practiceAllowed
+                                    ? "Luyện tập đang mở"
+                                    : "Luyện tập đang khóa"}
+                                </span>
+                                <button
+                                  className={`button ${access?.practiceAllowed ? "danger" : "primary"} small`}
+                                  disabled={
+                                    classLearningBusy ||
+                                    !classLearning?.classManagement
+                                  }
+                                  aria-label={`${access?.practiceAllowed ? "Khóa" : "Mở"} luyện tập · ${ch.title}`}
+                                  onClick={() =>
+                                    void updateClassLearning(
+                                      `/chapters/${ch.id}/practice-access`,
+                                      { enabled: !access?.practiceAllowed },
+                                      access?.practiceAllowed
+                                        ? "Đã khóa luyện tập chương."
+                                        : "Đã mở luyện tập chương.",
+                                    )
+                                  }
+                                >
+                                  {access?.practiceAllowed
+                                    ? "Khóa luyện tập"
+                                    : "Mở luyện tập"}
+                                </button>
+                                <span
+                                  className={`chapter-exam-status ${(access?.hunt?.open ?? access?.examAllowed) ? "open" : "locked"}`}
+                                >
+                                  {(access?.hunt?.open ?? access?.examAllowed)
+                                    ? "Săn thưởng đang mở"
+                                    : "Săn thưởng đang khóa"}
+                                </span>
+                                <button
+                                  className={`button ${(access?.hunt?.open ?? access?.examAllowed) ? "danger" : "primary"} small`}
+                                  disabled={
+                                    !classLearning?.classManagement ||
+                                    classLearningBusy
+                                  }
+                                  aria-label={`${(access?.hunt?.open ?? access?.examAllowed) ? "Khóa" : "Mở"} săn thưởng · ${ch.title}`}
+                                  onClick={() => setHuntChapter(ch.id)}
+                                >
+                                  {(access?.hunt?.open ?? access?.examAllowed)
+                                    ? "Khóa săn thưởng"
+                                    : "Mở săn thưởng"}
+                                </button>
+                                {!classLearning?.classManagement && (
+                                  <small>
+                                    Quyền luyện tập/săn thưởng đang chờ cập nhật
+                                    máy chủ.
+                                  </small>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <Empty
+                          title="Thêm chương học đầu tiên"
+                          text="Chia nội dung thành các chương để tổ chức câu hỏi và theo dõi tiến độ."
+                        />
+                      )}
+                    </div>
+                  </section>
+                  <section
+                    id="class-students"
+                    tabIndex={-1}
+                    aria-label="Quản lý học sinh"
+                  >
+                    <Roster
+                      key={current.id}
+                      classroom={current}
+                      revision={revision}
+                      onAdd={() => setEditor("student")}
+                      onReset={(s) => setEditor({ student: s })}
+                    />
+                  </section>
                 </>
               )}
               {page === "questions" && (
                 <>
                   <PageHeading
-                    motto
-                    eyebrow="NỀN TẢNG CỦA MỖI BÀI HỌC"
                     title="Ngân hàng câu hỏi"
-                    text="Câu hỏi rõ, lời giải tốt giúp học sinh tự học hiệu quả."
                     action={
                       <button
                         className="button primary"
@@ -1476,28 +1504,21 @@ export default function App() {
 }
 
 function PageHeading({
-  eyebrow,
   title,
   text,
   action,
   className = "",
-  motto = false,
 }: {
-  eyebrow: string;
   title: string;
   text?: string;
   action?: ReactNode;
   className?: string;
-  motto?: boolean;
 }) {
   return (
     <WorkspaceHeading className={`page-heading ${className}`}>
       <div>
         <h1>{title}</h1>
-        <span className="eyebrow">
-          {motto ? <Motto>{eyebrow}</Motto> : eyebrow}
-        </span>
-        {text && <p>{motto ? <Motto>{text}</Motto> : text}</p>}
+        {text && <p>{text}</p>}
       </div>
       {action}
     </WorkspaceHeading>
@@ -1568,12 +1589,7 @@ function Login({
       </section>
       <section className="login-form-side">
         <div className="login-form-wrap">
-          <h2>Mở khu vườn của bạn</h2>
-          <span className="pill">
-            <Sprout size={15} />
-            Chào mừng trở lại
-          </span>
-          <p>Đăng nhập để tiếp tục hành trình học tập.</p>
+          <h2>Đăng nhập</h2>
           {notice && (
             <div className="info-panel" role="status">
               {notice}
@@ -1778,7 +1794,7 @@ function Stat({
   icon: ReactNode;
   label: string;
   value: string;
-  note: string;
+  note?: string;
   color?: string;
   children?: ReactNode;
 }) {
@@ -1787,7 +1803,7 @@ function Stat({
       <span className={`stat-icon ${color}`}>{icon}</span>
       <span className="stat-label">{label}</span>
       <strong>{value}</strong>
-      <small>{note}</small>
+      {note && <small>{note}</small>}
       {children}
     </div>
   );
@@ -1830,9 +1846,6 @@ function ChapterGrid({
             data-progress-state={state}
           >
             <div className={`chapter-art art-${i % 3}`}>
-              <span className="garden-chapter-number" aria-hidden="true">
-                {String(i + 1).padStart(2, "0")}
-              </span>
               <span className="pill chapter-level">
                 Cấp {stage.level} · {stage.name}
               </span>
@@ -1966,35 +1979,13 @@ function TeacherHome({
     correct = students.reduce((n, s) => n + s.correct, 0);
   return (
     <div className="teacher-home">
-      <PageHeading
-        motto
-        eyebrow="CÙNG HỌC SINH GIEO NHỮNG MẦM XANH"
-        title="Một lớp học, nhiều cơ hội lớn lên."
+      <PageHeading title="Tổng quan" />
+      <HomeTasks
+        key={classroom.id}
+        classroom={classroom}
+        teacher
+        onNavigate={onPage}
       />
-      <div className="teacher-hero garden-hero">
-        <div className="hero-copy">
-          <span className="pill hero-pill">
-            <Users size={14} />
-            TRANG GIÁO VIÊN
-          </span>
-          <h2>
-            <Motto>
-              Bài học tốt bắt đầu
-              <br />
-              từ sự quan tâm.
-            </Motto>
-          </h2>
-          <p>Chuẩn bị câu hỏi, ghi nhận nỗ lực và giúp học sinh sửa sai.</p>
-          <button
-            className="button primary"
-            onClick={() => onPage("questions")}
-          >
-            Chuẩn bị bài luyện tập
-            <ArrowRight size={18} />
-          </button>
-        </div>
-        <GardenIllustration className="hero-illustration" />
-      </div>
       {error && (
         <div className="error-banner" role="alert">
           {error}
@@ -2012,7 +2003,6 @@ function TeacherHome({
           icon={<Users size={21} />}
           label="Học sinh"
           value={String(classroom.studentCount)}
-          note="Thành viên trong lớp"
         />
         <Stat
           icon={<BookOpen size={21} />}
@@ -2053,22 +2043,19 @@ function TeacherHome({
               ? "Đang tải thống kê…"
               : error
                 ? "Chưa tải được thống kê"
-                : "Nỗ lực chung của cả lớp"
+                : "Từ cấp 4"
           }
           color="rose"
         />
       </div>
-      <SectionTitle
-        title="Chuẩn bị cho buổi học"
-        description="Ba việc nhỏ để bắt đầu một hành trình lớn."
-      />
+      <SectionTitle title="Chuẩn bị cho buổi học" />
       <div className="quick-actions">
         <button className="card" onClick={() => onEditor("student")}>
           <span className="stat-icon green">
             <Users size={22} />
           </span>
           <h3>Thêm học sinh</h3>
-          <p>Tạo tài khoản và đưa học sinh vào lớp.</p>
+
           <ArrowRight size={18} />
         </button>
         <button className="card" onClick={() => onEditor("chapter")}>
@@ -2076,7 +2063,7 @@ function TeacherHome({
             <BookOpen size={22} />
           </span>
           <h3>Tạo chương học</h3>
-          <p>Tổ chức kiến thức theo từng chặng.</p>
+
           <ArrowRight size={18} />
         </button>
         <button className="card" onClick={() => onPage("classes")}>
@@ -2084,7 +2071,7 @@ function TeacherHome({
             <TrendingUp size={22} />
           </span>
           <h3>Xem tiến độ</h3>
-          <p>Xem tiến độ và khu vườn của lớp.</p>
+
           <ArrowRight size={18} />
         </button>
       </div>
@@ -2134,12 +2121,7 @@ function Corrections({
     : rows;
   return (
     <>
-      <PageHeading
-        motto
-        eyebrow="BIẾN LỖI SAI THÀNH KIẾN THỨC"
-        title="Sổ tay sửa sai"
-        text="Mỗi câu chưa đúng là cơ hội để hiểu sâu hơn."
-      />
+      <PageHeading title="Sổ tay sửa sai" />
       <div className="correction-filter">
         <label>
           Chương cần sửa

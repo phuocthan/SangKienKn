@@ -117,12 +117,6 @@ export function ClassCommunity({
         <WorkspaceHeading className="page-heading">
           <div>
             <h1>Khu vườn của lớp</h1>
-            <span className="eyebrow">
-              <Motto>CÙNG NHAU LỚN LÊN · {classroom.name}</Motto>
-            </span>
-            <p>
-              <Motto>Mỗi bạn một cây, cùng chăm vườn lớp.</Motto>
-            </p>
           </div>
         </WorkspaceHeading>
       )}

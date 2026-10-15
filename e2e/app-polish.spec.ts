@@ -15,7 +15,7 @@ test("empty goals do not promise progress and student home fits narrow screens",
   });
   await page.goto("/");
   const goal = page.getByRole("region", { name: "Mục tiêu học tập kế tiếp" });
-  await expect(goal).toContainText("Những hạt mầm đang được chuẩn bị");
+  await expect(goal).toContainText("Chưa có bài luyện tập mở");
   await expect(goal.getByRole("progressbar")).toHaveCount(0);
   await expect(goal.getByRole("button")).toHaveCount(0);
   for (const width of [320, 768, 1440]) {
@@ -59,7 +59,7 @@ test("student goal opens a ready chapter and correction counts survive grouped n
     path: `.local/polish-${info.project.name}-student.png`,
     fullPage: true,
   });
-  await goal.getByRole("button", { name: "Luyện tập chương này" }).click();
+  await goal.getByRole("button", { name: "Luyện tập", exact: true }).click();
   await expect(page.locator(".practice-layout")).toContainText("Chương ôn II");
   await expect(
     page.getByRole("button", { name: "Kết thúc phiên" }),
@@ -119,9 +119,9 @@ test("teacher statistics expose loading and failures, then recover with retry", 
     for (const action of await actions.all()) {
       const icon = (await action.locator(".stat-icon").boundingBox())!;
       const title = (await action.locator("h3").boundingBox())!;
-      const description = (await action.locator("p").boundingBox())!;
+      await expect(action.locator("p")).toHaveCount(0);
+      expect((await action.boundingBox())!.height).toBeGreaterThanOrEqual(44);
       expect(icon.x + icon.width).toBeLessThanOrEqual(title.x - 4);
-      expect(icon.x + icon.width).toBeLessThanOrEqual(description.x - 4);
     }
   }
 });

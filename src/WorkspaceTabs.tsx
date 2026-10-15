@@ -1,10 +1,34 @@
 import {
+  Component,
+  Suspense,
   useLayoutEffect,
   useRef,
   type KeyboardEvent,
   type ReactNode,
 } from "react";
 import type { AppIcon } from "./icons";
+
+class WorkspaceLoadBoundary extends Component<
+  { children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? (
+      <div className="error-banner" role="alert">
+        Không tải được nội dung. Kiểm tra kết nối rồi tải lại trang.
+        <button type="button" onClick={() => window.location.reload()}>
+          Tải lại trang
+        </button>
+      </div>
+    ) : (
+      this.props.children
+    );
+  }
+}
 
 export type WorkspaceTab<T extends string> = {
   id: T;
@@ -79,7 +103,17 @@ export function WorkspaceContent<T extends string>({
         role={tabs ? "tabpanel" : undefined}
         aria-labelledby={tabs ? `workspace-tab-${page}` : undefined}
       >
-        {children}
+        <WorkspaceLoadBoundary key={page}>
+          <Suspense
+            fallback={
+              <div className="loading-panel" role="status">
+                Đang tải nội dung…
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
+        </WorkspaceLoadBoundary>
       </div>
     </main>
   );

@@ -70,10 +70,10 @@ test("teacher selects questions, cancels or deletes a batch, and deletes the who
   await expect(page.locator(".bank-question")).toHaveCount(3);
   // Switching scope must never carry selected IDs into another lesson.
   await page.getByLabel("Lọc theo bài học").selectOption("Bài 2");
-  await expect(page.getByText("Đã chọn 0 câu", { exact: true })).toBeVisible();
+  await expect(page.getByRole("checkbox", { name: /Chọn câu hỏi:/ }).first()).not.toBeChecked();
   await expect(
     page.getByRole("button", { name: "Xóa các câu đã chọn" }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await page.getByLabel("Lọc theo bài học").selectOption("Bài 1");
   await page.getByRole("checkbox", { name: "Chọn tất cả trong bài" }).check();
   await page
@@ -161,7 +161,7 @@ test("old backend capability disables bulk deletion without sending any mutation
   await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   await expect(
     page.getByRole("button", { name: "Xóa các câu đã chọn" }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await expect(
     page.getByRole("checkbox", { name: "Chọn tất cả đang hiển thị" }),
   ).toBeDisabled();

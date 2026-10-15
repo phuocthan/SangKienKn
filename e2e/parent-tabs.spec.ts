@@ -238,7 +238,7 @@ for (const role of ["teacher", "student"] as const) {
       await page.goto("/#section=progress");
       await page.reload();
       await expect(
-        page.getByRole("heading", { name: /hôm nay mình học gì/ }),
+        page.getByRole("heading", { name: "Khu vườn của tôi", level: 1 }),
       ).toBeVisible();
       await expect(
         page.getByRole("tab", { name: "Hành trình của tôi" }),

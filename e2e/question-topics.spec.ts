@@ -40,7 +40,7 @@ test("teacher imports the 50-question Word with topics and student gets a balanc
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption(classroom.id);
   await navigateTo(page, { name: "Ngân hàng câu hỏi" });
-  await page.getByRole("button", { name: "Nhập file Word" }).click();
+  await page.getByRole("button", { name: "Nhập câu hỏi" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Bài nhận câu hỏi").selectOption(lessonTitle);
   await dialog
@@ -119,7 +119,7 @@ test("older API cannot silently discard topic labels while importing Word", asyn
   });
   await page.goto("/");
   await navigateTo(page, { name: "Ngân hàng câu hỏi" });
-  await page.getByRole("button", { name: "Nhập file Word" }).click();
+  await page.getByRole("button", { name: "Nhập câu hỏi" }).click();
   const dialog = page.getByRole("dialog");
   await dialog
     .getByLabel("File câu hỏi Word (.docx)")

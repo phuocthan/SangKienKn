@@ -157,17 +157,10 @@ export function QuestionBank({
         <div className="import-format-actions">
           <button
             className="button outline small"
-            onClick={() => open({ type: "import", format: "csv" })}
-          >
-            <Upload size={16} />
-            Nhập file CSV
-          </button>
-          <button
-            className="button outline small"
             onClick={() => open({ type: "import", format: "word" })}
           >
             <Upload size={16} />
-            Nhập file Word
+            Nhập câu hỏi
           </button>
         </div>
       </div>
@@ -198,7 +191,15 @@ export function QuestionBank({
             />
             Chọn tất cả{lesson ? " trong bài" : " đang hiển thị"}
           </label>
-          <span role="status">Đã chọn {selectedQuestions.length} câu</span>
+          <span role="status">
+            {loading
+              ? "Đang tải…"
+              : error
+                ? "Chưa tải được câu hỏi"
+                : selectedQuestions.length
+                  ? `Đã chọn ${selectedQuestions.length} câu`
+                  : `${selectable.length} câu đang dùng`}
+          </span>
           {selectedQuestions.length > 0 && (
             <button
               className="text-button"
@@ -209,39 +210,38 @@ export function QuestionBank({
           )}
         </div>
         <div className="bank-management-actions">
-          <button
-            className="button danger-outline small"
-            disabled={
-              !deleteSupported || busy || loading || !selectedQuestions.length
-            }
-            onClick={() =>
-              open({ type: "deleteQuestions", questions: selectedQuestions })
-            }
-          >
-            <Trash2 size={16} /> Xóa các câu đã chọn
-          </button>
-          <button
-            className="button danger-outline small"
-            disabled={
-              !lessonSupported ||
-              !lesson ||
-              busy ||
-              loading ||
-              !!error ||
-              !lessonTitles.includes(lesson)
-            }
-            onClick={() =>
-              open({ type: "deleteLesson", lesson, count: selectable.length })
-            }
-          >
-            <Trash2 size={16} /> Xóa cả bài
-          </button>
+          {selectedQuestions.length > 0 && (
+            <button
+              className="button danger-outline small"
+              disabled={
+                !deleteSupported || busy || loading || !selectedQuestions.length
+              }
+              onClick={() =>
+                open({ type: "deleteQuestions", questions: selectedQuestions })
+              }
+            >
+              <Trash2 size={16} /> Xóa các câu đã chọn
+            </button>
+          )}
+          {lesson && (
+            <button
+              className="button danger-outline small"
+              disabled={
+                !lessonSupported ||
+                !lesson ||
+                busy ||
+                loading ||
+                !!error ||
+                !lessonTitles.includes(lesson)
+              }
+              onClick={() =>
+                open({ type: "deleteLesson", lesson, count: selectable.length })
+              }
+            >
+              <Trash2 size={16} /> Xóa cả bài
+            </button>
+          )}
         </div>
-        {!lesson && (
-          <p className="subtle-note">
-            Chọn một bài trong bộ lọc để xóa cả bài.
-          </p>
-        )}
         {!deleteSupported && (
           <p className="subtle-note">
             Xóa nhiều câu đang chờ cập nhật server Railway.
@@ -516,10 +516,10 @@ function QuestionCard({
           Đáp án: <strong>{answerLabel(q)}</strong>
         </p>
       )}
-      <div className="bank-explanation">
-        <strong>Lời giải</strong>
+      <details className="bank-explanation">
+        <summary>Lời giải</summary>
         <p>{q.explanation}</p>
-      </div>
+      </details>
       {children}
     </article>
   );
@@ -744,11 +744,13 @@ function ImportForm({
   }
   return (
     <div className="question-import">
-      <p>
-        Nhập câu hỏi vào chương đang chọn. Tải mẫu, điền nội dung rồi chọn file
-        để xem trước. Hỗ trợ trắc nghiệm, đúng/sai và trả lời ngắn. Tối đa 100
-        câu.
-      </p>
+      <details className="workspace-help">
+        <summary>Hướng dẫn nhập câu hỏi</summary>
+        <p>
+          Tải mẫu, điền nội dung rồi chọn file để xem trước. Hỗ trợ trắc nghiệm,
+          đúng/sai và trả lời ngắn; tối đa 100 câu mỗi file.
+        </p>
+      </details>
       <label>
         Bài nhận câu hỏi
         <select

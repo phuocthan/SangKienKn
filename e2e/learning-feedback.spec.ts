@@ -30,15 +30,8 @@ test("chapters show real progress states, quieter quotes and growing aligned mil
   });
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption("class-demo");
-  const motto = page
-    .locator(".page-heading .eyebrow .motto-copy")
-    .filter({ hasText: "HỌC MỘT CHÚT" })
-    .last();
-  await expect(motto).toHaveCSS("font-style", "italic");
-  await expect(motto).toHaveCSS("opacity", "0.82");
-  expect(
-    await motto.evaluate((node) => getComputedStyle(node, "::before").content),
-  ).toBe("open-quote");
+  await expect(page.locator(".page-heading .eyebrow")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Khu vườn của tôi", level: 1 })).toBeVisible();
   const journey = page.getByRole("region", { name: "Hành trình của tôi" });
   await expect(journey.locator(".chapter-level-card > h3")).toHaveText([
     "Chương I",

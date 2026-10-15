@@ -32,7 +32,7 @@ const rangeLabel = (bucket: StudyBucket) =>
 export function StudentStudyStatistics({
   classroom,
   students,
-  initialStudentId = '',
+  initialStudentId = "",
   onClose,
 }: {
   classroom: Classroom;
@@ -309,16 +309,19 @@ export function StudentStudyStatistics({
                   </div>
                 ))}
               </dl>
-              <p className="study-statistics-note">
-                Tổng tích lũy:{" "}
-                <strong>{timeLabel(data.lifetimeSeconds)}</strong>. Lịch sử từ{" "}
-                {new Date(data.trackingStartedAt).toLocaleString("vi-VN", {
-                  timeZone: "Asia/Ho_Chi_Minh",
-                  hour12: false,
-                })}
-                . Thời gian cũ chưa được chia theo ngày. Tuần bắt đầu thứ Hai,
-                theo giờ Việt Nam.
-              </p>
+              <details className="workspace-help">
+                <summary>Cách tính thời gian</summary>
+                <p className="study-statistics-note">
+                  Tổng tích lũy:{" "}
+                  <strong>{timeLabel(data.lifetimeSeconds)}</strong>. Lịch sử từ{" "}
+                  {new Date(data.trackingStartedAt).toLocaleString("vi-VN", {
+                    timeZone: "Asia/Ho_Chi_Minh",
+                    hour12: false,
+                  })}
+                  . Thời gian cũ chưa được chia theo ngày. Tuần bắt đầu thứ Hai,
+                  theo giờ Việt Nam.
+                </p>
+              </details>
               {!studentId &&
                 (data.members.length ? (
                   <div className="table-scroll">

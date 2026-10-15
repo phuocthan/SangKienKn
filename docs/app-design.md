@@ -1,5 +1,17 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: giao diện ưu tiên tác vụ và chữ ngắn — 15/10/2026
+
+Người dùng duyệt đề xuất dùng `redesign-existing-projects` + `web-design-guidelines` rồi yêu cầu triển khai. Giữ màu rừng/kem, Be Vietnam Pro, Phosphor Duotone, cấp cây và navbar portrait84px/ô đều/tối đa hai dòng. Tên trang đi thẳng vào công việc: Tổng quan, Khu vườn của tôi, Luyện tập; bỏ khẩu hiệu/đoạn giới thiệu lặp ở các trang nghiệp vụ. Đăng nhập giữ câu chuyện thương hiệu riêng; thông tin hạn, điều kiện vào thi và hậu quả vi phạm vẫn hiện ở đúng thao tác.
+
+Trang chủ có **Việc cần làm / Cần theo dõi** từ GET hoạt động nhóm và learning hiện có: nhóm chưa nộp, buổi thi chưa kết thúc và thưởng chờ duyệt của giáo viên; sắp theo hạn và hiện tối đa ba việc. Học sinh có đường vào sửa sai theo số câu thật. Poll30giây khi visible/online và cập nhật focus/reconnect; nguồn lỗi có Thử lại, không báo hết việc khi chưa tải đủ. Không suy ra điểm cần chấm hoặc tạo dữ liệu minh họa. Teacher hero được bỏ, thống kê/thao tác xuất hiện sớm; student hero nhỏ và mục tiêu học tập giữ tiến độ thật, không mở chương bị khóa. Thẻ luyện tập có vùng minh họa84px mobile/104px desktop, bỏ số chương trang trí bị trùng, cấp cây và nút hoàn tất giữ rõ.
+
+Ngân hàng dùng một nút **Nhập câu hỏi**, mặc định Word và chọn được CSV trong modal hiện có; mẫu/preview/validation vẫn giữ. Lời giải mở bằng details; thao tác xóa hàng loạt hiện sau khi chọn, xóa cả bài chỉ hiện khi đã lọc bài. Hướng dẫn nhập và cách tính thống kê mở khi cần; ghi chú lịch sử thiếu kỳ vẫn giữ ở số liệu liên quan. Popup lưu online rút gọn thông báo, giữ hai lựa chọn **Bắt đầu ngay / Để sau**, lưu không tự mở thi.
+
+Quản lý lớp có lối tới Học sinh / Chương học / Cài đặt chung bằng nút di chuyển và focus đúng vùng, giữ toàn bộ nội dung/draft. Bốn ngưỡng phiên học trình bày thành hai cặp Rời tab (lần), Không tương tác (giây), mỗi cặp Nhắc nhở / Tự đóng; nhãn accessibility đủ ngữ cảnh, validation/phân quyền giữ nguyên. Hoạt động nhóm có bốn tab nội dung Yêu cầu / Thành viên / Bài nộp / Trao đổi, hỗ trợ mũi tên/Home/End; panel ẩn vẫn giữ form/file đang soạn. Hạn và trạng thái ở tóm tắt, học sinh có nút Nộp bài vào đúng mục. Quyền xem chéo/nộp/đại diện và gia hạn vẫn do server quyết định.
+
+`workspace-clarity.css` là lớp nhịp bố cục chung: tiêu đề gọn, nền thẻ ít bóng, khoảng cách nhất quán, nút thao tác mới tối thiểu44px và focus rõ. Minh họa nhóm nhỏ hơn, utility/header/navbar giữ bố cục hiện hành. Learning/GroupActivities/QuestionBank tải theo trang bằng React.lazy; Suspense và error boundary chỉ bao nội dung, giữ header/điều hướng khi tải hoặc lỗi và có Tải lại trang. Không đổi framework/API/DB. Chứng cứ kiểm tra và giới hạn ở đầu session-handoff.
+
 ## Hiện hành: quản lý chung, luyện tập và săn thưởng — 15/10/2026
 
 Quản lý học sinh thêm kính lúp44px ở ô thời gian, aria-label kèm tên, mở đúng học sinh trong popup ngày/tuần/tháng/CSV hiện có; toolbar Thống kê vẫn mở cả lớp. Đổi **Quản lý cấp độ → Quản lý chung**, giữ phút/cấp và thêm bốn ô nhắc/đóng theo số lần rời tab và giây không tương tác, lưới2cột desktop/1cột mobile, nền xanh nhạt/legend/nhãn rõ. Validate ngưỡng nhắc nhỏ hơn ngưỡng đóng, lỗi inline, busy khóa lưu.

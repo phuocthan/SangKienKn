@@ -81,6 +81,7 @@ test("admin creates teacher/student; teacher changes password, creates student a
     await dialog.getByLabel("Khối lớp").fill("10");
     await dialog.getByRole("button", { name: "Lưu" }).click();
     await expect(dialog).toHaveCount(0);
+    await navigateTo(teacher, { name: "Quản lý lớp", exact: true });
     await teacher
       .getByRole("button", { name: "Thêm học sinh", exact: true })
       .click();
@@ -168,7 +169,7 @@ test("all teacher/student pages fit desktop/mobile and group filters show real d
     },
   );
   expect(response.ok()).toBeTruthy();
-  await page.getByRole("button", { name: "Cập nhật", exact: true }).click();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await page
     .getByLabel("Tìm hoạt động")
     .fill(`Hoạt động UI ${info.project.name}`);
@@ -176,8 +177,9 @@ test("all teacher/student pages fit desktop/mobile and group filters show real d
   await checkLayout(page, "groups-list", info.project.name);
   await page.locator(".group-activity-card").click();
   await expect(page.locator(".group-roster")).toHaveCount(2);
+  await page.getByRole("tab", { name: "Bài nộp", exact: true }).click();
   await page.getByRole("button", { name: "Đã nộp (0)", exact: true }).click();
-  await expect(page.getByText("Không có nhóm ở trạng thái này")).toBeVisible();
+  await expect(page.getByRole("tabpanel", { name: "Bài nộp", exact: true }).getByText("Không có nhóm ở trạng thái này")).toBeVisible();
   await page.getByRole("button", { name: "Tất cả (2)", exact: true }).click();
   await checkLayout(page, "groups-detail", info.project.name);
   await page.getByRole("button", { name: "Tài khoản", exact: true }).click();

@@ -40,7 +40,7 @@ Chọn một bài trong bộ lọc rồi bấm **Xóa cả bài** để archive 
 
 Vào Ngân hàng câu hỏi, chọn lớp/chương/bài. Giáo viên có thể thêm một câu, sửa nội dung, ẩn hoặc hiện lại và xem lịch sử phiên bản.
 
-Chọn Nhập file Word hoặc Nhập file CSV → tải mẫu tương ứng → điền dữ liệu → chọn file → kiểm tra xem trước → xác nhận nhập. Có thể đổi định dạng trong hộp nhập; đổi định dạng sẽ xóa bản xem trước cũ. Chỉ lần xác nhận thành công mới lưu dữ liệu; chọn file hoặc xem trước không tạo câu hỏi.
+Từ giao diện15/10/2026, chọn **Nhập câu hỏi** → chọn Word/CSV trong hộp nhập (mặc định Word) → tải mẫu tương ứng → điền dữ liệu → chọn file → kiểm tra xem trước → xác nhận nhập. Có thể đổi định dạng trong hộp nhập; đổi định dạng sẽ xóa bản xem trước cũ. Chỉ lần xác nhận thành công mới lưu dữ liệu; chọn file hoặc xem trước không tạo câu hỏi.
 
 Trong hộp nhập, **Bài nhận câu hỏi** mặc định theo bài đang lọc. Chọn bài có sẵn để toàn bộ câu trong file vào đúng bài đó, giữ chủ đề riêng của từng câu. Chọn **Theo tên bài trong file** khi nhập nhiều bài; tên tương đương của bài có số (khác `:`, `-`, `·`, khoảng trắng, hoa/thường, dấu tiếng Việt như `hoà/hòa`) được ghép về tên đang có trong cùng chương. Nếu có nhiều tên tương đương, cần chọn chính xác bài nhận; bài khác số hoặc khác nội dung tên không tự gộp. Tên chưa có được liệt kê trong bản xem trước để giáo viên kiểm tra. Nhãn `Chủ đề` không tham gia tên bài hoặc tạo bài con.
 

@@ -3,7 +3,6 @@ import { studentLevel, STUDENT_LEVEL_NAMES } from "../shared/student-levels";
 import { duration } from "./api";
 import { StudentLevelIcon } from "./StudentLevel";
 import type { Chapter, Classroom } from "./types";
-import { Motto } from "./components";
 
 export function GardenGoal({
   classroom,
@@ -13,7 +12,7 @@ export function GardenGoal({
   onPractice: (chapter: Chapter) => void;
 }) {
   const chapter = classroom.chapters
-    .filter((item) => item.questionCount > 0)
+    .filter((item) => item.questionCount > 0 && item.practiceAllowed !== false)
     .sort((a, b) => {
       const left = studentLevel(a.seconds, a.levelMinutes),
         right = studentLevel(b.seconds, b.levelMinutes);
@@ -36,11 +35,16 @@ export function GardenGoal({
         <span className="goal-symbol">
           <Target size={24} aria-hidden="true" />
         </span>
-        <h2>Những hạt mầm đang được chuẩn bị</h2>
+        <h2>Chưa có bài luyện tập mở</h2>
         <p>
-          {classroom.chapters.length
-            ? "Giáo viên đang chuẩn bị câu hỏi. Mục tiêu sẽ xuất hiện khi có bài luyện tập."
-            : "Giáo viên sẽ thêm chương và câu hỏi để bạn bắt đầu."}
+          {classroom.chapters.some(
+            (chapter) =>
+              chapter.questionCount > 0 && chapter.practiceAllowed === false,
+          )
+            ? "Các chương đang khóa luyện tập. Chờ giáo viên mở lại."
+            : classroom.chapters.length
+              ? "Giáo viên đang chuẩn bị câu hỏi. Mục tiêu sẽ xuất hiện khi có bài luyện tập."
+              : "Giáo viên sẽ thêm chương và câu hỏi để bạn bắt đầu."}
         </p>
       </section>
     );
@@ -51,15 +55,8 @@ export function GardenGoal({
         <span className="goal-symbol">
           <Target size={24} aria-hidden="true" />
         </span>
-        <span className="eyebrow">
-          <Motto>TỪNG CHÚT MỖI NGÀY</Motto>
-        </span>
+        <h2>Mục tiêu tiếp theo</h2>
       </div>
-      <h2>
-        {stage.level === 5
-          ? "Khu vườn đang lớn lên"
-          : "Một bước nhỏ, thêm xanh"}
-      </h2>
       <div className="garden-goal-stage">
         <StudentLevelIcon level={stage.level === 5 ? 5 : stage.level + 1} />
         <div>
@@ -91,7 +88,7 @@ export function GardenGoal({
         {classroom.chapters.length} cây đã Kết Trái
       </div>
       <button className="text-button" onClick={() => onPractice(chapter)}>
-        Luyện tập chương này <ArrowRight size={17} aria-hidden="true" />
+        Luyện tập <ArrowRight size={17} aria-hidden="true" />
       </button>
     </section>
   );

@@ -25,22 +25,22 @@ test("teacher and student quick access uses database defaults and survives reloa
   });
   await teacher.click();
   await expect(
-    page.getByRole("heading", { name: "Một lớp học, nhiều cơ hội lớn lên." }),
+    page.getByRole("heading", { name: "Tổng quan" }),
   ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Một lớp học, nhiều cơ hội lớn lên." }),
+    page.getByRole("heading", { name: "Tổng quan" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
   await student.click();
   await expect(
-    page.getByRole("heading", { name: "Chào Hà Linh, hôm nay mình học gì?" }),
+    page.getByRole("heading", { name: "Khu vườn của tôi" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Lớp học của tôi", exact: true }),
+    page.getByRole("button", { name: "Ngân hàng câu hỏi", exact: true }),
   ).toHaveCount(0);
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Chào Hà Linh, hôm nay mình học gì?" }),
+    page.getByRole("heading", { name: "Khu vườn của tôi" }),
   ).toBeVisible();
 });

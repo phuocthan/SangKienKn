@@ -1,5 +1,9 @@
 # Hoạt động nhóm
 
+## Giao diện gọn theo tác vụ — 15/10/2026
+
+Mở hoạt động giữ tóm tắt hạn/trạng thái và chia bốn tab **Yêu cầu / Thành viên / Bài nộp / Trao đổi**. Yêu cầu chứa chữ/file gốc/lịch sử gia hạn; Thành viên chứa roster/đại diện; Bài nộp chứa form/file/link/lịch sử sản phẩm; Trao đổi chứa sản phẩm đọc chéo và nút phản biện khi đủ điều kiện server. Học sinh có nút **Nộp bài** ở tóm tắt để mở đúng tab. Tab hỗ trợ mũi tên/Home/End, giữ file/nội dung chưa gửi khi chuyển mục; điều kiện đại diện/quyền tất cả thành viên/hạn/gia hạn bên dưới không đổi.
+
 ## Vị trí quản lý thành viên hiện hành — 14/10/2026
 
 Giáo viên thêm/tìm học sinh tại **Lớp học của tôi → Quản lý lớp → Quản lý học sinh**, sau Quản lý cấp độ/Quản lý chương. Tab Hoạt động nhóm và quy tắc phân nhóm/quyền nộp không đổi. Top10 dùng chung hai vai trò nằm trong tab Khu vườn của lớp, không ở roster quản lý. Thay đổi danh sách lớp không tự thay thành viên hoạt động đã chia.

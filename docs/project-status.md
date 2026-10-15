@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: triển khai đề xuất tối ưu UI/UX — 15/10/2026
+
+Tiếp tục từ remote `bce44bc` sau khi pull11commit, giữ toàn bộ quyền học tập/đề săn thưởng/thống kê mới. Đã rút gọn tiêu đề/khẩu hiệu/mô tả; thêm việc cần làm từ dữ liệu thật; thu nhỏ hero/thẻ luyện; nhập Word/CSV một luồng, lời giải/hướng dẫn mở khi cần; nhóm thành bốn tab giữ draft/file; quản lý lớp có đường tới ba khu vực và ngưỡng nhắc/đóng theo cặp. Giữ navbar hai dòng/icon cố định và badge đỏ. React.lazy tải ba phân hệ khi mở, giữ điều hướng và có phục hồi lỗi tải. Thiết kế tại [app-design.md](app-design.md); QA/Git/deploy theo bản ghi mới đầu [session-handoff.md](session-handoff.md), không lấy các kết quả cũ bên dưới làm kết quả đợt này.
+
+**QA cuối:** TypeScript/Vite build đạt, **58/58 desktop +58/58 mobile** đạt trên server/SQLite riêng; gồm năm ca mới và hồi quy chức năng, file/note nhóm giữ khi chuyển tab, navbar hai dòng/icon cố định, nhập Word/CSV và phục hồi lỗi tải trang. JS ban đầu436,83kB minified so với516,60kB trước tách. Hai ca timer cũ ngoài lượt kiểm tra; không báo toàn bộ suite/backend đã chạy. Người dùng yêu cầu push Git, Railway cần xác nhận phát hành riêng.
+
 ## Hiện hành: quản lý lớp, luyện tập/săn thưởng và quy tắc phiên — 15/10/2026
 
 **Git hoàn tất:** đã commit/push tính năng **5bb72e5** lên origin/main và xác nhận SHA remote đúng **5bb72e5bcb314c139031520aba28bf009b50edf4**. Checkout sạch sau push mã. Các câu “chuẩn bị push” trong phần dưới là ghi trước bước Git này; không thực hiện lại tính năng/test hoặc tự suy Railway đã phát hành. Bản ghi trạng thái này được đẩy bằng commit tài liệu tiếp theo.

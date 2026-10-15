@@ -1,0 +1,399 @@
+/* Task-first workspaces: shared rhythm, quiet surfaces, full touch targets. */
+:root {
+  --workspace-space: 20px;
+  --workspace-surface: #fffef8;
+  --workspace-divider: #dce5d2;
+}
+.app-shell :is(.page-heading, .learning-page-heading) {
+  min-height: 0;
+  padding: 0;
+  margin-bottom: var(--workspace-space);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.workspace-topbar
+  .workspace-heading-slot
+  :is(.page-heading, .learning-page-heading) {
+  margin: 0;
+}
+.app-shell .main-content .card {
+  box-shadow: none;
+}
+.app-shell
+  .main-content
+  :is(.filter-bar, .workspace-filters, .question-toolbar) {
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.app-shell :is(button, a, summary):focus-visible {
+  outline: 2px solid #326145;
+  outline-offset: 3px;
+}
+.home-tasks {
+  padding: 16px 20px;
+  margin-bottom: var(--workspace-space);
+  border: 1px solid var(--workspace-divider);
+  border-radius: 16px;
+  background: var(--workspace-surface);
+  min-width: 0;
+}
+.home-tasks-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+}
+.home-tasks h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.home-tasks p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.home-task-list {
+  display: grid;
+  margin-top: 8px;
+}
+.home-task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--workspace-divider);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+.home-task:last-child {
+  border-bottom: 0;
+}
+.home-task:hover {
+  background: #edf4e7;
+}
+.home-task > span {
+  flex: 1;
+  min-width: 0;
+}
+.home-task strong {
+  display: block;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.home-task small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+}
+.home-task svg {
+  flex-shrink: 0;
+  color: #426942;
+}
+.home-tasks .text-button {
+  min-height: 44px;
+}
+.app-shell .student-home .student-welcome-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px;
+  align-items: center;
+  min-height: 0;
+  padding: 20px;
+  gap: 12px;
+  border-radius: 18px;
+}
+.app-shell .student-home .student-welcome-hero .hero-illustration {
+  position: static;
+  width: 100px;
+  height: 100px;
+  max-width: 100%;
+  margin: 0;
+  opacity: 1;
+  transform: none;
+}
+.app-shell .student-home .student-welcome-hero h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+.app-shell .student-home .student-welcome-hero p {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+.student-home .garden-hero-actions {
+  gap: 8px;
+  margin-top: 0;
+}
+.student-home .garden-hero-actions .button {
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+.app-shell .main-content .garden-goal {
+  padding: 18px 20px;
+  gap: 10px;
+  border-radius: 18px;
+}
+.garden-goal .garden-goal-heading {
+  gap: 10px;
+}
+.garden-goal .garden-goal-heading h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.app-shell .main-content .quick-actions > button.card {
+  min-height: 76px;
+  padding: 16px;
+  gap: 12px;
+}
+.quick-actions h3 {
+  margin: 0;
+}
+.app-shell .chapter-card .chapter-art {
+  height: 104px;
+  min-height: 104px;
+  align-items: center;
+}
+.app-shell .chapter-card .chapter-body {
+  padding: 16px;
+  gap: 12px;
+}
+.app-shell .chapter-card .chapter-body h3 {
+  margin-bottom: 0;
+}
+.app-shell .chapter-card .chapter-art .student-level-icon {
+  width: 64px;
+  height: 64px;
+  margin-right: 16px;
+}
+.app-shell
+  .chapter-card[data-progress-state="complete"]
+  .chapter-art
+  .student-level-icon {
+  margin-right: 48px;
+}
+.section-workspace {
+  min-width: 0;
+  margin: 16px 0;
+}
+.section-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  background: #eaf0e2;
+}
+.section-tabs [role="tab"] {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #52654a;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-wrap: balance;
+}
+.section-tabs [role="tab"]:hover {
+  background: #dce8d0;
+}
+.section-tabs [aria-selected="true"] {
+  background: var(--workspace-surface);
+  border-color: #c8d8b9;
+  color: #234c34;
+}
+.section-workspace [role="tabpanel"] {
+  min-width: 0;
+}
+.section-workspace [hidden] {
+  display: none;
+}
+.group-workspace .group-heading-illustration {
+  width: 110px;
+  height: 72px;
+  object-fit: contain;
+}
+.group-workspace .workspace-stat {
+  padding: 14px 16px;
+  gap: 5px;
+}
+.group-workspace .workspace-stat strong {
+  font-size: 26px;
+}
+.group-workspace .group-detail-summary {
+  padding: 18px;
+  gap: 16px;
+}
+.group-workspace .group-deadline-block .button {
+  margin-top: 8px;
+}
+.group-member-card,
+.group-discussion-card {
+  padding: 20px;
+  min-width: 0;
+}
+.group-member-card .group-members {
+  margin-block: 16px;
+}
+.group-workspace .group-no-product {
+  padding: 16px;
+}
+.bank-management .bank-management-actions:empty {
+  display: none;
+}
+.bank-explanation {
+  border-top: 1px solid var(--workspace-divider);
+  margin-top: 14px;
+}
+.bank-explanation summary,
+.workspace-help summary {
+  display: list-item;
+  cursor: pointer;
+  min-height: 44px;
+  padding-block: 12px;
+  color: #426942;
+  font-size: 13px;
+  font-weight: 600;
+}
+.workspace-help {
+  margin: 8px 0;
+}
+.workspace-help p {
+  margin: 4px 0 12px;
+  max-width: 65ch;
+  font-size: 13px;
+  color: var(--muted);
+}
+.class-management-card .session-policy-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.class-section-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.class-section-links .button {
+  min-height: 44px;
+}
+.app-shell .class-chapter-access .button {
+  min-height: 44px;
+}
+.app-shell .chapter-list .chapter-row {
+  padding: 8px 16px;
+}
+.chapter-row-copy .chapter-row-actions .text-button {
+  min-height: 44px;
+}
+#class-general,
+#class-chapters,
+#class-students {
+  margin-bottom: 24px;
+}
+.policy-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  margin: 0;
+  border: 1px solid #d3dfc6;
+  border-radius: 10px;
+}
+.policy-pair legend {
+  padding: 0 4px;
+  font-weight: 600;
+  font-size: 13px;
+}
+.policy-pair legend span {
+  font-weight: 400;
+  color: var(--muted);
+}
+.policy-pair label {
+  font-size: 13px;
+}
+.app-shell
+  :is(.question-toolbar, .bank-management, .workspace-filters)
+  .button {
+  min-height: 44px;
+}
+.study-statistics .study-periods {
+  padding: 4px;
+  gap: 4px;
+  border-radius: 12px;
+  background: #eaf0e2;
+}
+.study-statistics .study-periods .button {
+  min-height: 44px;
+}
+@media (max-width: 700px) {
+  :root {
+    --workspace-space: 16px;
+  }
+  .app-shell :is(.page-heading, .learning-page-heading) h1 {
+    font-size: 24px;
+    line-height: 1.3;
+  }
+  .app-shell :is(.page-heading, .learning-page-heading) {
+    gap: 12px;
+  }
+  .home-tasks {
+    padding: 14px 16px;
+  }
+  .student-home .garden-welcome-grid {
+    gap: 14px;
+  }
+  .app-shell .student-home .student-welcome-hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px;
+  }
+  .app-shell .student-home .student-welcome-hero .hero-illustration {
+    display: none;
+  }
+  .app-shell .chapter-card .chapter-art {
+    height: 84px;
+    min-height: 84px;
+  }
+  .app-shell .chapter-card .chapter-art .student-level-icon {
+    width: 52px;
+    height: 52px;
+  }
+  .group-workspace .group-heading-illustration {
+    width: 72px;
+    height: 48px;
+  }
+  .group-workspace .group-detail-summary {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 16px;
+  }
+  .group-workspace .workspace-stats {
+    gap: 8px;
+  }
+  .group-workspace .workspace-stat {
+    padding: 12px;
+  }
+  .group-workspace .workspace-stat > span {
+    font-size: 12px;
+  }
+  .class-management-card .session-policy-fields {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+  .section-tabs [role="tab"] {
+    font-size: 12px;
+    padding-inline: 4px;
+  }
+  .group-member-card,
+  .group-discussion-card {
+    padding: 16px;
+  }
+}

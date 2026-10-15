@@ -30,7 +30,7 @@ test("teacher downloads and imports a real Word template with preview, format sw
   await page.reload();
   await page.getByLabel("Chọn lớp học").selectOption(classroom.id);
   await navigateTo(page, { name: "Ngân hàng câu hỏi" });
-  await page.getByRole("button", { name: "Nhập file Word" }).click();
+  await page.getByRole("button", { name: "Nhập câu hỏi" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByLabel("Định dạng file")).toHaveValue("word");
   const downloadEvent = page.waitForEvent("download");
@@ -134,7 +134,7 @@ test("teacher downloads and imports a real Word template with preview, format sw
       q.explanation.includes("\nCentimét, kilômét"),
     ),
   ).toBeTruthy();
-  await page.getByRole("button", { name: "Nhập file Word" }).click();
+  await page.getByRole("button", { name: "Nhập câu hỏi" }).click();
   await file.setInputFiles(validFile);
   await dialog.getByRole("button", { name: "Xác nhận nhập 4 câu" }).click();
   await expect(dialog.getByRole("alert")).toContainText(
@@ -188,7 +188,8 @@ test("teacher imports with preview and network retry, edits/hides/restores; stud
     .getByLabel("Chọn lớp học")
     .selectOption({ label: `${className} · Toán` });
   await navigateTo(page, { name: "Ngân hàng câu hỏi" });
-  await page.getByRole("button", { name: "Nhập file CSV" }).click();
+  await page.getByRole("button", { name: "Nhập câu hỏi" }).click();
+  await page.getByRole("dialog").getByLabel("Định dạng file").selectOption("csv");
   const dialog = page.getByRole("dialog");
   const download = page.waitForEvent("download");
   await dialog.getByRole("button", { name: "Tải file mẫu" }).click();
@@ -264,6 +265,7 @@ test("teacher imports with preview and network retry, edits/hides/restores; stud
   await page.getByLabel("Mật khẩu mới", { exact: true }).fill("OwnPass123!");
   await page.getByLabel("Nhập lại mật khẩu mới").fill("OwnPass123!");
   await page.getByRole("button", { name: "Lưu mật khẩu" }).click();
+  await navigateTo(page, { name: "Luyện tập", exact: true });
   await page.locator(".chapter-grid").getByRole("button", { name: /^(Luyện tập|Ôn tập lại)$/ }).click();
   await page.getByRole("button", { name: "B 2", exact: true }).click();
   await page.getByRole("button", { name: "Kiểm tra đáp án" }).click();
@@ -363,7 +365,7 @@ test("student practices, repairs a wrong answer, and keeps progress after reload
   page.on("pageerror", (e) => errors.push(e.message));
   await demoLogin(page, "Học sinh");
   await expect(
-    page.getByRole("heading", { name: "Gieo nỗ lực hôm nay, đón tri thức ngày mai." }),
+    page.getByRole("heading", { name: "Khu vườn của tôi", level: 1 }),
   ).toBeVisible();
   await page.screenshot({
     path: info.outputPath("garden.png"),
@@ -608,7 +610,7 @@ test("teacher creates content and student account; student changes password, lea
   await page.getByLabel("Mật khẩu", { exact: true }).fill("TempPass123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Đặt mật khẩu của riêng bạn" }),
+    page.getByRole("heading", { name: "Đổi mật khẩu tạm" }),
   ).toBeVisible();
   await page.getByLabel("Mật khẩu hiện tại").fill("TempPass123!");
   await page.getByLabel("Mật khẩu mới", { exact: true }).fill("OwnPass123!");

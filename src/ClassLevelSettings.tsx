@@ -39,7 +39,6 @@ export function ClassLevelSettings({
     >
       <div>
         <h2 id="class-level-title">Quản lý chung</h2>
-        <p>Mỗi chương tăng một cấp sau số phút học có hoạt động bạn chọn.</p>
       </div>
       <form
         aria-label="Cài đặt thời gian tăng cấp"
@@ -66,46 +65,57 @@ export function ClassLevelSettings({
         >
           <legend>Nhắc nhở và tự động đóng phiên</legend>
           <p>
-            Áp dụng cho luyện tập, ôn, sửa sai và kiểm tra của lớp này. Ngưỡng
-            nhắc nhở phải nhỏ hơn ngưỡng đóng.
+            Áp dụng cho luyện tập, ôn, sửa sai và kiểm tra. Ngưỡng nhắc phải nhỏ
+            hơn ngưỡng đóng.
           </p>
           {(
             [
-              ["warningTabs", "Nhắc khi rời tab (lần)", 1, 19],
-              ["closeTabs", "Tự đóng khi rời tab (lần)", 2, 20],
-              [
-                "warningIdleSeconds",
-                "Nhắc khi không tương tác (giây)",
-                5,
-                3599,
-              ],
-              [
-                "closeIdleSeconds",
-                "Tự đóng khi không tương tác (giây)",
-                6,
-                3600,
-              ],
+              {
+                title: "Rời tab",
+                unit: "lần",
+                context: "rời tab",
+                fields: [
+                  ["warningTabs", 1, 19],
+                  ["closeTabs", 2, 20],
+                ],
+              },
+              {
+                title: "Không tương tác",
+                unit: "giây",
+                context: "không tương tác",
+                fields: [
+                  ["warningIdleSeconds", 5, 3599],
+                  ["closeIdleSeconds", 6, 3600],
+                ],
+              },
             ] as const
-          ).map(([key, label, min, max]) => (
-            <label key={key}>
-              {label}
-              <input
-                type="number"
-                required
-                min={min}
-                max={max}
-                step={1}
-                value={rules[key]}
-                onChange={(e) =>
-                  setRules({ ...rules, [key]: Number(e.target.value) })
-                }
-              />
-            </label>
+          ).map((group) => (
+            <fieldset className="policy-pair" key={group.title}>
+              <legend>
+                {group.title} <span>· {group.unit}</span>
+              </legend>
+              {group.fields.map(([key, min, max], index) => (
+                <label key={key}>
+                  {index === 0 ? "Nhắc nhở" : "Tự đóng"}
+                  <input
+                    type="number"
+                    required
+                    min={min}
+                    max={max}
+                    step={1}
+                    aria-label={`${index === 0 ? "Nhắc nhở" : "Tự đóng"} khi ${group.context} (${group.unit})`}
+                    value={rules[key]}
+                    onChange={(event) =>
+                      setRules({ ...rules, [key]: Number(event.target.value) })
+                    }
+                  />
+                </label>
+              ))}
+            </fieldset>
           ))}
           <small>
-            Ví dụ: nhắc ở lần 2/30 giây; đóng ở lần 3/60 giây. Phiên luyện tập
-            vi phạm không được tính giờ; bài kiểm tra được tự nộp với đáp án đã
-            lưu.
+            Phiên luyện tập vi phạm không được tính giờ; bài kiểm tra tự nộp đáp
+            án đã lưu.
           </small>
           {!canConfigurePolicy && (
             <p role="status">Cài đặt đóng phiên đang chờ cập nhật máy chủ.</p>
@@ -124,8 +134,8 @@ export function ClassLevelSettings({
         </button>
       </form>
       <small>
-        Hiện tại: {minutes} phút/cấp · Giới hạn 1–1440 phút. Vé và điểm đã cấp
-        được giữ nguyên.
+        {minutes} phút/cấp · Cho phép 1–1440 phút. Vé và điểm đã cấp được giữ
+        nguyên.
       </small>
       {!enabled && (
         <p role="status" className="muted">

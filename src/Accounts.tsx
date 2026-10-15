@@ -180,11 +180,6 @@ export function AdminWorkspace({
               <div className="page-heading">
                 <div>
                   <h1>Quản lý tài khoản</h1>
-                  <span className="eyebrow">QUẢN TRỊ TOÀN TRƯỜNG</span>
-                  <p>
-                    Tạo tài khoản giáo viên, học sinh và cấp lại mật khẩu khi
-                    cần.
-                  </p>
                 </div>
                 <button
                   className="button primary"
@@ -200,7 +195,6 @@ export function AdminWorkspace({
                 </span>
                 <div>
                   <strong>Kết nối lớp học, nuôi dưỡng tri thức.</strong>
-                  <p>Mỗi tài khoản mở ra một hành trình học tập mới.</p>
                 </div>
                 <GardenIllustration className="admin-illustration" />
               </div>
