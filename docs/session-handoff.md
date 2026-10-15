@@ -2,6 +2,8 @@
 
 ## Quản lý chung, khóa luyện tập và đề săn thưởng — 15/10/2026
 
+**Git hoàn tất:** đã commit/push tính năng **5bb72e5** lên origin/main và xác nhận SHA remote đúng **5bb72e5bcb314c139031520aba28bf009b50edf4**. Checkout sạch sau push mã. Các câu “chuẩn bị push” trong phần dưới là ghi trước bước Git này; không thực hiện lại tính năng/test hoặc tự suy Railway đã phát hành. Bản ghi trạng thái này được đẩy bằng commit tài liệu tiếp theo.
+
 Yêu cầu mới: kính lúp xem thống kê cá nhân trong roster, đổi gate Kiểm tra chương thành Luyện tập, thêm gate Săn thưởng với upload/dùng lại/xóa đề, cài ngưỡng nhắc/đóng tab–idle, hoàn tất push remote. Đã đọc tài liệu hiện hành và dùng redesign-existing-projects + web-design-guidelines (guideline nguồn Vercel lấy mới). Giữ các thay đổi thống kê toàn lớp/CSV, kéo thả thứ tự chương, nhãn/icon và tài liệu đang có từ phiên trước; sẽ đưa cùng vào bản push vì đã tích hợp/kiểm thử. Không nhập/sửa dữ liệu Railway hoặc database local chính trong đợt phát triển này.
 
 Thêm kính lúp44px/aria-label tên ở ô thời gian, mở đúng học sinh trong StudentStudyStatistics; toolbar toàn lớp/bộ lọc/CSV vẫn giữ. Quản lý chung giữ phút/cấp và bốn ngưỡng: warningTabs/closeTabs/warningIdleSeconds/closeIdleSeconds, ví dụ2/3lần và30/60giây. Owner-only, validation ngưỡng nhắc nhỏ hơn ngưỡng đóng, lưu cùng phút/cấp trong transaction. Khóa luyện tập thật trên studentcard/GETđề/start/heartbeat/attempts/review, kể cả URL cũ; server kết thúc phiên đang học, **giữ giờ đã ghi khi giáo viên khóa**, không coi giáo viên khóa là vi phạm của học sinh. Săn thưởng/thi chính thức không bị khóa theo quyền luyện tập.
