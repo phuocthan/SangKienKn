@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { X, Leaf, Sprout, ArrowRight } from "./icons";
 
 export function Motto({ children }: { children: ReactNode }) {
@@ -192,6 +192,33 @@ export function Modal({
   const dismissibleRef = useRef(dismissible);
   dismissibleRef.current = dismissible;
   const titleId = useId();
+  const [closing, setClosing] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  const closePending = useRef(false);
+  function requestClose(pointer: boolean) {
+    if (!dismissibleRef.current || closePending.current) return;
+    if (
+      !pointer ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      onCloseRef.current();
+      return;
+    }
+    closePending.current = true;
+    setClosing(true);
+    closeTimer.current = setTimeout(() => onCloseRef.current(), 160);
+  }
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+  useEffect(() => {
+    if (!dismissible && closePending.current) {
+      clearTimeout(closeTimer.current);
+      closePending.current = false;
+      setClosing(false);
+      ref.current?.focus();
+    }
+  }, [dismissible]);
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     const style = document.body.style.overflow;
@@ -250,8 +277,9 @@ export function Modal({
   return (
     <div
       className="modal-backdrop"
+      data-closing={closing}
       onMouseDown={(e) => {
-        if (dismissible && e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) requestClose(true);
       }}
     >
       <div
@@ -261,11 +289,16 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
+        inert={closing}
       >
         <div className="modal-head">
           <h2 id={titleId}>{title}</h2>
           {dismissible && (
-            <button className="icon-button" aria-label="Đóng" onClick={onClose}>
+            <button
+              className="icon-button"
+              aria-label="Đóng"
+              onClick={(e) => requestClose(e.detail !== 0)}
+            >
               <X size={20} aria-hidden="true" />
             </button>
           )}

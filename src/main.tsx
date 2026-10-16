@@ -22,6 +22,10 @@ import "./app-polish.css";
 import "./redesign.css";
 import "./learning-feedback.css";
 import "./workspace-clarity.css";
+import "./motion.css";
+import { installMotionInput } from "./motion";
+
+installMotionInput();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

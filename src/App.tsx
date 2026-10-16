@@ -1,4 +1,6 @@
 import { HomeTasks } from "./HomeTasks";
+import { MotionToast } from "./MotionToast";
+import { useChapterLevelUps } from "./motion";
 import { StudentNotebook } from "./StudentNotebook";
 import { useStudentActivity } from "./useStudentActivity";
 import { StudentStudyStatistics } from "./StudentStudyStatistics";
@@ -217,6 +219,10 @@ export default function App() {
   const [loadingClasses, setLoadingClasses] = useState(false);
   const current = classes.find((c) => c.id === classId) ?? classes[0];
   const isTeacher = user?.role === "teacher";
+  const levelUps = useChapterLevelUps(
+    user?.role === "student" ? user.id : "",
+    classes,
+  );
 
   const initialize = useCallback(async () => {
     setBooting(true);
@@ -802,19 +808,7 @@ export default function App() {
               }}
             />
           )}
-          {notice && (
-            <div className="toast" role="status">
-              <CheckCircle2 size={18} />
-              {notice}
-              <button
-                className="icon-button"
-                aria-label="Đóng thông báo"
-                onClick={() => setNotice("")}
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
+          <MotionToast message={notice} onClose={() => setNotice("")} />
           {error && (
             <div className="error-banner" role="alert">
               {error}
@@ -1042,6 +1036,7 @@ export default function App() {
                   <PageHeading title="Luyện tập" />
                   <ChapterGrid
                     classroom={current}
+                    levelUps={levelUps}
                     onStudy={(ch, lesson) =>
                       setStudy({ chapter: ch, mode: "practice", lesson })
                     }
@@ -1863,9 +1858,11 @@ function Stat({
 }
 function ChapterGrid({
   classroom,
+  levelUps,
   onStudy,
 }: {
   classroom: Classroom;
+  levelUps: Set<string>;
   onStudy: (ch: Chapter, lesson?: string) => void;
 }) {
   const [selectedLessons, setSelectedLessons] = useState<
@@ -1902,7 +1899,10 @@ function ChapterGrid({
               <span className="pill chapter-level">
                 Cấp {stage.level} · {stage.name}
               </span>
-              <StudentLevelIcon level={stage.level} />
+              <StudentLevelIcon
+                level={stage.level}
+                celebrating={levelUps.has(`${classroom.id}/${ch.id}`)}
+              />
               {stage.level === 5 && (
                 <span
                   className="chapter-completion-mark"
@@ -1935,7 +1935,8 @@ function ChapterGrid({
               >
                 <span
                   style={{
-                    width: `${percent}%`,
+                    width: "100%",
+                    transform: `scaleX(${percent / 100})`,
                   }}
                 />
               </div>

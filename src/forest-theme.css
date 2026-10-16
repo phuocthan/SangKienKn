@@ -67,20 +67,20 @@
     .chapter-card,
     .group-activity-card
   ) {
-  transition:
-    box-shadow 180ms ease,
-    border-color 180ms ease;
+  transition: border-color 160ms ease;
 }
 
-.main-content
-  :is(
-    .quick-actions > .card,
-    .class-card,
-    .chapter-card,
-    .group-activity-card
-  ):hover {
-  border-color: #8ead79;
-  box-shadow: 0 8px 24px #315d3e16;
+@media (hover: hover) and (pointer: fine) {
+  .main-content
+    :is(
+      .quick-actions > .card,
+      .class-card,
+      .chapter-card,
+      .group-activity-card
+    ):hover {
+    border-color: #8ead79;
+    box-shadow: 0 8px 24px #315d3e16;
+  }
 }
 
 .chapter-art.art-0,

@@ -1,5 +1,21 @@
 # Bàn giao session GreenEdu
 
+## Chốt Git bản animation — 16/10/2026
+
+Người dùng yêu cầu “Apply” sau khi biết animation đã hoàn tất nhưng chưa push; tiếp tục đưa bản đã kiểm thử lên origin/main để luồng autobuild hiện có nhận mã. Fetch trước chốt xác nhận HEAD/origin/main cùng7444958, không có commit remote mới. Chỉ gồm animation, kiểm thử và tài liệu bên dưới; không đưa .local/database/ảnh test/secrets lên Git. Kết quả32/32 E2E/build là của lượt triển khai15/10, đã đối chiếu report, không chạy lại hoặc báo thành lượt kiểm thử mới trong bước Git. Dùng Git thực tế để xác nhận SHA/push; việc push không xác nhận Railway deploy thành công. Các ghi chú “chưa push” bên dưới là trạng thái trước yêu cầu mới này.
+
+## Áp dụng animation sau khi người dùng duyệt — 15/10/2026
+
+Mục tiêu mới nhất: áp dụng đề xuất animation từ lượt tìm skill. Đã dùng `animate` + `animation-performance` của `emilkowalski/skills`, cùng hai skill thiết kế của dự án. Xem nguồn/cách tải lại tại [design-skills.md](design-skills.md), hành vi hiện hành tại đầu [app-design.md](app-design.md). Không cài thêm dependency hoặc thay backend/schema/database.
+
+- `src/motion.css`, `src/motion.ts`: theo dõi phương thức nhập qua DOM, popup220ms vào/160ms đóng bằng X hoặc backdrop, nút nhấn120ms, reduced motion và bàn phím không chờ chuyển động. Giữ focus trap/restore, khóa cuộn và trạng thái busy trong Modal. Hủy/lưu/thao tác parent unmount vẫn đóng ngay, không trì hoãn lưu/nộp hay timer học/thi.
+- `src/MotionToast.tsx`: hiện/ẩn160ms, giữ thời gian thông báo6giây, ngắt/đổi thông báo an toàn và status trợ năng. `App.tsx`: thanh tiến độ chương dùng scaleX, vẫn đúng phần trăm và ARIA. Navbar/header/nhãn hai dòng/badge đỏ giữ vị trí.
+- Cây trong thẻ chương Luyện tập có nhịp280ms chỉ khi server trả thời gian tăng qua cấp với cùng ngưỡng. Hook baseline ở App ngăn phát lại khi mở trang, polling, đổi màn hoặc đổi ngưỡng; không tự cộng tiến độ. Chỉ g SVG artwork chuyển động, không thay khung icon. Bỏ transition shadow thẻ lớn và hover trên thiết bị cảm ứng.
+
+**QA mới:** TypeScript/Vite build đạt (`.local/motion-build`, main439,67kB/gzip135,06kB); typecheck và Prettier đạt; `git diff --check` sạch. **32/32 E2E desktop/mobile đạt**, gồm8ca mới motion,6popup sau tạo kiểm tra (busy/retry/lỗi/focus),8portrait/account/nav/badge,6redesign/submenu và4learning-feedback. Lệnh: `npx playwright test --config .local/motion.config.ts e2e/motion.spec.ts e2e/redesign.spec.ts e2e/online-created-popup.spec.ts e2e/portrait-navigation.spec.ts e2e/learning-feedback.spec.ts`. Config/server/data test riêng cổng3105, `.local/e2e-motion-*.sqlite`; không đụng Railway hoặc `.local/greenedu.sqlite`. Report `.local/motion-results/report.json`; đã xem ảnh thẻ chương mobile390px. Không chạy lại backend vì không đổi backend. Không suy60/120fps từ mô phỏng; cần cảm nhận animation trên điện thoại thật. Trình duyệt thiếu `@starting-style` có fallback mở ngay.
+
+Chưa commit/push/deploy trong lượt animation này; yêu cầu mới chỉ “Áp dụng”, AGENTS.md không cho tự push/deploy. Commit remote trước lượt này là7444958; các ghi chú Git hoàn tất bên dưới nói về đợt ôn/thi trước. Thay đổi hiện nằm trong working tree; session sau kiểm tra Git thực tế và tiếp tục theo yêu cầu mới.
+
 ## Chốt Git theo yêu cầu người dùng — 15/10/2026
 
 Người dùng yêu cầu push remote sau khi hoàn thiện. Đợt chốt gồm ba tab ôn/thi, bài ôn có tiêu đề/Word/CSV, giữ lịch sử và bản sửa nhập sau xóa/tạo lại bài của lượt trước. Fetch xác nhận main/origin main cùng6163c03 trước commit, không có commit remote mới hoặc thay đổi ngoài phạm vi. Các câu “chưa commit/push” ở các bản ghi dưới là trạng thái trước yêu cầu này. Dùng Git thực tế để xác nhận commit/SHA remote sau chốt. QA là các lượt161backend,80E2E rộng,12xác nhận,2săn hết hạn đã ghi; không chạy lại hoặc cộng kết quả cũ thành lượt mới trong bước Git. Không đưa .local/database/ảnh test/secrets lên Git. Push main cho luồng autobuild hiện có; không tự kết luận Railway deploy thành công từ kết quả Git.

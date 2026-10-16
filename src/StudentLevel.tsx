@@ -9,10 +9,12 @@ export function StudentLevelIcon({
   level,
   className = "",
   label,
+  celebrating = false,
 }: {
   level: number;
   className?: string;
   label?: string;
+  celebrating?: boolean;
 }) {
   const stage = Math.max(1, Math.min(5, Math.floor(level)));
   return (
@@ -23,8 +25,11 @@ export function StudentLevelIcon({
       aria-label={label ?? `Cấp ${stage} · ${STUDENT_LEVEL_NAMES[stage - 1]}`}
       data-icon-family="greenedu-duotone"
       data-level={stage}
+      data-level-up={celebrating || undefined}
     >
-      <LevelArtwork stage={stage} />
+      <g className="level-artwork">
+        <LevelArtwork stage={stage} />
+      </g>
     </svg>
   );
 }

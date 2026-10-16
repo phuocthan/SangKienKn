@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: animation nhẹ đã áp dụng — 15/10/2026
+
+Theo yêu cầu “Áp dụng” sau đề xuất skill: popup vào220ms, đóng bằng X/backdrop160ms; nút nhấn120ms; toast vào/ra160ms và vẫn tự ẩn6giây. Cây trong thẻ chương chỉ chuyển động280ms khi dữ liệu thời gian thực tế tăng qua cấp, không phát lại khi mở trang/polling/đổi màn hoặc đổi ngưỡng. Tiến độ chương dùng scaleX thay width. Giữ vị trí header/navbar, nhãn hai dòng/badge đỏ; bàn phím và reduced motion không chờ chuyển động. Không thêm thư viện hay đổi backend/nghiệp vụ/timer. Quyết định/phạm vi tại [app-design.md](app-design.md), nguồn skill tại [design-skills.md](design-skills.md).
+
+**QA mới:** build, typecheck, Prettier, diff check đạt; **32/32 E2E** trên desktop/mobile với server/SQLite riêng, gồm popup busy/retry/focus, toast, lên cấp đúng dữ liệu, reduced motion và navbar cố định. Cần kiểm tra cảm giác chuyển động trên điện thoại thật; không khẳng định60/120fps bằng mô phỏng. Ngày16/10 người dùng yêu cầu “Apply”: chốt commit/push bản animation lên origin/main cho autobuild; đối chiếu Git để xác nhận SHA. Không suy Railway đã deploy từ kết quả push. Ghi chú chưa push trong nhật ký15/10 là trạng thái cũ. Chi tiết/đường dẫn report ở đầu [session-handoff.md](session-handoff.md).
+
 ## Chốt push ba mục ôn/thi và sửa nhập bài — 15/10/2026
 
 Theo yêu cầu mới, chốt toàn bộ tính năng bài ôn/tách ba mục cùng sửa nhập sau xóa/tạo lại bài lên origin/main. Các ghi nhận “chưa push” bên dưới thuộc thời điểm trước yêu cầu này; đối chiếu Git và đầu session-handoff để tiếp tục. Không kèm database/.local/secrets và không coi push là xác nhận Railway đã deploy. Các kiểm tra chức năng đã hoàn tất trong lượt triển khai, không báo thành kiểm tra mới ở bước Git.

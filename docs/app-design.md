@@ -1,5 +1,15 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: chuyển động nhẹ theo ngữ cảnh — 15/10/2026
+
+Áp dụng `animate` và `animation-performance` từ Emil Kowalski sau khi người dùng duyệt. Giữ React/CSS hiện có, không thêm thư viện. Popup dùng opacity/scale0,97→1 trong220ms; đóng bằng X/backdrop với chuột/cảm ứng thu lại160ms. Escape, thao tác bàn phím, Hủy/lưu thành công và các lần parent chủ động bỏ popup vẫn xử lý ngay; không giữ bản sao DOM để tạo hiệu ứng thoát. Focus trap, trả focus, khóa cuộn và chặn đóng khi busy được giữ trong Modal dùng chung. Bộ đếm học/thi và thời điểm lưu/nộp không bị trì hoãn bởi animation.
+
+Nút hành động phản hồi nhấn120ms/scale0,98; hover nhấc1px chỉ trên con trỏ chính xác có hover. Thanh điều hướng giữ hình học/icon/nhãn hai dòng, không có hiệu ứng dịch vị trí khi đổi mục. Toast toàn app vào/ra160ms, vẫn tự đóng sau6giây, có nút đóng và status cho trình đọc màn hình; thông báo mới thay nội dung và hủy timer ẩn cũ. Không thêm chuyển động cho từng câu trả lời hay bảng số liệu. Bỏ transition bóng của các thẻ lớn, hover thẻ chỉ trên thiết bị hỗ trợ hover.
+
+Cây trong thẻ chương Luyện tập chỉ có nhịp lên cấp280ms khi dữ liệu server trả về **tăng thời gian và tăng cấp**, cùng ngưỡng phút/cấp. Lần tải đầu, polling không đổi, mở lại màn hình và giáo viên đổi ngưỡng không phát hiệu ứng. Baseline giữ ở App trong phiên hiện tại, không ghi thêm dữ liệu người dùng. Chỉ artwork SVG bên trong chuyển động; khung/icon đứng yên. Thanh tiến độ của thẻ chương đổi sang scaleX thay cho thay đổi width, vẫn giữ phần trăm/ARIA từ dữ liệu thật.
+
+`prefers-reduced-motion` tắt dịch/phóng cây, modal và nút; đóng popup ngay. Thao tác bàn phím không chờ transition popup/nút/toast. CSS mới dùng transform/opacity/translate, không `transition: all`, không `will-change` đại trà, không cập nhật React từng frame. Trình duyệt thiếu `@starting-style` mở popup/thông báo ngay và vẫn dùng được đầy đủ. Độ mượt thực tế cần xem trên điện thoại thật; mô phỏng mobile không chứng minh60/120fps.
+
 ## Hiện hành: tách Ôn tập / Kiểm tra săn thưởng / Kiểm tra online — 15/10/2026
 
 Ba tab trong khu vực ôn/thi, giữ thanh điều hướng chính5vị trí, icon không dịch khi đổi tab. Tab mobile cùng hàng, nhãn tối đa2dòng, nút44px; không thêm slogan hoặc khối giới thiệu lớn. URL lưu mục đang mở và giữ mã lượt thi khi reload.
