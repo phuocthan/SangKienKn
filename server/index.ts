@@ -5,6 +5,7 @@ import { createApp } from "./app.js";
 import { openDatabase, seedDemo } from "./db.js";
 import { sweepLearningExams } from "./learning.js";
 import {expireStudySessions} from './class-management.js';
+import { sweepWeeklyPractice } from './weekly-practice.js';
 import { readWelcomeConfig, welcomeWorker } from "./welcome-email.js";
 
 const production = process.env.NODE_ENV === "production";
@@ -35,6 +36,7 @@ const examSweep = setInterval(() => {
   try {
     sweepLearningExams(db);
     expireStudySessions(db,Date.now());
+    sweepWeeklyPractice(db,Date.now());
   } catch (error) {
     console.error("Exam sweep:", error);
   }

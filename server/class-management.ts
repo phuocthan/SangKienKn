@@ -106,6 +106,7 @@ export function terminateStudy(db: DatabaseSync, id: string, reason: string) {
   db.exec("BEGIN IMMEDIATE");
   try {
     if (reason === "tabs" || reason === "idle") {
+      db.prepare("DELETE FROM weekly_practice_credit WHERE session_id=?").run(id);
       db.prepare(
         "UPDATE progress SET seconds=MAX(0,seconds-?) WHERE student_id=? AND chapter_id=?",
       ).run(Number(c.credited_ms) / 1000, c.student_id, c.chapter_id);

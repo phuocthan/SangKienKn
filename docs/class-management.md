@@ -1,8 +1,13 @@
-### Submenu hiện hành — 16/10/2026
+# Quản lý lớp: quyền học tập và quy tắc phiên
+
+## Mức luyện tập tối thiểu mỗi tuần — 16/10/2026
+
+Cài đặt chung có thêm số phút tối thiểu theo lớp/môn và báo cáo hai danh sách Đã hoàn thành / Chưa hoàn thành. Tuần00:00thứHai–12:00Chủnhật giờ Việt Nam; thay đổi mức áp dụng tuần sau, lịch sử giữ mức và roster đã giao. Không thay cấp độ từng chương hoặc quyền kiểm tra. [Đặc tả đầy đủ](weekly-practice.md).
+
+## Submenu hiện hành — 16/10/2026
 
 Sidebar Quản lý lớp mở tab **Học sinh**, submenu ngang **Học sinh / Chương học / Cài đặt chung** thay ba nút cuộn cũ. Chỉ hiện vùng đang chọn, giữ nháp khi chuyển; route class-settings/class-chapters/class-general lưu cùng lớp trong URL và khôi phục khi reload. Phân quyền/API/nghiệp vụ phía dưới giữ nguyên. Thiết kế ở đầu app-design.
 
- Quản lý lớp: quyền học tập và quy tắc phiên
 
 ## Điều hướng hiện hành — 16/10/2026
 

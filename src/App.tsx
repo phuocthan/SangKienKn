@@ -86,6 +86,7 @@ import { searchText } from "./search";
 import { GardenNote } from "./GardenNote";
 import type { LearningOverview } from "../shared/learning";
 import { ClassLevelSettings } from "./ClassLevelSettings";
+import { WeeklyPractice } from "./WeeklyPractice";
 import { flushStudyClosures } from "./session-end";
 import {
   WorkspaceHeading,
@@ -1135,6 +1136,11 @@ export default function App() {
                     ) : !classLearningError ? (
                       <div className="loading-panel">Đang tải cài đặt lớp…</div>
                     ) : null}
+                    <WeeklyPractice
+                      key={current.id}
+                      classroomId={current.id}
+                      active={page === "class-general"}
+                    />
                   </section>
                   <section
                     id="class-chapters"

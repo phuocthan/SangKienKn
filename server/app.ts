@@ -54,6 +54,12 @@ import {
   LessonError,
 } from "./lesson-catalog.js";
 import { loginEmail } from "../shared/login-email.js";
+import {
+  startWeeklyPractice,
+  sweepWeeklyPractice,
+  saveWeeklyMinimum,
+  weeklyPracticeReport,
+} from "./weekly-practice.js";
 import { registerFeedbackRoutes } from "./feedback.js";
 import { archiveChapter, chapterIsArchived } from "./chapter-archive.js";
 import { activeChapterIds } from "./chapter-order.js";
@@ -109,6 +115,7 @@ export function createApp(
 ) {
   const now = options.now ?? Date.now;
   startStudyHistory(db, now());
+  startWeeklyPractice(db, now());
   const publicUser = (u: Row) => ({
     id: u.id,
     email: u.email,
@@ -287,6 +294,7 @@ export function createApp(
     if (!req.user)
       return next(new ApiError(401, "Vui lòng đăng nhập để tiếp tục."));
     expireStudySessions(db, now());
+    sweepWeeklyPractice(db, now());
     if (
       req.user.must_change &&
       !["/auth/me", "/auth/password", "/auth/logout"].includes(req.path)
@@ -1017,6 +1025,35 @@ export function createApp(
     res.json(
       classroomStudyStatistics(db, classId, period as StudyPeriod, date),
     );
+  });
+  app.get("/api/classrooms/:id/weekly-practice", (req: AppRequest, res) => {
+    teacher(req);
+    const id = String(req.params.id);
+    classroom(req, id);
+    const week = req.query.week;
+    if (
+      week !== undefined &&
+      (typeof week !== "string" || !validStudyDate(week))
+    )
+      fail(400, "Tuần không hợp lệ.");
+    const data = weeklyPracticeReport(
+      db,
+      id,
+      now(),
+      week as string | undefined,
+    );
+    if (week && !data.report) fail(404, "Chưa có báo cáo cho tuần này.");
+    res.json(data);
+  });
+  app.post("/api/classrooms/:id/weekly-practice", (req: AppRequest, res) => {
+    teacher(req);
+    const id = String(req.params.id);
+    classroom(req, id);
+    const minutes = req.body?.minutes;
+    if (!Number.isInteger(minutes) || minutes < 0 || minutes > 9360)
+      fail(400, "Nhập số phút nguyên từ 0 đến 9360.");
+    saveWeeklyMinimum(db, id, minutes, now());
+    res.json(weeklyPracticeReport(db, id, now()));
   });
   app.post("/api/classrooms/:id/students", (req: AppRequest, res) => {
     teacher(req);

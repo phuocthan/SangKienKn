@@ -1,4 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
+import { recordWeeklyPractice } from "./weekly-practice.js";
 import { recordSessionCredit } from './class-management.js';
 import {
   STUDY_DAY_MS,
@@ -128,6 +129,7 @@ export function creditStudyInterval(
       cursor = next;
     }
     recordSessionCredit(db, studentId, chapterId, creditedMs, creditedDays);
+    recordWeeklyPractice(db, studentId, chapterId, start, end);
     finishSession();
     db.exec("COMMIT");
   } catch (error) {

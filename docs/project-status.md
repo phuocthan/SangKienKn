@@ -1,5 +1,19 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Chốt remote cho báo cáo tuần — 16/10/2026
+
+Người dùng đã yêu cầu push mã báo cáo tuần, kiểm thử và tài liệu liên quan, gồm bản Word giáo viên đã bàn giao. Ghi chú chưa push bên dưới thuộc thời điểm triển khai trước yêu cầu này; trạng thái commit/remote đối chiếu trực tiếp trong Git. Không chạy lại kiểm thử ở bước Git và chưa xác nhận Railway triển khai thành công.
+
+## Luyện tập tối thiểu mỗi tuần — 16/10/2026
+
+Đã thêm cấu hình phút tối thiểu trong Quản lý lớp → Cài đặt chung; báo cáo theo tuần00:00thứHai–12:00Chủnhật giờ Việt Nam, hai danh sách đạt/chưa đạt và thời gian còn thiếu. Ghi khoảng thời gian chính xác, snapshot mức/roster, giữ tuần cũ, hủy credit phiên vi phạm; migration bổ sung, không sửa dữ liệu thật. [Nghiệp vụ](weekly-practice.md), thiết kế đầu app-design. Backend Railway cần triển khai mới để UI local dùng được; chưa push/deploy cho lượt này. QA:171/171backend đạt; E2E rộng28/30 và6/6weekly xác nhận cuối đạt sau sửa harness/payload, không cộng lượt trùng. TypeScript/build đạt, ảnhdesktop/mobile đã xem; chi tiết đầu bàn giao.
+
+## Tài liệu Word cho giáo viên — 16/10/2026
+
+Đã tạo `artifacts/documents/GreenEdu_Huong_dan_giao_vien.docx` gồm11trang: tóm tắt menu, tạo lớp/tài khoản học sinh, chương/bài/ngân hàng, ôn tập, cấp độ và ngưỡng phiên, săn thưởng/duyệt điểm, kiểm tra X/Y, nhóm/gia hạn/nộp bài, vườn/thống kê, góp ý/phản biện và xử lý tình huống. Đối chiếu mã39fcad4 và đặc tả hiện hành, không lấy đường dẫn menu lịch sử. File không chứa tài khoản thật, mật khẩu hoặc dữ liệu học sinh. Đây là hướng dẫn sử dụng theo mã hiện có, không xác nhận Railway đã triển khai từng tính năng.
+
+Tạo bằng documents skill/python-docx trong runtime đóng gói; render_docx.py thất bại vì Windows thiếu LibreOffice. Đã dùng Microsoft Word ẩn xuất PDF và Poppler đóng gói tạo ảnh11trang để kiểm tra bố cục, dấu tiếng Việt, bảng và số trang. File PDF/ảnh/script QA ở .local/teacher-guide-20261016, chỉ bàn giao Word. Không sửa mã ứng dụng hoặc database, không chạy lại test chức năng và không tự push cho lượt tạo tài liệu. Đồng thời sửa lại dòng tiêu đề Markdown đầu app-design/class-management bị chèn lệch ở lượt trước, không thay đặc tả.
+
 ## Hiện hành: rút gọn menu, đưa Quản lý lớp ra sidebar — 16/10/2026
 
 Bổ sung theo ảnh: bỏ trạng thái/nút săn thưởng trong thẻ chương Quản lý lớp, giữ luyện tập. Quản lý đề săn thưởng vẫn ở tab Săn thưởng. TypeScript/build và lượt xác nhận6/6 E2E desktop/mobile mới đạt, gồm upload/khóa/dùng lại/xóa đề ở tab này.

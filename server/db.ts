@@ -12,6 +12,7 @@ import { ensureChapterArchiveSchema } from "./chapter-archive.js";
 import { ensureChapterOrderSchema } from "./chapter-order.js";
 import { ensureStudyHistorySchema } from "./study-history.js";
 import { ensureClassManagementSchema } from "./class-management.js";
+import { ensureWeeklyPracticeSchema } from "./weekly-practice.js";
 
 export function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -194,6 +195,7 @@ export function openDatabase(path: string) {
   ensureChapterArchiveSchema(db);
   ensureChapterOrderSchema(db);
   ensureStudyHistorySchema(db);
+  ensureWeeklyPracticeSchema(db);
   ensureClassManagementSchema(db);
   ensureLevelSettingsSchema(db);
   ensureLessonSchema(db);

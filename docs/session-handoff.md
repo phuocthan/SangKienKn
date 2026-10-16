@@ -1,5 +1,23 @@
 # Bàn giao session GreenEdu
 
+## Chốt Git cho báo cáo tuần — 16/10/2026
+
+Người dùng yêu cầu push remote sau khi hoàn thành tính năng luyện tập tối thiểu mỗi tuần. Fetch xác nhận không có commit mới trên origin/main so với HEAD 39fcad4. Đợt chốt gồm mã, kiểm thử, tài liệu báo cáo tuần và bản Word hướng dẫn giáo viên đã bàn giao; không gồm database, dữ liệu học sinh hoặc secrets. Kết quả kiểm thử phía dưới là của lượt triển khai, không chạy lại trong bước Git. Các ghi chú chưa push phía dưới là trạng thái trước yêu cầu này. Đối chiếu SHA Git để xác nhận push; chưa xác nhận Railway triển khai thành công.
+
+## Luyện tập tối thiểu mỗi tuần — 16/10/2026
+
+Yêu cầu mới: giáo viên đặt thời gian luyện tập tối thiểu hằng tuần từ00:00thứHai đến12:00trưaChủnhật, sau hạn chia hai danh sách hoàn thành/chưa hoàn thành. Giữ toàn bộ tài liệu Word và sửa tiêu đề Markdown chưa commit của lượt trước; Git mã39fcad4 trước phát triển. Không push/deploy hoặc sửa Railway/DB local chính trong lượt mới.
+
+Đã triển khai WeeklyPractice trong Cài đặt chung, API chủ lớp, module shared/server weekly-practice và migration bổ sung. Cộng thời gian luyện/ôn/sửa sai theo lớp/môn, cắt interval tại đúng hạn UTC+7, không tính thi hoặc chiều Chủ nhật. Lần cấu hình đầu áp dụng tuần đang mở; thay đổi sau áp dụng tuần sau. Mức/roster từng tuần giữ riêng, hai danh sách có số giây và thời gian còn thiếu, bộ chọn tuần, trạng thái tạm tính/kết thúc và thiếu lịch sử lần đầu. Credit theo session trong transaction ghi giờ; tab/idle loại đúng session, kể cả xác nhận muộn, khóa do giáo viên giữ giờ. Worker và API tự chốt sau hạn; không email hoặc bịa lịch sử những tuần downtime hoàn toàn. Chi tiết [weekly-practice.md](weekly-practice.md).
+
+Đọc lại redesign-existing-projects/web-design-guidelines, lấy guideline mới và giữ React/CSS/nhận diện cũ. Kiểm thử dùng .local/weekly-practice-20261016, cổng3324 và SQLite e2e riêng. **QA mới:** toàn bộ backend **171/171 đạt** (15,7giây), gồm10ca weekly/API về giờ Việt Nam, đúng mốc hạn, khoảng học qua tuần, phân quyền, lớp/roster, lịch sử mức, retry, rollback và hủy phiên muộn. TypeScript và Vite build cuối đạt (main436,59kB). Lượt rộng30E2E có28đạt/2timeout harness vì tạo lớp qua API nhưng UI chưa reload danh sách. Sau thêm reload, lượt xác nhận phát hiện lỗi frontend gửi sai cấu trúc qua helper api; đã sửa thành payload minutes trực tiếp. Bản cuối **6/6 weekly desktop/mobile đạt (10,9giây)** gồm lưu thật/reload/đổi mức giữ tuần cũ, hai danh sách và chọn lịch sử, backend cũ. Không báo lượt đầu30/30; tổng30tìnhhuống được xác nhận qua các lượt, các ca chạy lại không cộng thành số mới. Xem ảnh desktop/mobile sau chỉnh padding, không tràn ngang. Report rộng .local/weekly-practice-20261016/report.json; bản cuối recheck-report.json; log backend.log/build.log. Không dùng kết quả này để khẳng định Railway đã deploy. Backend cần triển khai Railway để API mới hoạt động ở local mặc định; không coi build/test local là đã phát hành. Bản Word11trang cũ chưa có chức năng mới, không tự viết lại bản đã bàn giao.
+
+## Tài liệu Word cho giáo viên — 16/10/2026
+
+Đã tạo `artifacts/documents/GreenEdu_Huong_dan_giao_vien.docx` gồm11trang: tóm tắt menu, tạo lớp/tài khoản học sinh, chương/bài/ngân hàng, ôn tập, cấp độ và ngưỡng phiên, săn thưởng/duyệt điểm, kiểm tra X/Y, nhóm/gia hạn/nộp bài, vườn/thống kê, góp ý/phản biện và xử lý tình huống. Đối chiếu mã39fcad4 và đặc tả hiện hành, không lấy đường dẫn menu lịch sử. File không chứa tài khoản thật, mật khẩu hoặc dữ liệu học sinh. Đây là hướng dẫn sử dụng theo mã hiện có, không xác nhận Railway đã triển khai từng tính năng.
+
+Tạo bằng documents skill/python-docx trong runtime đóng gói; render_docx.py thất bại vì Windows thiếu LibreOffice. Đã dùng Microsoft Word ẩn xuất PDF và Poppler đóng gói tạo ảnh11trang để kiểm tra bố cục, dấu tiếng Việt, bảng và số trang. File PDF/ảnh/script QA ở .local/teacher-guide-20261016, chỉ bàn giao Word. Không sửa mã ứng dụng hoặc database, không chạy lại test chức năng và không tự push cho lượt tạo tài liệu. Đồng thời sửa lại dòng tiêu đề Markdown đầu app-design/class-management bị chèn lệch ở lượt trước, không thay đặc tả.
+
 ## Đổi sidebar và vị trí nút Tạo bài ôn — 16/10/2026
 
 ## Submenu Quản lý lớp, yêu cầu push remote — 16/10/2026
