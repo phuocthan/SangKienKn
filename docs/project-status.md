@@ -8,6 +8,12 @@ Bổ sung theo ảnh: bỏ trạng thái/nút săn thưởng trong thẻ chươn
 
 **QA lượt này:** TypeScript/Vite build đạt; 36/38 E2E lượt rộng và 2/2 ca submenu sau cập nhật harness đạt trên cùng build, tổng38tình huống desktop/mobile qua hai lượt. Đã xem ảnh desktop/mobile, local5173 đang chạy; chưa commit/push/deploy trong đợt sửa menu này. Chi tiết report/giới hạn ở đầu bàn giao.
 
+## Hiện hành: ba submenu Quản lý lớp — 16/10/2026
+
+Theo yêu cầu mới, Quản lý lớp dùng cùng submenu như Ôn tập: Học sinh (mặc định), Chương học, Cài đặt chung. Chỉ hiện panel được chọn; giữ bản nháp khi đổi tab, URL lưu tab/lớp, sidebar chọn Quản lý lớp. Desktop và portrait dùng WorkspaceTabs hiện có, giữ phím mũi tên/Home/End và layout trên dock. Không đổi backend/schema/dữ liệu. Người dùng yêu cầu hoàn tất push remote; kết quả kiểm tra và Git ở đầu session-handoff. Thiết kế mới ở đầu app-design.
+
+**QA lượt submenu:** TypeScript/build đạt; 60/66 ca rộng và 6/6 xác nhận sau sửa harness đạt trên cùng build, tổng66tìnhhuống qua hai lượt. Ảnh desktop/mobile đã xem, dữ liệu test riêng; chi tiết/giới hạn ở đầu bàn giao. Chốt push theo yêu cầu, kiểm tra Git thực tế; không coi push là xác nhận Railway đã deploy.
+
 ## Chốt Git theo yêu cầu người dùng — 16/10/2026
 
 Người dùng đã yêu cầu đẩy remote sau khi sửa menu và bỏ săn thưởng khỏi thẻ chương. Fetch xác nhận HEAD/origin/main cùng9adbcff trước bước chốt, không có commit remote mới. Đợt commit gồm frontend, E2E liên quan và tài liệu thiết kế/bàn giao; không gồm .local/database/secrets. Kết quả TypeScript/build, 38tình huống qua hai lượt và 6/6 xác nhận bổ sung là kết quả các lượt triển khai phía dưới, không chạy lại hoặc coi là kiểm thử mới ở bước Git. Các ghi chú chưa push bên dưới là trạng thái trước yêu cầu này. Đối chiếu Git thực tế để xác nhận commit/push; push không xác nhận Railway deploy thành công.

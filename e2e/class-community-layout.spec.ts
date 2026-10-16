@@ -45,8 +45,6 @@ for (const role of ["teacher", "student"] as const) {
       await navigateTo(page, { name: "Quản lý lớp", exact: true });
       const titles = page.getByRole("heading", { level: 2 });
       await expect(titles).toHaveText([
-        "Quản lý cấp độ",
-        "Quản lý chương",
         "Quản lý học sinh",
       ]);
       await expect(page.locator(".roster-card")).toBeVisible();

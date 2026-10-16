@@ -98,15 +98,17 @@ test("magnifier opens the selected student; common settings persist and practice
   );
   await stats.getByRole("button", { name: "Đóng", exact: true }).click();
   await expect(magnifier).toBeFocused();
+  await navigateTo(page, { name: "Cài đặt chung", exact: true });
   const form = page.getByRole("form", { name: "Cài đặt thời gian tăng cấp" });
   await expect(
     page.getByRole("heading", { name: "Quản lý chung", exact: true }),
   ).toBeVisible();
   await form.getByLabel("Nhắc nhở khi không tương tác (giây)").fill("20");
   await form.getByRole("button", { name: "Lưu thay đổi", exact: true }).click();
-  await expect(page.locator(".toast[role=status]")).toContainText(
+  await expect(page.locator(".toast [role=status]")).toContainText(
     "Đã lưu cài đặt chung",
   );
+  await navigateTo(page, { name: "Chương học", exact: true });
   const row = page.locator(".chapter-row").filter({
     has: page.getByRole("heading", {
       name: "Chương chính sách",
@@ -139,10 +141,11 @@ test("magnifier opens the selected student; common settings persist and practice
   await page.bringToFront();
   await page.reload();
   await page.getByLabel("Chọn lớp học").selectOption("management-class");
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Cài đặt chung", exact: true });
   await expect(
     form.getByLabel("Nhắc nhở khi không tương tác (giây)"),
   ).toHaveValue("20");
+  await navigateTo(page, { name: "Chương học", exact: true });
   await expect(
     page.getByRole("button", {
       name: "Mở luyện tập · Chương chính sách",

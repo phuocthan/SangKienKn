@@ -14,6 +14,9 @@ export async function navigateTo(
       .getByRole("button", { name: "Ngân hàng câu hỏi", exact: true })
       .count()) > 0;
   const destinations = [
+    ["Học sinh", "Quản lý lớp"],
+    ["Chương học", "Quản lý lớp"],
+    ["Cài đặt chung", "Quản lý lớp"],
     ["Săn thưởng", "Ôn tập"],
     ["Kiểm tra", "Ôn tập"],
     ["Hoạt động nhóm", "Lớp học của tôi"],

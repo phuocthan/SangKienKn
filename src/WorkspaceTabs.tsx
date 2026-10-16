@@ -42,11 +42,13 @@ export function WorkspaceContent<T extends string>({
   tabs,
   page,
   onNavigate,
+  contentKey = page,
 }: {
   children: ReactNode;
   tabs?: { label: string; items: WorkspaceTab<T>[] };
   page: T;
   onNavigate: (page: T) => void;
+  contentKey?: string;
 }) {
   const mainRef = useRef<HTMLElement>(null);
 
@@ -103,7 +105,7 @@ export function WorkspaceContent<T extends string>({
         role={tabs ? "tabpanel" : undefined}
         aria-labelledby={tabs ? `workspace-tab-${page}` : undefined}
       >
-        <WorkspaceLoadBoundary key={page}>
+        <WorkspaceLoadBoundary key={contentKey}>
           <Suspense
             fallback={
               <div className="loading-panel" role="status">

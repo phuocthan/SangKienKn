@@ -147,6 +147,7 @@ test("teacher uploads a titled Word/CSV review; student selects, resumes and rep
   await page
     .getByRole("button", { name: "Câu tiếp theo", exact: true })
     .click();
+  await expect(page.locator(".question-meta")).toContainText("Câu 2/3");
   const text = await page.locator(".question-card h2").innerText();
   await page.reload();
   await expect(

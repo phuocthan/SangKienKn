@@ -7,7 +7,7 @@ async function teacher(page: Page) {
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await page.getByLabel("Chọn lớp học").selectOption("levels-class-2");
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Cài đặt chung", exact: true });
 }
 
 test("teacher saves class level minutes and persisted student milestones agree", async ({
@@ -39,13 +39,13 @@ test("teacher saves class level minutes and persisted student milestones agree",
   ).toBeDisabled();
   await input.fill("30");
   await form.getByRole("button", { name: "Lưu thay đổi" }).click();
-  await expect(page.locator(".toast[role=status]")).toContainText(
+  await expect(page.locator(".toast [role=status]")).toContainText(
     "Đã lưu cài đặt chung cho lớp.",
   );
   await page.reload();
   // Page selection resets after a normal reload; reopen the teacher settings.
   await page.getByLabel("Chọn lớp học").selectOption("levels-class-2");
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Cài đặt chung", exact: true });
   await expect(input).toHaveValue("30");
   await form.scrollIntoViewIfNeeded();
   expect(

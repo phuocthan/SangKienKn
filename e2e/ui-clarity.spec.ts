@@ -103,10 +103,10 @@ test("teacher imports both formats from one action and reaches paired classroom 
   await page.keyboard.press("Escape");
   await navigateTo(page, { name: "Quản lý lớp", exact: true });
   await page
-    .getByRole("group", { name: "Nội dung quản lý lớp" })
-    .getByRole("button", { name: "Cài đặt chung" })
+    .getByRole("tablist", { name: "Quản lý lớp", exact: true })
+    .getByRole("tab", { name: "Cài đặt chung" })
     .click();
-  await expect(page.locator("#class-general")).toBeFocused();
+  await expect(page.locator("#class-general")).toBeVisible();
   await expect(
     page.getByRole("group", { name: "Rời tab · lần", exact: true }),
   ).toBeVisible();
@@ -124,10 +124,10 @@ test("teacher imports both formats from one action and reaches paired classroom 
     page.getByRole("button", { name: "Lưu thay đổi", exact: true }),
   ).toBeDisabled();
   await page
-    .getByRole("group", { name: "Nội dung quản lý lớp" })
-    .getByRole("button", { name: "Học sinh", exact: true })
+    .getByRole("tablist", { name: "Quản lý lớp", exact: true })
+    .getByRole("tab", { name: "Học sinh", exact: true })
     .click();
-  await expect(page.locator("#class-students")).toBeFocused();
+  await expect(page.locator("#class-students")).toBeVisible();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

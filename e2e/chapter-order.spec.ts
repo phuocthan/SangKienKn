@@ -48,7 +48,7 @@ test("creation lists existing chapters; reorder persists, new chapters append an
   await dialog.getByLabel("Tên chương").fill("Chương mới");
   await dialog.getByRole("button", { name: "Lưu", exact: true }).click();
   await expect(dialog).toHaveCount(0);
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   await expect(titles(page)).toHaveText([...names, "Chương mới"]);
   await expect(page.getByLabel(/Vị trí chương/)).toHaveCount(0);
   await page.getByRole("button", { name: "Sắp xếp", exact: true }).click();
@@ -133,7 +133,7 @@ test("failed ordering keeps current positions and permits a retry", async ({
   page,
 }, info) => {
   await classroom(page, `retry-${info.project.name}`, names);
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   await page.route("**/api/classrooms/*/chapters/order", (route) =>
     route.fulfill({
       status: 503,
@@ -192,7 +192,7 @@ test("empty class creation and old server order capability have clear states", a
     await route.fulfill({ response, json: classes });
   });
   await page.reload();
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   await expect(
     page.getByRole("button", { name: "Sắp xếp", exact: true }),
   ).toBeDisabled();
@@ -207,7 +207,7 @@ test("drag works with mouse and touch, cancel discards draft and save persists",
   page,
 }, info) => {
   const id = await classroom(page, `drag-${info.project.name}`, names);
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   await page.getByRole("button", { name: "Sắp xếp", exact: true }).click();
   const dialog = page.getByRole("dialog", {
     name: "Sắp xếp chương",

@@ -39,7 +39,21 @@ test("teacher opens class management directly and creates reviews above the libr
   });
   await management.click();
   await expect(management).toHaveAttribute("aria-current", "page");
-  await expect(page.getByRole("tablist")).toHaveCount(0);
+  const managementTabs = page.getByRole("tablist", {
+    name: "Quản lý lớp",
+    exact: true,
+  });
+  await expect(managementTabs.getByRole("tab")).toHaveText([
+    "Học sinh",
+    "Chương học",
+    "Cài đặt chung",
+  ]);
+  await expect(page.locator(".roster-card")).toBeVisible();
+  await expect(page.locator("#class-chapters")).toBeHidden();
+  await expect(page.locator("#class-general")).toBeHidden();
+  await managementTabs
+    .getByRole("tab", { name: "Chương học", exact: true })
+    .click();
   await expect(
     page.getByRole("heading", { name: "Quản lý lớp", exact: true }),
   ).toBeVisible();
@@ -52,13 +66,33 @@ test("teacher opens class management directly and creates reviews above the libr
   await expect(
     page.getByRole("button", { name: "Thêm chương", exact: true }),
   ).toBeVisible();
+  await expect(page.locator(".roster-card")).toBeHidden();
+  await managementTabs
+    .getByRole("tab", { name: "Cài đặt chung", exact: true })
+    .click();
   await expect(
     page.getByRole("form", { name: "Cài đặt thời gian tăng cấp" }),
   ).toBeVisible();
-  await expect(page.locator(".roster-card")).toBeVisible();
-  await expect(page.locator(".chapter-list")).not.toContainText(
-    "Săn thưởng",
-  );
+  const warningTabs = page.getByLabel("Nhắc nhở khi rời tab (lần)", {
+    exact: true,
+  });
+  await warningTabs.fill("1");
+  await managementTabs
+    .getByRole("tab", { name: "Học sinh", exact: true })
+    .click();
+  await managementTabs
+    .getByRole("tab", { name: "Cài đặt chung", exact: true })
+    .click();
+  await expect(warningTabs).toHaveValue("1");
+  await expect(page).toHaveURL(/section=class-general/);
+  await page.reload();
+  await expect(
+    managementTabs.getByRole("tab", { name: "Cài đặt chung", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
+  await managementTabs
+    .getByRole("tab", { name: "Học sinh", exact: true })
+    .click();
+  await expect(page.locator(".chapter-list")).not.toContainText("Săn thưởng");
   await expect(
     page
       .locator(".class-chapter-access")
@@ -160,9 +194,72 @@ test("student keeps access to exams without teacher class management", async ({
   await expect(
     nav.getByRole("button", { name: "Kiểm tra", exact: true }),
   ).toHaveAttribute("aria-current", "page");
-  await page.goto("/#section=class-settings");
+  for (const section of ["class-settings", "class-chapters", "class-general"]) {
+    await page.goto(`/#section=${section}`);
+    await page.reload();
+    await expect(
+      page.getByRole("heading", { name: "Khu vườn của tôi", exact: true }),
+    ).toBeVisible();
+  }
+});
+
+test("class management tabs support keyboard navigation and fit above the portrait dock", async ({
+  page,
+}, info) => {
+  await page.request.post("/api/auth/login", {
+    data: { email: "giaovien@greenedu.nk", password: "GreenEdu123!" },
+  });
+  await page.goto("/#section=class-settings&classroom=class-demo");
+  const tabs = page.getByRole("tablist", { name: "Quản lý lớp", exact: true });
+  const nav = page.getByRole("navigation", { name: "Điều hướng chính" });
+  for (const size of [
+    { width: 320, height: 720 },
+    { width: 390, height: 844 },
+    { width: 768, height: 1024 },
+    { width: 1440, height: 1000 },
+  ]) {
+    await page.setViewportSize(size);
+    await tabs.getByRole("tab", { name: "Học sinh", exact: true }).click();
+    await tabs.getByRole("tab", { name: "Học sinh", exact: true }).focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(
+      tabs.getByRole("tab", { name: "Chương học", exact: true }),
+    ).toBeFocused();
+    await expect(page.locator("#class-chapters")).toBeVisible();
+    await expect(page.locator("#class-students")).toBeHidden();
+    await page.keyboard.press("End");
+    await expect(
+      tabs.getByRole("tab", { name: "Cài đặt chung", exact: true }),
+    ).toBeFocused();
+    await expect(page.locator("#class-general")).toBeVisible();
+    await expect(page.locator("#class-chapters")).toBeHidden();
+    await expect(
+      nav.getByRole("button", { name: "Quản lý lớp", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+    const rows = await tabs
+      .getByRole("tab")
+      .evaluateAll((nodes) => nodes.map((n) => n.getBoundingClientRect().top));
+    expect(Math.max(...rows) - Math.min(...rows)).toBeLessThan(2);
+    for (const tab of await tabs.getByRole("tab").all())
+      await expect(tab).toBeInViewport({ ratio: 1 });
+    if (size.width < 1100) {
+      const menu = (await tabs.boundingBox())!;
+      const dock = (await page.locator(".sidebar").boundingBox())!;
+      expect(Math.abs(menu.y + menu.height - dock.y)).toBeLessThan(2);
+    }
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    if (size.width === 390 || size.width === 1440)
+      await page.screenshot({
+        path: info.outputPath(`management-${size.width}.png`),
+        fullPage: true,
+      });
+  }
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Khu vườn của tôi", exact: true }),
-  ).toBeVisible();
+    tabs.getByRole("tab", { name: "Cài đặt chung", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
 });

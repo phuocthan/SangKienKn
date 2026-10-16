@@ -1,4 +1,10 @@
-# Thiết kế giao diện GreenEdu
+### Hiện hành: submenu Quản lý lớp — 16/10/2026
+
+Ba nút cuộn đến vùng nội dung trong Quản lý lớp được thay bằng **Học sinh / Chương học / Cài đặt chung**, dùng chính WorkspaceTabs như Ôn tập: tab có icon, trạng thái chọn, điều khiển mũi tên/Home/End; desktop ở đầu nội dung, portrait nằm ngay trên dock. Chỉ hiện một vùng tương ứng, mặc định Học sinh; không còn ba vùng kéo dài trên cùng trang.
+
+Sidebar vẫn chọn Quản lý lớp ở cả ba tab. Route lần lượt là section=class-settings / class-chapters / class-general, giữ classroom; tải lại mở đúng tab. Học sinh bị chuyển về trang cá nhân nếu dùng các URL quản lý. WorkspaceContent giữ cùng contentKey cho ba tab để các panel ẩn vẫn giữ DOM/form/nháp khi đổi tab; đổi lớp làm mới dữ liệu theo lớp, không gán nháp cho lớp khác. Quyền/API/lưu cài đặt/quản lý chương và học sinh giữ nguyên. Cập nhật này thay bố cục nút cuộn và mô tả không có submenu trong các mục trước bên dưới.
+
+ Thiết kế giao diện GreenEdu
 
 ## Hiện hành: Ôn tập và Quản lý lớp trên sidebar — 16/10/2026
 

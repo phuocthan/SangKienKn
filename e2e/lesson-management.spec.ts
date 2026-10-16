@@ -10,7 +10,7 @@ test("teacher adds an empty lesson, duplicate is rejected, delete can be cancell
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   const chapter = page.locator(".chapter-row").filter({
     has: page.getByRole("heading", { name: "Chương ôn I", exact: true }),
   });

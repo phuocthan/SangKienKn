@@ -2,6 +2,14 @@
 
 ## Đổi sidebar và vị trí nút Tạo bài ôn — 16/10/2026
 
+## Submenu Quản lý lớp, yêu cầu push remote — 16/10/2026
+
+Mục tiêu mới nhất: ba mục bên trong Quản lý lớp chia submenu giống Ôn tập, hoàn tất push remote. Git sạch ở3f52f10 trước sửa, fetch không có commit mới. Dùng lại redesign-existing-projects và web-design-guidelines, đọc skill và lấy guideline Vercel mới; giữ stack React/CSS/Be Vietnam Pro/Phosphor hiện có.
+
+Đã thêm route class-chapters/class-general, dùng class-settings làm tab Học sinh mặc định. Ba tab có icon/keyboard/ARIA/URL/reload, sidebar cùng active Quản lý lớp. Bỏ nút cuộn class-section-links, chỉ hiện section tương ứng qua hidden. WorkspaceContent nhận contentKey tùy chọn; ba tab quản lý dùng cùng key để không unmount form/roster khi đổi tab, giữ nháp; effect tải cấu hình theo lớp/revision và trạng thái đang ở quản lý, không tải lại khi đổi giữa ba tab. Học sinh không được vào cả ba URL quản lý. Không sửa backend hoặc dữ liệu thật.
+
+Cập nhật helper/đường đi E2E vào Chương học/Cài đặt chung; giữ assertions chức năng, bổ sung giữ nháp, default/ẩn panel, keyboard, route/reload và dock320/390/768/1440. Tests chỉ dùng server3322/SQLite .local/e2e-class-tabs-* riêng; build/config/report tại .local/class-tabs-20261016. **QA mới:** TypeScript/Vite build đạt (main430,63kB). Lượt rộng66ca có60đạt/6lỗi harness:4ca dùng selector toast trước animation và2ca đọc câu ôn trước khi chuyển câu hoàn tất. Đã sửa selector role=status bên trong toast và chờ Câu2/3 trước khi ghi nội dung, không giảm assertions; chạy xác nhận **6/6desktop/mobile đạt** trên cùng build. Tổng66tình huống được xác nhận qua hai lượt, không gọi lượt đầu66/66 hoặc cộng ca trùng. Report .local/class-tabs-20261016/report.json và recheck-report.json; bao phủ submenu/nháp/keyboard/reload/route học sinh, thống kê/CSV, cài ngưỡng, khóa luyện/săn, sắp xếp/chỉnh bài/import và bài ôn. Đã xem ảnh390/1440px; không đổi backend nên không chạy backend suite, không báo toàn bộ E2E repository đạt. Tài liệu app-design/class-management/project-status đã cập nhật; các mô tả không có submenu của lượt trước là lịch sử. Chốt commit/push origin/main theo yêu cầu sau kiểm tra; đối chiếu SHA remote trong Git, không suy Railway deploy từ Git.
+
 ## Chốt Git theo yêu cầu người dùng — 16/10/2026
 
 Người dùng đã yêu cầu đẩy remote sau khi sửa menu và bỏ săn thưởng khỏi thẻ chương. Fetch xác nhận HEAD/origin/main cùng9adbcff trước bước chốt, không có commit remote mới. Đợt commit gồm frontend, E2E liên quan và tài liệu thiết kế/bàn giao; không gồm .local/database/secrets. Kết quả TypeScript/build, 38tình huống qua hai lượt và 6/6 xác nhận bổ sung là kết quả các lượt triển khai phía dưới, không chạy lại hoặc coi là kiểm thử mới ở bước Git. Các ghi chú chưa push bên dưới là trạng thái trước yêu cầu này. Đối chiếu Git thực tế để xác nhận commit/push; push không xác nhận Railway deploy thành công.

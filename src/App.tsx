@@ -130,6 +130,8 @@ type Page =
   | "corrections"
   | "classes"
   | "class-settings"
+  | "class-chapters"
+  | "class-general"
   | "groups"
   | "questions"
   | "progress"
@@ -182,6 +184,8 @@ export default function App() {
       "corrections",
       "classes",
       "class-settings",
+      "class-chapters",
+      "class-general",
       "groups",
       "progress",
       "garden",
@@ -190,6 +194,11 @@ export default function App() {
       ? section
       : "home";
   });
+  const isClassManagementPage = [
+    "class-settings",
+    "class-chapters",
+    "class-general",
+  ].includes(page);
   const [study, setStudy] = useState<Study | null>(null);
   useEffect(() => {
     const flush = () => {
@@ -249,6 +258,8 @@ export default function App() {
           setPage((restored) =>
             restored === "classes" ||
             restored === "class-settings" ||
+            restored === "class-chapters" ||
+            restored === "class-general" ||
             restored === "progress"
               ? "home"
               : restored,
@@ -320,7 +331,7 @@ export default function App() {
   const [classLearningBusy, setClassLearningBusy] = useState(false);
   const [sortingClassId, setSortingClassId] = useState<string | null>(null);
   useEffect(() => {
-    if (!isTeacher || !current || page !== "class-settings") return;
+    if (!isTeacher || !current || !isClassManagementPage) return;
     let active = true;
     setClassLearning(null);
     setClassLearningError("");
@@ -334,7 +345,7 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [isTeacher, current?.id, page, revision]);
+  }, [isTeacher, current?.id, isClassManagementPage, revision]);
   async function updateClassLearning(
     path: string,
     body: object,
@@ -393,6 +404,8 @@ export default function App() {
         "corrections",
         "classes",
         "class-settings",
+        "class-chapters",
+        "class-general",
         "groups",
         "progress",
         "garden",
@@ -595,22 +608,33 @@ export default function App() {
       ? "learning"
       : page === "leaderboard"
         ? "garden"
-        : isTeacher &&
-            (page === "groups" || page === "progress" || page === "garden")
-          ? "classes"
-          : !isTeacher && page === "corrections"
-            ? "practice"
-            : !isTeacher && page === "groups"
-              ? "garden"
-              : !isTeacher && page === "progress"
-                ? "home"
-                : page;
+        : isTeacher && isClassManagementPage
+          ? "class-settings"
+          : isTeacher &&
+              (page === "groups" || page === "progress" || page === "garden")
+            ? "classes"
+            : !isTeacher && page === "corrections"
+              ? "practice"
+              : !isTeacher && page === "groups"
+                ? "garden"
+                : !isTeacher && page === "progress"
+                  ? "home"
+                  : page;
   const tabGroups: {
     parent: Page;
     label: string;
     items: WorkspaceTab<Page>[];
   }[] = isTeacher
     ? [
+        {
+          parent: "class-settings",
+          label: "Quản lý lớp",
+          items: [
+            { id: "class-settings", label: "Học sinh", icon: Users },
+            { id: "class-chapters", label: "Chương học", icon: Books },
+            { id: "class-general", label: "Cài đặt chung", icon: Settings },
+          ],
+        },
         {
           parent: "classes",
           label: "Lớp học của tôi",
@@ -765,7 +789,12 @@ export default function App() {
             </div>
           </div>
         </header>
-        <WorkspaceContent tabs={activeTabs} page={page} onNavigate={navigate}>
+        <WorkspaceContent
+          tabs={activeTabs}
+          page={page}
+          onNavigate={navigate}
+          contentKey={isClassManagementPage ? "class-management" : page}
+        >
           {!isTeacher && (
             <ExamNotices
               key={user.id}
@@ -1071,37 +1100,12 @@ export default function App() {
                   </section>
                 </>
               )}
-              {page === "class-settings" && (
+              {isClassManagementPage && (
                 <>
                   <PageHeading title="Quản lý lớp" />
-                  <div
-                    className="class-section-links"
-                    role="group"
-                    aria-label="Nội dung quản lý lớp"
-                  >
-                    {[
-                      ["class-students", "Học sinh"],
-                      ["class-chapters", "Chương học"],
-                      ["class-general", "Cài đặt chung"],
-                    ].map(([id, label]) => (
-                      <button
-                        className="button outline small"
-                        key={id}
-                        onClick={() => {
-                          const section = document.getElementById(id);
-                          section?.focus({ preventScroll: true });
-                          section?.scrollIntoView({
-                            block: "start",
-                            behavior: "auto",
-                          });
-                        }}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
                   <section
                     id="class-general"
+                    hidden={page !== "class-general"}
                     tabIndex={-1}
                     aria-label="Cài đặt chung"
                   >
@@ -1134,6 +1138,7 @@ export default function App() {
                   </section>
                   <section
                     id="class-chapters"
+                    hidden={page !== "class-chapters"}
                     tabIndex={-1}
                     aria-label="Chương học"
                   >
@@ -1289,6 +1294,7 @@ export default function App() {
                   </section>
                   <section
                     id="class-students"
+                    hidden={page !== "class-settings"}
                     tabIndex={-1}
                     aria-label="Quản lý học sinh"
                   >

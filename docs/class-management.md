@@ -1,4 +1,8 @@
-# Quản lý lớp: quyền học tập và quy tắc phiên
+### Submenu hiện hành — 16/10/2026
+
+Sidebar Quản lý lớp mở tab **Học sinh**, submenu ngang **Học sinh / Chương học / Cài đặt chung** thay ba nút cuộn cũ. Chỉ hiện vùng đang chọn, giữ nháp khi chuyển; route class-settings/class-chapters/class-general lưu cùng lớp trong URL và khôi phục khi reload. Phân quyền/API/nghiệp vụ phía dưới giữ nguyên. Thiết kế ở đầu app-design.
+
+ Quản lý lớp: quyền học tập và quy tắc phiên
 
 ## Điều hướng hiện hành — 16/10/2026
 

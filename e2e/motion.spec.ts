@@ -158,7 +158,7 @@ test("saved notice can be dismissed, shown again and expires automatically", asy
 }, info) => {
   await page.clock.install();
   await teacher(page);
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   for (let i = 0; i < 2; i++) {
     await page
       .getByRole("button", { name: "Thêm chương", exact: true })

@@ -14,7 +14,7 @@ test("management owns the roster, preserves honors and confirms chapter deletion
   await expect(
     page.getByRole("region", { name: "Vinh danh Top 10" }),
   ).toBeVisible();
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   await expect(page.locator(".roster-card")).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Quản lý chương", exact: true }),
@@ -32,7 +32,7 @@ test("management owns the roster, preserves honors and confirms chapter deletion
   await page.reload();
   await navigateTo(page, { name: "Ngân hàng câu hỏi", exact: true });
   await page.getByLabel("Chương câu hỏi").selectOption(id);
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   const row = page
     .locator(".chapter-row")
     .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
@@ -69,7 +69,7 @@ test("management owns the roster, preserves honors and confirms chapter deletion
   ).toBe(false);
   await navigateTo(page, { name: "Ngân hàng câu hỏi", exact: true });
   await expect(page.getByLabel("Chương câu hỏi")).not.toHaveValue(id);
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   await page.screenshot({
     path: info.outputPath("class-management.png"),
     fullPage: true,
@@ -90,7 +90,7 @@ test("old server capability keeps chapter deletion unavailable", async ({
     await route.fulfill({ response, json: classes });
   });
   await page.goto("/");
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   await expect(
     page.getByRole("button", { name: /^Xóa chương ·/ }).first(),
   ).toBeDisabled();

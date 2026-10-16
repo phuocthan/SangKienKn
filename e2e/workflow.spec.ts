@@ -563,7 +563,7 @@ test("teacher creates content and student account; student changes password, lea
     .getByRole("button", { name: "Lưu", exact: true })
     .click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Chương học", exact: true });
   await page.getByRole("button", { name: "Thêm chương", exact: true }).click();
   await page.getByLabel("Tên chương").fill("Chương 1 · Đại số");
   await page

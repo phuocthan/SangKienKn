@@ -54,7 +54,7 @@ test("teacher deletes and recreates a lesson, then uploads Word and CSV without 
     .getByRole("button", { name: "Xác nhận xóa bài", exact: true })
     .click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await navigateTo(page, { name: "Quản lý lớp" });
+  await navigateTo(page, { name: "Chương học" });
   await page.getByRole("button", { name: "Thêm bài", exact: true }).click();
   await page
     .getByRole("dialog")
