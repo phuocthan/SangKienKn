@@ -15,14 +15,14 @@ test("online creation opens on demand, keeps draft on failure and saves without 
   page,
 }, info) => {
   await teacher(page);
-  await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
+  await navigateTo(page, { name: "Ôn tập", exact: true });
   await expect(page.getByRole("button", { name: /Tạo.*kiểm tra/ })).toHaveCount(
     0,
   );
   await expect(
     page.getByRole("button", { name: "Làm mới", exact: true }),
   ).toHaveCount(0);
-  await navigateTo(page, { name: "Kiểm tra online", exact: true });
+  await navigateTo(page, { name: "Kiểm tra", exact: true });
   await expect(page.locator(".learning-form")).toHaveCount(0);
   const trigger = page.getByRole("button", {
     name: "Tạo bài kiểm tra",
@@ -89,7 +89,7 @@ test("submenu is one row above the portrait dock and leaves focused content visi
 }, info) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await teacher(page);
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Ôn tập", exact: true });
   for (const size of [
     { width: 320, height: 720 },
     { width: 390, height: 844 },
@@ -97,7 +97,7 @@ test("submenu is one row above the portrait dock and leaves focused content visi
     { width: 1440, height: 1000 },
   ]) {
     await page.setViewportSize(size);
-    const tabs = page.getByRole("tablist", { name: "Lớp học của tôi" });
+    const tabs = page.getByRole("tablist", { name: "Ôn tập", exact: true });
     await expect(tabs).toBeVisible();
     const tops = await tabs
       .getByRole("tab")
@@ -184,7 +184,7 @@ test("student review and garden keep actions, all levels and decorative fence", 
   await expect(page.getByText("TRANG CỘNG TÁC", { exact: true })).toHaveCount(
     0,
   );
-  await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
+  await navigateTo(page, { name: "Ôn tập", exact: true });
   await page.getByText("Ôn từ ngân hàng", { exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Bắt đầu ôn", exact: true }),

@@ -1,8 +1,8 @@
-# Ôn tập, kiểm tra săn thưởng và kiểm tra online
+# Ôn tập, săn thưởng và kiểm tra
 
-## Quy trình hiện hành — 15/10/2026
+## Quy trình hiện hành — cập nhật 16/10/2026
 
-Khu vực ôn/thi có ba tab cho giáo viên và học sinh: **Ôn tập**, **Kiểm tra săn thưởng**, **Kiểm tra online**. Giữ năm vị trí trên thanh điều hướng chính; Ôn tập & kiểm tra mở danh sách bài ôn, Kiểm tra online vẫn là lối tắt riêng. Chuyển giữa ba tab không đổi vị trí icon. Tab được lưu trong URL; phòng thi giữ mã lượt để tải lại đúng bài.
+Khu vực ôn/thi có ba tab cho giáo viên và học sinh: **Ôn tập**, **Săn thưởng**, **Kiểm tra**. Giữ năm vị trí trên thanh điều hướng chính; Ôn tập mở danh sách bài ôn. Giáo viên dùng submenu Kiểm tra, vị trí sidebar Kiểm tra online cũ nay là Quản lý lớp; học sinh giữ lối tắt Kiểm tra. Chuyển giữa ba tab không đổi vị trí icon. Tab được lưu trong URL; phòng thi giữ mã lượt để tải lại đúng bài. Nút Tạo bài ôn nằm trong nội dung, phía trên Bài ôn của lớp, không trên header.
 
 ### Ôn tập
 

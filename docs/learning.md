@@ -1,5 +1,9 @@
 # Cấp độ ôn tập và kiểm tra
 
+## Điều hướng hiện hành — 16/10/2026
+
+Ba tab được rút gọn thành **Ôn tập / Săn thưởng / Kiểm tra**. Sidebar Ôn tập thay Ôn tập & kiểm tra; sidebar giáo viên Quản lý lớp thay Kiểm tra online, giáo viên vào kiểm tra qua submenu Ôn tập. Học sinh giữ shortcut Kiểm tra. Nút Tạo bài ôn nằm trên Bài ôn của lớp trong nội dung. Đây là cập nhật nhãn/vị trí, không đổi quy tắc học/thi bên dưới. Xem đầu [app-design.md](app-design.md).
+
 ## Hiện hành: ba mục ôn/thi và bài ôn có tiêu đề — 15/10/2026
 
 Tách thành **Ôn tập → Kiểm tra săn thưởng → Kiểm tra online**. Giáo viên tạo bài ôn có tiêu đề và upload Word/CSV; học sinh chọn theo tiêu đề, tiếp tục/làm lại giữ lịch sử. Câu upload dùng bộ riêng, không tự đưa vào ngân hàng luyện tập. Bộ ôn ngân hàng cũ vẫn truy cập được; ôn chương/kỳ nằm trong Ôn từ ngân hàng. Săn thưởng có quản lý đề/điều kiện/vé/lượt thi/duyệt điểm riêng; online giữ tạo đề/thông báo/kết quả và các lịch kiểm tra đã lưu. Quy trình/API/migration/quyền tại [review-papers.md](review-papers.md). Các chỉ dẫn ma trận/thi theo lịch chung một trang phía dưới là luồng cũ.

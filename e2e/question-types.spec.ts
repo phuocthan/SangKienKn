@@ -168,7 +168,7 @@ test("completed review starts a fresh round without changing the old answers", a
   );
   expect(created.ok()).toBeTruthy();
   const original = await created.json();
-  await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
+  await navigateTo(page, { name: "Ôn tập", exact: true });
   await page
     .getByRole("button", { name: "Tiếp tục ôn", exact: true })
     .first()

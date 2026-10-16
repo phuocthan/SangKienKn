@@ -86,8 +86,6 @@ import { searchText } from "./search";
 import { GardenNote } from "./GardenNote";
 import type { LearningOverview } from "../shared/learning";
 import { ClassLevelSettings } from "./ClassLevelSettings";
-import { HuntAccess } from "./HuntAccess";
-import { DEFAULT_SESSION_POLICY } from "../shared/session-policy";
 import { flushStudyClosures } from "./session-end";
 import {
   WorkspaceHeading,
@@ -193,7 +191,6 @@ export default function App() {
       : "home";
   });
   const [study, setStudy] = useState<Study | null>(null);
-  const [huntChapter, setHuntChapter] = useState<string | null>(null);
   useEffect(() => {
     const flush = () => {
       void flushStudyClosures();
@@ -579,30 +576,27 @@ export default function App() {
         { id: "home", label: "Tổng quan", icon: LayoutDashboard },
         { id: "classes", label: "Lớp học của tôi", icon: ClassroomIcon },
         { id: "questions", label: "Ngân hàng câu hỏi", icon: Books },
-        { id: "learning", label: "Ôn tập & kiểm tra", icon: GraduationCap },
+        { id: "learning", label: "Ôn tập", icon: GraduationCap },
         {
-          id: "online-exams",
-          label: "Kiểm tra online",
-          icon: ClipboardList,
+          id: "class-settings",
+          label: "Quản lý lớp",
+          icon: Settings,
         },
       ]
     : [
         { id: "home", label: "Khu vườn của tôi", icon: Sprout },
         { id: "practice", label: "Luyện tập", icon: BookOpen },
-        { id: "learning", label: "Ôn tập & kiểm tra", icon: GraduationCap },
-        { id: "online-exams", label: "Kiểm tra online", icon: ClipboardList },
+        { id: "learning", label: "Ôn tập", icon: GraduationCap },
+        { id: "online-exams", label: "Kiểm tra", icon: ClipboardList },
         { id: "garden", label: "Lớp học của tôi", icon: TreeIcon },
       ];
   const parentPage: Page =
-    page === "hunt"
+    page === "hunt" || (isTeacher && page === "online-exams")
       ? "learning"
       : page === "leaderboard"
         ? "garden"
         : isTeacher &&
-            (page === "groups" ||
-              page === "progress" ||
-              page === "garden" ||
-              page === "class-settings")
+            (page === "groups" || page === "progress" || page === "garden")
           ? "classes"
           : !isTeacher && page === "corrections"
             ? "practice"
@@ -623,7 +617,6 @@ export default function App() {
           items: [
             { id: "classes", label: "Khu vườn của lớp", icon: ClassroomIcon },
             { id: "groups", label: "Hoạt động nhóm", icon: Users },
-            { id: "class-settings", label: "Quản lý lớp", icon: Settings },
           ],
         },
       ]
@@ -658,17 +651,17 @@ export default function App() {
     !study && current
       ? ["learning", "hunt", "online-exams"].includes(page)
         ? {
-            label: "Ôn tập và kiểm tra",
+            label: "Ôn tập",
             items: [
               { id: "learning" as const, label: "Ôn tập", icon: BookOpen },
               {
                 id: "hunt" as const,
-                label: "Kiểm tra săn thưởng",
+                label: "Săn thưởng",
                 icon: Trophy,
               },
               {
                 id: "online-exams" as const,
-                label: "Kiểm tra online",
+                label: "Kiểm tra",
                 icon: ClipboardList,
               },
             ],
@@ -1139,28 +1132,6 @@ export default function App() {
                       <div className="loading-panel">Đang tải cài đặt lớp…</div>
                     ) : null}
                   </section>
-                  {huntChapter &&
-                    classLearning?.chapters.some((c) => c.id === huntChapter) &&
-                    current.chapters.some((c) => c.id === huntChapter) && (
-                      <HuntAccess
-                        key={huntChapter}
-                        chapter={current.chapters.find(
-                          (c) => c.id === huntChapter,
-                        )!}
-                        state={classLearning.chapters.find(
-                          (c) => c.id === huntChapter,
-                        )!}
-                        policy={
-                          classLearning.sessionPolicy ?? DEFAULT_SESSION_POLICY
-                        }
-                        onClose={() => setHuntChapter(null)}
-                        onSaved={async () => {
-                          await reload();
-                          setRevision((r) => r + 1);
-                          setNotice("Đã cập nhật quyền săn thưởng.");
-                        }}
-                      />
-                    )}
                   <section
                     id="class-chapters"
                     tabIndex={-1}
@@ -1299,30 +1270,9 @@ export default function App() {
                                     ? "Khóa luyện tập"
                                     : "Mở luyện tập"}
                                 </button>
-                                <span
-                                  className={`chapter-exam-status ${(access?.hunt?.open ?? access?.examAllowed) ? "open" : "locked"}`}
-                                >
-                                  {(access?.hunt?.open ?? access?.examAllowed)
-                                    ? "Săn thưởng đang mở"
-                                    : "Săn thưởng đang khóa"}
-                                </span>
-                                <button
-                                  className={`button ${(access?.hunt?.open ?? access?.examAllowed) ? "danger" : "primary"} small`}
-                                  disabled={
-                                    !classLearning?.classManagement ||
-                                    classLearningBusy
-                                  }
-                                  aria-label={`${(access?.hunt?.open ?? access?.examAllowed) ? "Khóa" : "Mở"} săn thưởng · ${ch.title}`}
-                                  onClick={() => setHuntChapter(ch.id)}
-                                >
-                                  {(access?.hunt?.open ?? access?.examAllowed)
-                                    ? "Khóa săn thưởng"
-                                    : "Mở săn thưởng"}
-                                </button>
                                 {!classLearning?.classManagement && (
                                   <small>
-                                    Quyền luyện tập/săn thưởng đang chờ cập nhật
-                                    máy chủ.
+                                    Quyền luyện tập đang chờ cập nhật máy chủ.
                                   </small>
                                 )}
                               </div>

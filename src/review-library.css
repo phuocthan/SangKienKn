@@ -1,3 +1,10 @@
+.review-library-actions {
+  display: flex;
+  margin-bottom: 16px;
+}
+.review-library-actions .button {
+  min-height: 44px;
+}
 .review-library .learning-section {
   min-width: 0;
 }

@@ -25,7 +25,7 @@ for (const role of ["teacher", "student"] as const) {
         ? [
             {
               label: "Lớp học của tôi",
-              items: ["Khu vườn của lớp", "Hoạt động nhóm", "Quản lý lớp"],
+              items: ["Khu vườn của lớp", "Hoạt động nhóm"],
             },
           ]
         : [
@@ -102,24 +102,6 @@ for (const role of ["teacher", "student"] as const) {
             await expect(
               page.getByRole("button", { name: "Thêm chương", exact: true }),
             ).toHaveCount(0);
-          }
-          if (role === "teacher" && name === "Quản lý lớp") {
-            await expect(
-              page.getByRole("heading", {
-                name: "Quản lý chương",
-                exact: true,
-              }),
-            ).toBeVisible();
-            await expect(
-              page.locator(".chapter-list .chapter-row").first(),
-            ).toBeVisible();
-            await expect(
-              page.getByRole("button", { name: "Thêm chương", exact: true }),
-            ).toBeVisible();
-            await expect(
-              page.getByRole("form", { name: "Cài đặt thời gian tăng cấp" }),
-            ).toBeVisible();
-            await expect(page.locator(".roster-card")).toBeVisible();
           }
           const section = (await tabs
             .getByRole("tab", { name, exact: true })

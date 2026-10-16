@@ -1,5 +1,17 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: rút gọn menu, đưa Quản lý lớp ra sidebar — 16/10/2026
+
+Bổ sung theo ảnh: bỏ trạng thái/nút săn thưởng trong thẻ chương Quản lý lớp, giữ luyện tập. Quản lý đề săn thưởng vẫn ở tab Săn thưởng. TypeScript/build và lượt xác nhận6/6 E2E desktop/mobile mới đạt, gồm upload/khóa/dùng lại/xóa đề ở tab này.
+
+Đã pull fast-forward `bce44bc → 9adbcff`, giữ bản animation/bài ôn mới từ remote. Sidebar giáo viên là Tổng quan / Lớp học của tôi / Ngân hàng câu hỏi / Ôn tập / Quản lý lớp. Quản lý lớp thay mục Kiểm tra online cũ; submenu Lớp học của tôi chỉ còn vườn và nhóm. Ba tab Ôn tập / Săn thưởng / Kiểm tra dùng nhãn ngắn, giáo viên vẫn vào kiểm tra từ đây. Học sinh giữ shortcut Kiểm tra. Nút Tạo bài ôn chuyển vào nội dung phía trên Bài ôn của lớp. Quyết định hiện hành ở đầu [app-design.md](app-design.md); kết quả kiểm tra và trạng thái Git ở đầu [session-handoff.md](session-handoff.md). Không đổi backend/schema/dữ liệu.
+
+**QA lượt này:** TypeScript/Vite build đạt; 36/38 E2E lượt rộng và 2/2 ca submenu sau cập nhật harness đạt trên cùng build, tổng38tình huống desktop/mobile qua hai lượt. Đã xem ảnh desktop/mobile, local5173 đang chạy; chưa commit/push/deploy trong đợt sửa menu này. Chi tiết report/giới hạn ở đầu bàn giao.
+
+## Chốt Git theo yêu cầu người dùng — 16/10/2026
+
+Người dùng đã yêu cầu đẩy remote sau khi sửa menu và bỏ săn thưởng khỏi thẻ chương. Fetch xác nhận HEAD/origin/main cùng9adbcff trước bước chốt, không có commit remote mới. Đợt commit gồm frontend, E2E liên quan và tài liệu thiết kế/bàn giao; không gồm .local/database/secrets. Kết quả TypeScript/build, 38tình huống qua hai lượt và 6/6 xác nhận bổ sung là kết quả các lượt triển khai phía dưới, không chạy lại hoặc coi là kiểm thử mới ở bước Git. Các ghi chú chưa push bên dưới là trạng thái trước yêu cầu này. Đối chiếu Git thực tế để xác nhận commit/push; push không xác nhận Railway deploy thành công.
+
 ## Hiện hành: animation nhẹ đã áp dụng — 15/10/2026
 
 Theo yêu cầu “Áp dụng” sau đề xuất skill: popup vào220ms, đóng bằng X/backdrop160ms; nút nhấn120ms; toast vào/ra160ms và vẫn tự ẩn6giây. Cây trong thẻ chương chỉ chuyển động280ms khi dữ liệu thời gian thực tế tăng qua cấp, không phát lại khi mở trang/polling/đổi màn hoặc đổi ngưỡng. Tiến độ chương dùng scaleX thay width. Giữ vị trí header/navbar, nhãn hai dòng/badge đỏ; bàn phím và reduced motion không chờ chuyển động. Không thêm thư viện hay đổi backend/nghiệp vụ/timer. Quyết định/phạm vi tại [app-design.md](app-design.md), nguồn skill tại [design-skills.md](design-skills.md).

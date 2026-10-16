@@ -41,14 +41,14 @@ async function login(page: Page, teacher: boolean) {
   if (teacher)
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
   await navigateTo(page, {
-    name: teacher ? "Kiểm tra online" : "Kiểm tra online",
+    name: teacher ? "Kiểm tra" : "Kiểm tra",
     exact: true,
   });
 }
 
 async function teacherOnline(page: Page) {
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Kiểm tra online", exact: true });
+  await navigateTo(page, { name: "Kiểm tra", exact: true });
 }
 
 test("each exam groups counts and runs; tab auto-submit restores practice time before class closes; closed Excel is scoped", async ({
@@ -149,7 +149,7 @@ test("each exam groups counts and runs; tab auto-submit restores practice time b
     await student
       .getByRole("button", { name: "Kết thúc phiên", exact: true })
       .click();
-    await navigateTo(student, { name: "Kiểm tra online", exact: true });
+    await navigateTo(student, { name: "Kiểm tra", exact: true });
     // Returning from practice opens the grouped list; the submitted run stays saved.
     await expect(student.locator(".exam-room")).toHaveCount(0);
     const myGroup = student.locator(`[data-exam-id="${a}"]`);

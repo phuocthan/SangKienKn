@@ -14,12 +14,12 @@ async function login(page: Page, teacher: boolean) {
   if (teacher)
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
   await navigateTo(page, {
-    name: teacher ? "Kiểm tra online" : "Kiểm tra online",
+    name: teacher ? "Kiểm tra" : "Kiểm tra",
     exact: true,
   });
   await expect(
     page.getByRole("heading", {
-      name: teacher ? "Kiểm tra online" : "Kiểm tra online",
+      name: teacher ? "Kiểm tra" : "Kiểm tra",
       exact: true,
     }),
   ).toBeVisible();
@@ -105,7 +105,7 @@ test("online manager requires one source and supports whole chapter plus selecte
     "learning-ch2::Bài 2",
   ]);
   await acknowledgeOnlineExamCreated(page);
-  await navigateTo(page, { name: "Ôn tập & kiểm tra", exact: true });
+  await navigateTo(page, { name: "Ôn tập", exact: true });
   await expect(
     page.getByRole("heading", { name: "Ôn tập", exact: true }),
   ).toBeVisible();

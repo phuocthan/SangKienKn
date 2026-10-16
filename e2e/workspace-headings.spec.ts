@@ -21,8 +21,8 @@ for (const role of ["teacher", "student"] as const) {
             "Lớp học của tôi",
             "Hoạt động nhóm",
             "Ngân hàng câu hỏi",
-            "Ôn tập & kiểm tra",
-            "Kiểm tra online",
+            "Ôn tập",
+            "Kiểm tra",
             "Khu vườn của lớp",
             "Quản lý góp ý",
             "Tài khoản",
@@ -30,8 +30,8 @@ for (const role of ["teacher", "student"] as const) {
         : [
             "Khu vườn của tôi",
             "Luyện tập",
-            "Ôn tập & kiểm tra",
-            "Kiểm tra online",
+            "Ôn tập",
+            "Kiểm tra",
             "Hoạt động nhóm",
             "Sổ tay sửa sai",
             "Khu vườn của lớp",
@@ -91,7 +91,7 @@ for (const role of ["teacher", "student"] as const) {
             [
               "Xếp hạng chăm chỉ",
               "Hoạt động nhóm",
-              "Ôn tập & kiểm tra",
+              "Ôn tập",
               "Quản lý góp ý",
               "Góp ý",
             ].includes(name)

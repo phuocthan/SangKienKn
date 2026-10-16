@@ -1,5 +1,11 @@
 # Quản lý lớp: quyền học tập và quy tắc phiên
 
+## Điều hướng hiện hành — 16/10/2026
+
+Thẻ chương Quản lý lớp chỉ hiển thị Mở/Khóa luyện tập. Trạng thái và nút săn thưởng đã bỏ khỏi thẻ theo ảnh người dùng; mở/khóa/upload/dùng lại đề thực hiện tại Ôn tập → Săn thưởng → Đề săn thưởng theo chương. Không thay API/quyền hoặc lịch sử.
+
+Giáo viên vào **Quản lý lớp** trực tiếp từ sidebar (vị trí Kiểm tra online cũ), không qua tab Lớp học của tôi. Giữ các vùng Học sinh / Chương học / Cài đặt chung và route `class-settings`. Tab **Kiểm tra săn thưởng** được rút gọn thành **Săn thưởng**; các quyền/API/quy tắc dưới giữ nguyên.
+
 ## Điều hướng săn thưởng — 15/10/2026
 
 Giáo viên có thể mở/khóa/upload/dùng lại đề ngay tại **Kiểm tra săn thưởng → Đề săn thưởng theo chương**, ngoài các nút Quản lý lớp hiện có. Cùng `HuntAccess` và API/quyền/chính sách bên dưới; không thêm gate hoặc thay đổi vé/điểm. Thiết lập học kỳ/cách tính tỷ lệ nằm trong **Thiết lập chương** của tab này. Ôn tập theo tiêu đề/upload đã tách riêng; [quy trình hiện hành](review-papers.md).

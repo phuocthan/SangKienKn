@@ -14,12 +14,11 @@ export async function navigateTo(
       .getByRole("button", { name: "Ngân hàng câu hỏi", exact: true })
       .count()) > 0;
   const destinations = [
-    ["Ôn tập", "Ôn tập & kiểm tra"],
-    ["Kiểm tra săn thưởng", "Ôn tập & kiểm tra"],
+    ["Săn thưởng", "Ôn tập"],
+    ["Kiểm tra", "Ôn tập"],
     ["Hoạt động nhóm", "Lớp học của tôi"],
     ["Sổ tay sửa sai", "Luyện tập"],
     ["Khu vườn của lớp", "Lớp học của tôi"],
-    ["Quản lý lớp", "Lớp học của tôi"],
     ["Tiến độ học tập", "Lớp học của tôi"],
     ["Hành trình của tôi", "Khu vườn của tôi"],
     ["Xếp hạng chăm chỉ", "Lớp học của tôi"],

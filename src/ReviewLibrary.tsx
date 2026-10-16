@@ -207,20 +207,23 @@ export function ReviewLibrary({
     <div className="learning-workspace review-library">
       <WorkspaceHeading>
         <h1>Ôn tập</h1>
-        {teacher && (
+      </WorkspaceHeading>
+      {teacher && (
+        <div className="review-library-actions">
           <button
             ref={createButton}
             className="button primary"
             disabled={!data || busy}
+            aria-haspopup="dialog"
             onClick={() => {
               setFormError("");
               setCreating(true);
             }}
           >
-            <Plus size={19} /> Tạo bài ôn
+            <Plus size={19} aria-hidden="true" /> Tạo bài ôn
           </button>
-        )}
-      </WorkspaceHeading>
+        </div>
+      )}
       {error && (
         <div className="error-banner" role="alert">
           {error}

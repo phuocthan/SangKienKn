@@ -1,5 +1,15 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: Ôn tập và Quản lý lớp trên sidebar — 16/10/2026
+
+Theo ảnh chốt tiếp theo, thẻ chương trong Quản lý lớp chỉ giữ trạng thái và nút Mở/Khóa luyện tập. Bỏ trạng thái/nút Mở/Khóa săn thưởng tại đây; quản lý đề và quyền săn thưởng tập trung ở Ôn tập → Săn thưởng, không bỏ nghiệp vụ hoặc thay dữ liệu săn thưởng.
+
+Sidebar giáo viên giữ năm mục theo thứ tự **Tổng quan / Lớp học của tôi / Ngân hàng câu hỏi / Ôn tập / Quản lý lớp**. Quản lý lớp thay vị trí Kiểm tra online cũ, mở thẳng trang quản lý hiện có (Học sinh, Chương học, Cài đặt chung), không còn là tab trong Lớp học của tôi. Lớp học của tôi chỉ còn Khu vườn của lớp và Hoạt động nhóm. Khi mở Quản lý lớp hoặc tải lại URL `section=class-settings`, sidebar chọn đúng Quản lý lớp và không hiện submenu lớp học.
+
+Ba tab chung đổi thành **Ôn tập / Săn thưởng / Kiểm tra**, tiêu đề trang tương ứng cùng tên. Giáo viên vào Kiểm tra từ submenu Ôn tập; sidebar vẫn chọn Ôn tập khi đang ở Săn thưởng hoặc Kiểm tra. Học sinh giữ lối tắt sidebar **Kiểm tra** và năm mục hiện có; không có quyền quản lý lớp. Không đổi ID route, mã phòng, thông báo hoặc hành vi làm bài.
+
+Nút **Tạo bài ôn** nằm trong nội dung, ngay phía trên thẻ **Bài ôn của lớp**, không nằm trên header. Giữ nút tối thiểu44px, trạng thái disabled/busy, modal tạo và trả focus về nút sau khi đóng. Không thay màu/font/icon chung hoặc animation. Quyết định này thay các tên menu và vị trí Quản lý lớp/Tạo bài ôn trong mô tả trước ngày16/10 bên dưới.
+
 ## Hiện hành: chuyển động nhẹ theo ngữ cảnh — 15/10/2026
 
 Áp dụng `animate` và `animation-performance` từ Emil Kowalski sau khi người dùng duyệt. Giữ React/CSS hiện có, không thêm thư viện. Popup dùng opacity/scale0,97→1 trong220ms; đóng bằng X/backdrop với chuột/cảm ứng thu lại160ms. Escape, thao tác bàn phím, Hủy/lưu thành công và các lần parent chủ động bỏ popup vẫn xử lý ngay; không giữ bản sao DOM để tạo hiệu ứng thoát. Focus trap, trả focus, khóa cuộn và chặn đóng khi busy được giữ trong Modal dùng chung. Bộ đếm học/thi và thời điểm lưu/nộp không bị trì hoãn bởi animation.

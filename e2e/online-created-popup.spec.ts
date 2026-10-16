@@ -11,7 +11,7 @@ async function teacherOnline(page: Page) {
   });
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Kiểm tra online", exact: true });
+  await navigateTo(page, { name: "Kiểm tra", exact: true });
 }
 
 async function saveExam(page: Page, title: string, preparation = 2) {
@@ -106,7 +106,7 @@ test("successful creation shows the exact popup; understood keeps the exam unsta
   await page.reload();
   await expect(popup).toHaveCount(0);
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Kiểm tra online", exact: true });
+  await navigateTo(page, { name: "Kiểm tra", exact: true });
   await expect(
     group.getByRole("button", { name: "Bắt đầu kiểm tra", exact: true }),
   ).toBeEnabled();

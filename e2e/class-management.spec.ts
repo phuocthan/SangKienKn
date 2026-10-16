@@ -165,10 +165,10 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
   browser,
 }, info) => {
   await login(page, true);
-  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await navigateTo(page, { name: "Săn thưởng", exact: true });
   await page
     .getByRole("button", {
-      name: "Mở săn thưởng · Chương chính sách",
+      name: "Mở săn thưởng",
       exact: true,
     })
     .click();
@@ -198,7 +198,7 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
   await expect(dialog).toHaveCount(0);
   await expect(
     page.getByRole("button", {
-      name: "Khóa săn thưởng · Chương chính sách",
+      name: "Khóa săn thưởng",
       exact: true,
     }),
   ).toBeVisible();
@@ -207,7 +207,7 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
   let runId = "";
   try {
     await login(student);
-    await navigateTo(student, { name: "Kiểm tra săn thưởng", exact: true });
+    await navigateTo(student, { name: "Săn thưởng", exact: true });
     const card = student
       .locator(".hunt-chapter")
       .filter({ hasText: "Chương chính sách" });
@@ -223,7 +223,7 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
     await page.bringToFront();
     await page
       .getByRole("button", {
-        name: "Khóa săn thưởng · Chương chính sách",
+        name: "Khóa săn thưởng",
         exact: true,
       })
       .click();
@@ -254,7 +254,7 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
   await page.bringToFront();
   await page
     .getByRole("button", {
-      name: "Mở săn thưởng · Chương chính sách",
+      name: "Mở săn thưởng",
       exact: true,
     })
     .click();
@@ -267,7 +267,7 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
     .click();
   await page
     .getByRole("button", {
-      name: "Khóa săn thưởng · Chương chính sách",
+      name: "Khóa săn thưởng",
       exact: true,
     })
     .click();
@@ -279,7 +279,7 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
   await close.getByRole("button", { name: "Xác nhận khóa" }).click();
   await page
     .getByRole("button", {
-      name: "Mở săn thưởng · Chương chính sách",
+      name: "Mở săn thưởng",
       exact: true,
     })
     .click();

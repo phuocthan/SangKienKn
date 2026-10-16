@@ -166,7 +166,7 @@ for (const role of ["teacher", "student", "admin"] as const) {
       }
       if (viewport.width === 320 && role !== "admin") {
         const longest = nav.getByRole("button", {
-          name: role === "teacher" ? "Kiểm tra online" : "Ôn tập & kiểm tra",
+          name: role === "teacher" ? "Ngân hàng câu hỏi" : "Lớp học của tôi",
           exact: true,
         });
         await longest.click();

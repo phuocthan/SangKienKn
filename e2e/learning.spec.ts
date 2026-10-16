@@ -41,7 +41,7 @@ async function login(page: Page, teacher = false) {
   );
   if (teacher)
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
+  await navigateTo(page, { name: "Ôn tập" });
   await expect(
     page.getByRole("heading", { name: "Ôn tập", exact: true }),
   ).toBeVisible();
@@ -140,7 +140,7 @@ test("saved scheduled papers retain individual lessons, private uploads and manu
     },
   );
   expect(uploadResponse.ok()).toBeTruthy();
-  await navigateTo(page, { name: "Kiểm tra online", exact: true });
+  await navigateTo(page, { name: "Kiểm tra", exact: true });
   const bank = page
     .locator(".learning-row")
     .filter({ has: page.getByText(bankTitle, { exact: true }) })
@@ -251,13 +251,13 @@ test("student reviews semester, resumes exact question and repairs without revea
   await expect(page.locator(".question-meta")).toContainText("Câu 2/8");
   const text = await page.locator(".question-card h2").innerText();
   await page.reload();
-  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
+  await navigateTo(page, { name: "Ôn tập" });
   await page.getByRole("button", { name: "Tiếp tục ôn" }).first().click();
   await expect(page.locator(".question-meta")).toContainText("Câu 2/8");
   await expect(page.locator(".question-card h2")).toHaveText(text);
   await page.locator(".choices .choice").first().click();
   await page.reload();
-  await navigateTo(page, { name: "Ôn tập & kiểm tra" });
+  await navigateTo(page, { name: "Ôn tập" });
   await page.getByRole("button", { name: "Tiếp tục ôn" }).first().click();
   await expect(page.locator(".choices .choice").first()).toHaveAttribute(
     "aria-pressed",
@@ -279,7 +279,7 @@ test("student reviews semester, resumes exact question and repairs without revea
       ).ok(),
     ).toBeTruthy();
   const corrections = await (await page.request.get("/api/corrections")).json();
-  await navigateTo(page, { name: "Kiểm tra săn thưởng", exact: true });
+  await navigateTo(page, { name: "Săn thưởng", exact: true });
   // The API setup happens after the learning view mounts on ending the review.
   await page.bringToFront();
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
@@ -354,7 +354,7 @@ test("student uses hunt ticket and teacher approves the earned point", async ({
     ).ok(),
   ).toBeTruthy();
   await login(page);
-  await navigateTo(page, { name: "Kiểm tra săn thưởng", exact: true });
+  await navigateTo(page, { name: "Săn thưởng", exact: true });
   await repairPublishedNotebook(page);
   for (let i = 0; i < 8; i++)
     await page.request.post("/api/attempts", {
@@ -389,7 +389,7 @@ test("student uses hunt ticket and teacher approves the earned point", async ({
   await page.getByRole("button", { name: "Về danh sách", exact: true }).click();
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
   await login(page, true);
-  await navigateTo(page, { name: "Kiểm tra săn thưởng", exact: true });
+  await navigateTo(page, { name: "Săn thưởng", exact: true });
   const reward = page
     .locator(".learning-row")
     .filter({ hasText: "Săn điểm đạt từ 8,0" })
@@ -446,7 +446,7 @@ test("teacher creates a bank review and manages a saved scheduled exam; student 
     },
   );
   expect(created.ok()).toBeTruthy();
-  await navigateTo(page, { name: "Kiểm tra online", exact: true });
+  await navigateTo(page, { name: "Kiểm tra", exact: true });
   await page
     .locator(".learning-row")
     .filter({ has: page.getByText(title, { exact: true }) })
@@ -465,7 +465,7 @@ test("teacher creates a bank review and manages a saved scheduled exam; student 
   const student = await studentContext.newPage();
   try {
     await login(student);
-    await navigateTo(student, { name: "Kiểm tra online", exact: true });
+    await navigateTo(student, { name: "Kiểm tra", exact: true });
     await student
       .locator(".learning-row")
       .filter({ has: student.getByText(title, { exact: true }) })
@@ -582,7 +582,7 @@ test("leaving the tab four times submits and warnings survive reload", async ({
   expect(response.ok()).toBeTruthy();
   await page.getByRole("button", { name: "Đăng xuất", exact: true }).click();
   await login(page);
-  await navigateTo(page, { name: "Kiểm tra online", exact: true });
+  await navigateTo(page, { name: "Kiểm tra", exact: true });
   await page
     .locator(".learning-row")
     .filter({ has: page.getByText(title, { exact: true }) })

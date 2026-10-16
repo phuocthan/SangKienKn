@@ -7,7 +7,7 @@ async function teacher(page: Page) {
   });
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Kiểm tra online", exact: true });
+  await navigateTo(page, { name: "Kiểm tra", exact: true });
 }
 
 test("pointer modal exit preserves focus and keyboard reopening stays immediate", async ({

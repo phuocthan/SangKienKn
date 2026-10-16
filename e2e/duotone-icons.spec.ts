@@ -24,14 +24,14 @@ for (const role of ["teacher", "student"] as const) {
             ["Tổng quan", "SquaresFour"],
             ["Lớp học của tôi", "ChalkboardTeacher"],
             ["Ngân hàng câu hỏi", "Books"],
-            ["Ôn tập & kiểm tra", "GraduationCap"],
-            ["Kiểm tra online", "ClipboardText"],
+            ["Ôn tập", "GraduationCap"],
+            ["Quản lý lớp", "GearSix"],
           ]
         : [
             ["Khu vườn của tôi", "Plant"],
             ["Luyện tập", "BookOpenText"],
-            ["Ôn tập & kiểm tra", "GraduationCap"],
-            ["Kiểm tra online", "ClipboardText"],
+            ["Ôn tập", "GraduationCap"],
+            ["Kiểm tra", "ClipboardText"],
             ["Lớp học của tôi", "Tree"],
           ];
     for (const [label, icon] of destinations) {

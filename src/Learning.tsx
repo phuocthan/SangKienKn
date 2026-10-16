@@ -282,7 +282,7 @@ export function Learning({
       className={`learning-workspace ${onlinePage ? "online-workspace" : "hunt-workspace"} ${teacher ? "teacher-learning" : "student-learning"}`}
     >
       <WorkspaceHeading className="learning-heading learning-page-heading">
-        <h1>{onlinePage ? "Kiểm tra online" : "Kiểm tra săn thưởng"}</h1>
+        <h1>{onlinePage ? "Kiểm tra" : "Săn thưởng"}</h1>
         {teacher && onlinePage && (
           <button
             ref={createExamButtonRef}

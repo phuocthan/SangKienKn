@@ -14,7 +14,7 @@ async function login(page: Page, teacher = false) {
   await expect(page.getByRole("navigation")).toBeVisible();
   if (teacher) {
     await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-    await navigateTo(page, { name: "Kiểm tra online", exact: true });
+    await navigateTo(page, { name: "Kiểm tra", exact: true });
     await expect(
       page.getByRole("button", { name: "Tạo bài kiểm tra", exact: true }),
     ).toBeEnabled();
@@ -235,7 +235,7 @@ test("older Railway capability disables online preparation and start without sen
   await page.getByLabel("Mật khẩu", { exact: true }).fill("GreenEdu123!");
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Kiểm tra online", exact: true });
+  await navigateTo(page, { name: "Kiểm tra", exact: true });
   await expect(
     page.getByRole("button", { name: "Tạo bài kiểm tra", exact: true }),
   ).toBeEnabled();

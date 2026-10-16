@@ -37,7 +37,7 @@ test("teacher reward workspace reopens an expired paper and closes an active pap
   );
   await page.goto("/");
   await page.getByLabel("Chọn lớp học").selectOption("learning-class");
-  await navigateTo(page, { name: "Kiểm tra săn thưởng", exact: true });
+  await navigateTo(page, { name: "Săn thưởng", exact: true });
   const row = page
     .locator(".learning-row")
     .filter({ has: page.getByText("Chương ôn I", { exact: true }) })
