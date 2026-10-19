@@ -19,6 +19,7 @@ export async function navigateTo(
     ["Cài đặt chung", "Quản lý lớp"],
     ["Săn thưởng", "Ôn tập"],
     ["Kiểm tra", "Ôn tập"],
+    ["Kiểm tra online", "Ôn tập"],
     ["Hoạt động nhóm", "Lớp học của tôi"],
     ["Sổ tay sửa sai", "Luyện tập"],
     ["Khu vườn của lớp", "Lớp học của tôi"],
@@ -42,5 +43,6 @@ export async function navigateTo(
   ) {
     return;
   }
-  await page.getByRole("tab", options).click();
+  // Keep existing test intents while the submenu uses its explicit online label.
+  await page.getByRole("tab", match[0] === "Kiểm tra" ? {...options, name: "Kiểm tra online", exact: true} : options).click();
 }

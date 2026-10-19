@@ -123,7 +123,7 @@ test("teacher uploads a titled Word/CSV review; student selects, resumes and rep
     .getByRole("dialog")
     .getByRole("button", { name: "Đóng", exact: true })
     .click();
-  await tabs.getByRole("tab", { name: "Kiểm tra", exact: true }).click();
+  await tabs.getByRole("tab", { name: "Kiểm tra online", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Tạo bài kiểm tra", exact: true }),
   ).toBeVisible();
@@ -227,10 +227,10 @@ test("three learning tabs fit mobile, keep dock positions and survive reload and
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     let dock: number[] | undefined;
-    for (const name of ["Ôn tập", "Săn thưởng", "Kiểm tra"]) {
+    for (const name of ["Ôn tập", "Săn thưởng", "Kiểm tra online"]) {
       await list.getByRole("tab", { name, exact: true }).click();
       await expect(
-        page.getByRole("heading", { name, exact: true }),
+        page.getByRole("heading", { name: name === "Kiểm tra online" ? "Kiểm tra" : name, exact: true }),
       ).toBeVisible();
       const positions = await page
         .getByRole("navigation", { name: "Điều hướng chính" })
@@ -296,7 +296,7 @@ test("old backend blocks uploaded review creation and keeps the other workspaces
     form.getByRole("button", { name: "Lưu bài ôn", exact: true }),
   ).toBeDisabled();
   await form.getByRole("button", { name: "Hủy", exact: true }).click();
-  await page.getByRole("tab", { name: "Kiểm tra", exact: true }).click();
+  await page.getByRole("tab", { name: "Kiểm tra online", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Tạo bài kiểm tra", exact: true }),
   ).toBeEnabled();

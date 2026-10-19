@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   Download,
   Eye,
-  EyeOff,
   History,
   Pencil,
   Upload,
@@ -302,11 +301,18 @@ export function QuestionBank({
                   Sửa câu hỏi
                 </button>
                 <button
-                  className="button outline small"
-                  onClick={() => open({ type: "visibility", question: q })}
+                  className={`button ${q.active ? "danger" : "outline"} small`}
+                  disabled={busy || (q.active && !deleteSupported)}
+                  onClick={() =>
+                    open(
+                      q.active
+                        ? { type: "deleteQuestions", questions: [q] }
+                        : { type: "visibility", question: q },
+                    )
+                  }
                 >
-                  {q.active ? <EyeOff size={15} /> : <Eye size={15} />}
-                  {q.active ? "Ẩn câu hỏi" : "Hiện lại"}
+                  {q.active ? <Trash2 size={15} /> : <Eye size={15} />}
+                  {q.active ? "Xóa câu hỏi" : "Hiện lại"}
                 </button>
                 <button
                   className="button outline small"
@@ -330,13 +336,14 @@ export function QuestionBank({
                 : dialog.type === "history"
                   ? "Lịch sử câu hỏi"
                   : dialog.type === "deleteQuestions"
-                    ? `Xóa ${dialog.questions.length} câu hỏi`
+                    ? dialog.questions.length === 1
+                      ? "Xóa câu hỏi"
+                      : `Xóa ${dialog.questions.length} câu hỏi`
                     : dialog.type === "deleteLesson"
                       ? "Xóa cả bài học"
-                      : dialog.question.active
-                        ? "Ẩn câu hỏi"
-                        : "Hiện lại câu hỏi"
+                      : "Hiện lại câu hỏi"
           }
+          dismissible={!busy}
           onClose={() => {
             if (!busy) setDialog(null);
           }}

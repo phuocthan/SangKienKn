@@ -298,8 +298,8 @@ test("teacher imports with preview and network retry, edits/hides/restores; stud
   await expect(dialog.locator(".bank-question")).toHaveCount(2);
   await expect(dialog).toContainText("Lời giải phiên bản đầu");
   await dialog.getByRole("button", { name: "Đóng", exact: true }).click();
-  await card.getByRole("button", { name: "Ẩn câu hỏi" }).click();
-  await dialog.getByRole("button", { name: "Xác nhận", exact: true }).click();
+  await card.getByRole("button", { name: "Xóa câu hỏi" }).click();
+  await dialog.getByRole("button", { name: "Xác nhận xóa 1 câu", exact: true }).click();
   await expect(page.locator(".bank-question")).toHaveCount(1);
   await page.getByLabel("Hiện cả câu đã ẩn").check();
   await expect(card).toContainText("Đã ẩn");

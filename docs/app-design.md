@@ -1,5 +1,21 @@
 # Thiết kế giao diện GreenEdu
 
+## Nhãn submenu Kiểm tra online — 19/10/2026
+
+Theo yêu cầu mới, submenu Ôn tập / Săn thưởng / Kiểm tra đổi thành **Ôn tập / Săn thưởng / Kiểm tra online**. Chỉ đổi nhãn tab cho cả giáo viên và học sinh; tiêu đề trang Kiểm tra, lối tắt sidebar học sinh, ID online-exams, URL và chức năng giữ nguyên. Thay nhãn submenu ngắn ở các quyết định lịch sử phía dưới. Giữ các thay đổi xóa bài kiểm tra/xóa câu hỏi chưa push. Cập nhật selector tab/helper trong E2E theo nhãn mới; đây là đổi chữ giao diện, không thêm ca test hoặc sửa backend/database. Chưa push/deploy.
+
+## Nút Xóa câu hỏi thay Ẩn câu hỏi — 19/10/2026
+
+Theo ảnh người dùng, nút ở mỗi câu đang sử dụng đổi thành **Xóa câu hỏi**, icon thùng rác/màu danger, mở cùng popup và endpoint xóa nhiều câu với danh sách một ID. Popup một câu có tiêu đề Xóa câu hỏi, Hủy/Xác nhận xóa 1 câu và lời giải thích giữ lịch sử; đang xử lý chặn đóng modal/gửi lặp. Không chỉ đổi chữ trên luồng visibility: thao tác đi qua quyền/capability canDeleteQuestions và API `/chapters/:id/questions/delete` có sẵn. Câu ngừng dùng cho lượt học mới, vẫn giữ lượt làm/sổ tay/đề đã lưu; Hiện cả câu đã ẩn và Hiện lại giữ như luồng xóa nhiều câu trước. Không xóa vật lý dữ liệu lịch sử hoặc đổi backend.
+
+## Xóa bài kiểm tra — 19/10/2026
+
+Giáo viên sở hữu lớp có nút **Xóa bài kiểm tra** ở từng buổi trong mục Kiểm tra, gồm bài online và lịch kiểm tra cũ. Chỉ xóa đề chưa bắt đầu hoặc bài đã kết thúc/đóng; buổi đang thông báo/chờ/đang thi cần Đóng bài thi trước để thu bài. Bài hết hạn tự chốt lượt quá hạn trước khi kiểm tra điều kiện xóa. Không cho học sinh, giáo viên lớp khác hoặc admin thay quyền chủ lớp.
+
+Hộp xác nhận nêu rõ đề và toàn bộ bài làm/điểm/kết quả của buổi sẽ bị xóa vĩnh viễn, gợi ý tải kết quả trước; Hủy là lựa chọn an toàn. Khóa nút/đóng modal khi đang xóa, lỗi giữ modal để thử lại, thành công bỏ đúng buổi/lượt khỏi danh sách và trả focus về Tạo bài kiểm tra. Giữ nguyên ngân hàng câu hỏi, tiến độ, luyện tập/sửa sai và dữ liệu buổi khác. Không thao tác xóa nào đã được thực hiện trên dữ liệu thật trong lượt phát triển này.
+
+POST `/api/learning/exams/:id/delete` kiểm tra teacher/chủ lớp, 409 nếu buổi còn mở hoặc còn lượt active; xóa exam_tab_events, exam_activity, exam_runs, online_exam_sessions, exam_creation_requests và exam_definitions trong một transaction. Lỗi ở bất kỳ bước nào rollback toàn bộ. Không cần migration. Overview thêm capability examDeletion; frontend với backend cũ khóa nút và báo cần cập nhật Railway.
+
 ## Thống kê tính từ ngày triển khai — 19/10/2026
 
 Theo yêu cầu mới, ngày/tuần/tháng đầu tiên vẫn hiển thị thời gian đã ghi nhận như bình thường, không gắn nhãn “Lịch sử chưa đủ kỳ”. Bỏ nhãn ở tổng hợp, danh sách từng học sinh và bảng kỳ; CSV ghi “Đã theo dõi” cho cả kỳ bắt đầu giữa chừng. Giữ mốc bắt đầu trong phần Cách tính thời gian. Không thay thời gian thực, không bù dữ liệu trước triển khai; kỳ hoàn toàn trước tracking vẫn là Chưa có lịch sử. Thay quyết định hiển thị partial trong các mục lịch sử phía dưới. Giữ nguyên các sửa đổi báo cáo tuần chưa push của lượt trước; không sửa backend/database hoặc deploy.

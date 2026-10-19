@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clock3, Download } from "./icons";
+import { Clock3, Download, Trash2 } from "./icons";
 import type { ExamDefinition, LearningOverview } from "../shared/learning";
 import { api, errorMessage } from "./api";
 import { ExamMetadata } from "./ExamMetadata";
@@ -13,6 +13,7 @@ export function OnlineExamGroups({
   busy,
   onStart,
   onClose,
+  onDelete,
   onJoin,
   onOpen,
 }: {
@@ -21,6 +22,7 @@ export function OnlineExamGroups({
   busy: boolean;
   onStart: (exam: ExamDefinition) => void;
   onClose: (exam: ExamDefinition) => void;
+  onDelete: (exam: ExamDefinition) => void;
   onJoin: (exam: ExamDefinition) => void;
   onOpen: (id: string) => void;
 }) {
@@ -68,6 +70,7 @@ export function OnlineExamGroups({
             busy={busy}
             onStart={onStart}
             onClose={onClose}
+            onDelete={onDelete}
             onJoin={onJoin}
             onOpen={onOpen}
           />
@@ -85,6 +88,7 @@ function ExamGroup({
   busy,
   onStart,
   onClose,
+  onDelete,
   onJoin,
   onOpen,
 }: {
@@ -95,6 +99,7 @@ function ExamGroup({
   busy: boolean;
   onStart: (exam: ExamDefinition) => void;
   onClose: (exam: ExamDefinition) => void;
+  onDelete: (exam: ExamDefinition) => void;
   onJoin: (exam: ExamDefinition) => void;
   onOpen: (id: string) => void;
 }) {
@@ -202,6 +207,14 @@ function ExamGroup({
                   <Download size={16} /> Tải kết quả
                 </a>
               )}
+              <button
+                type="button"
+                className="button danger small"
+                disabled={busy || !data.examDeletion || (announced && !ended)}
+                onClick={() => onDelete(exam)}
+              >
+                <Trash2 size={16} /> Xóa bài kiểm tra
+              </button>
             </>
           ) : ownRun ? (
             <button
@@ -232,6 +245,13 @@ function ExamGroup({
           )}
         </div>
       </div>
+      {teacher && (!data.examDeletion || (announced && !ended)) && (
+        <p className="muted">
+          {!data.examDeletion
+            ? "Xóa bài kiểm tra đang chờ cập nhật backend Railway."
+            : "Đóng bài thi trước khi xóa."}
+        </p>
+      )}
       <details
         className="online-exam-results"
         onToggle={(event) => setExpanded(event.currentTarget.open)}

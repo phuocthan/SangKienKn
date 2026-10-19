@@ -31,6 +31,7 @@ import { HuntAccess } from "./HuntAccess";
 import type { Chapter, Classroom, User } from "./types";
 import type {
   ExamRun,
+  ExamDefinition,
   LearningChapter,
   LearningOverview,
 } from "../shared/learning";
@@ -72,6 +73,38 @@ export function Learning({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  const [deletingExam, setDeletingExam] = useState<ExamDefinition | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  function askDelete(exam: ExamDefinition) {
+    setDeleteError("");
+    setDeletingExam(exam);
+  }
+  async function deleteExam() {
+    if (busy || !deletingExam) return;
+    setBusy(true);
+    setDeleteError("");
+    try {
+      await api(`/learning/exams/${deletingExam.id}/delete`, {});
+      const id = deletingExam.id;
+      setData((current) =>
+        current
+          ? {
+              ...current,
+              exams: current.exams.filter((ex) => ex.id !== id),
+              runs: current.runs.filter((run) => run.examId !== id),
+            }
+          : current,
+      );
+      setDeletingExam(null);
+      setNotice("Đã xóa bài kiểm tra.");
+      await refresh();
+      requestAnimationFrame(() => createExamButtonRef.current?.focus());
+    } catch (cause) {
+      setDeleteError(errorMessage(cause));
+    } finally {
+      setBusy(false);
+    }
+  }
   const [examFormOpen, setExamFormOpen] = useState(false);
   const [createdOnlineExam, setCreatedOnlineExam] = useState<{
     id: string;
@@ -338,6 +371,45 @@ export function Learning({
               onClick={dismissCreatedOnlineExam}
             >
               Để sau
+            </button>
+          </div>
+        </Modal>
+      )}
+      {deletingExam && (
+        <Modal
+          title="Xóa bài kiểm tra"
+          dismissible={!busy}
+          onClose={() => setDeletingExam(null)}
+        >
+          <p>
+            Xóa bài kiểm tra <strong>{deletingExam.title}</strong>?
+          </p>
+          <p>
+            Đề và toàn bộ bài làm, điểm, kết quả của buổi này sẽ bị xóa vĩnh
+            viễn. Ngân hàng câu hỏi vẫn được giữ. Bạn nên tải kết quả trước nếu
+            cần lưu lại.
+          </p>
+          {deleteError && (
+            <p className="error-banner" role="alert">
+              {deleteError}
+            </p>
+          )}
+          <div className="modal-actions">
+            <button
+              type="button"
+              className="button secondary"
+              disabled={busy}
+              onClick={() => setDeletingExam(null)}
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              className="button danger"
+              disabled={busy}
+              onClick={() => void deleteExam()}
+            >
+              {busy ? "Đang xóa…" : "Xóa vĩnh viễn"}
             </button>
           </div>
         </Modal>
@@ -786,6 +858,7 @@ export function Learning({
                     : "Buổi kiểm tra đã kết thúc.",
                 )
               }
+              onDelete={askDelete}
               onJoin={(ex) => void act(() => startRun({ examId: ex.id }))}
               onOpen={openRun}
             />
@@ -894,6 +967,19 @@ export function Learning({
                                 : ex.delivery === "online"
                                   ? "Đã đóng"
                                   : "Mở lại"}
+                            </button>
+                            <button
+                              type="button"
+                              className="button danger small"
+                              disabled={
+                                busy ||
+                                !data.examDeletion ||
+                                (ex.enabled &&
+                                  ex.closesAt > (data.serverNow ?? Date.now()))
+                              }
+                              onClick={() => askDelete(ex)}
+                            >
+                              Xóa bài kiểm tra
                             </button>
                           </div>
                         ) : (

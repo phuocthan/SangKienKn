@@ -686,7 +686,7 @@ export default function App() {
               },
               {
                 id: "online-exams" as const,
-                label: "Kiểm tra",
+                label: "Kiểm tra online",
                 icon: ClipboardList,
               },
             ],

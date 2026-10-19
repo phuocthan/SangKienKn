@@ -95,6 +95,7 @@ export type LearningReward = {
   createdAt: number;
 };
 export type LearningOverview = {
+  examDeletion?: boolean;
   reviewPapers?: boolean;
   classManagement?: boolean;
   sessionPolicy?: SessionPolicy;

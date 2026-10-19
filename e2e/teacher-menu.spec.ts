@@ -106,7 +106,7 @@ test("teacher opens class management directly and creates reviews above the libr
   await expect(tabs.getByRole("tab")).toHaveText([
     "Ôn tập",
     "Săn thưởng",
-    "Kiểm tra",
+    "Kiểm tra online",
   ]);
   const create = page.getByRole("button", { name: "Tạo bài ôn", exact: true });
   await expect(create).toBeEnabled();
@@ -143,10 +143,10 @@ test("teacher opens class management directly and creates reviews above the libr
     path: info.outputPath("review-action.png"),
     fullPage: true,
   });
-  for (const label of ["Săn thưởng", "Kiểm tra"]) {
+  for (const label of ["Săn thưởng", "Kiểm tra online"]) {
     await tabs.getByRole("tab", { name: label, exact: true }).click();
     await expect(
-      page.getByRole("heading", { name: label, exact: true }),
+      page.getByRole("heading", { name: label === "Kiểm tra online" ? "Kiểm tra" : label, exact: true }),
     ).toBeVisible();
     await expect(
       nav.getByRole("button", { name: "Ôn tập", exact: true }),
@@ -187,7 +187,7 @@ test("student keeps access to exams without teacher class management", async ({
   await expect(
     page.getByRole("button", { name: "Tạo bài ôn", exact: true }),
   ).toHaveCount(0);
-  await page.getByRole("tab", { name: "Kiểm tra", exact: true }).click();
+  await page.getByRole("tab", { name: "Kiểm tra online", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Kiểm tra", exact: true }),
   ).toBeVisible();

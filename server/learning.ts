@@ -633,6 +633,7 @@ export function registerLearningRoutes(
       chapters,
       serverNow: now(),
       onlineExamGroups: true,
+      examDeletion: true,
       classManagement: true,
       sessionPolicy: sessionPolicy(db, String(c.id)),
       levelMinutes: classroomLevelMinutes(db, String(c.id)),
@@ -1795,6 +1796,46 @@ export function registerLearningRoutes(
         db.prepare(
           "UPDATE exam_definitions SET enabled=1,starts_at=MIN(starts_at,?) WHERE id=?",
         ).run(timestamp, e.id);
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+    res.json({ ok: true });
+  });
+  app.post("/api/learning/exams/:id/delete", (req: AppRequest, res) => {
+    teacher(req);
+    const id = String(req.params.id);
+    const exam = db
+      .prepare("SELECT * FROM exam_definitions WHERE id=?")
+      .get(id);
+    if (!exam) fail(404, "Không tìm thấy kiểm tra.");
+    classroom(req, String(exam.classroom_id));
+    sweepLearningExams(db, now());
+    const online = db
+      .prepare("SELECT started_at FROM online_exam_sessions WHERE exam_id=?")
+      .get(id);
+    if (
+      (exam.enabled &&
+        Number(exam.closes_at) > now() &&
+        (!online || online.started_at != null)) ||
+      db
+        .prepare("SELECT 1 FROM exam_runs WHERE exam_id=? AND status='active'")
+        .get(id)
+    )
+      fail(409, "Hãy đóng bài thi để thu bài học sinh trước khi xóa.");
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      db.prepare(
+        "DELETE FROM exam_tab_events WHERE run_id IN (SELECT id FROM exam_runs WHERE exam_id=?)",
+      ).run(id);
+      db.prepare(
+        "DELETE FROM exam_activity WHERE run_id IN (SELECT id FROM exam_runs WHERE exam_id=?)",
+      ).run(id);
+      db.prepare("DELETE FROM exam_runs WHERE exam_id=?").run(id);
+      db.prepare("DELETE FROM online_exam_sessions WHERE exam_id=?").run(id);
+      db.prepare("DELETE FROM exam_creation_requests WHERE exam_id=?").run(id);
+      db.prepare("DELETE FROM exam_definitions WHERE id=?").run(id);
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");

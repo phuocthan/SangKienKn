@@ -1511,3 +1511,58 @@ test("rewards require owning teacher approval; Excel contains true official aver
     403,
   );
 });
+
+
+test("only the classroom teacher can delete an exam; drafts disappear without affecting the question bank", async(t)=>{
+ const f=await fixture(t);
+ const exam=await f.official({delivery:"online",preparationMinutes:0,durationMinutes:5,requestId:randomUUID()});
+ const path=`/learning/exams/${exam.id}/delete`;
+ const count=f.db.prepare("SELECT COUNT(*) n FROM questions").get()!.n;
+ assert.equal((await f.request(path,{},f.student)).status,403);
+ assert.equal((await f.request(path,{},f.other)).status,403);
+ assert.equal((await f.request(path,{})).status,401);
+ assert.equal((await f.request('/learning/exams/missing/delete',{},f.teacher)).status,404);
+ assert.equal((await f.request(path,{},f.teacher)).status,200);
+ assert.equal(f.db.prepare("SELECT 1 FROM exam_definitions WHERE id=?").get(exam.id),undefined);
+ assert.equal(f.db.prepare("SELECT 1 FROM online_exam_sessions WHERE exam_id=?").get(exam.id),undefined);
+ assert.equal(f.db.prepare("SELECT 1 FROM exam_creation_requests WHERE exam_id=?").get(exam.id),undefined);
+ assert.equal(f.db.prepare("SELECT COUNT(*) n FROM questions").get()!.n,count);
+ assert.equal((await f.read('/classrooms/class-demo/learning',f.teacher)).exams.some((e:{id:string})=>e.id===exam.id),false);
+ assert.equal((await f.request(`/learning/exams/${exam.id}/open`,{},f.teacher)).status,404);
+});
+
+test("exam deletion requires closing active exams and atomically removes only that exam's results",async(t)=>{
+ const f=await fixture(t);
+ const exam=await f.official({delivery:"online",preparationMinutes:0,durationMinutes:5,requestId:randomUUID()});
+ const keep=await f.official({delivery:"online",preparationMinutes:0,durationMinutes:5,requestId:randomUUID()});
+ await f.post(`/learning/exams/${exam.id}/open`,{},f.teacher);
+ const run=await f.start({examId:exam.id});
+ f.db.prepare("INSERT INTO exam_tab_events VALUES(?,?,?)").run(run.id,'delete-tab',f.now());
+ const path=`/learning/exams/${exam.id}/delete`;
+ assert.equal((await f.request(path,{},f.teacher)).status,409);
+ assert.equal(f.db.prepare("SELECT status FROM exam_runs WHERE id=?").get(run.id)!.status,'active');
+ await f.post(`/learning/exams/${exam.id}/state`,{enabled:false},f.teacher);
+ f.db.exec("CREATE TRIGGER fail_exam_delete BEFORE DELETE ON exam_definitions BEGIN SELECT RAISE(ABORT,'test rollback'); END");
+ assert.equal((await f.request(path,{},f.teacher)).status,500);
+ assert.ok(f.db.prepare("SELECT 1 FROM exam_runs WHERE id=?").get(run.id));
+ assert.ok(f.db.prepare("SELECT 1 FROM exam_tab_events WHERE run_id=?").get(run.id));
+ assert.ok(f.db.prepare("SELECT 1 FROM online_exam_sessions WHERE exam_id=?").get(exam.id));
+ f.db.exec("DROP TRIGGER fail_exam_delete");
+ assert.equal((await f.request(path,{},f.teacher)).status,200);
+ for(const table of ['exam_runs','exam_creation_requests','online_exam_sessions']) assert.equal(f.db.prepare(`SELECT COUNT(*) n FROM ${table} WHERE exam_id=?`).get(exam.id)!.n,0);
+ for(const table of ['exam_tab_events','exam_activity']) assert.equal(f.db.prepare(`SELECT COUNT(*) n FROM ${table} WHERE run_id=?`).get(run.id)!.n,0);
+ assert.ok(f.db.prepare("SELECT 1 FROM exam_definitions WHERE id=?").get(keep.id));
+ assert.equal((await f.request(`/classrooms/class-demo/exam-runs`,{examId:exam.id,requestId:randomUUID()},f.student)).status,404);
+ assert.equal((await f.read('/learning/exam-notices')).notices.some((e:{id:string})=>e.id===exam.id),false);
+});
+
+
+test("expired exam can be deleted after collecting overdue runs without waiting for the worker",async(t)=>{
+ const f=await fixture(t);
+ const exam=await f.official({delivery:"online",preparationMinutes:0,durationMinutes:1,requestId:randomUUID()});
+ await f.post(`/learning/exams/${exam.id}/open`,{},f.teacher);
+ await f.start({examId:exam.id});
+ f.advance(60000);
+ assert.equal((await f.request(`/learning/exams/${exam.id}/delete`,{},f.teacher)).status,200);
+ assert.equal(f.db.prepare("SELECT 1 FROM exam_runs WHERE exam_id=?").get(exam.id),undefined);
+});

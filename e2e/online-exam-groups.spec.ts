@@ -88,7 +88,7 @@ test("each exam groups counts and runs; tab auto-submit restores practice time b
     await expect(group.locator(".online-exam-state")).toHaveText("Chuẩn bị");
     await expect(group).toContainText("Chưa ấn định");
     await expect(
-      page.getByRole("heading", { name: "Lượt thi & kết quả", exact: true }),
+      group.getByRole("button", { name: "Xem bài", exact: true }),
     ).toHaveCount(0);
     await expect(group.getByRole("link", { name: "Tải kết quả" })).toHaveCount(
       0,
@@ -211,4 +211,46 @@ test("each exam groups counts and runs; tab auto-submit restores practice time b
       });
     await context.close();
   }
+});
+
+
+test("teacher can confirm deletion of drafts and closed exams; students have no delete control",async({page,browser},info)=>{
+ await login(page,true);
+ const create=async()=>{
+  const response=await page.request.post('/api/classrooms/learning-class/exams',{data:{title:`Xóa đề ${info.project.name} ${Date.now()}`,delivery:'online',preparationMinutes:0,durationMinutes:5,chapterIds:['learning-ch1'],questionCount:2,requestId:crypto.randomUUID()}});
+  expect(response.ok()).toBeTruthy();return (await response.json()).id as string;
+ };
+ const draft=await create();
+ await page.reload();await teacherOnline(page);
+ const group=page.locator(`[data-exam-id="${draft}"]`);
+ await group.getByRole('button',{name:'Xóa bài kiểm tra',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:'Xóa bài kiểm tra',exact:true});
+ await expect(dialog).toContainText('xóa vĩnh viễn');
+ await dialog.getByRole('button',{name:'Hủy',exact:true}).click();
+ await expect(dialog).toHaveCount(0);
+ await expect(group).toBeVisible();
+ await group.getByRole('button',{name:'Xóa bài kiểm tra',exact:true}).click();
+ await page.route(`**/api/learning/exams/${draft}/delete`,r=>r.fulfill({status:500,json:{error:'Không thể xóa lúc này. Thử lại.'}}),{times:1});
+ await dialog.getByRole('button',{name:'Xóa vĩnh viễn',exact:true}).click();
+ await expect(dialog.getByRole('alert')).toContainText('Không thể xóa lúc này');
+ await expect(group).toBeVisible();
+ await page.screenshot({path:info.outputPath('delete-confirmation.png'),fullPage:true});
+ await dialog.getByRole('button',{name:'Xóa vĩnh viễn',exact:true}).click();
+ await expect(dialog).toHaveCount(0);await expect(group).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Tạo bài kiểm tra',exact:true})).toBeFocused();
+ const running=await create();
+ expect((await page.request.post(`/api/learning/exams/${running}/open`,{data:{}})).ok()).toBeTruthy();
+ await page.reload();await teacherOnline(page);
+ const active=page.locator(`[data-exam-id="${running}"]`);
+ await expect(active.getByRole('button',{name:'Xóa bài kiểm tra',exact:true})).toBeDisabled();
+ await expect(active).toContainText('Đóng bài thi trước khi xóa.');
+ await active.getByRole('button',{name:'Đóng bài thi',exact:true}).click();
+ await expect(active.getByRole('button',{name:'Xóa bài kiểm tra',exact:true})).toBeEnabled();
+ await active.getByRole('button',{name:'Xóa bài kiểm tra',exact:true}).click();
+ await dialog.getByRole('button',{name:'Xóa vĩnh viễn',exact:true}).click();
+ await expect(active).toHaveCount(0);
+ await create();
+ const context=await browser.newContext({...info.project.use});
+ try {const student=await context.newPage();await login(student,false);await expect(student.getByRole('button',{name:'Xóa bài kiểm tra',exact:true})).toHaveCount(0);}
+ finally{await context.close();}
 });

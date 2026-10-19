@@ -1,5 +1,9 @@
 # Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
+## Nút Xóa câu hỏi thay Ẩn câu hỏi — 19/10/2026
+
+Theo ảnh người dùng, nút ở mỗi câu đang sử dụng đổi thành **Xóa câu hỏi**, icon thùng rác/màu danger, mở cùng popup và endpoint xóa nhiều câu với danh sách một ID. Popup một câu có tiêu đề Xóa câu hỏi, Hủy/Xác nhận xóa 1 câu và lời giải thích giữ lịch sử; đang xử lý chặn đóng modal/gửi lặp. Không chỉ đổi chữ trên luồng visibility: thao tác đi qua quyền/capability canDeleteQuestions và API `/chapters/:id/questions/delete` có sẵn. Câu ngừng dùng cho lượt học mới, vẫn giữ lượt làm/sổ tay/đề đã lưu; Hiện cả câu đã ẩn và Hiện lại giữ như luồng xóa nhiều câu trước. Không xóa vật lý dữ liệu lịch sử hoặc đổi backend.
+
 ## Nhập sau khi xóa và tạo lại bài — 15/10/2026
 
 Khi bài đang dùng có tên tương đương với bài đã xóa (ví dụ `Bài 1: Dao động điều hoà` và `Bài 1 - Dao động điều hòa`), API ưu tiên ghép câu nhập/tạo/sửa vào tên bài đang dùng. Tên cũ trong lịch sử không được chọn trước chỉ vì trùng chính xác tên trong file và không làm bài đang dùng trở thành tên mơ hồ. Nếu thực sự có nhiều bài đang dùng tương đương, vẫn cần chọn chính xác bài nhận.

@@ -1,5 +1,29 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Phát hành Railway theo yêu cầu — 19/10/2026
+
+Người dùng yêu cầu deploy sau ba thay đổi: quyền xóa bài kiểm tra cho giáo viên, nút Xóa câu hỏi thay Ẩn câu hỏi và nhãn submenu Kiểm tra online. Kiểm tra Git không có commit mới trên origin/main; Railway liên kết SangKienKn / zooming-light / production, tự build nhánh main, volume /data hiện có. Phát hành qua commit/push GitHub, không dùng deploy SQLite local hoặc upload .local/file khóa Word. Không chỉnh cấu hình Railway hoặc dữ liệu thật.
+
+Build release cuối đạt; kiểm thử backend176/176, xóa đề10tình huống qua hai lượt, xóa câu4/4 thuộc các lượt triển khai bên dưới. Lượt menu phát hành mới **6/6 desktop/mobile đạt (16,6 giây)** trên build cuối; report .local/release-menu-20261019-report.json. Trạng thái deployment đối chiếu trong Git/CLI Railway. Các ghi chú chưa push/deploy phía dưới là trạng thái trước yêu cầu phát hành này. Không coi push là đã deploy; xác nhận SHA và trạng thái SUCCESS cùng HTTP health/tài nguyên production sau phát hành.
+
+## Nhãn submenu Kiểm tra online — 19/10/2026
+
+Theo yêu cầu mới, submenu Ôn tập / Săn thưởng / Kiểm tra đổi thành **Ôn tập / Săn thưởng / Kiểm tra online**. Chỉ đổi nhãn tab cho cả giáo viên và học sinh; tiêu đề trang Kiểm tra, lối tắt sidebar học sinh, ID online-exams, URL và chức năng giữ nguyên. Thay nhãn submenu ngắn ở các quyết định lịch sử phía dưới. Giữ các thay đổi xóa bài kiểm tra/xóa câu hỏi chưa push. Cập nhật selector tab/helper trong E2E theo nhãn mới; đây là đổi chữ giao diện, không thêm ca test hoặc sửa backend/database. Kiểm tra mới TypeScript và diff check đạt; không chạy lại E2E cho thay đổi nhãn. Chưa push/deploy.
+
+## Nút Xóa câu hỏi thay Ẩn câu hỏi — 19/10/2026
+
+Theo ảnh người dùng, nút ở mỗi câu đang sử dụng đổi thành **Xóa câu hỏi**, icon thùng rác/màu danger, mở cùng popup và endpoint xóa nhiều câu với danh sách một ID. Popup một câu có tiêu đề Xóa câu hỏi, Hủy/Xác nhận xóa 1 câu và lời giải thích giữ lịch sử; đang xử lý chặn đóng modal/gửi lặp. Không chỉ đổi chữ trên luồng visibility: thao tác đi qua quyền/capability canDeleteQuestions và API `/chapters/:id/questions/delete` có sẵn. Câu ngừng dùng cho lượt học mới, vẫn giữ lượt làm/sổ tay/đề đã lưu; Hiện cả câu đã ẩn và Hiện lại giữ như luồng xóa nhiều câu trước. Không xóa vật lý dữ liệu lịch sử hoặc đổi backend. QA mới: TypeScript/Vite build/diff check đạt; 4/4 E2E desktop/mobile đạt (15,6 giây), gồm xóa một câu, hủy, hiện lại, xóa nhiều câu/cả bài và capability backend cũ. Lượt thăm dò có2 lỗi kỳ vọng tổng số thẻ sau khi phạm vi bài tự làm mới; đã sửa kiểm tra đúng câu biến mất và chọn lại Bài 1, giữ assertions xóa/khôi phục. Report .local/question-delete-20261019/report.json, SQLite/cổng3328 riêng. Cập nhật selector workflow theo nhãn mới, chưa chạy lại toàn file workflow; không chạy lại backend vì không thay server. Giữ phần xóa bài kiểm tra chưa push của lượt trước; chưa push/deploy trong lượt này.
+
+## Xóa bài kiểm tra — 19/10/2026
+
+Giáo viên sở hữu lớp có nút **Xóa bài kiểm tra** ở từng buổi trong mục Kiểm tra, gồm bài online và lịch kiểm tra cũ. Chỉ xóa đề chưa bắt đầu hoặc bài đã kết thúc/đóng; buổi đang thông báo/chờ/đang thi cần Đóng bài thi trước để thu bài. Bài hết hạn tự chốt lượt quá hạn trước khi kiểm tra điều kiện xóa. Không cho học sinh, giáo viên lớp khác hoặc admin thay quyền chủ lớp.
+
+Hộp xác nhận nêu rõ đề và toàn bộ bài làm/điểm/kết quả của buổi sẽ bị xóa vĩnh viễn, gợi ý tải kết quả trước; Hủy là lựa chọn an toàn. Khóa nút/đóng modal khi đang xóa, lỗi giữ modal để thử lại, thành công bỏ đúng buổi/lượt khỏi danh sách và trả focus về Tạo bài kiểm tra. Giữ nguyên ngân hàng câu hỏi, tiến độ, luyện tập/sửa sai và dữ liệu buổi khác. Không thao tác xóa nào đã được thực hiện trên dữ liệu thật trong lượt phát triển này.
+
+POST `/api/learning/exams/:id/delete` kiểm tra teacher/chủ lớp, 409 nếu buổi còn mở hoặc còn lượt active; xóa exam_tab_events, exam_activity, exam_runs, online_exam_sessions, exam_creation_requests và exam_definitions trong một transaction. Lỗi ở bất kỳ bước nào rollback toàn bộ. Không cần migration. Overview thêm capability examDeletion; frontend với backend cũ khóa nút và báo cần cập nhật Railway.
+
+Đợt phát triển bắt đầu từ Git 1b791c3, chỉ có file khóa Word chưa track; giữ nguyên file đó, không đưa vào Git. Đã dùng redesign-existing-projects và web-design-guidelines; lấy guideline mới, xem ảnh hộp xác nhận desktop/mobile. QA mới: **176/176 backend đạt**, TypeScript/Vite build và diff check đạt. E2E lượt rộng 10 ca có8 đạt/2 dừng ở assertion cũ về việc không có tiêu đề lịch sử; sửa assertion sang kiểm tra nhóm buổi chưa có bài làm, giữ các assertions đếm/tham gia/thu bài/Excel phía sau. Chạy xác nhận hai ca desktop/mobile **2/2 đạt (28,1 giây)**; tổng10tình huống xác nhận qua hai lượt, không báo lượt đầu10/10 hoặc cộng thành12. Ca mới xóa desktop/mobile đã đạt từ lượt rộng: hủy/lỗi/thử lại/focus, draft/closed, khóa khi đang mở, student không có nút. SQLite/cổng3326 và build/log/report tại .local/exam-delete-20261019; lỗi SQLite trong test rollback là cố ý, dữ liệu giữ nguyên như assertion. Không push/deploy Railway trong lượt này; local5173 cần backend mới để bật quyền xóa. Bản Word giáo viên chưa cập nhật chức năng này.
+
 ## Chốt Git theo yêu cầu push — 19/10/2026
 
 Người dùng yêu cầu push các thay đổi hai mốc chốt tuần (12:00 nhắc nhở, 24:00 chốt cuối) và bỏ nhãn lịch sử chưa đủ kỳ. Fetch không có commit mới trên origin/main. Kết quả kiểm thử ghi dưới là các lượt triển khai trước bước Git, không chạy lại trong bước push. Không đưa database, secrets hoặc file khóa tạm Word lên remote. Các ghi chú chưa push phía dưới thuộc thời điểm trước yêu cầu này; đối chiếu SHA remote trong Git. Push không xác nhận Railway triển khai thành công.

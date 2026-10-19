@@ -1,5 +1,13 @@
 # Kiểm tra online do giáo viên bắt đầu
 
+## Xóa bài kiểm tra — 19/10/2026
+
+Giáo viên sở hữu lớp có nút **Xóa bài kiểm tra** ở từng buổi trong mục Kiểm tra, gồm bài online và lịch kiểm tra cũ. Chỉ xóa đề chưa bắt đầu hoặc bài đã kết thúc/đóng; buổi đang thông báo/chờ/đang thi cần Đóng bài thi trước để thu bài. Bài hết hạn tự chốt lượt quá hạn trước khi kiểm tra điều kiện xóa. Không cho học sinh, giáo viên lớp khác hoặc admin thay quyền chủ lớp.
+
+Hộp xác nhận nêu rõ đề và toàn bộ bài làm/điểm/kết quả của buổi sẽ bị xóa vĩnh viễn, gợi ý tải kết quả trước; Hủy là lựa chọn an toàn. Khóa nút/đóng modal khi đang xóa, lỗi giữ modal để thử lại, thành công bỏ đúng buổi/lượt khỏi danh sách và trả focus về Tạo bài kiểm tra. Giữ nguyên ngân hàng câu hỏi, tiến độ, luyện tập/sửa sai và dữ liệu buổi khác. Không thao tác xóa nào đã được thực hiện trên dữ liệu thật trong lượt phát triển này.
+
+POST `/api/learning/exams/:id/delete` kiểm tra teacher/chủ lớp, 409 nếu buổi còn mở hoặc còn lượt active; xóa exam_tab_events, exam_activity, exam_runs, online_exam_sessions, exam_creation_requests và exam_definitions trong một transaction. Lỗi ở bất kỳ bước nào rollback toàn bộ. Không cần migration. Overview thêm capability examDeletion; frontend với backend cũ khóa nút và báo cần cập nhật Railway.
+
 ## Điều hướng hiện hành — 15/10/2026
 
 Kiểm tra online là tab thứ3 trong khu vực **Ôn tập / Kiểm tra săn thưởng / Kiểm tra online**; lối tắt thanh điều hướng chính giữ nguyên. Ôn tập mới dùng bài có tiêu đề/đề riêng, săn thưởng có tab riêng. Online giữ các buổi thi, tạo mới/thông báo và các **Lịch kiểm tra đã lưu** từ luồng cũ; không xóa hay sửa các đề/kết quả cũ khi tách trang. [Chi tiết ôn/thi hiện hành](review-papers.md).

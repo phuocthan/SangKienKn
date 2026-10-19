@@ -48,6 +48,25 @@ test("teacher selects questions, cancels or deletes a batch, and deletes the who
   await navigateTo(page, { name: "Ngân hàng câu hỏi" });
   await page.getByLabel("Lọc theo bài học").selectOption("Bài 1");
   await expect(page.locator(".bank-question")).toHaveCount(3);
+  const single=page.locator('.bank-question').filter({hasText:'Câu kiểm thử 1'});
+  await expect(single.getByRole('button',{name:'Ẩn câu hỏi',exact:true})).toHaveCount(0);
+  await single.getByRole('button',{name:'Xóa câu hỏi',exact:true}).click();
+  const singleDialog=page.getByRole('dialog',{name:'Xóa câu hỏi',exact:true});
+  await expect(singleDialog).toContainText('Lịch sử làm bài');
+  await singleDialog.getByRole('button',{name:'Hủy',exact:true}).click();
+  await expect(page.locator('.bank-question')).toHaveCount(3);
+  await single.getByRole('button',{name:'Xóa câu hỏi',exact:true}).click();
+  await singleDialog.getByRole('button',{name:'Xác nhận xóa 1 câu',exact:true}).click();
+  await expect(singleDialog).toHaveCount(0);
+  await expect(single).toHaveCount(0);
+  await page.getByLabel('Hiện cả câu đã ẩn').check();
+  await single.getByRole('button',{name:'Hiện lại',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button',{name:'Xác nhận',exact:true}).click();
+  await expect(single).toContainText('Đang sử dụng');
+  await page.getByLabel('Hiện cả câu đã ẩn').uncheck();
+  await page.getByLabel('Lọc theo bài học').selectOption('Bài 1');
+  await expect(page.locator('.bank-question')).toHaveCount(3);
+
   await page
     .getByRole("checkbox", {
       name: "Chọn câu hỏi: Câu kiểm thử 1",
