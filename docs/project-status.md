@@ -1,5 +1,21 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Chốt Git theo yêu cầu push — 19/10/2026
+
+Người dùng yêu cầu push các thay đổi hai mốc chốt tuần (12:00 nhắc nhở, 24:00 chốt cuối) và bỏ nhãn lịch sử chưa đủ kỳ. Fetch không có commit mới trên origin/main. Kết quả kiểm thử ghi dưới là các lượt triển khai trước bước Git, không chạy lại trong bước push. Không đưa database, secrets hoặc file khóa tạm Word lên remote. Các ghi chú chưa push phía dưới thuộc thời điểm trước yêu cầu này; đối chiếu SHA remote trong Git. Push không xác nhận Railway triển khai thành công.
+
+## Thống kê tính từ ngày triển khai — 19/10/2026
+
+Theo yêu cầu mới, ngày/tuần/tháng đầu tiên vẫn hiển thị thời gian đã ghi nhận như bình thường, không gắn nhãn “Lịch sử chưa đủ kỳ”. Bỏ nhãn ở tổng hợp, danh sách từng học sinh và bảng kỳ; CSV ghi “Đã theo dõi” cho cả kỳ bắt đầu giữa chừng. Giữ mốc bắt đầu trong phần Cách tính thời gian. Không thay thời gian thực, không bù dữ liệu trước triển khai; kỳ hoàn toàn trước tracking vẫn là Chưa có lịch sử. Thay quyết định hiển thị partial trong các mục lịch sử phía dưới. Giữ nguyên các sửa đổi báo cáo tuần chưa push của lượt trước; không sửa backend/database hoặc deploy. Kiểm tra mới cho lượt này: TypeScript và git diff --check đạt; không chạy lại backend/E2E vì chỉ bỏ nhãn và đổi lời giải thích/CSV.
+
+## Hiện hành: học bù sau trưa Chủ nhật và hai lần chốt — 16/10/2026
+
+Theo yêu cầu mới, 12:00 Chủ nhật chỉ tạm chốt danh sách cho cô nhắc học sinh chưa đủ chỉ tiêu; tiếp tục cộng thời gian đến 24:00 Chủ nhật rồi chốt lần cuối (UTC+7). Tuần sau bắt đầu đúng 00:00 thứ Hai. UI có lựa chọn danh sách trưa giữ nguyên / kết quả cập nhật hoặc cuối ngày. Không tự gửi tin cho học sinh. Đặc tả [weekly-practice.md](weekly-practice.md) thay quy tắc cũ bỏ chiều Chủ nhật bên dưới.
+
+Migration bổ sung credit trước trưa, snapshot nhắc nhở và cờ tuần được tạo trước trưa; giữ dữ liệu cũ, mở lại tuần đóng trưa nếu chưa hết ngày, không bịa giờ chiều từng bị bản trước loại. Snapshot trưa giữ nguyên cả khi học bù hoặc hủy phiên muộn; kết quả cập nhật vẫn loại giờ vi phạm. Tuần tạo sau trưa không dựng snapshot giả. Chưa push/deploy hoặc thay dữ liệu thật Railway trong lượt đổi này.
+
+QA mới: backend **173/173 đạt**, TypeScript và Vite build đạt; **8/8 E2E desktop/mobile đạt** gồm học bù chuyển sang hoàn thành nhưng snapshot trưa vẫn chưa đạt, cấu hình/lịch sử/backend cũ. Đã xem ảnh mobile; kiểm tra UI giữ label/select, focus, hai danh sách responsive và trạng thái rỗng theo skills hiện có. SQLite/cổng3324 riêng; log .local/weekly-practice-20261016/sunday-backend.log, sunday-build.log và recheck-report.json. Lượt unit thăm dò cần cập nhật kỳ vọng tuần mới lúc 00:00 thứ Hai và tìm đúng học sinh trong fixture nhiều thành viên; bản suite cuối đạt như trên. Bản Word giáo viên chưa cập nhật hai mốc.
+
 ## Chốt remote cho báo cáo tuần — 16/10/2026
 
 Người dùng đã yêu cầu push mã báo cáo tuần, kiểm thử và tài liệu liên quan, gồm bản Word giáo viên đã bàn giao. Ghi chú chưa push bên dưới thuộc thời điểm triển khai trước yêu cầu này; trạng thái commit/remote đối chiếu trực tiếp trong Git. Không chạy lại kiểm thử ở bước Git và chưa xác nhận Railway triển khai thành công.

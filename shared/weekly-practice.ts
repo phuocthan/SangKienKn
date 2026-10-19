@@ -8,7 +8,12 @@ import {
 export function practiceWeek(now: number) {
   const week = studyPeriodStart(studyDate(now), "week");
   const startsAt = studyDayStart(week);
-  return { week, startsAt, closesAt: startsAt + 6.5 * STUDY_DAY_MS };
+  return {
+    week,
+    startsAt,
+    preliminaryAt: startsAt + 6.5 * STUDY_DAY_MS,
+    closesAt: startsAt + 7 * STUDY_DAY_MS,
+  };
 }
 export type WeeklyMember = {
   id: string;
@@ -27,6 +32,11 @@ export type WeeklyPracticeData = {
     minutes: number;
     closed: boolean;
     coverageStart: number;
+    preliminaryAt?: number;
+    preliminary?: {
+      completed: WeeklyMember[];
+      incomplete: WeeklyMember[];
+    } | null;
     completed: WeeklyMember[];
     incomplete: WeeklyMember[];
   };

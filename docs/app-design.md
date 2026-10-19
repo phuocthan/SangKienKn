@@ -1,8 +1,12 @@
 # Thiết kế giao diện GreenEdu
 
+## Thống kê tính từ ngày triển khai — 19/10/2026
+
+Theo yêu cầu mới, ngày/tuần/tháng đầu tiên vẫn hiển thị thời gian đã ghi nhận như bình thường, không gắn nhãn “Lịch sử chưa đủ kỳ”. Bỏ nhãn ở tổng hợp, danh sách từng học sinh và bảng kỳ; CSV ghi “Đã theo dõi” cho cả kỳ bắt đầu giữa chừng. Giữ mốc bắt đầu trong phần Cách tính thời gian. Không thay thời gian thực, không bù dữ liệu trước triển khai; kỳ hoàn toàn trước tracking vẫn là Chưa có lịch sử. Thay quyết định hiển thị partial trong các mục lịch sử phía dưới. Giữ nguyên các sửa đổi báo cáo tuần chưa push của lượt trước; không sửa backend/database hoặc deploy.
+
 ## Hiện hành báo cáo luyện tập theo tuần — 16/10/2026
 
-Quản lý lớp → Cài đặt chung thêm thẻ **Luyện tập tối thiểu mỗi tuần** sau Quản lý chung. Biểu mẫu số phút riêng, mô tả giờ00:00thứHai–12:00Chủnhật theo Việt Nam, tuần hiệu lực và trạng thái lưu/lỗi. Bên dưới có bộ chọn tuần và hai danh sách Đã hoàn thành / Chưa hoàn thành, mỗi dòng tên và thời gian, nhóm chưa đạt thêm còn thiếu. Hai cột desktop, một cột mobile; avatar/chữ/focus theo giao diện có sẵn. Hiện tạm tính khi tuần còn mở, đã kết thúc sau hạn và cảnh báo tuần đầu thiếu lịch sử; giữ nháp khi đổi tab/poll. Nghiệp vụ [weekly-practice.md](weekly-practice.md).
+Quản lý lớp → Cài đặt chung thêm thẻ **Luyện tập tối thiểu mỗi tuần** sau Quản lý chung. Biểu mẫu số phút riêng, mô tả giờ 00:00 thứ Hai–24:00 Chủ nhật theo Việt Nam, tạm chốt 12:00 Chủ nhật và vẫn tính học bù đến cuối ngày, tuần hiệu lực và trạng thái lưu/lỗi. Bên dưới có bộ chọn tuần và hai danh sách Đã hoàn thành / Chưa hoàn thành, mỗi dòng tên và thời gian, nhóm chưa đạt thêm còn thiếu. Hai cột desktop, một cột mobile; avatar/chữ/focus theo giao diện có sẵn. Có bộ chọn danh sách cập nhật/chốt cuối ngày và danh sách tạm chốt 12:00 được giữ riêng để cô nhắc nhở. Hiện tạm tính trước trưa, đã tạm chốt nhưng vẫn cộng học bù sau trưa, đã kết thúc sau cuối ngày và cảnh báo tuần đầu thiếu lịch sử; giữ nháp khi đổi tab/poll. Nghiệp vụ [weekly-practice.md](weekly-practice.md).
 
 ## Hiện hành: submenu Quản lý lớp — 16/10/2026
 

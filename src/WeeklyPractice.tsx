@@ -33,6 +33,7 @@ export function WeeklyPractice({
   const [notice, setNotice] = useState("");
   const [unsupported, setUnsupported] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [view, setView] = useState("current");
   const generation = useRef(0),
     saving = useRef(false),
     initialized = useRef(false);
@@ -109,6 +110,8 @@ export function WeeklyPractice({
     }
   }
   const report = data?.report;
+  const preliminary = view === "noon" && report?.preliminary;
+  const shown = preliminary || report;
   function list(title: string, members: WeeklyMember[], complete: boolean) {
     return (
       <section
@@ -143,9 +146,10 @@ export function WeeklyPractice({
     <section className="card weekly-practice" aria-labelledby="weekly-title">
       <h2 id="weekly-title">Luyện tập tối thiểu mỗi tuần</h2>
       <p>
-        Tính từ 00:00 thứ Hai đến 12:00 trưa Chủ nhật, giờ Việt Nam. Cộng thời
-        gian luyện tập, ôn và sửa sai được ghi nhận trong lớp/môn này; không
-        tính thời gian làm kiểm tra.
+        Tính từ 00:00 thứ Hai đến hết Chủ nhật, giờ Việt Nam. Tạm chốt lúc 12:00
+        Chủ nhật để cô nhắc các em còn thiếu; các em vẫn được học bù đến 24:00
+        Chủ nhật trước khi chốt lần cuối. Cộng thời gian luyện tập, ôn và sửa
+        sai được ghi nhận trong lớp/môn này; không tính thời gian làm kiểm tra.
       </p>
       {unsupported ? (
         <p role="status">Báo cáo tuần đang chờ cập nhật backend Railway.</p>
@@ -220,6 +224,7 @@ export function WeeklyPractice({
                 disabled={busy}
                 onChange={(e) => {
                   setWeek(e.target.value);
+                  setView("current");
                   setData((d) => (d ? { ...d, report: null } : d));
                 }}
               >
@@ -237,10 +242,41 @@ export function WeeklyPractice({
               <p>
                 <strong>
                   {report.closed
-                    ? "Đã kết thúc tuần"
-                    : "Tuần đang diễn ra · kết quả tạm tính"}
+                    ? "Đã kết thúc tuần · Chốt cuối ngày Chủ nhật"
+                    : report.preliminary
+                      ? "Đã tạm chốt 12:00 · Vẫn tính giờ học bù"
+                      : "Tuần đang diễn ra · kết quả tạm tính"}
                 </strong>
               </p>
+              {report.preliminary ? (
+                <label className="weekly-week">
+                  Danh sách hiển thị
+                  <select
+                    value={view}
+                    onChange={(e) => setView(e.target.value)}
+                  >
+                    <option value="current">
+                      {report.closed
+                        ? "Chốt cuối ngày Chủ nhật"
+                        : "Cập nhật đến hiện tại"}
+                    </option>
+                    <option value="noon">
+                      Tạm chốt 12:00 Chủ nhật · Dùng nhắc nhở
+                    </option>
+                  </select>
+                </label>
+              ) : data &&
+                data.serverNow >= (report.preliminaryAt ?? report.closesAt) ? (
+                <p className="muted">
+                  Chưa có danh sách tạm chốt 12:00 cho tuần này.
+                </p>
+              ) : null}
+              {preliminary && (
+                <p>
+                  Danh sách giữ tại mốc 12:00 Chủ nhật để cô nhắc nhở; kết quả
+                  học bù xem ở danh sách cập nhật.
+                </p>
+              )}
               <p>
                 {date(report.startsAt)} – {date(report.closesAt)} · Mức tối
                 thiểu <strong>{report.minutes} phút/học sinh</strong>.
@@ -253,12 +289,13 @@ export function WeeklyPractice({
                 </p>
               )}
               <div className="weekly-results">
-                {list("Đã hoàn thành", report.completed, true)}
-                {list("Chưa hoàn thành", report.incomplete, false)}
+                {list("Đã hoàn thành", shown!.completed, true)}
+                {list("Chưa hoàn thành", shown!.incomplete, false)}
               </div>
               <p className="muted">
-                Sau 12:00 Chủ nhật không cộng thêm vào tuần này. Phiên bị xác
-                nhận vi phạm muộn sẽ được loại khỏi báo cáo.
+                Sau 12:00 Chủ nhật vẫn cộng thời gian học đến hết ngày. Phiên bị
+                xác nhận vi phạm muộn sẽ được loại khỏi kết quả cập nhật; danh
+                sách nhắc nhở lúc 12:00 giữ nguyên.
               </p>
             </>
           ) : data && data.weeks.length > 0 && !error ? (

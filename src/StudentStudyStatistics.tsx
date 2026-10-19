@@ -126,7 +126,7 @@ export function StudentStudyStatistics({
     if (!data || loading || error) return;
     const coverageLabel = {
       none: "Chưa có lịch sử",
-      partial: "Lịch sử chưa đủ kỳ",
+      partial: "Đã theo dõi",
       full: "Đã theo dõi",
     };
     const periodLabel = { day: "Ngày", week: "Tuần", month: "Tháng" };
@@ -303,9 +303,6 @@ export function StudentStudyStatistics({
                   <div key={value}>
                     <dt>{label}</dt>
                     <dd>{timeLabel(data.summaries[value].seconds)}</dd>
-                    {data.summaries[value].coverage === "partial" && (
-                      <small>Lịch sử chưa đủ kỳ</small>
-                    )}
                   </div>
                 ))}
               </dl>
@@ -318,8 +315,8 @@ export function StudentStudyStatistics({
                     timeZone: "Asia/Ho_Chi_Minh",
                     hour12: false,
                   })}
-                  . Thời gian cũ chưa được chia theo ngày. Tuần bắt đầu thứ Hai,
-                  theo giờ Việt Nam.
+                  . Số liệu tính từ ngày triển khai, kể cả kỳ đầu chưa trọn.
+                  Tuần bắt đầu thứ Hai, theo giờ Việt Nam.
                 </p>
               </details>
               {!studentId &&
@@ -354,10 +351,6 @@ export function StudentStudyStatistics({
                               <td key={p}>
                                 {timeLabel(
                                   member.statistics.summaries[p].seconds,
-                                )}
-                                {member.statistics.summaries[p].coverage ===
-                                  "partial" && (
-                                  <small>Lịch sử chưa đủ kỳ</small>
                                 )}
                               </td>
                             ))}
@@ -409,9 +402,6 @@ export function StudentStudyStatistics({
                                   }}
                                 />
                               </div>
-                            )}
-                            {bucket.coverage === "partial" && (
-                              <small>Lịch sử chưa đủ kỳ</small>
                             )}
                           </td>
                         </tr>

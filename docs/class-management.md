@@ -2,7 +2,7 @@
 
 ## Mức luyện tập tối thiểu mỗi tuần — 16/10/2026
 
-Cài đặt chung có thêm số phút tối thiểu theo lớp/môn và báo cáo hai danh sách Đã hoàn thành / Chưa hoàn thành. Tuần00:00thứHai–12:00Chủnhật giờ Việt Nam; thay đổi mức áp dụng tuần sau, lịch sử giữ mức và roster đã giao. Không thay cấp độ từng chương hoặc quyền kiểm tra. [Đặc tả đầy đủ](weekly-practice.md).
+Cài đặt chung có thêm số phút tối thiểu theo lớp/môn và báo cáo hai danh sách Đã hoàn thành / Chưa hoàn thành. Tuần 00:00 thứ Hai–24:00 Chủ nhật giờ Việt Nam; tạm chốt lúc 12:00 Chủ nhật để nhắc nhở, tiếp tục cộng học bù và chốt lần cuối cuối ngày; thay đổi mức áp dụng tuần sau, lịch sử giữ mức và roster đã giao. Không thay cấp độ từng chương hoặc quyền kiểm tra. [Đặc tả đầy đủ](weekly-practice.md).
 
 ## Submenu hiện hành — 16/10/2026
 

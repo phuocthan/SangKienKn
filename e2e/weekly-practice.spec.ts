@@ -76,7 +76,7 @@ test("ended weeks display separate completed and incomplete students and retain 
     report: {
       week: "2026-10-12",
       startsAt: monday,
-      closesAt: monday + 6.5 * 86400000,
+      closesAt: monday + 7 * 86400000,
       minutes: 60,
       closed: true,
       coverageStart: monday,
@@ -109,7 +109,7 @@ test("ended weeks display separate completed and incomplete students and retain 
                 ...fixture.report!,
                 week: "2026-10-05",
                 startsAt: monday - 7 * 86400000,
-                closesAt: monday - 0.5 * 86400000,
+                closesAt: monday,
                 minutes: 30,
                 coverageStart: monday - 7 * 86400000,
                 incomplete: fixture.report!.incomplete.map((m) => ({
@@ -166,4 +166,60 @@ test("a server without weekly reporting clearly disables the weekly controls", a
   await expect(
     page.getByRole("button", { name: "Lưu thời gian tuần", exact: true }),
   ).toHaveCount(0);
+});
+
+test("Sunday catch-up and noon reminder lists remain separate", async ({
+  page,
+}, info) => {
+  const monday = Date.parse("2026-10-12T00:00:00+07:00");
+  const student = {
+    id: "catch-up",
+    name: "Nguyễn Học Bù",
+    seconds: 3600,
+    remainingSeconds: 0,
+  };
+  const payload: WeeklyPracticeData = {
+    serverNow: monday + 6.75 * 86400000,
+    config: { minutes: 60, effectiveWeek: "2026-10-12" },
+    weeks: [{ week: "2026-10-12", minutes: 60, closed: false }],
+    report: {
+      week: "2026-10-12",
+      startsAt: monday,
+      preliminaryAt: monday + 6.5 * 86400000,
+      closesAt: monday + 7 * 86400000,
+      minutes: 60,
+      closed: false,
+      coverageStart: monday,
+      completed: [student],
+      incomplete: [],
+      preliminary: {
+        completed: [],
+        incomplete: [{ ...student, seconds: 1200, remainingSeconds: 2400 }],
+      },
+    },
+  };
+  await page.route("**/api/classrooms/class-demo/weekly-practice*", (r) =>
+    r.fulfill({ json: payload }),
+  );
+  await teacher(page);
+  await navigateTo(page, { name: "Cài đặt chung", exact: true });
+  const panel = page.locator(".weekly-practice");
+  await expect(panel).toContainText("Đã tạm chốt 12:00 · Vẫn tính giờ học bù");
+  await expect(
+    panel.getByRole("region", { name: "Đã hoàn thành", exact: true }),
+  ).toContainText(student.name);
+  await panel.getByLabel("Danh sách hiển thị").selectOption("noon");
+  await expect(
+    panel.getByRole("region", { name: "Chưa hoàn thành", exact: true }),
+  ).toContainText(student.name);
+  await expect(panel).toContainText("Còn thiếu 0 giờ 40 phút 0 giây");
+  await panel.getByLabel("Danh sách hiển thị").selectOption("current");
+  await expect(
+    panel.getByRole("region", { name: "Đã hoàn thành", exact: true }),
+  ).toContainText(student.name);
+  await panel.scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: info.outputPath("sunday-catch-up.png"),
+    fullPage: true,
+  });
 });

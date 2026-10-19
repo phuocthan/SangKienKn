@@ -29,6 +29,30 @@ export function ensureWeeklyPracticeSchema(db: DatabaseSync) {
       week TEXT NOT NULL,credited_ms INTEGER NOT NULL CHECK(credited_ms>=0),
       PRIMARY KEY(session_id,classroom_id,week));
     CREATE INDEX IF NOT EXISTS weekly_credit_report ON weekly_practice_credit(classroom_id,week,student_id);`);
+  if (
+    !db
+      .prepare("PRAGMA table_info(weekly_practice_credit)")
+      .all()
+      .some((c) => c.name === "before_noon_ms")
+  ) {
+    db.exec(
+      "ALTER TABLE weekly_practice_credit ADD COLUMN before_noon_ms INTEGER NOT NULL DEFAULT 0; UPDATE weekly_practice_credit SET before_noon_ms=credited_ms",
+    );
+  }
+  db.exec(`CREATE TABLE IF NOT EXISTS weekly_practice_preliminary(
+    classroom_id TEXT NOT NULL,week TEXT NOT NULL,student_id TEXT NOT NULL,name TEXT NOT NULL,seconds INTEGER NOT NULL,
+    PRIMARY KEY(classroom_id,week,student_id));
+    CREATE TABLE IF NOT EXISTS weekly_practice_checkpoints(classroom_id TEXT NOT NULL,week TEXT NOT NULL,
+    PRIMARY KEY(classroom_id,week));`);
+  if (
+    !db
+      .prepare("PRAGMA table_info(weekly_practice_periods)")
+      .all()
+      .some((c) => c.name === "noon_eligible")
+  )
+    db.exec(
+      "ALTER TABLE weekly_practice_periods ADD COLUMN noon_eligible INTEGER NOT NULL DEFAULT 1",
+    );
 }
 export function startWeeklyPractice(db: DatabaseSync, now: number) {
   db.prepare(
@@ -36,7 +60,7 @@ export function startWeeklyPractice(db: DatabaseSync, now: number) {
   ).run(now);
 }
 
-// Exact interval clipping; Sunday afternoon belongs to neither learning window.
+// Count the entire week; retain exact pre-noon credit for the reminder snapshot.
 // Called inside creditStudyInterval's transaction before its session is removed.
 export function recordWeeklyPractice(
   db: DatabaseSync,
@@ -67,14 +91,15 @@ export function recordWeeklyPractice(
     const finish = Math.min(end, w.closesAt);
     if (finish > cursor)
       db.prepare(
-        `INSERT INTO weekly_practice_credit VALUES(?,?,?,?,?)
-      ON CONFLICT(session_id,classroom_id,week) DO UPDATE SET credited_ms=credited_ms+excluded.credited_ms`,
+        `INSERT INTO weekly_practice_credit VALUES(?,?,?,?,?,?)
+      ON CONFLICT(session_id,classroom_id,week) DO UPDATE SET credited_ms=credited_ms+excluded.credited_ms,before_noon_ms=before_noon_ms+excluded.before_noon_ms`,
       ).run(
         id,
         student,
         classroom.classroom_id,
         w.week,
         Math.round(finish - cursor),
+        Math.round(Math.max(0, Math.min(finish, w.preliminaryAt) - cursor)),
       );
     cursor = w.startsAt + 7 * STUDY_DAY_MS;
   }
@@ -88,13 +113,53 @@ export function sweepWeeklyPractice(db: DatabaseSync, now: number) {
   if (!tracking) return;
   db.exec("SAVEPOINT weekly_sweep");
   try {
+    // Upgrade noon closures from the previous policy, preserving recorded credit.
+    for (const row of db
+      .prepare(
+        "SELECT classroom_id,week,closed_at FROM weekly_practice_periods WHERE closed_at IS NOT NULL",
+      )
+      .all()) {
+      const oldDeadline = studyDayStart(String(row.week)) + 6.5 * STUDY_DAY_MS;
+      if (Number(row.closed_at) === oldDeadline) {
+        const end = oldDeadline + 0.5 * STUDY_DAY_MS;
+        db.prepare(
+          "UPDATE weekly_practice_periods SET closed_at=? WHERE classroom_id=? AND week=?",
+        ).run(now < end ? null : end, row.classroom_id, row.week);
+      }
+    }
+    // Snapshot the noon list once, including when the worker resumes after noon.
+    for (const row of db
+      .prepare(
+        `SELECT * FROM weekly_practice_periods p WHERE NOT EXISTS
+      (SELECT 1 FROM weekly_practice_checkpoints s WHERE s.classroom_id=p.classroom_id AND s.week=p.week)`,
+      )
+      .all()) {
+      const noon = studyDayStart(String(row.week)) + 6.5 * STUDY_DAY_MS;
+      if (
+        now < noon ||
+        Number(row.coverage_start) >= noon ||
+        !row.noon_eligible
+      )
+        continue;
+      db.prepare(
+        `INSERT INTO weekly_practice_preliminary
+        SELECT m.classroom_id,m.week,m.student_id,m.name,CAST(COALESCE(SUM(c.before_noon_ms),0)/1000 AS INTEGER)
+        FROM weekly_practice_members m LEFT JOIN weekly_practice_credit c
+        ON c.classroom_id=m.classroom_id AND c.week=m.week AND c.student_id=m.student_id
+        WHERE m.classroom_id=? AND m.week=? GROUP BY m.student_id`,
+      ).run(row.classroom_id, row.week);
+      db.prepare("INSERT INTO weekly_practice_checkpoints VALUES(?,?)").run(
+        row.classroom_id,
+        row.week,
+      );
+    }
     // The stored roster/goal, not today's roster/goal, belongs to a closed week.
     for (const row of db
       .prepare(
         "SELECT classroom_id,week FROM weekly_practice_periods WHERE closed_at IS NULL",
       )
       .all()) {
-      const deadline = studyDayStart(String(row.week)) + 6.5 * STUDY_DAY_MS;
+      const deadline = studyDayStart(String(row.week)) + 7 * STUDY_DAY_MS;
       if (now >= deadline)
         db.prepare(
           "UPDATE weekly_practice_periods SET closed_at=? WHERE classroom_id=? AND week=?",
@@ -110,12 +175,13 @@ export function sweepWeeklyPractice(db: DatabaseSync, now: number) {
       for (const s of settings) {
         if (Number(s.minutes) <= 0) continue;
         db.prepare(
-          "INSERT INTO weekly_practice_periods VALUES(?,?,?,?,NULL) ON CONFLICT DO NOTHING",
+          "INSERT INTO weekly_practice_periods(classroom_id,week,minutes,coverage_start,closed_at,noon_eligible) VALUES(?,?,?,?,NULL,?) ON CONFLICT DO NOTHING",
         ).run(
           s.classroom_id,
           w.week,
           s.minutes,
           Math.max(w.startsAt, Number(tracking.started_at)),
+          now < w.preliminaryAt ? 1 : 0,
         );
         db.prepare(
           `INSERT INTO weekly_practice_members SELECT ?,?,u.id,u.name FROM memberships m JOIN users u ON u.id=m.student_id
@@ -226,13 +292,41 @@ export function weeklyPracticeReport(
     report = {
       week: week!,
       startsAt: start,
-      closesAt: start + 6.5 * STUDY_DAY_MS,
+      closesAt: start + 7 * STUDY_DAY_MS,
+      preliminaryAt: start + 6.5 * STUDY_DAY_MS,
+      preliminary: null,
       minutes: Number(row.minutes),
       coverageStart: Number(row.coverage_start),
       closed: row.closed_at !== null,
       completed: students.filter((s) => s.remainingSeconds === 0),
       incomplete: students.filter((s) => s.remainingSeconds > 0),
     };
+    if (
+      db
+        .prepare(
+          "SELECT 1 FROM weekly_practice_checkpoints WHERE classroom_id=? AND week=?",
+        )
+        .get(classroom, week!)
+    ) {
+      const snapshot = db
+        .prepare(
+          "SELECT * FROM weekly_practice_preliminary WHERE classroom_id=? AND week=? ORDER BY name,student_id",
+        )
+        .all(classroom, week!)
+        .map((r) => ({
+          id: String(r.student_id),
+          name: String(r.name),
+          seconds: Number(r.seconds),
+          remainingSeconds: Math.max(
+            0,
+            Number(row.minutes) * 60 - Number(r.seconds),
+          ),
+        }));
+      report.preliminary = {
+        completed: snapshot.filter((s) => s.remainingSeconds === 0),
+        incomplete: snapshot.filter((s) => s.remainingSeconds > 0),
+      };
+    }
   }
   return {
     serverNow: now,

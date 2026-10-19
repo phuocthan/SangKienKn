@@ -16,15 +16,16 @@ import { creditStudyInterval, startStudyHistory } from "./study-history.js";
 import { terminateStudy } from "./class-management.js";
 
 const mon = studyDayStart("2026-10-12"),
-  cutoff = mon + 6.5 * STUDY_DAY_MS;
+  noon = mon + 6.5 * STUDY_DAY_MS,
+  cutoff = mon + 7 * STUDY_DAY_MS;
 
-test("a cross-week interval excludes Sunday afternoon and splits at Monday midnight", (t) => {
+test("a cross-week interval includes Sunday afternoon and splits at Monday midnight", (t) => {
   const { db, chapter } = fixture(t);
   recordWeeklyPractice(
     db,
     "student-demo",
     chapter,
-    cutoff - 10000,
+    noon - 10000,
     mon + 7 * STUDY_DAY_MS + 20000,
   );
   const rows = db
@@ -35,7 +36,7 @@ test("a cross-week interval excludes Sunday afternoon and splits at Monday midni
   assert.deepEqual(
     rows.map((r) => [r.week, r.credited_ms]),
     [
-      ["2026-10-12", 10000],
+      ["2026-10-12", 0.5 * STUDY_DAY_MS + 10000],
       ["2026-10-19", 20000],
     ],
   );
@@ -67,7 +68,8 @@ test("a teacher lock keeps valid recorded time in the weekly report", (t) => {
   creditStudyInterval(db, "student-demo", chapter, mon, mon + 60000, () => {});
   terminateStudy(db, "weekly-lock", "locked");
   assert.equal(
-    weeklyPracticeReport(db, "class-demo", cutoff).report!.completed.length,
+    weeklyPracticeReport(db, "class-demo", cutoff, "2026-10-12").report!
+      .completed.length,
     1,
   );
 });
@@ -86,13 +88,14 @@ function fixture(t: TestContext, start = mon) {
   t.after(() => db.close());
   return { db, chapter };
 }
-test("Vietnam week begins Monday midnight and ends Sunday noon at exact boundaries", () => {
+test("Vietnam week begins Monday midnight and ends Sunday midnight with a noon checkpoint", () => {
   assert.deepEqual(practiceWeek(mon), {
     week: "2026-10-12",
     startsAt: mon,
+    preliminaryAt: noon,
     closesAt: cutoff,
   });
-  assert.equal(practiceWeek(cutoff).week, "2026-10-12");
+  assert.equal(practiceWeek(cutoff - 1).week, "2026-10-12");
   assert.equal(practiceWeek(mon + 7 * STUDY_DAY_MS).week, "2026-10-19");
   assert.equal(practiceWeek(mon - 1).week, "2026-10-05");
 });
@@ -113,10 +116,10 @@ test("only exact clipped intervals count; completion is inclusive and chapters a
     cutoff + 10000,
     cutoff + 90000,
   );
-  let r = weeklyPracticeReport(db, "class-demo", cutoff).report!;
+  let r = weeklyPracticeReport(db, "class-demo", cutoff, "2026-10-12").report!;
   assert.equal(r.incomplete.find((m) => m.id === "student-demo")!.seconds, 10);
   assert.equal(r.closed, true);
-  // A confirmed interval arriving after noon still contributes only its actual pre-noon time.
+  // Late credit is clipped at the final midnight boundary.
   recordWeeklyPractice(
     db,
     "student-demo",
@@ -124,11 +127,20 @@ test("only exact clipped intervals count; completion is inclusive and chapters a
     cutoff - 60000,
     cutoff - 10000,
   );
-  r = weeklyPracticeReport(db, "class-demo", cutoff + 100000).report!;
+  r = weeklyPracticeReport(
+    db,
+    "class-demo",
+    cutoff + 100000,
+    "2026-10-12",
+  ).report!;
   assert.equal(r.completed.find((m) => m.id === "student-demo")!.seconds, 60);
   assert.equal(r.completed[0].remainingSeconds, 0);
   assert.equal(
-    db.prepare("SELECT COUNT(*) n FROM weekly_practice_credit").get()!.n,
+    db
+      .prepare(
+        "SELECT COUNT(*) n FROM weekly_practice_credit WHERE week='2026-10-12'",
+      )
+      .get()!.n,
     2,
   );
 });
@@ -162,21 +174,24 @@ test("weekly goal changes and roster changes cannot rewrite the ended week's goa
     false,
   );
 });
-test("first setup after cutoff starts next Monday, zero disables later weeks and retry is idempotent", (t) => {
+test("first setup Sunday afternoon applies this week; zero disables later weeks and retry is idempotent", (t) => {
   const { db } = fixture(t);
-  saveWeeklyMinimum(db, "class-demo", 30, cutoff);
-  saveWeeklyMinimum(db, "class-demo", 30, cutoff + 1000);
-  assert.equal(weeklyPracticeReport(db, "class-demo", cutoff).report, null);
+  saveWeeklyMinimum(db, "class-demo", 30, noon + 1000);
+  saveWeeklyMinimum(db, "class-demo", 30, noon + 2000);
+  const r = weeklyPracticeReport(db, "class-demo", noon + 2000).report!;
+  assert.equal(r.minutes, 30);
+  assert.equal(r.preliminary, null);
   assert.equal(
     db.prepare("SELECT COUNT(*) n FROM weekly_practice_settings").get()!.n,
     1,
   );
-  let now = mon + 7 * STUDY_DAY_MS;
-  assert.equal(weeklyPracticeReport(db, "class-demo", now).report!.minutes, 30);
-  saveWeeklyMinimum(db, "class-demo", 0, now);
-  now += 7 * STUDY_DAY_MS;
-  assert.equal(weeklyPracticeReport(db, "class-demo", now).weeks.length, 1);
+  saveWeeklyMinimum(db, "class-demo", 0, noon + 3000);
+  assert.equal(
+    weeklyPracticeReport(db, "class-demo", cutoff, "2026-10-12").weeks.length,
+    1,
+  );
 });
+
 test("rollout does not fabricate earlier daily history and no report is fabricated for downtime weeks", (t) => {
   const { db, chapter } = fixture(t, mon + 2 * STUDY_DAY_MS);
   db.prepare("INSERT INTO study_daily_time VALUES(?,?,?,9999999)").run(
@@ -211,13 +226,15 @@ test("credit integration is atomic and invalidated sessions are removed even fro
   ).run(chapter, mon);
   creditStudyInterval(db, "student-demo", chapter, mon, mon + 60000, () => {});
   assert.equal(
-    weeklyPracticeReport(db, "class-demo", cutoff).report!.completed.length,
+    weeklyPracticeReport(db, "class-demo", cutoff, "2026-10-12").report!
+      .completed.length,
     1,
   );
   terminateStudy(db, "weekly-session", "tabs");
   terminateStudy(db, "weekly-session", "tabs");
   assert.equal(
-    weeklyPracticeReport(db, "class-demo", cutoff).report!.completed.length,
+    weeklyPracticeReport(db, "class-demo", cutoff, "2026-10-12").report!
+      .completed.length,
     0,
   );
   assert.equal(
@@ -286,4 +303,45 @@ test("weekly API checks owner role, validates limits and selected weeks, saves a
     "UPDATE classrooms SET teacher_id='student-demo' WHERE id='class-demo'",
   ).run();
   assert.equal((await request(path, teacher)).status, 403);
+});
+
+test("noon reminder snapshot stays fixed while Sunday catch-up changes final completion", (t) => {
+  const { db, chapter } = fixture(t);
+  saveWeeklyMinimum(db, "class-demo", 1, mon);
+  recordWeeklyPractice(db, "student-demo", chapter, noon - 30000, noon + 10000);
+  let r = weeklyPracticeReport(db, "class-demo", noon + 10000).report!;
+  assert.equal(r.closed, false);
+  assert.equal(
+    r.preliminary!.incomplete.find((s) => s.id === "student-demo")!.seconds,
+    30,
+  );
+  assert.equal(r.incomplete.find((s) => s.id === "student-demo")!.seconds, 40);
+  recordWeeklyPractice(db, "student-demo", chapter, noon + 10000, noon + 30000);
+  r = weeklyPracticeReport(db, "class-demo", cutoff, "2026-10-12").report!;
+  assert.equal(r.closed, true);
+  assert.equal(r.completed[0].seconds, 60);
+  assert.equal(
+    r.preliminary!.incomplete.find((s) => s.id === "student-demo")!.seconds,
+    30,
+  );
+  assert.equal(r.closesAt, cutoff);
+});
+
+test("delayed sweep clips noon snapshot and upgrades the previous noon closure without inventing credit", (t) => {
+  const { db, chapter } = fixture(t);
+  saveWeeklyMinimum(db, "class-demo", 1, mon);
+  recordWeeklyPractice(db, "student-demo", chapter, noon - 10000, noon + 60000);
+  db.prepare("UPDATE weekly_practice_periods SET closed_at=?").run(noon);
+  const r = weeklyPracticeReport(db, "class-demo", noon + 60000).report!;
+  assert.equal(r.closed, false);
+  assert.equal(r.completed[0].seconds, 70);
+  assert.equal(
+    r.preliminary!.incomplete.find((s) => s.id === "student-demo")!.seconds,
+    10,
+  );
+  ensureWeeklyPracticeSchema(db);
+  assert.equal(
+    weeklyPracticeReport(db, "class-demo", cutoff, "2026-10-12").report!.closed,
+    true,
+  );
 });
