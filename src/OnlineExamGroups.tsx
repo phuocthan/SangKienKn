@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Clock3, Download, Trash2 } from "./icons";
+import { Clock3, Download, Trash2, Pencil } from "./icons";
 import type { ExamDefinition, LearningOverview } from "../shared/learning";
 import { api, errorMessage } from "./api";
 import { ExamMetadata } from "./ExamMetadata";
 
 type RunSummary = LearningOverview["runs"][number];
-const date = (value: number) => new Date(value).toLocaleString("vi-VN");
+const date = (value: number) =>
+  new Date(value).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
 
 export function OnlineExamGroups({
   data,
@@ -14,6 +15,7 @@ export function OnlineExamGroups({
   onStart,
   onClose,
   onDelete,
+  onEdit,
   onJoin,
   onOpen,
 }: {
@@ -23,6 +25,7 @@ export function OnlineExamGroups({
   onStart: (exam: ExamDefinition) => void;
   onClose: (exam: ExamDefinition) => void;
   onDelete: (exam: ExamDefinition) => void;
+  onEdit: (exam: ExamDefinition) => void;
   onJoin: (exam: ExamDefinition) => void;
   onOpen: (id: string) => void;
 }) {
@@ -48,8 +51,8 @@ export function OnlineExamGroups({
       </h2>
       <p>
         {teacher
-          ? "Đề đã lưu sẵn. Bắt đầu khi lớp sẵn sàng."
-          : "Vào thi khi giáo viên mở đề. Xem kết quả sau khi buổi thi kết thúc."}
+          ? "Tạo đề, hẹn giờ hoặc bắt đầu khi lớp sẵn sàng."
+          : "Vào thi khi đến giờ mở đề. Xem kết quả sau khi buổi thi kết thúc."}
       </p>
       {!data.onlineExamGroups && (
         <p className="muted">
@@ -71,6 +74,7 @@ export function OnlineExamGroups({
             onStart={onStart}
             onClose={onClose}
             onDelete={onDelete}
+            onEdit={onEdit}
             onJoin={onJoin}
             onOpen={onOpen}
           />
@@ -89,6 +93,7 @@ function ExamGroup({
   onStart,
   onClose,
   onDelete,
+  onEdit,
   onJoin,
   onOpen,
 }: {
@@ -100,6 +105,7 @@ function ExamGroup({
   onStart: (exam: ExamDefinition) => void;
   onClose: (exam: ExamDefinition) => void;
   onDelete: (exam: ExamDefinition) => void;
+  onEdit: (exam: ExamDefinition) => void;
   onJoin: (exam: ExamDefinition) => void;
   onOpen: (id: string) => void;
 }) {
@@ -110,7 +116,20 @@ function ExamGroup({
   const announced = exam.startedAt != null;
   const ended = announced && (!exam.enabled || now >= exam.closesAt);
   const running = announced && !ended && now >= exam.startsAt;
-  const state = ended ? "Kết thúc" : running ? "Đang thi" : "Chuẩn bị";
+  const scheduled = exam.scheduledStartAt != null;
+  const editable =
+    !announced ||
+    (scheduled &&
+      exam.enabled &&
+      now < exam.startsAt &&
+      !exam.participants?.joined);
+  const state = ended
+    ? "Kết thúc"
+    : running
+      ? "Đang thi"
+      : scheduled
+        ? "Đã hẹn giờ"
+        : "Chuẩn bị";
   useEffect(() => {
     if (!expanded || !data.onlineExamGroups) return;
     let cancelled = false;
@@ -170,17 +189,27 @@ function ExamGroup({
       </dl>
       <div className="online-exam-controls">
         <small>
-          {!announced
-            ? "Chờ giáo viên bắt đầu"
-            : ended
-              ? "Buổi kiểm tra đã kết thúc."
-              : !running
-                ? "Đang chờ bắt đầu · Đã gửi thông báo cho lớp."
-                : "Đề đang mở cho học sinh làm bài."}
+          {scheduled && !ended && !running
+            ? "Tự mở theo lịch đã hẹn · Giờ Việt Nam (UTC+7)."
+            : !announced
+              ? "Chờ giáo viên bắt đầu"
+              : ended
+                ? "Buổi kiểm tra đã kết thúc."
+                : !running
+                  ? "Đang chờ bắt đầu · Đã gửi thông báo cho lớp."
+                  : "Đề đang mở cho học sinh làm bài."}
         </small>
         <div className="learning-actions">
           {teacher ? (
             <>
+              <button
+                type="button"
+                className="button secondary small"
+                disabled={busy || !data.examEditing || !editable}
+                onClick={() => onEdit(exam)}
+              >
+                <Pencil size={16} /> Chỉnh sửa thông tin
+              </button>
               {!announced && (
                 <button
                   className="button primary small"
@@ -210,7 +239,11 @@ function ExamGroup({
               <button
                 type="button"
                 className="button danger small"
-                disabled={busy || !data.examDeletion || (announced && !ended)}
+                disabled={
+                  busy ||
+                  !data.examDeletion ||
+                  (announced && !ended && !editable)
+                }
                 onClick={() => onDelete(exam)}
               >
                 <Trash2 size={16} /> Xóa bài kiểm tra
@@ -245,11 +278,21 @@ function ExamGroup({
           )}
         </div>
       </div>
-      {teacher && (!data.examDeletion || (announced && !ended)) && (
+      {teacher &&
+        (!data.examDeletion || (announced && !ended && !editable)) && (
+          <p className="muted">
+            {!data.examDeletion
+              ? "Xóa bài kiểm tra đang chờ cập nhật backend Railway."
+              : "Đóng bài thi trước khi xóa."}
+          </p>
+        )}
+      {teacher && (
         <p className="muted">
-          {!data.examDeletion
-            ? "Xóa bài kiểm tra đang chờ cập nhật backend Railway."
-            : "Đóng bài thi trước khi xóa."}
+          {!data.examEditing
+            ? "Chỉnh sửa đang chờ cập nhật backend Railway."
+            : !editable
+              ? "Chỉ chỉnh sửa thông tin trước khi bài kiểm tra bắt đầu."
+              : "Có thể chỉnh đề, thời gian hoặc bỏ lịch hẹn trước giờ bắt đầu."}
         </p>
       )}
       <details

@@ -78,6 +78,15 @@ export function ensureLearningSchema(db: DatabaseSync) {
     CREATE UNIQUE INDEX IF NOT EXISTS one_active_exam ON exam_runs(student_id) WHERE status='active';
     CREATE INDEX IF NOT EXISTS learning_reward_class ON learning_rewards(classroom_id,status);
   `);
+  if (
+    !db
+      .prepare("PRAGMA table_info(online_exam_sessions)")
+      .all()
+      .some((column) => column.name === "scheduled_start_at")
+  )
+    db.exec(
+      "ALTER TABLE online_exam_sessions ADD COLUMN scheduled_start_at INTEGER",
+    );
   const columns = new Set(
     db
       .prepare("PRAGMA table_info(exam_runs)")

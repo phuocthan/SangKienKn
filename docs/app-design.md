@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Hiện hành: hẹn giờ và chỉnh sửa kiểm tra online —20/10/2026
+
+Form Tạo bài kiểm tra thêm checkbox **Hẹn giờ bắt đầu**; khi bật mới hiện datetime-local **Ngày và giờ bắt đầu (giờ Việt Nam)** và lời giải thích UTC+7, giờ này là giờ học sinh được vào làm. Giữ thời gian chuẩn bị/làm bài/ngưỡng tab và hai nguồn đề. Không hẹn thì luồng nháp/Bắt đầu ngay/Để sau không đổi. Có lịch thì popup sau tạo xác nhận ngày giờ, có Chỉnh sửa thông tin/Đã hiểu; danh sách hiện Đã hẹn giờ và các mốc.
+
+Chỉnh sửa thông tin trên popup/danh sách tải lại draft từ API chủ lớp, dùng form hiện có với tiêu đề Chỉnh sửa bài kiểm tra và Lưu thay đổi. Giữ nguồn/chương/bài/trọng số/câu upload, có thể đổi/bỏ lịch trước giờ thi. Lỗi giữ draft/focus lỗi; busy chặn gửi lặp/đóng; hủy không ghi. Bài đã bắt đầu/đóng/có lượt thi khóa sửa và có lời giải thích. Ngày giờ dùng UTC+7 cả lúc nhập và hiển thị; native control được kiểm tra không tràn320/390px. Giữ header/nav, khả năng dùng bàn phím và animation hiện có. Chi tiết quy tắc/snapshot tại [online-exams.md](online-exams.md).
+
 ## Nhãn submenu Kiểm tra online — 19/10/2026
 
 Theo yêu cầu mới, submenu Ôn tập / Săn thưởng / Kiểm tra đổi thành **Ôn tập / Săn thưởng / Kiểm tra online**. Chỉ đổi nhãn tab cho cả giáo viên và học sinh; tiêu đề trang Kiểm tra, lối tắt sidebar học sinh, ID online-exams, URL và chức năng giữ nguyên. Thay nhãn submenu ngắn ở các quyết định lịch sử phía dưới. Giữ các thay đổi xóa bài kiểm tra/xóa câu hỏi chưa push. Cập nhật selector tab/helper trong E2E theo nhãn mới; đây là đổi chữ giao diện, không thêm ca test hoặc sửa backend/database. Chưa push/deploy.

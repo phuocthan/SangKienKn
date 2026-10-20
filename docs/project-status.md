@@ -1,5 +1,15 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Chốt phát hành Git hẹn giờ/chỉnh sửa đề —20/10/2026
+
+Theo yêu cầu deploy Git, đưa bản đã kiểm thử lên origin/main cho luồng Railway autobuild hiện có. Fetch trước chốt không có commit remote mới ngoài13c638e. Bộ poster vẫn riêng working tree; không kèm dữ liệu/.local/secrets. API deployment và trang production bị403 trong môi trường này, nên chỉ xác nhận SHA remote qua Git, chưa xác nhận Railway deploy thành công. QA và phạm vi tính năng giữ theo lượt triển khai bên dưới; ghi chú chưa push là trạng thái trước yêu cầu này.
+
+## Hiện hành: hẹn giờ bắt đầu và sửa bài kiểm tra —20/10/2026
+
+Đã pull5commit lên **13c638e**, giữ bộ poster và tài liệu chưa commit. Form Tạo bài kiểm tra có ngày/giờ Việt Nam (UTC+7), bài tự mở theo lịch; Chỉnh sửa thông tin trong popup/danh sách tải lại đầy đủ nguồn đề/câu upload/cấu hình và lịch, cập nhật cùng ID, có đổi/bỏ lịch. Chỉ chủ lớp sửa trước giờ thi và khi chưa có lượt làm; bản đã bắt đầu/đóng khóa ở server. Lịch/snapshot giữ qua restart; thời gian chuẩn bị đứng trước giờ mở, cả lớp cùng hạn nộp. API/capability/migration thêm không reset dữ liệu. [Quy tắc chi tiết](online-exams.md).
+
+QA: full **180/180 backend đạt**; bổ sung migration/reopen **4/4 xác nhận đạt** (cùng các ca đã có, không cộng trùng). Build/typecheck đạt; E2E rộng26/28 với2lỗi harness popup che navbar, đã sửa và **6/6 ca mới desktop/mobile đạt** trên DB E2E cũ. Có thử tự mở không lệnh giáo viên, giữ đề/ID khi sửa, retry/hủy/reload và native date control không tràn320/390px; đã xem ảnh. Sau tinh chỉnh hướng dẫn cuối, build lại và2/2 xác nhận desktop/mobile đạt. Chi tiết các lượt/report ở đầu session-handoff. **Chưa commit/push/deploy**; backend Railway cần triển khai mới để có tính năng, không ghi dữ liệu thật.
+
 ## Phát hành Railway theo yêu cầu — 19/10/2026
 
 Người dùng yêu cầu deploy sau ba thay đổi: quyền xóa bài kiểm tra cho giáo viên, nút Xóa câu hỏi thay Ẩn câu hỏi và nhãn submenu Kiểm tra online. Kiểm tra Git không có commit mới trên origin/main; Railway liên kết SangKienKn / zooming-light / production, tự build nhánh main, volume /data hiện có. Phát hành qua commit/push GitHub, không dùng deploy SQLite local hoặc upload .local/file khóa Word. Không chỉnh cấu hình Railway hoặc dữ liệu thật.

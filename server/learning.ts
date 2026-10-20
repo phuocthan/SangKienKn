@@ -6,7 +6,7 @@ import {
   type QuestionKind,
   type QuestionAnswer,
 } from "../shared/question-types.js";
-import type { Express } from "express";
+import type { Express, Response } from "express";
 import type { DatabaseSync } from "node:sqlite";
 import { chapterIsArchived } from "./chapter-archive.js";
 import { randomInt, randomUUID, createHash } from "node:crypto";
@@ -590,10 +590,10 @@ export function registerLearningRoutes(
       JOIN classrooms c ON c.id=e.classroom_id JOIN users u ON u.id=c.teacher_id
       JOIN memberships m ON m.classroom_id=c.id AND m.student_id=?
       LEFT JOIN exam_runs r ON r.exam_id=e.id AND r.student_id=m.student_id
-      WHERE o.started_at IS NOT NULL AND e.enabled=1 AND e.closes_at>?
+      WHERE o.started_at IS NOT NULL AND o.started_at<=? AND e.enabled=1 AND e.closes_at>?
         AND (r.status IS NULL OR r.status='active') ORDER BY e.starts_at DESC`,
       )
-      .all(req.user!.id, now());
+      .all(req.user!.id, now(), now());
     res.json({
       serverNow: now(),
       notices: rows
@@ -634,6 +634,8 @@ export function registerLearningRoutes(
       serverNow: now(),
       onlineExamGroups: true,
       examDeletion: true,
+      examScheduling: true,
+      examEditing: true,
       classManagement: true,
       sessionPolicy: sessionPolicy(db, String(c.id)),
       levelMinutes: classroomLevelMinutes(db, String(c.id)),
@@ -693,6 +695,7 @@ export function registerLearningRoutes(
             durationMinutes: online?.duration_minutes ?? 20,
             preparationMinutes: online?.preparation_minutes ?? 0,
             startedAt: online?.started_at ?? null,
+            scheduledStartAt: online?.scheduled_start_at ?? null,
             participants: {
               joined: Number(participants.joined),
               submitted: Number(participants.submitted ?? 0),
@@ -1546,9 +1549,58 @@ export function registerLearningRoutes(
       fail(409, "Vị trí câu chưa hợp lệ.");
     res.json({ ok: true });
   });
-  app.post("/api/classrooms/:id/exams", (req: AppRequest, res) => {
+  function editableExam(req: AppRequest, id: string) {
     teacher(req);
-    const c = classroom(req, String(req.params.id)),
+    const exam = db
+      .prepare("SELECT * FROM exam_definitions WHERE id=?")
+      .get(id);
+    if (!exam) fail(404, "Không tìm thấy kiểm tra.");
+    classroom(req, String(exam.classroom_id));
+    const online = db
+      .prepare("SELECT * FROM online_exam_sessions WHERE exam_id=?")
+      .get(id);
+    if (!online) fail(409, "Chỉ chỉnh sửa bài kiểm tra online.");
+    if (
+      (online.started_at != null &&
+        (!exam.enabled ||
+          !online.scheduled_start_at ||
+          Number(exam.starts_at) <= now())) ||
+      db.prepare("SELECT 1 FROM exam_runs WHERE exam_id=?").get(id)
+    )
+      fail(
+        409,
+        "Bài kiểm tra đã bắt đầu; không thể chỉnh sửa đề hoặc thời gian.",
+      );
+    return { exam, online };
+  }
+  app.get("/api/learning/exams/:id/edit", (req: AppRequest, res) => {
+    const { exam, online } = editableExam(req, String(req.params.id));
+    const selection = online.selection
+      ? json<Record<string, unknown>>(online.selection)
+      : null;
+    res.json({
+      id: exam.id,
+      title: exam.title,
+      source: selection ? "bank" : "upload",
+      tabLimit: exam.tab_limit,
+      durationMinutes: online.duration_minutes,
+      preparationMinutes: online.preparation_minutes,
+      scheduledStartAt: online.scheduled_start_at ?? null,
+      ...(selection ?? {
+        questions: json<Snapshot[]>(exam.questions).map((q) => ({
+          chapterId: q.chapterId,
+          question: q,
+        })),
+      }),
+    });
+  });
+  function saveExam(req: AppRequest, res: Response, editingId?: string) {
+    teacher(req);
+    const editing = editingId ? editableExam(req, editingId) : null;
+    const c = classroom(
+        req,
+        String(editing?.exam.classroom_id ?? req.params.id),
+      ),
       ids = chapterIds(c.id, req.body?.chapterIds),
       source = req.body?.source ?? "bank";
     if (!["bank", "upload"].includes(source))
@@ -1562,6 +1614,7 @@ export function registerLearningRoutes(
     if (!["scheduled", "online"].includes(delivery))
       fail(400, "Loại kiểm tra không hợp lệ.");
     const online = delivery === "online";
+    if (editing && !online) fail(400, "Không thể đổi loại kiểm tra.");
     const durationMinutes = online
       ? number(req.body?.durationMinutes ?? 20, "Thời gian làm bài", 1, 180)
       : 20;
@@ -1575,8 +1628,17 @@ export function registerLearningRoutes(
       1,
       10,
     );
+    const scheduledStartAt =
+      online && req.body?.scheduledStartAt != null
+        ? number(
+            req.body.scheduledStartAt,
+            "Hẹn giờ bắt đầu",
+            1,
+            8640000000000000,
+          )
+        : null;
     const starts = online
-        ? now()
+        ? (scheduledStartAt ?? now())
         : number(req.body?.startsAt, "Giờ mở", 1, 8640000000000000),
       closes = online
         ? starts + durationMinutes * 60000
@@ -1586,7 +1648,9 @@ export function registerLearningRoutes(
         ? null
         : text(req.body.requestId, "Mã tạo kiểm tra", 100);
     const fingerprint = createHash("sha256")
-      .update(JSON.stringify(req.body))
+      .update(
+        JSON.stringify(editingId ? { editingId, body: req.body } : req.body),
+      )
       .digest("hex");
     if (requestId) {
       const existing = db
@@ -1602,6 +1666,8 @@ export function registerLearningRoutes(
         return res.json({ id: existing.exam_id });
       }
     }
+    if (scheduledStartAt != null && scheduledStartAt <= now())
+      fail(400, "Hẹn giờ bắt đầu phải ở tương lai.");
     if (closes <= starts || closes <= now())
       fail(400, "Giờ đóng phải sau giờ mở và hiện tại.");
     let uploaded: {
@@ -1656,28 +1722,36 @@ export function registerLearningRoutes(
       )
         fail(400, "Đề tải lên có câu trùng trong cùng chương.");
     }
-    const id = randomUUID();
+    const id = editingId ?? randomUUID();
     db.exec("BEGIN IMMEDIATE");
     try {
+      if (editingId) editableExam(req, editingId);
+      const previous = editing ? json<Snapshot[]>(editing.exam.questions) : [];
       for (const { chapterId, content } of uploaded) {
-        const questionId = randomUUID();
-        // Private exam questions support grading/notebook without publishing to practice.
-        db.prepare(
-          `INSERT INTO questions(id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,changed_at,topic,kind,correct_answer)
-          VALUES(?,?,?,?,?,?,?,0,1,1,?,?,?,?)`,
-        ).run(
-          questionId,
-          chapterId,
-          content.text,
-          JSON.stringify(content.choices),
-          content.correctIndex,
-          content.explanation,
-          content.lesson,
-          now(),
-          content.topic ?? "",
-          content.kind ?? "multiple-choice",
-          content.correctAnswer ?? null,
+        const reusable = previous.find(
+          (q) =>
+            q.chapterId === chapterId &&
+            JSON.stringify(questionInput(q)) === JSON.stringify(content),
         );
+        const questionId = reusable?.id ?? randomUUID();
+        // Private exam questions support grading/notebook without publishing to practice.
+        if (!reusable)
+          db.prepare(
+            `INSERT INTO questions(id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,changed_at,topic,kind,correct_answer)
+          VALUES(?,?,?,?,?,?,?,0,1,1,?,?,?,?)`,
+          ).run(
+            questionId,
+            chapterId,
+            content.text,
+            JSON.stringify(content.choices),
+            content.correctIndex,
+            content.explanation,
+            content.lesson,
+            now(),
+            content.topic ?? "",
+            content.kind ?? "multiple-choice",
+            content.correctAnswer ?? null,
+          );
         questions.push({
           ...content,
           id: questionId,
@@ -1688,20 +1762,41 @@ export function registerLearningRoutes(
           ),
         });
       }
-      db.prepare("INSERT INTO exam_definitions VALUES(?,?,?,?,?,?,?,?,?)").run(
-        id,
-        c.id,
-        title,
-        JSON.stringify(online && source === "bank" ? [] : questions),
-        starts,
-        closes,
-        tabLimit,
-        online || req.body?.manualOpen ? 0 : 1,
-        now(),
-      );
+      if (editingId) {
+        db.prepare(
+          "UPDATE exam_definitions SET title=?,questions=?,starts_at=?,closes_at=?,tab_limit=?,enabled=? WHERE id=?",
+        ).run(
+          title,
+          JSON.stringify(
+            online && source === "bank" && !scheduledStartAt ? [] : questions,
+          ),
+          starts,
+          closes,
+          tabLimit,
+          scheduledStartAt ? 1 : 0,
+          id,
+        );
+      } else
+        db.prepare(
+          "INSERT INTO exam_definitions VALUES(?,?,?,?,?,?,?,?,?)",
+        ).run(
+          id,
+          c.id,
+          title,
+          JSON.stringify(
+            online && source === "bank" && !scheduledStartAt ? [] : questions,
+          ),
+          starts,
+          closes,
+          tabLimit,
+          scheduledStartAt ? 1 : online || req.body?.manualOpen ? 0 : 1,
+          now(),
+        );
       if (online)
         db.prepare(
-          "INSERT INTO online_exam_sessions(exam_id,duration_minutes,preparation_minutes,question_count,selection) VALUES(?,?,?,?,?)",
+          `INSERT INTO online_exam_sessions(exam_id,duration_minutes,preparation_minutes,question_count,selection,scheduled_start_at,started_at) VALUES(?,?,?,?,?,?,?)
+          ON CONFLICT(exam_id) DO UPDATE SET duration_minutes=excluded.duration_minutes,preparation_minutes=excluded.preparation_minutes,
+          question_count=excluded.question_count,selection=excluded.selection,scheduled_start_at=excluded.scheduled_start_at,started_at=excluded.started_at`,
         ).run(
           id,
           durationMinutes,
@@ -1715,6 +1810,10 @@ export function registerLearningRoutes(
                 lessonKeys: req.body?.lessonKeys,
               })
             : null,
+          scheduledStartAt,
+          scheduledStartAt == null
+            ? null
+            : Math.max(now(), scheduledStartAt - preparationMinutes * 60000),
         );
       if (requestId)
         db.prepare("INSERT INTO exam_creation_requests VALUES(?,?,?,?,?)").run(
@@ -1729,8 +1828,14 @@ export function registerLearningRoutes(
       db.exec("ROLLBACK");
       throw error;
     }
-    res.status(201).json({ id });
-  });
+    res.status(editingId ? 200 : 201).json({ id });
+  }
+  app.post("/api/classrooms/:id/exams", (req: AppRequest, res) =>
+    saveExam(req, res),
+  );
+  app.post("/api/learning/exams/:id/update", (req: AppRequest, res) =>
+    saveExam(req, res, String(req.params.id)),
+  );
   app.post("/api/learning/exams/:id/open", (req: AppRequest, res) => {
     teacher(req);
     const e = db
@@ -1813,12 +1918,15 @@ export function registerLearningRoutes(
     classroom(req, String(exam.classroom_id));
     sweepLearningExams(db, now());
     const online = db
-      .prepare("SELECT started_at FROM online_exam_sessions WHERE exam_id=?")
+      .prepare(
+        "SELECT started_at,scheduled_start_at FROM online_exam_sessions WHERE exam_id=?",
+      )
       .get(id);
     if (
       (exam.enabled &&
         Number(exam.closes_at) > now() &&
-        (!online || online.started_at != null)) ||
+        (!online || online.started_at != null) &&
+        !(online?.scheduled_start_at && Number(exam.starts_at) > now())) ||
       db
         .prepare("SELECT 1 FROM exam_runs WHERE exam_id=? AND status='active'")
         .get(id)

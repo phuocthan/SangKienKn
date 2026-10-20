@@ -106,10 +106,79 @@ export function Learning({
     }
   }
   const [examFormOpen, setExamFormOpen] = useState(false);
+  const [editingExamId, setEditingExamId] = useState<string | null>(null);
+  const [scheduleEnabled, setScheduleEnabled] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState("");
+  const vietnamInput = (timestamp: number) =>
+    new Date(timestamp + 7 * 3600000).toISOString().slice(0, 16);
+  const scheduleDate = (timestamp: number) =>
+    new Intl.DateTimeFormat("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      dateStyle: "short",
+      timeStyle: "short",
+    }).format(timestamp);
+  async function editExam(id: string) {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const draft = await api<{
+        title: string;
+        source: "bank" | "upload";
+        tabLimit: number;
+        durationMinutes: number;
+        preparationMinutes: number;
+        scheduledStartAt: number | null;
+        chapterIds?: string[];
+        questionCount?: number;
+        lessonKeys?: string[];
+        weights?: Record<string, number>;
+        questions?: UploadedExamQuestion[];
+      }>(`/learning/exams/${id}/edit`);
+      setTitle(draft.title);
+      setExamSource(draft.source);
+      setTabLimit(draft.tabLimit);
+      setDurationMinutes(draft.durationMinutes);
+      setPreparationMinutes(draft.preparationMinutes);
+      setScheduleEnabled(draft.scheduledStartAt != null);
+      setScheduledDate(
+        draft.scheduledStartAt ? vietnamInput(draft.scheduledStartAt) : "",
+      );
+      setCount(draft.questionCount ?? draft.questions?.length ?? 10);
+      setWeights(draft.weights ?? {});
+      setUploaded(draft.questions ?? []);
+      setBankSelection(
+        Object.fromEntries(
+          (draft.chapterIds ?? []).map((id) => [
+            id,
+            draft.lessonKeys
+              ? (data?.matrix ?? [])
+                  .filter(
+                    (r) =>
+                      r.chapterId === id && draft.lessonKeys!.includes(r.key),
+                  )
+                  .map((r) => r.key)
+              : "all",
+          ]),
+        ),
+      );
+      setEditingExamId(id);
+      setFormError("");
+      setError("");
+      setCreatedExamError("");
+      setCreatedOnlineExam(null);
+      setExamFormOpen(true);
+    } catch (cause) {
+      if (createdOnlineExam) setCreatedExamError(errorMessage(cause));
+      else setError(errorMessage(cause));
+    } finally {
+      setBusy(false);
+    }
+  }
   const [createdOnlineExam, setCreatedOnlineExam] = useState<{
     id: string;
     preparationMinutes: number;
     durationMinutes: number;
+    scheduledStartAt?: number | null;
   } | null>(null);
   const [createdExamError, setCreatedExamError] = useState("");
   const createExamButtonRef = useRef<HTMLButtonElement>(null);
@@ -258,6 +327,18 @@ export function Learning({
       setFormError("Chọn một nguồn đề: Upload file hoặc Chọn từ ngân hàng.");
       return;
     }
+    const scheduledStartAt = scheduleEnabled
+      ? Date.parse(`${scheduledDate}:00+07:00`)
+      : null;
+    if (
+      scheduleEnabled &&
+      (!data?.examScheduling ||
+        !Number.isFinite(scheduledStartAt) ||
+        scheduledStartAt! <= (data?.serverNow ?? Date.now()))
+    ) {
+      setFormError("Chọn ngày và giờ bắt đầu trong tương lai (giờ Việt Nam).");
+      return;
+    }
     const body = {
       title,
       chapterIds: selectedChapters,
@@ -270,27 +351,36 @@ export function Learning({
       delivery: "online",
       durationMinutes,
       preparationMinutes,
+      ...(data?.examScheduling ? { scheduledStartAt } : {}),
       ...(examSource === "upload"
         ? { questions: uploaded }
         : Object.values(bankSelection).some(Array.isArray)
           ? { lessonKeys: bankKeys }
           : {}),
     };
-    const intent = `create:${JSON.stringify(body)}`;
+    const intent = `save:${editingExamId ?? "new"}:${JSON.stringify(body)}`;
     await act(async () => {
       const saved = await api<{ id: string }>(
-        `/classrooms/${classroom.id}/exams`,
+        editingExamId
+          ? `/learning/exams/${editingExamId}/update`
+          : `/classrooms/${classroom.id}/exams`,
         { ...body, requestId: requestKey(intent) },
       );
       startKeys.current.delete(intent);
       setExamFormOpen(false);
       setTitle("");
       setCreatedExamError("");
-      setCreatedOnlineExam({
-        id: saved.id,
-        preparationMinutes,
-        durationMinutes,
-      });
+      if (editingExamId) {
+        setEditingExamId(null);
+        setNotice("Đã cập nhật bài kiểm tra.");
+        requestAnimationFrame(() => createExamButtonRef.current?.focus());
+      } else
+        setCreatedOnlineExam({
+          id: saved.id,
+          preparationMinutes,
+          durationMinutes,
+          scheduledStartAt,
+        });
     });
   }
   if (runId)
@@ -322,6 +412,16 @@ export function Learning({
             className="button primary"
             disabled={busy || !data}
             onClick={() => {
+              if (editingExamId) {
+                setTitle("");
+                setExamSource("");
+                setBankSelection({});
+                setUploaded([]);
+                setWeights({});
+                setScheduleEnabled(false);
+                setScheduledDate("");
+              }
+              setEditingExamId(null);
               setFormError("");
               setExamFormOpen(true);
             }}
@@ -349,28 +449,44 @@ export function Learning({
           dismissible={!busy}
           onClose={dismissCreatedOnlineExam}
         >
-          <p>Đã lưu bài kiểm tra. Bạn có thể bắt đầu ngay hoặc để sau.</p>
+          <p>
+            {createdOnlineExam.scheduledStartAt
+              ? `Đã hẹn giờ bắt đầu lúc ${scheduleDate(createdOnlineExam.scheduledStartAt)} (giờ Việt Nam). Bài sẽ tự mở theo lịch, kể cả khi bạn đóng trình duyệt.`
+              : "Đã lưu bài kiểm tra. Bạn có thể bắt đầu ngay hoặc để sau."}
+          </p>
           {createdExamError && (
             <p className="error-banner" role="alert">
               {createdExamError}
             </p>
           )}
           <div className="modal-actions">
-            <button
-              type="button"
-              className="button primary"
-              disabled={busy}
-              onClick={() => void startCreatedOnlineExam()}
-            >
-              {busy ? "Đang bắt đầu…" : "Bắt đầu ngay"}
-            </button>
+            {!createdOnlineExam.scheduledStartAt && (
+              <button
+                type="button"
+                className="button primary"
+                disabled={busy}
+                onClick={() => void startCreatedOnlineExam()}
+              >
+                {busy ? "Đang bắt đầu…" : "Bắt đầu ngay"}
+              </button>
+            )}
+            {data?.examEditing && (
+              <button
+                type="button"
+                className="button secondary"
+                disabled={busy}
+                onClick={() => void editExam(createdOnlineExam.id)}
+              >
+                Chỉnh sửa thông tin
+              </button>
+            )}
             <button
               type="button"
               className="button outline"
               disabled={busy}
               onClick={dismissCreatedOnlineExam}
             >
-              Để sau
+              {createdOnlineExam.scheduledStartAt ? "Đã hiểu" : "Để sau"}
             </button>
           </div>
         </Modal>
@@ -501,7 +617,9 @@ export function Learning({
             )}
           {onlinePage && teacher && examFormOpen && (
             <Modal
-              title="Tạo bài kiểm tra"
+              title={
+                editingExamId ? "Chỉnh sửa bài kiểm tra" : "Tạo bài kiểm tra"
+              }
               className="online-exam-create-modal"
               dismissible={!busy && !uploadBusy}
               onClose={() => setExamFormOpen(false)}
@@ -647,6 +765,42 @@ export function Learning({
                   )}
                   <fieldset disabled={busy || uploadBusy}>
                     <legend className="sr-only">Thời gian và giới hạn</legend>
+                    <div className="learning-options">
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="scheduleEnabled"
+                          checked={scheduleEnabled}
+                          disabled={!data.examScheduling}
+                          onChange={(e) => setScheduleEnabled(e.target.checked)}
+                        />
+                        Hẹn giờ bắt đầu
+                      </label>
+                    </div>
+                    {!data.examScheduling && (
+                      <p className="muted">
+                        Hẹn giờ bắt đầu đang chờ cập nhật backend Railway.
+                      </p>
+                    )}
+                    {scheduleEnabled && (
+                      <label>
+                        Ngày và giờ bắt đầu (giờ Việt Nam)
+                        <input
+                          type="datetime-local"
+                          name="scheduledStartAt"
+                          autoComplete="off"
+                          required
+                          step={60}
+                          min={vietnamInput(data.serverNow ?? Date.now())}
+                          value={scheduledDate}
+                          onChange={(e) => setScheduledDate(e.target.value)}
+                        />
+                        <small>
+                          Bắt đầu làm bài đúng giờ đã chọn (UTC+7). Thông báo
+                          xuất hiện trước giờ này theo số phút chuẩn bị.
+                        </small>
+                      </label>
+                    )}
                     <div className="learning-settings">
                       <label>
                         Thời gian chuẩn bị (phút)
@@ -686,10 +840,9 @@ export function Learning({
                         />
                       </label>
                       <p className="online-exam-timing-note">
-                        Bấm Bắt đầu kiểm tra để thông báo cho lớp. Hết thời gian
-                        chuẩn bị mới mở đề; thời gian làm bài bắt đầu từ lúc mở
-                        đề. Cả lớp cùng hạn nộp, vào muộn không được cộng thêm
-                        giờ.
+                        {scheduleEnabled
+                          ? "Bài tự mở đúng ngày giờ đã hẹn. Thông báo trước giờ mở theo số phút chuẩn bị. Cả lớp cùng hạn nộp, vào muộn không được cộng thêm giờ."
+                          : "Bấm Bắt đầu kiểm tra để thông báo cho lớp. Hết thời gian chuẩn bị mới mở đề; thời gian làm bài bắt đầu từ lúc mở đề. Cả lớp cùng hạn nộp, vào muộn không được cộng thêm giờ."}
                       </p>
                     </div>
                   </fieldset>
@@ -706,7 +859,11 @@ export function Learning({
                         : !examSource || !bankKeys.length)
                     }
                   >
-                    {busy ? "Đang lưu…" : "Lưu bài kiểm tra"}
+                    {busy
+                      ? "Đang lưu…"
+                      : editingExamId
+                        ? "Lưu thay đổi"
+                        : "Lưu bài kiểm tra"}
                   </button>
                 </form>
               </section>
@@ -859,6 +1016,7 @@ export function Learning({
                 )
               }
               onDelete={askDelete}
+              onEdit={(ex) => void editExam(ex.id)}
               onJoin={(ex) => void act(() => startRun({ examId: ex.id }))}
               onOpen={openRun}
             />

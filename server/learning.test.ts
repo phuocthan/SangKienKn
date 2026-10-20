@@ -1566,3 +1566,291 @@ test("expired exam can be deleted after collecting overdue runs without waiting 
  assert.equal((await f.request(`/learning/exams/${exam.id}/delete`,{},f.teacher)).status,200);
  assert.equal(f.db.prepare("SELECT 1 FROM exam_runs WHERE exam_id=?").get(exam.id),undefined);
 });
+
+test("online schedule opens at the exact saved time without an open command and notices respect preparation", async (t) => {
+  const f = await fixture(t),
+    starts = f.now() + 600000;
+  const body = {
+    title: "Hẹn giờ",
+    delivery: "online",
+    source: "bank",
+    chapterIds: ["chapter-1"],
+    questionCount: 3,
+    preparationMinutes: 2,
+    durationMinutes: 5,
+    tabLimit: 4,
+    scheduledStartAt: starts,
+    requestId: randomUUID(),
+  };
+  const exam = await f.post("/classrooms/class-demo/exams", body, f.teacher);
+  const snapshot = String(
+    f.db
+      .prepare("SELECT questions FROM exam_definitions WHERE id=?")
+      .get(exam.id)!.questions,
+  );
+  assert.equal(JSON.parse(snapshot).length, 3);
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exam-runs",
+        { examId: exam.id, requestId: randomUUID() },
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  assert.deepEqual((await f.read("/learning/exam-notices")).notices, []);
+  f.advance(480000);
+  const notices = (await f.read("/learning/exam-notices")).notices;
+  assert.equal(notices[0].startsAt, starts);
+  assert.equal(notices[0].questions, undefined);
+  f.db
+    .prepare(
+      "UPDATE questions SET text='Bank changed later' WHERE chapter_id='chapter-1'",
+    )
+    .run();
+  f.advance(120000);
+  const run = await f.start({ examId: exam.id });
+  const room = await f.read(`/learning/exam-runs/${run.id}`);
+  assert.equal(room.deadlineAt, starts + 300000);
+  assert.equal(
+    room.questions.some((q: any) => q.text === "Bank changed later"),
+    false,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT questions FROM exam_definitions WHERE id=?")
+      .get(exam.id)!.questions,
+    snapshot,
+  );
+  // Retrying a delivered create request after its planned start must not create a new exam.
+  assert.equal(
+    (await f.post("/classrooms/class-demo/exams", body, f.teacher)).id,
+    exam.id,
+  );
+  assert.equal(
+    (await f.request(`/learning/exams/${exam.id}/edit`, undefined, f.teacher))
+      .status,
+    409,
+  );
+  assert.equal(
+    (await f.request(`/learning/exams/${exam.id}/update`, body, f.teacher))
+      .status,
+    409,
+  );
+});
+
+test("teacher edits the same draft, reschedules and cancels a schedule with safe validation and retries", async (t) => {
+  const f = await fixture(t);
+  const body = {
+    title: "Bản nháp",
+    delivery: "online",
+    source: "bank",
+    chapterIds: ["chapter-1"],
+    questionCount: 2,
+    preparationMinutes: 0,
+    durationMinutes: 5,
+    tabLimit: 4,
+  };
+  const exam = await f.post(
+    "/classrooms/class-demo/exams",
+    { ...body, requestId: randomUUID() },
+    f.teacher,
+  );
+  const edit = `/learning/exams/${exam.id}/edit`,
+    update = `/learning/exams/${exam.id}/update`;
+  for (const cookie of [f.student, f.other]) {
+    assert.equal((await f.request(edit, undefined, cookie)).status, 403);
+    assert.equal((await f.request(update, body, cookie)).status, 403);
+  }
+  assert.equal((await f.request(edit)).status, 401);
+  const draft = await f.read(edit, f.teacher);
+  assert.deepEqual(draft.chapterIds, ["chapter-1"]);
+  assert.equal(draft.source, "bank");
+  const plan = {
+    ...body,
+    title: "Tên mới",
+    durationMinutes: 8,
+    tabLimit: 2,
+    scheduledStartAt: f.now() + 900000,
+    requestId: randomUUID(),
+  };
+  await f.post(update, plan, f.teacher);
+  await f.post(update, plan, f.teacher);
+  let saved = await f.read(edit, f.teacher);
+  assert.equal(saved.title, "Tên mới");
+  assert.equal(saved.durationMinutes, 8);
+  assert.equal(saved.tabLimit, 2);
+  assert.equal(saved.scheduledStartAt, plan.scheduledStartAt);
+  assert.equal(
+    f.db.prepare("SELECT COUNT(*) n FROM exam_definitions").get()!.n,
+    1,
+  );
+  const before = JSON.stringify(
+    f.db.prepare("SELECT * FROM exam_definitions WHERE id=?").get(exam.id),
+  );
+  for (const value of [
+    f.now(),
+    f.now() - 1,
+    "2026-10-20",
+    -5,
+    8640000000000001,
+  ]) {
+    assert.equal(
+      (
+        await f.request(
+          update,
+          { ...plan, scheduledStartAt: value, requestId: randomUUID() },
+          f.teacher,
+        )
+      ).status,
+      400,
+    );
+    assert.equal(
+      JSON.stringify(
+        f.db.prepare("SELECT * FROM exam_definitions WHERE id=?").get(exam.id),
+      ),
+      before,
+    );
+  }
+  assert.equal(
+    (
+      await f.request(
+        update,
+        { ...plan, questionCount: 100, requestId: randomUUID() },
+        f.teacher,
+      )
+    ).status,
+    409,
+  );
+  await f.post(
+    update,
+    { ...plan, scheduledStartAt: f.now() + 1200000, requestId: randomUUID() },
+    f.teacher,
+  );
+  saved = await f.read(edit, f.teacher);
+  assert.equal(saved.scheduledStartAt, f.now() + 1200000);
+  await f.post(
+    update,
+    { ...body, scheduledStartAt: null, requestId: randomUUID() },
+    f.teacher,
+  );
+  const session = f.db
+    .prepare("SELECT * FROM online_exam_sessions WHERE exam_id=?")
+    .get(exam.id)!;
+  assert.equal(session.started_at, null);
+  assert.equal(session.scheduled_start_at, null);
+  assert.equal(
+    f.db
+      .prepare("SELECT enabled FROM exam_definitions WHERE id=?")
+      .get(exam.id)!.enabled,
+    0,
+  );
+  f.advance(1200000);
+  assert.deepEqual((await f.read("/learning/exam-notices")).notices, []);
+  await f.post(`/learning/exams/${exam.id}/open`, {}, f.teacher);
+  assert.equal((await f.request(update, body, f.teacher)).status, 409);
+});
+
+test("editing uploaded exams preserves private question IDs, can replace the paper and rolls back failed updates", async (t) => {
+  const f = await fixture(t);
+  const question = {
+    text: "Một vật đi 20 m trong 5 s, tốc độ bằng bao nhiêu?",
+    choices: ["2 m/s", "4 m/s", "8 m/s", "20 m/s"],
+    correctIndex: 1,
+    explanation: "20/5=4 m/s.",
+    lesson: "Bài luyện tập chung",
+  };
+  const body = {
+    title: "Đề riêng",
+    delivery: "online",
+    source: "upload",
+    chapterIds: ["chapter-1"],
+    questions: [{ chapterId: "chapter-1", question }],
+    preparationMinutes: 1,
+    durationMinutes: 10,
+    tabLimit: 4,
+  };
+  const exam = await f.post("/classrooms/class-demo/exams", body, f.teacher),
+    update = `/learning/exams/${exam.id}/update`;
+  const rows = () =>
+    f.db.prepare("SELECT * FROM exam_definitions WHERE id=?").get(exam.id)!;
+  const first = JSON.parse(String(rows().questions));
+  const total = f.db.prepare("SELECT COUNT(*) n FROM questions").get()!.n;
+  const draft = await f.read(`/learning/exams/${exam.id}/edit`, f.teacher);
+  await f.post(
+    update,
+    {
+      ...body,
+      title: "Đã sửa tiêu đề",
+      questions: draft.questions,
+      requestId: randomUUID(),
+    },
+    f.teacher,
+  );
+  assert.equal(JSON.parse(String(rows().questions))[0].id, first[0].id);
+  assert.equal(
+    f.db.prepare("SELECT COUNT(*) n FROM questions").get()!.n,
+    total,
+  );
+  const before = JSON.stringify(rows());
+  f.db.exec(
+    "CREATE TRIGGER reject_schedule_update BEFORE UPDATE ON online_exam_sessions BEGIN SELECT RAISE(ABORT,'expected update rollback'); END",
+  );
+  const replacement = {
+    ...body,
+    questions: [
+      {
+        chapterId: "chapter-1",
+        question: { ...question, text: "Nội dung thay thế hợp lệ" },
+      },
+    ],
+    requestId: randomUUID(),
+  };
+  assert.equal((await f.request(update, replacement, f.teacher)).status, 500);
+  assert.equal(JSON.stringify(rows()), before);
+  assert.equal(
+    f.db.prepare("SELECT COUNT(*) n FROM questions").get()!.n,
+    total,
+  );
+  f.db.exec("DROP TRIGGER reject_schedule_update");
+  await f.post(update, replacement, f.teacher);
+  assert.equal(
+    JSON.parse(String(rows().questions))[0].text,
+    "Nội dung thay thế hợp lệ",
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT active FROM questions WHERE id=?")
+      .get(JSON.parse(String(rows().questions))[0].id)!.active,
+    0,
+  );
+});
+
+test("future scheduled exam can be deleted and cancellation prevents automatic opening", async (t) => {
+  const f = await fixture(t);
+  const body = {
+    title: "Hẹn xóa",
+    delivery: "online",
+    source: "bank",
+    chapterIds: ["chapter-1"],
+    questionCount: 2,
+    preparationMinutes: 1,
+    durationMinutes: 5,
+    scheduledStartAt: f.now() + 180000,
+  };
+  const exam = await f.post("/classrooms/class-demo/exams", body, f.teacher);
+  await f.post(`/learning/exams/${exam.id}/delete`, {}, f.teacher);
+  f.advance(180000);
+  assert.deepEqual((await f.read("/learning/exam-notices")).notices, []);
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exam-runs",
+        { examId: exam.id, requestId: randomUUID() },
+        f.student,
+      )
+    ).status,
+    404,
+  );
+});

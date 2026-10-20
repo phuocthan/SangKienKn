@@ -51,6 +51,7 @@ export type ExamDefinition = {
   durationMinutes?: number;
   preparationMinutes?: number;
   startedAt?: number | null;
+  scheduledStartAt?: number | null;
   id: string;
   title: string;
   startsAt: number;
@@ -96,6 +97,8 @@ export type LearningReward = {
 };
 export type LearningOverview = {
   examDeletion?: boolean;
+  examScheduling?: boolean;
+  examEditing?: boolean;
   reviewPapers?: boolean;
   classManagement?: boolean;
   sessionPolicy?: SessionPolicy;

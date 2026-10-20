@@ -1,5 +1,9 @@
 # Cấp độ ôn tập và kiểm tra
 
+## Hẹn giờ và chỉnh sửa kiểm tra online —20/10/2026
+
+Tạo bài kiểm tra có Hẹn giờ bắt đầu bằng ngày/giờ Việt Nam. Bài đã lưu tự mở theo giờ thực tế; trước giờ làm bài, chủ lớp được chỉnh tên, nguồn đề, thời gian và lịch trên cùng ID. Bài chưa hẹn giữ luồng bắt đầu thủ công; khi đã bắt đầu/đóng/có lượt làm thì khóa sửa. Đề hẹn giờ chốt snapshot lúc lưu; hạn nộp chung tính từ giờ mở đã chọn. API/capability/migration, quy tắc thông báo và giới hạn tại [online-exams.md](online-exams.md). Không đổi vé/điểm/sổ tay hay ngân hàng đang dùng.
+
 ## Điều hướng hiện hành — 16/10/2026
 
 Ba tab được rút gọn thành **Ôn tập / Săn thưởng / Kiểm tra**. Sidebar Ôn tập thay Ôn tập & kiểm tra; sidebar giáo viên Quản lý lớp thay Kiểm tra online, giáo viên vào kiểm tra qua submenu Ôn tập. Học sinh giữ shortcut Kiểm tra. Nút Tạo bài ôn nằm trên Bài ôn của lớp trong nội dung. Đây là cập nhật nhãn/vị trí, không đổi quy tắc học/thi bên dưới. Xem đầu [app-design.md](app-design.md).

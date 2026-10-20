@@ -1,5 +1,23 @@
 # Kiểm tra online do giáo viên bắt đầu
 
+## Hẹn giờ bắt đầu và chỉnh sửa đề —20/10/2026
+
+Giáo viên vào **Kiểm tra → Tạo bài kiểm tra**, chọn nguồn đề rồi bật **Hẹn giờ bắt đầu**. Chọn **Ngày và giờ bắt đầu (giờ Việt Nam)**; ứng dụng dùng UTC+7, không phụ thuộc múi giờ máy giáo viên. Đây là giờ bắt đầu làm bài, không phải giờ bắt đầu đếm thời gian chuẩn bị. Hạn kết thúc bằng giờ đã chọn cộng số phút làm bài; học sinh vào muộn chỉ có phần thời gian còn lại. Không bật hẹn giờ thì vẫn lưu bản nháp và bắt đầu thủ công như trước.
+
+Lưu bài có lịch sẽ tự mở đúng mốc đã lưu dù giáo viên đóng trình duyệt. Thông báo trong app xuất hiện từ X phút trước giờ bắt đầu; nếu tạo/chỉnh khi đã nằm trong khoảng chuẩn bị thì thông báo từ lúc lưu. Không phát email hay tự ép học sinh vào phòng. Popup sau tạo xác nhận lịch/giờ Việt Nam, có **Chỉnh sửa thông tin** và **Đã hiểu**; không có Bắt đầu ngay để tránh vô tình đổi lịch. Danh sách hiển thị Đã hẹn giờ, giờ mở/hạn kết thúc và vẫn cho học sinh chờ tới giờ mở.
+
+Nút **Chỉnh sửa thông tin** có trong popup sau tạo và trên từng buổi online. Mở lại đầy đủ tên, nguồn/chương/bài/trọng số/số câu hoặc câu tải lên, thời gian chuẩn bị/làm bài, ngưỡng rời tab và lịch đã lưu. Có thể thay nội dung đề, đổi lịch hoặc bỏ chọn hẹn giờ rồi **Lưu thay đổi** để trở về bản chờ bắt đầu thủ công. Đóng form bằng X/Escape bỏ chỉnh sửa chưa lưu. Lưu lỗi giữ nguyên dữ liệu để thử lại; lưu thành công cập nhật cùng ID, không tạo buổi mới. Đề upload giữ câu đã tải, không bắt upload lại khi sửa tên/thời gian; câu riêng không thay đổi được tái dùng ID.
+
+Chỉ chủ lớp được xem dữ liệu chỉnh sửa hoặc cập nhật. Bản chờ thủ công được sửa; bài hẹn giờ được sửa trước giờ làm bài và chưa có lượt thi, kể cả khi đang trong khoảng thông báo chuẩn bị. Bài đã bắt đầu, đã đóng hoặc đã có bài làm bị khóa chỉnh sửa tại server, không chỉ dựa vào nút disabled. Bài hẹn giờ chưa tới giờ bắt đầu có thể xóa bằng hộp xác nhận hiện có; khi đang thi vẫn phải đóng/thu bài trước. Không đổi dữ liệu bài đã nộp hoặc buổi khác.
+
+### API, snapshot và lưu lịch
+
+Overview thêm `examScheduling`, `examEditing` và `exams[].scheduledStartAt`; client dùng backend cũ khóa điều khiển mới, không gửi lịch sang API chưa hỗ trợ. POST tạo online nhận `scheduledStartAt` là timestamp milliseconds UTC hoặc null. Ngày giờ phải ở tương lai; số phút chuẩn bị/làm bài và nguồn đề vẫn được kiểm tra như cũ. GET `/api/learning/exams/:id/edit` trả draft đầy đủ chỉ cho chủ lớp, POST `/api/learning/exams/:id/update` dùng cùng validation/transaction với tạo; requestId chống lưu lặp gắn với thao tác/ID đề/nội dung. Lỗi không thay dữ liệu đã lưu, private question insert hoặc bản ghi request.
+
+Migration bổ sung cột nullable `online_exam_sessions.scheduled_start_at`, gọi lại an toàn và giữ mọi dữ liệu cũ. Với bài hẹn giờ, `exam_definitions.starts_at` là giờ làm bài đã chọn, `closes_at` là hạn chung, `enabled=1`; bộ câu được chốt ngay khi lưu/chỉnh, kể cả nguồn ngân hàng, để ngân hàng thay đổi sau đó không làm lịch tự mở thất bại. `online_exam_sessions.started_at` của bài hẹn giờ là **mốc bắt đầu thông báo chuẩn bị**, có thể ở tương lai, bằng max(thời điểm lưu, giờ làm bài−X). API thông báo lọc mốc này; quyền vào bài luôn kiểm tra giờ mở/đóng trên server. Không cần trình duyệt hoặc cron kích hoạt mở bài: các mốc/quyền đã lưu và vẫn có hiệu lực sau server khởi động lại. Worker thu bài hết hạn hiện có giữ nguyên. Bài ngân hàng chưa hẹn vẫn chọn/chốt lại câu khi giáo viên bắt đầu thủ công.
+
+Bản cập nhật cần triển khai backend Railway; build/test riêng không chứng minh production đã có migration/capability. QA và trạng thái Git của lượt này ở đầu session-handoff; không áp các ghi chú lịch sử “bài chưa bắt đầu không có giờ ấn định” hoặc “không được sửa sau thông báo” vào bài hẹn giờ mới.
+
 ## Xóa bài kiểm tra — 19/10/2026
 
 Giáo viên sở hữu lớp có nút **Xóa bài kiểm tra** ở từng buổi trong mục Kiểm tra, gồm bài online và lịch kiểm tra cũ. Chỉ xóa đề chưa bắt đầu hoặc bài đã kết thúc/đóng; buổi đang thông báo/chờ/đang thi cần Đóng bài thi trước để thu bài. Bài hết hạn tự chốt lượt quá hạn trước khi kiểm tra điều kiện xóa. Không cho học sinh, giáo viên lớp khác hoặc admin thay quyền chủ lớp.

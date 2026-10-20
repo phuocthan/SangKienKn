@@ -72,6 +72,16 @@ test("online session migration and reopen preserve the announced schedule, selec
     db.prepare(
       "INSERT INTO online_exam_sessions(exam_id,duration_minutes,question_count,selection,started_at) VALUES('online',1,1,'{}',60000)",
     ).run();
+    db.exec("ALTER TABLE online_exam_sessions DROP COLUMN scheduled_start_at");
+    ensureLearningSchema(db);
+    assert.equal(
+      db.prepare("SELECT scheduled_start_at FROM online_exam_sessions").get()!
+        .scheduled_start_at,
+      null,
+    );
+    db.prepare(
+      "UPDATE online_exam_sessions SET scheduled_start_at=120000",
+    ).run();
     db.exec("ALTER TABLE online_exam_sessions DROP COLUMN preparation_minutes");
     const before = db.prepare("SELECT * FROM online_exam_sessions").get()!;
     ensureLearningSchema(db);
@@ -90,6 +100,11 @@ test("online session migration and reopen preserve the announced schedule, selec
       db.prepare("SELECT started_at FROM online_exam_sessions").get()!
         .started_at,
       60000,
+    );
+    assert.equal(
+      db.prepare("SELECT scheduled_start_at FROM online_exam_sessions").get()!
+        .scheduled_start_at,
+      120000,
     );
     assert.equal(
       db.prepare("SELECT COUNT(*) AS n FROM online_exam_sessions").get()!.n,
