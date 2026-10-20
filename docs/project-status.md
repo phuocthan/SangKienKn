@@ -1,10 +1,18 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Lưu bộ thiết kế và tài liệu lên Git — 20/10/2026
+
+Theo yêu cầu “push git”, bổ sung các poster giới thiệu/hồ sơ v1–v8, nguồn icon 3D đã duyệt, tài liệu thiết kế/bàn giao và đề xuất ảnh câu hỏi vào Git. Poster hiện hành là v8; các bản trước giữ làm lịch sử. Bộ icon ứng dụng đã phát hành ở commit 4e0823b và đã xác minh Railway thành công; lượt này chỉ lưu tài liệu/nguồn thiết kế, không sửa runtime hoặc dữ liệu. Các ghi chú “chưa push” trong nhật ký bên dưới mô tả thời điểm trước đợt Git này.
+
+Không chạy lại build/E2E cho đợt chỉ thay tài liệu và artifact; kết quả 12/12 của bản icon bên dưới thuộc lượt kiểm thử trước. Kiểm tra diff và danh sách file trước commit; không đưa .local, database, secrets hoặc file khóa Word lên Git. Đề xuất ảnh câu hỏi vẫn chưa được triển khai.
+
 ## Đợt phát hành icon cấp độ 3D — 20/10/2026
 
 Theo yêu cầu mới, đưa bộ Mầm / Chồi / Cây Non / Đơm Hoa / Kết Trái đã duyệt vào bản phát hành main. Năm WebP320×320 có alpha, tổng163.384byte; dùng chung trong thẻ chương, mốc cấp, giáo viên và khu vườn. Giữ ngưỡng thời gian, phạm vi lớp–môn–chương, accessible name và animation. Đã cập nhật main từ remote b21edc2, giữ đủ các thay đổi tài liệu/local có sẵn; chỉ commit phạm vi icon và ghi chú liên quan.
 
 QA mới TypeScript/Vite build đạt, 12/12 E2E desktop/mobile đạt (32,5 giây) trên cổng3336/SQLite riêng; ảnh/URI/MIME/kích thước và các cấp/reload/vườn/roster/motion đều đạt, đã xem thanh cấp hai kích thước. Log `.local/icon-push-20261020`. Không sửa backend/database, không đưa poster hoặc nguồn PNG lớn vào đợt push. Cần đối chiếu deployment Railway và tài nguyên thực tế để xác nhận production; các dòng chưa push của lượt áp dụng local trước đây là lịch sử.
+
+Xác nhận sau push: commit `4e0823b561e520aa8b275abe9f9eaa2f93f4cbea` đã có trên origin/main. Railway deployment `c7b6c25e-4c82-40a0-bf8c-6b6084afdf18` SUCCESS, đúng SHA. HTTP health200/ok=true/demo=false/quickLogin=false; cả năm WebP production trả200/image-webp, byte và SHA-256 khớp bộ đã test. Bundle `/assets/index-CjBszAa2.js` chứa family greenedu-3d và đường dẫn ảnh mới. Báo cáo `.local/icon-push-20261020/release-verification.json`. Ghi chú kiểm tra sau phát hành này lưu tại workspace; không tạo thêm đợt deploy chỉ để đổi tài liệu.
 
 ## Chốt phát hành Git hẹn giờ/chỉnh sửa đề —20/10/2026
 
@@ -15,6 +23,74 @@ Theo yêu cầu deploy Git, đưa bản đã kiểm thử lên origin/main cho l
 Đã pull5commit lên **13c638e**, giữ bộ poster và tài liệu chưa commit. Form Tạo bài kiểm tra có ngày/giờ Việt Nam (UTC+7), bài tự mở theo lịch; Chỉnh sửa thông tin trong popup/danh sách tải lại đầy đủ nguồn đề/câu upload/cấu hình và lịch, cập nhật cùng ID, có đổi/bỏ lịch. Chỉ chủ lớp sửa trước giờ thi và khi chưa có lượt làm; bản đã bắt đầu/đóng khóa ở server. Lịch/snapshot giữ qua restart; thời gian chuẩn bị đứng trước giờ mở, cả lớp cùng hạn nộp. API/capability/migration thêm không reset dữ liệu. [Quy tắc chi tiết](online-exams.md).
 
 QA: full **180/180 backend đạt**; bổ sung migration/reopen **4/4 xác nhận đạt** (cùng các ca đã có, không cộng trùng). Build/typecheck đạt; E2E rộng26/28 với2lỗi harness popup che navbar, đã sửa và **6/6 ca mới desktop/mobile đạt** trên DB E2E cũ. Có thử tự mở không lệnh giáo viên, giữ đề/ID khi sửa, retry/hủy/reload và native date control không tràn320/390px; đã xem ảnh. Sau tinh chỉnh hướng dẫn cuối, build lại và2/2 xác nhận desktop/mobile đạt. Chi tiết các lượt/report ở đầu session-handoff. **Chưa commit/push/deploy**; backend Railway cần triển khai mới để có tính năng, không ghi dữ liệu thật.
+
+## Poster v8: bỏ nhãn GDPT 2018 — 20/10/2026
+
+Theo yêu cầu tiếp theo, [poster v8](../artifacts/posters/ho-so-san-pham-2026-v8/README.md) bỏ tên/chú thích chương trình khỏi tiêu đề, bảng, chân trang và metadata. Giữ luận điểm giáo dục, chữ A3 18,53 pt và hình nhỏ của v7. QA mới xem render, kiểm tra hai PDF một trang/không còn nhãn đã bỏ/đủ nội dung/font, PNG 3508 × 4961/300 dpi và QR đúng Railway; báo cáo `.local/poster-gdpt2018/v8-verification.json`. v8 mới nhất; giữ tài liệu nguồn/bản cũ, không sửa app/database/push/deploy.
+
+## Poster v7: ưu tiên căn cứ và logic giáo dục — 20/10/2026
+
+Theo yêu cầu mới, [poster v7](../artifacts/posters/ho-so-san-pham-2026-v7/README.md) thay hướng hình lớn/khẩu hiệu bằng nhu cầu → định hướng GDPT 2018 → hoạt động GreenEdu → minh chứng để giáo viên điều chỉnh. Có bảng tự học, hợp tác, giải quyết vấn đề/sáng tạo và đánh giá quá trình; nhiệm vụ phải được giáo viên chọn theo yêu cầu cần đạt. Cấp cây ghi thời gian/tạo động lực, không phải đo năng lực; hiệu quả học tập còn cần kiểm chứng. Hình cây chỉ còn khung 3,12% trang, chữ nội dung A3 18,53 pt. Căn cứ và giới hạn nguồn tại SOURCES.md của bản này.
+
+QA mới: xem render cuối, hai PDF một trang đúng khổ, đủ nội dung/cỡ chữ/ký tự trong trang, PNG 3508 × 4961/300 dpi, QR đúng Railway; báo cáo `.local/poster-gdpt2018/v7-verification.json`. Giữ mọi bản cũ và thay đổi có sẵn, không sửa app/database/push/deploy; không ghi đối chiếu chương trình là bằng chứng đã phát triển năng lực thực nghiệm.
+
+## Đề xuất ảnh trong câu hỏi — 19/10/2026
+
+Đã khảo sát và thử cơ chế trích ảnh nhúng qua relationship trên mẫu DOCX tổng hợp; khả thi. Hướng ưu tiên: Chèn ảnh/chọn file/dán Ctrl+V, sau đó nhập ảnh có sẵn trong Word, giữ ảnh theo phiên bản/snapshot và quyền xem lời giải. **Chưa triển khai**, bộ nhập hiện tại vẫn chỉ nhận văn bản. Phạm vi, thử nghiệm và nguồn tại [question-images-proposal.md](question-images-proposal.md); không thay dữ liệu hoặc deploy.
+
+## Poster v6: sửa giọng văn theo góp ý — 19/10/2026
+
+Người dùng nhận xét từ ngữ có hơi hướng AI. Đã viết lại poster tại `artifacts/posters/ho-so-san-pham-2026-v6`: câu chính “CÂY CỦA EM LỚN LÊN KHI EM HỌC.”, giới thiệu làm bài/xem câu sai/theo dõi cây; bốn cụm Vì sao làm? / Cách làm / Học sinh / Giáo viên dùng lời cụ thể, gần cách cô nói với học sinh. Bỏ “Gieo nỗ lực”, “Nuôi tri thức”, “hành trình riêng”, “sửa sai có đích”; kết quả nêu đúng chức năng đã có và dự kiến hỏi ý kiến học sinh. Vẫn ghi AI hỗ trợ viết/kiểm tra mã, tạo minh họa và cô kiểm tra bài tập; không bịa gia sư AI hoặc kết quả khảo sát.
+
+Giữ banner/ảnh cổ thụ/cỡ chữ v5, không gọi ImageGen. QA mới xem render cuối, hai PDF đúng một trang/đúng khổ và đủ chữ mới, kiểm tra bỏ khẩu hiệu cũ, cỡ nội dung A3 14,74 pt và ký tự trong khổ, PNG 3508 × 4961/300 dpi, QR đúng Railway; ảnh nguồn khớp v5. Báo cáo `.local/poster-submission-20261019/v6-verification.json`. v6 mới nhất, giữ các bản trước, có nguồn/README. Không sửa app/database/push/deploy hoặc tác vụ Forms ở thread riêng.
+
+## Poster v5: kiểm tra và chỉnh cỡ chữ — 19/10/2026
+
+Người dùng yêu cầu kiểm tra cỡ chữ. Đã đo PDF A3 v4 bằng pdfplumber: nhãn mục 11,29 pt, mô tả 11,62 pt, chân trang 11,54 pt, chú thích QR 7,83 pt. Làm v5 tại `artifacts/posters/ho-so-san-pham-2026-v5`: nhãn 16,42 pt, nội dung/danh sách/chân trang đồng nhất 14,74 pt, chú thích QR 12,21 pt; câu chủ đạo giữ 42,95 pt. Tăng giãn dòng/độ đậm màu chữ, ngắt lại cột và thu minh họa 600 xuống 540 đơn vị để không đè chữ. Giữ nguyên ảnh cổ thụ/mầm cây và banner; không gọi ImageGen lại. v5 là bản mới nhất để người dùng xem, các bản cũ vẫn giữ.
+
+QA mới: xem render cuối; hai PDF đúng một trang A0 theo mẫu/A3 và đủ nội dung, kiểm tra mọi ký tự nằm trong khổ, đo font trước/sau; PNG 3508 × 4961/300 dpi, QR đúng Railway. Báo cáo `.local/poster-submission-20261019/v5-verification.json`, có README/nguồn dàn trang. Không sửa app/database/push/deploy; giữ thay đổi có sẵn, không can thiệp tác vụ Forms ở thread riêng.
+
+## Poster v4: cổ thụ trên sách, chữ quanh minh họa — 19/10/2026
+
+Theo yêu cầu mới, đã tạo `artifacts/posters/ho-so-san-pham-2026-v4` với minh họa ImageGen mới: cổ thụ mọc từ sách mở, năm mầm cây vui chơi/tưới cây/chơi xích đu quanh gốc. Các cụm Nhu cầu / Ý tưởng / Học sinh chủ động / Giáo viên đồng hành nằm hai bên; giữ thông điệp lớn, banner mẫu nguyên bản, tác giả/đơn vị, năm cấp độ, vòng học, AI hỗ trợ phát triển, kết quả/hướng tiếp tục và QR. Bản v4 thay v3 làm bản mới nhất để xem, không xóa các bản cũ. Có ảnh minh họa RGBA trong assets, prompt đầy đủ và nguồn dàn trang.
+
+QA mới: xem render cuối sau xử lý chữ đè lên lá/sách; hai PDF một trang A0 theo mẫu và A3, đủ chữ/không placeholder; PNG 3508 × 4961/300 dpi, QR đúng Railway, banner khớp nhị phân với PPTX nguồn. Lớp chữ 257 từ; minh họa 1254 × 1254/alpha 0–255. Báo cáo `.local/poster-submission-20261019/v4-verification.json`. Không sửa app/database/push/deploy, giữ thay đổi icon 3D local có sẵn. Tác vụ Google Forms đã chuyển sang thread riêng `01a1545e-1bae-7570-a3de-5a5a37399d75` theo yêu cầu, không tiếp tục ở thread poster.
+
+## Poster v3: ý tưởng gây chú ý trước chi tiết — 19/10/2026
+
+Người dùng yêu cầu ý tưởng phải đủ nổi bật để thu hút trước khi đọc tiếp. Đã làm bản v3 tại `artifacts/posters/ho-so-san-pham-2026-v3`: thông điệp lớn **BIẾN VIỆC HỌC THÀNH MỘT KHU VƯỜN.**, cây Kết Trái phóng lớn và bốn giai đoạn dẫn tới cây trưởng thành. Nhu cầu/chức năng theo vai trò/vòng phản hồi/AI/kết quả và hướng phát triển nằm phía dưới. Giữ nguyên banner mẫu 2026 và thông tin tác giả/đơn vị; không bịa số liệu hiệu quả hoặc AI gia sư. Đây là bản mới nhất, thay v2 về thứ tự hiện hành; tất cả bản trước vẫn giữ.
+
+QA mới: xem render cuối sau sửa chồng cây/đường nối/nhãn; hai PDF một trang A0 theo mẫu và A3, đủ chữ và không placeholder. PNG 3508 × 4961/300 dpi; QR giải mã đúng Railway, banner so khớp nhị phân với PPTX gốc. Báo cáo `.local/poster-submission-20261019/v3-verification.json`. Có nguồn build/README/bản xem nhanh. Không thay app/database/push/deploy; giữ thay đổi icon 3D local và các file có sẵn.
+
+## Poster hồ sơ v2: sáng tạo và đầy đủ hơn — 19/10/2026
+
+Người dùng chưa hài lòng bản đầu và yêu cầu sáng tạo/đầy đủ hơn. Đã làm lại infographic tại artifacts/posters/ho-so-san-pham-2026-v2, giữ nguyên banner2026 và đúng thông tin tác giả/đơn vị. Trục đường nuôi cây5cấp, ba nhu cầu lớp học,8chức năng theo vai trò học sinh/giáo viên, vòng giao bài–học/sửa sai–ghi nhận–phản hồi, vườn/vinh danh, AI hỗ trợ phát triển và kết quả/hướng tiếp tục. Phân biệt kết quả web đã có với giá trị hướng tới, không bịa khảo sát/tăng điểm hoặc gia sưAI đã tích hợp. Nội dung384từ dàn dạng nhãn ngắn, đầy đủ hơn bản đầu206từ.
+
+Đầu ra PDF A0 đúng khổ mẫu2384×3370pt, A3 và PNG3508×4961/300dpi, bản xem nhanh/nguồn build/README. Đã xem render cuối; Pypdf xác nhận đủ1trang/kích thước/tên/chức năng/không placeholder, QR giải mã đúngRailway. QA .local/poster-submission-20261019/v2-verification.json. Giữ tất cả bản cũ và thay đổi icon3D local đang chờ người dùng kiểm tra; không sửa app/database/push/deploy trong lượt poster này.
+
+## Poster một trang theo mẫu hồ sơ 2026 — 19/10/2026
+
+Người dùng gửi ảnh yêu cầu mẫu Canva và đề nghị sửa poster. Đã tìm đúng Mẫu Poster2026.pptx trong thư mục tài liệu Desktop; lấy nguyên banner3975×724 từ media/image1.png, kiểm tra binary không đổi. Gộp bộ3tờ thành1poster tại artifacts/posters/ho-so-san-pham-2026, gồm PDF đúng khổ gốc2384×3370pt (~A0), PDF A3, PNG3508×4961/300dpi, ảnh xem nhanh và nguồn build. Giữ Nguyễn Thị Thanh Phương/THPT Nguyễn Khuyến/thành phố Đà Nẵng, bỏ viền hướng dẫn. Có5mục: bối cảnh-đối tượng, ý tưởng5cấp, AI/cách triển khai, kết quả chức năng và nhận xét/hướng phát triển, QR sản phẩm.
+
+AI chỉ ghi hỗ trợ lập trình/thiết kế; không hứa gia sư AI, không bịa khảo sát/tăng điểm hoặc thành tích giải thưởng. Đã xem bản render cuối sau chỉnh khoảng minh họa–mục2, kiểm tra đủ2PDF1trang/kích thước/tên/tiêu đề/không placeholder; QR ảnh cuối giải mã đúngRailway. QA .local/poster-submission-20261019/verification.json; chi tiết README trong thư mục kết quả. Giữ bộ3poster cũ và thay đổi icon3D local trước đó. Không sửa Canva trực tiếp, không đổi app/database/push/deploy trong lượt này.
+
+## Hiện hành: icon cấp độ 3D đã duyệt, chạy local — 19/10/2026
+
+Người dùng đã duyệt bộ preview và yêu cầu áp dụng, deploy local trước để kiểm tra. Thay hình vẽ trong LevelArtwork bằng SVG image dẫn5WebP public/assets/student-levels-3d-v1 (320×320, alpha trong suốt, tổng163.384byte); giữ svg/g80×80, class/CSS/ARIA/data-level và animation lên cấp/vườn. StudentLevelIcon đổi family greenedu-3d, giữ toàn bộ tên/ngưỡng/phạm vi lớp–môn–chương. Các vị trí dùng chung gồm thẻ chương/mốc cấp, danh sách giáo viên, vườn cá nhân/lớp và vinh danh. Quyết định này thay trạng thái chờ duyệt phía dưới; preview cũ vẫn giữ làm nguồn. Không thay backend/database.
+
+Đã chạy npm run local: Vite nền http://localhost:5173, API/database tiếp tục Railway. Đã mở local trong browser, hiện form đăng nhập; không tự đăng nhập/ghi dữ liệu thật. Health qua proxy ok=true/demo=false/quickLogin=false. **QA mới:** TypeScript/Vite build/diff check đạt; **8/8 E2E desktop/mobile đạt (27,6 giây)** về5file ảnh/URI/mime/kích thước<50KB, đầy đủ5cấp/reload/độc lập theo chương, giáo viên/vườn, animation chỉ khi tăng cấp. Tests dùng server3330 và SQLite e2e riêng, không Railway. Xem ảnh thanh cấp desktop/mobile sau tích hợp; không tràn/đổi hình học. Log/report .local/level-3d-local-20261019. Không chạy backend suite vì không sửa server; cập nhật selector family trong duotone-icons nhưng chưa chạy file đó. Chưa push/deploy Railway. Giữ bộ poster và file khóa Word có sẵn chưa commit.
+
+## Đề xuất chờ duyệt: bộ icon cấp độ 3D — 19/10/2026
+
+Người dùng thích cây trong poster và yêu cầu xem preview trước khi thay bộ hiện tại. Đã tạo artifacts/design/student-levels-3d-preview với5PNG nền trong suốt1254×1254 (Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái), bảng preview2400×1680 gồm hình lớn/64px/mô phỏng thẻ chương-vườn và nguồn dàn trang. Dùng ImageGen theo ảnh cây poster tham chiếu, giữ hoa trắng/quả vàng phân biệt cấp4/5; dàn chữ riêng. Đã xem ảnh tổng thể và xác nhận cả5PNG RGBA có alpha0–255.
+
+**Chưa được duyệt, chưa áp dụng vào app.** Giữ nguyên LevelArtwork/StudentLevelIcon và ngưỡng cấp; không đổi public/src/server/database, không push/deploy. Khi người dùng duyệt mới tích hợp, cân lại kích thước/nén ảnh và kiểm tra UI thật. Không tự coi preview là quyết định thiết kế hiện hành. Chi tiết tại artifacts/design/student-levels-3d-preview/README.md.
+
+## Bộ poster giới thiệu GreenEdu — 19/10/2026
+
+Đã tạo artifacts/posters/gioi-thieu-2026: 3 poster Nhu cầu → Ý tưởng → Hiện thực hóa, PDF A3 3 trang, PNG3508×4961/300dpi, ảnh tổng thể và nguồn build.py/DESIGN.md/assets. Theo yêu cầu nghiên cứu link https://ieeai.net/top-50: web extractor không mở được, nhưng trình duyệt đã xem trực tiếp Hành trình Việt Nam/COMPETECH/AI-PhysicsBook. Chỉ tham khảo bố cục/mạch vấn đề–giải pháp–triển khai–minh chứng; không sao chép số liệu/hình/logo giải thưởng. Tìm skill trên skills.sh, chọn canvas-design của anthropics/skills và đọc SKILL.md nguồn chính thức; không cài skill. Dùng ImageGen tạo ba minh họa mới; dàn chữ tiếng Việt, logo thật và QR bằng ReportLab, theo PDF skill.
+
+QA mới: xem tổng thể ba trang render; Pypdf xác nhận3trang/tiêu đề; ảnh300dpi đúng khổ; ZXing giải mã QR ảnh cuối đúng https://greenedu.up.railway.app/. Mỗi tờ78–82từ kể cả nhận diện/chân trang. Không bịa số liệu hiệu quả hoặc tuyên bố AI đang có trong sản phẩm. Không sửa ứng dụng/dữ liệu, không push/deploy; giữ poster cũ. Đây là bộ giới thiệu dự án, tách poster hướng dẫn học sinh12/10. Nguồn/giới hạn tại artifacts/posters/gioi-thieu-2026/README.md, QA tại .local/poster-series-20261019/verification.json.
 
 ## Phát hành Railway theo yêu cầu — 19/10/2026
 

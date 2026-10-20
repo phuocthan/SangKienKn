@@ -6,11 +6,25 @@ Theo yêu cầu đưa bộ icon mới lên remote, bản phát hành dùng năm 
 
 QA mới trên mã đã cập nhật origin/main b21edc2: TypeScript/Vite build đạt, 12/12 E2E desktop/mobile đạt (32,5 giây), gồm đủ năm ảnh/cấp/nhãn, lớp–môn–chương/reload, giáo viên/vườn và animation. Test dùng cổng3336 và database riêng; chi tiết `.local/icon-push-20261020`. Railway tự triển khai qua main; chỉ xác nhận production sau khi kiểm tra deployment và tài nguyên thật.
 
+Xác nhận sau push: commit `4e0823b561e520aa8b275abe9f9eaa2f93f4cbea` đã có trên origin/main. Railway deployment `c7b6c25e-4c82-40a0-bf8c-6b6084afdf18` SUCCESS, đúng SHA. HTTP health200/ok=true/demo=false/quickLogin=false; cả năm WebP production trả200/image-webp, byte và SHA-256 khớp bộ đã test. Bundle `/assets/index-CjBszAa2.js` chứa family greenedu-3d và đường dẫn ảnh mới. Báo cáo `.local/icon-push-20261020/release-verification.json`. Ghi chú kiểm tra sau phát hành này lưu tại workspace; không tạo thêm đợt deploy chỉ để đổi tài liệu.
+
 ## Hiện hành: hẹn giờ và chỉnh sửa kiểm tra online —20/10/2026
 
 Form Tạo bài kiểm tra thêm checkbox **Hẹn giờ bắt đầu**; khi bật mới hiện datetime-local **Ngày và giờ bắt đầu (giờ Việt Nam)** và lời giải thích UTC+7, giờ này là giờ học sinh được vào làm. Giữ thời gian chuẩn bị/làm bài/ngưỡng tab và hai nguồn đề. Không hẹn thì luồng nháp/Bắt đầu ngay/Để sau không đổi. Có lịch thì popup sau tạo xác nhận ngày giờ, có Chỉnh sửa thông tin/Đã hiểu; danh sách hiện Đã hẹn giờ và các mốc.
 
 Chỉnh sửa thông tin trên popup/danh sách tải lại draft từ API chủ lớp, dùng form hiện có với tiêu đề Chỉnh sửa bài kiểm tra và Lưu thay đổi. Giữ nguồn/chương/bài/trọng số/câu upload, có thể đổi/bỏ lịch trước giờ thi. Lỗi giữ draft/focus lỗi; busy chặn gửi lặp/đóng; hủy không ghi. Bài đã bắt đầu/đóng/có lượt thi khóa sửa và có lời giải thích. Ngày giờ dùng UTC+7 cả lúc nhập và hiển thị; native control được kiểm tra không tràn320/390px. Giữ header/nav, khả năng dùng bàn phím và animation hiện có. Chi tiết quy tắc/snapshot tại [online-exams.md](online-exams.md).
+
+## Hiện hành: icon cấp độ 3D đã duyệt, chạy local — 19/10/2026
+
+Người dùng đã duyệt bộ preview và yêu cầu áp dụng, deploy local trước để kiểm tra. Thay hình vẽ trong LevelArtwork bằng SVG image dẫn5WebP public/assets/student-levels-3d-v1 (320×320, alpha trong suốt, tổng163.384byte); giữ svg/g80×80, class/CSS/ARIA/data-level và animation lên cấp/vườn. StudentLevelIcon đổi family greenedu-3d, giữ toàn bộ tên/ngưỡng/phạm vi lớp–môn–chương. Các vị trí dùng chung gồm thẻ chương/mốc cấp, danh sách giáo viên, vườn cá nhân/lớp và vinh danh. Quyết định này thay trạng thái chờ duyệt phía dưới; preview cũ vẫn giữ làm nguồn. Không thay backend/database.
+
+Đã chạy npm run local: Vite nền http://localhost:5173, API/database tiếp tục Railway. Đã mở local trong browser, hiện form đăng nhập; không tự đăng nhập/ghi dữ liệu thật. Health qua proxy ok=true/demo=false/quickLogin=false. **QA mới:** TypeScript/Vite build/diff check đạt; **8/8 E2E desktop/mobile đạt (27,6 giây)** về5file ảnh/URI/mime/kích thước<50KB, đầy đủ5cấp/reload/độc lập theo chương, giáo viên/vườn, animation chỉ khi tăng cấp. Tests dùng server3330 và SQLite e2e riêng, không Railway. Xem ảnh thanh cấp desktop/mobile sau tích hợp; không tràn/đổi hình học. Log/report .local/level-3d-local-20261019. Không chạy backend suite vì không sửa server; cập nhật selector family trong duotone-icons nhưng chưa chạy file đó. Chưa push/deploy Railway. Giữ bộ poster và file khóa Word có sẵn chưa commit.
+
+## Đề xuất chờ duyệt: bộ icon cấp độ 3D — 19/10/2026
+
+Người dùng thích cây trong poster và yêu cầu xem preview trước khi thay bộ hiện tại. Đã tạo artifacts/design/student-levels-3d-preview với5PNG nền trong suốt1254×1254 (Mầm/Chồi/Cây Non/Đơm Hoa/Kết Trái), bảng preview2400×1680 gồm hình lớn/64px/mô phỏng thẻ chương-vườn và nguồn dàn trang. Dùng ImageGen theo ảnh cây poster tham chiếu, giữ hoa trắng/quả vàng phân biệt cấp4/5; dàn chữ riêng. Đã xem ảnh tổng thể và xác nhận cả5PNG RGBA có alpha0–255.
+
+**Chưa được duyệt, chưa áp dụng vào app.** Giữ nguyên LevelArtwork/StudentLevelIcon và ngưỡng cấp; không đổi public/src/server/database, không push/deploy. Khi người dùng duyệt mới tích hợp, cân lại kích thước/nén ảnh và kiểm tra UI thật. Không tự coi preview là quyết định thiết kế hiện hành. Chi tiết tại artifacts/design/student-levels-3d-preview/README.md.
 
 ## Nhãn submenu Kiểm tra online — 19/10/2026
 
