@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Đợt phát hành icon cấp độ 3D — 20/10/2026
+
+Người dùng yêu cầu đưa bộ icon đã duyệt lên remote sau khi trước đó chỉ áp dụng local. Đã fetch và cập nhật main từ13c638e lên b21edc2 (lịch/chỉnh sửa kiểm tra online). Git autostash phát sinh xung đột ở ba tài liệu do cùng thêm đầu trang; đã ghép đủ phần remote và phần local sau khi xác minh phần gốc không đổi. Bản sao trước ghép tại `.local/icon-push-20261020`, autostash1a3150a giữ để khôi phục. Giữ tất cả poster, nguồn thiết kế, đề xuất ảnh câu hỏi và file khóa Word có sẵn ngoài phạm vi commit icon.
+
+Bản phát hành thêm năm WebP320×320 alpha, tổng163.384byte tại public/assets/student-levels-3d-v1; LevelArtwork dùng SVG image, family greenedu-3d, giữ nhãn, cấp/ngưỡng, phạm vi từng chương và animation. QA mới TypeScript/Vite build đạt; 12/12 E2E desktop/mobile đạt (32,5 giây), bổ sung chạy duotone-icons cùng cấp độ/motion/vườn/roster. Server3336, SQLite e2e riêng; không dùng dữ liệu Railway. Đã xem preview thanh cấp desktop/mobile. Report và build `.local/icon-push-20261020`. Không chạy lại backend suite vì phần icon không sửa server.
+
+Commit chỉ gồm phần tích hợp/ảnh tối ưu/test và ghi chú icon trong tài liệu; các bản poster và nguồn PNG lớn vẫn ở workspace. Railway tự triển khai từ main; không dùng deploy SQLite local. Push không đồng nghĩa đã triển khai xong, cần kiểm tra deployment và năm file ảnh production trước khi báo thành công.
+
 ## Chốt Git theo yêu cầu deploy —20/10/2026
 
 Người dùng yêu cầu “Xong deploy git” sau khi hẹn giờ/chỉnh sửa bài kiểm tra đã hoàn tất. Fetch xác nhận main/origin main cùng13c638e, không có commit remote mới. Lượt này chốt source, migration, test và tài liệu của tính năng lên main cho Railway autobuild; giữ riêng bộ poster chưa commit và phần bàn giao poster ở working tree. Không đưa database/.local/secrets hoặc thay cấu hình Railway.

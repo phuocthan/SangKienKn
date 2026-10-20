@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Bản phát hành icon cấp độ 3D — 20/10/2026
+
+Theo yêu cầu đưa bộ icon mới lên remote, bản phát hành dùng năm WebP trong suốt 320 × 320 tại `public/assets/student-levels-3d-v1`, thay hình trong LevelArtwork và family greenedu-3d. Thứ tự Mầm / Chồi / Cây Non / Đơm Hoa / Kết Trái, accessible name, kích thước và hiệu ứng lên cấp/vườn giữ nguyên; không đổi phạm vi lớp–môn–chương hoặc ngưỡng thời gian. Chỉ ảnh đã tối ưu dùng trong ứng dụng, không đưa tài liệu poster hoặc database vào bản phát hành này.
+
+QA mới trên mã đã cập nhật origin/main b21edc2: TypeScript/Vite build đạt, 12/12 E2E desktop/mobile đạt (32,5 giây), gồm đủ năm ảnh/cấp/nhãn, lớp–môn–chương/reload, giáo viên/vườn và animation. Test dùng cổng3336 và database riêng; chi tiết `.local/icon-push-20261020`. Railway tự triển khai qua main; chỉ xác nhận production sau khi kiểm tra deployment và tài nguyên thật.
+
 ## Hiện hành: hẹn giờ và chỉnh sửa kiểm tra online —20/10/2026
 
 Form Tạo bài kiểm tra thêm checkbox **Hẹn giờ bắt đầu**; khi bật mới hiện datetime-local **Ngày và giờ bắt đầu (giờ Việt Nam)** và lời giải thích UTC+7, giờ này là giờ học sinh được vào làm. Giữ thời gian chuẩn bị/làm bài/ngưỡng tab và hai nguồn đề. Không hẹn thì luồng nháp/Bắt đầu ngay/Để sau không đổi. Có lịch thì popup sau tạo xác nhận ngày giờ, có Chỉnh sửa thông tin/Đã hiểu; danh sách hiện Đã hẹn giờ và các mốc.

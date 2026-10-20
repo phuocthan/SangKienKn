@@ -23,7 +23,7 @@ export function StudentLevelIcon({
       className={`student-level-icon ${className}`}
       role="img"
       aria-label={label ?? `Cấp ${stage} · ${STUDENT_LEVEL_NAMES[stage - 1]}`}
-      data-icon-family="greenedu-duotone"
+      data-icon-family="greenedu-3d"
       data-level={stage}
       data-level-up={celebrating || undefined}
     >

@@ -78,7 +78,7 @@ for (const role of ["teacher", "student"] as const) {
     if (role === "student") {
       const timeline = page.locator(".chapter-level-timeline").first();
       const stages = timeline.locator(
-        '.student-level-icon[data-icon-family="greenedu-duotone"]',
+        '.student-level-icon[data-icon-family="greenedu-3d"]',
       );
       await expect(stages).toHaveCount(5);
       for (const [index, name] of [

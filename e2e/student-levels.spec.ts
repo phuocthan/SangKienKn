@@ -12,6 +12,16 @@ test("student switches independent subject icons, sees all five stages and retai
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page.getByRole("navigation")).toBeVisible();
   const names = ["Mầm", "Chồi", "Cây Non", "Đơm Hoa", "Kết Trái"];
+  for (let stage = 1; stage <= 5; stage++) {
+    const image = await page.request.get(
+      `/assets/student-levels-3d-v1/level-${stage}.webp`,
+    );
+    expect(image.ok()).toBeTruthy();
+    expect(image.headers()["content-type"]).toContain("image/webp");
+    const bytes = await image.body();
+    expect(bytes.toString("ascii", 0, 4)).toBe("RIFF");
+    expect(bytes.length).toBeLessThan(50000);
+  }
   for (let i = 0; i < names.length; i++) {
     await page.getByLabel("Chọn lớp học").selectOption(`levels-class-${i + 1}`);
     const card = page.getByRole("region", { name: "Hành trình của tôi" });
@@ -33,6 +43,15 @@ test("student switches independent subject icons, sees all five stages and retai
     await expect(timeline.locator(".chapter-level-milestones li")).toHaveCount(
       5,
     );
+    const art = timeline.locator(
+      '.chapter-level-milestones .student-level-icon[data-icon-family="greenedu-3d"] image',
+    );
+    await expect(art).toHaveCount(5);
+    for (let stage = 1; stage <= 5; stage++)
+      await expect(art.nth(stage - 1)).toHaveAttribute(
+        "href",
+        `/assets/student-levels-3d-v1/level-${stage}.webp`,
+      );
     await card.scrollIntoViewIfNeeded();
     for (const step of await timeline
       .locator(".chapter-level-milestones li")

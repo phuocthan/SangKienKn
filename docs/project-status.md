@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Đợt phát hành icon cấp độ 3D — 20/10/2026
+
+Theo yêu cầu mới, đưa bộ Mầm / Chồi / Cây Non / Đơm Hoa / Kết Trái đã duyệt vào bản phát hành main. Năm WebP320×320 có alpha, tổng163.384byte; dùng chung trong thẻ chương, mốc cấp, giáo viên và khu vườn. Giữ ngưỡng thời gian, phạm vi lớp–môn–chương, accessible name và animation. Đã cập nhật main từ remote b21edc2, giữ đủ các thay đổi tài liệu/local có sẵn; chỉ commit phạm vi icon và ghi chú liên quan.
+
+QA mới TypeScript/Vite build đạt, 12/12 E2E desktop/mobile đạt (32,5 giây) trên cổng3336/SQLite riêng; ảnh/URI/MIME/kích thước và các cấp/reload/vườn/roster/motion đều đạt, đã xem thanh cấp hai kích thước. Log `.local/icon-push-20261020`. Không sửa backend/database, không đưa poster hoặc nguồn PNG lớn vào đợt push. Cần đối chiếu deployment Railway và tài nguyên thực tế để xác nhận production; các dòng chưa push của lượt áp dụng local trước đây là lịch sử.
+
 ## Chốt phát hành Git hẹn giờ/chỉnh sửa đề —20/10/2026
 
 Theo yêu cầu deploy Git, đưa bản đã kiểm thử lên origin/main cho luồng Railway autobuild hiện có. Fetch trước chốt không có commit remote mới ngoài13c638e. Bộ poster vẫn riêng working tree; không kèm dữ liệu/.local/secrets. API deployment và trang production bị403 trong môi trường này, nên chỉ xác nhận SHA remote qua Git, chưa xác nhận Railway deploy thành công. QA và phạm vi tính năng giữ theo lượt triển khai bên dưới; ghi chú chưa push là trạng thái trước yêu cầu này.
