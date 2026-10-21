@@ -1,5 +1,17 @@
 # Thiết kế giao diện GreenEdu
 
+## Giữ giao diện hiện tại, bỏ bản thử Tailwind — 21/10/2026
+
+Người dùng đã xem và quyết định bỏ bản thử, tiếp tục dùng giao diện hiện tại. Đã dừng riêng Vite5181 và chuyển thư mục thử `tailwind-preview/` cùng dependency riêng vào bản lưu bị bỏ trong `.local`, ngoài source và Git. App5173, src, package/lockfile/config chính và database không bị thay đổi. Không đưa Tailwind vào bản chính, không push/deploy. Các mục thử Tailwind bên dưới chỉ là lịch sử đã hủy; không tiếp tục triển khai từ đó. Giữ các ghi chú phát hành CSV/Railway có sẵn.
+
+## Lịch sử đã hủy: bản thử Tailwind riêng — 21/10/2026
+
+Theo yêu cầu thử giao diện Tailwind, tạo `tailwind-preview/` dùng lại `src/main.tsx` và toàn bộ React/nghiệp vụ hiện có, chạy riêng http://localhost:5181. Dependency Tailwind4.3.3/@tailwindcss/vite4.3.3/Vite6.4.4 và lockfile riêng; không đổi package/config/entry/CSS của app5173. CSS Tailwind biên dịch @apply có phạm vi html[data-preview=tailwind], không Preflight toàn cục/CDN. Thanh trên cùng chuyển Tailwind ↔ hiện tại, giữ hash/trang; vị trí thanh được ResizeObserver đo để không bị header/sidebar che. Giữ nav/tab, bộ cây3D và ngưỡng/quyền/cách tính dữ liệu. Thiết kế thử: xanh rừng/nền sáng, header/avatar vừa phải, bảng học sinh gọn, controls/submenu/popup đồng bộ. Chưa được duyệt làm thiết kế chính.
+
+Dùng redesign-existing-projects chính và web-design-guidelines (đọc guideline Vercel mới), ưu tiên semantic/focus/contrast/giảm chuyển động/bảng cuộn trong khung. Yêu cầu thử Tailwind cho phép dùng thư viện mới trong preview, không áp dụng ngoại lệ đó để migrate production. Lần xem ảnh phát hiện thanh so sánh bị fixed header che và chữ lời nhắn tối trên sidebar; đã sửa và xem ảnh cuối.
+
+QA mới: typecheck riêng preview đạt; build cuối Vite6.4.4 đạt; 2/2 E2E desktop/mobile đạt (14,6giây), mỗi ca thử1440/768/390/320px, đổi theme không đổi hash, nav3tab/quản lý học sinh/thống kê/CSV/focus bàn phím, không tràn ngang hoặc lỗiJS. Server3340/SQLite e2e riêng, không ghi Railway. Report/ảnh `.local/tailwind-preview`; các lượt xác nhận trước không cộng trùng. Dependency ban đầu tự resolve peer Vite8; đã pin6.4.4 để khớp app trước build/test cuối. Đã bật Vite nền5181, HTTP200 và proxy health Railway ok=true/demo=false/quickLogin=false; không tự đăng nhập/ghi dữ liệu thật. Preview dùng API/database Railway như5173 nên thao tác form của người dùng vẫn ghi dữ liệu thật. Hướng dẫn `tailwind-preview/README.md`, chạy/dừng `tailwind-preview/start.ps1`. Chưa push/deploy, giữ ghi chú lỗi Railway của lượt trước.
+
 ## Tên file CSV kèm tên lớp — 21/10/2026
 
 Theo yêu cầu bổ sung, tên file CSV trong thống kê có tên lớp ở trước phạm vi học sinh/kỳ/ngày: ví dụ `greenedu-thong-ke-lop-11-2-ca-lop-day-2026-10-21.csv`. Tên lớp được chuyển không dấu và thay dấu cách, dấu /, ký tự đặc biệt bằng dấu gạch ngang để lưu được trên Windows; nội dung file vẫn giữ nguyên tiếng Việt. Áp dụng cả xuất cả lớp và cá nhân. Giữ toàn bộ thay đổi CSV trước đó; chưa push/deploy.

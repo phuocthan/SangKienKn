@@ -1,8 +1,26 @@
 # Bàn giao session GreenEdu
 
+## Push lại và thử phát hành — 22/10/2026
+
+Theo yêu cầu “deploy lại lên git”, fetch xác nhận main/origin main cùnga683643. Bản sửa CSV đã ở Git; lượt này lưu thêm quyết định bỏ Tailwind/giữ giao diện hiện tại và kết quả Railway chặn build ngày21/10, rồi thử phát hành lại. Không đưa preview đã hủy hoặc .local/database/secrets lên Git. Không đổi runtime từ bản CSV đã kiểm thử; không chạy lại hoặc báo kết quả test cũ thành QA mới. Trước push, Railway vẫn chạy930fdf7; cần xác minh deployment mới và bundle trước khi kết luận đã deploy.
+
+## Giữ giao diện hiện tại, bỏ bản thử Tailwind — 21/10/2026
+
+Người dùng đã xem và quyết định bỏ bản thử, tiếp tục dùng giao diện hiện tại. Đã dừng riêng Vite5181 và chuyển thư mục thử `tailwind-preview/` cùng dependency riêng vào bản lưu bị bỏ trong `.local`, ngoài source và Git. App5173, src, package/lockfile/config chính và database không bị thay đổi. Không đưa Tailwind vào bản chính, không push/deploy. Các mục thử Tailwind bên dưới chỉ là lịch sử đã hủy; không tiếp tục triển khai từ đó. Giữ các ghi chú phát hành CSV/Railway có sẵn.
+
+## Lịch sử đã hủy: bản thử Tailwind riêng — 21/10/2026
+
+Theo yêu cầu thử giao diện Tailwind, tạo `tailwind-preview/` dùng lại `src/main.tsx` và toàn bộ React/nghiệp vụ hiện có, chạy riêng http://localhost:5181. Dependency Tailwind4.3.3/@tailwindcss/vite4.3.3/Vite6.4.4 và lockfile riêng; không đổi package/config/entry/CSS của app5173. CSS Tailwind biên dịch @apply có phạm vi html[data-preview=tailwind], không Preflight toàn cục/CDN. Thanh trên cùng chuyển Tailwind ↔ hiện tại, giữ hash/trang; vị trí thanh được ResizeObserver đo để không bị header/sidebar che. Giữ nav/tab, bộ cây3D và ngưỡng/quyền/cách tính dữ liệu. Thiết kế thử: xanh rừng/nền sáng, header/avatar vừa phải, bảng học sinh gọn, controls/submenu/popup đồng bộ. Chưa được duyệt làm thiết kế chính.
+
+Dùng redesign-existing-projects chính và web-design-guidelines (đọc guideline Vercel mới), ưu tiên semantic/focus/contrast/giảm chuyển động/bảng cuộn trong khung. Yêu cầu thử Tailwind cho phép dùng thư viện mới trong preview, không áp dụng ngoại lệ đó để migrate production. Lần xem ảnh phát hiện thanh so sánh bị fixed header che và chữ lời nhắn tối trên sidebar; đã sửa và xem ảnh cuối.
+
+QA mới: typecheck riêng preview đạt; build cuối Vite6.4.4 đạt; 2/2 E2E desktop/mobile đạt (14,6giây), mỗi ca thử1440/768/390/320px, đổi theme không đổi hash, nav3tab/quản lý học sinh/thống kê/CSV/focus bàn phím, không tràn ngang hoặc lỗiJS. Server3340/SQLite e2e riêng, không ghi Railway. Report/ảnh `.local/tailwind-preview`; các lượt xác nhận trước không cộng trùng. Dependency ban đầu tự resolve peer Vite8; đã pin6.4.4 để khớp app trước build/test cuối. Đã bật Vite nền5181, HTTP200 và proxy health Railway ok=true/demo=false/quickLogin=false; không tự đăng nhập/ghi dữ liệu thật. Preview dùng API/database Railway như5173 nên thao tác form của người dùng vẫn ghi dữ liệu thật. Hướng dẫn `tailwind-preview/README.md`, chạy/dừng `tailwind-preview/start.ps1`. Chưa push/deploy, giữ ghi chú lỗi Railway của lượt trước.
+
 ## Phát hành CSV thống kê — 21/10/2026
 
 Theo yêu cầu deploy, chốt bản CSV khớp bảng giáo viên và tên file kèm tên lớp lên main cho Railway tự triển khai. Fetch trước phát hành xác nhận main/origin main cùng930fdf7, không có thay đổi remote cần ghép. Chỉ gồm frontend, test và tài liệu; không sửa backend/database. Đã đối chiếu report của lượt trước: 10/10 E2E thống kê, 2/2 xác nhận tên file, build/diff check đạt; không báo các lượt này thành QA chạy mới khi push. Các ghi chú chưa push bên dưới là trạng thái trước yêu cầu phát hành. Chỉ xác nhận production sau khi kiểm tra SHA deployment và bundle thực tế.
+
+Kết quả phát hành: đã push commit `a683643d311059eea73aa501b38c0b908c3d5e97`, xác nhận origin/main khớp. Railway vẫn chạy deployment `c1958684-ae97-4222-b75b-1d788d0e37ac` của930fdf7, chưa tạo deployment mới. Thử CLI up từ snapshot runtime/build/test trích đúng commit a683643 tại `.local/statistics-csv-20261021/release-a683643` (không dữ liệu/secrets/artifacts lớn), Railway từ chối sau upload: **Deploys have been paused temporarily**, exit1. https://status.railway.com/ ngày21/10 xác nhận sự cố Dashboard/API và builds paused (cập nhật13:40UTC); không coi sự cố20/10 đã resolved là trạng thái mới nhất. Health production vẫn ok=true/demo=false/quickLogin=false. **Chưa deploy thành công**; cần kích hoạt lại deploy sau khi Railway mở build và xác minh bundle mới, không suy push thành công là production đã cập nhật. Không thay source/volume/cấu hình dịch vụ hoặc restart bản đang chạy. Ghi chú kết quả này lưu local để lượt tiếp theo tiếp tục.
 
 ## Tên file CSV kèm tên lớp — 21/10/2026
 
