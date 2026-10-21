@@ -4,6 +4,8 @@
 
 Theo yêu cầu “deploy lại lên git”, fetch xác nhận main/origin main cùnga683643. Bản sửa CSV đã ở Git; lượt này lưu thêm quyết định bỏ Tailwind/giữ giao diện hiện tại và kết quả Railway chặn build ngày21/10, rồi thử phát hành lại. Không đưa preview đã hủy hoặc .local/database/secrets lên Git. Không đổi runtime từ bản CSV đã kiểm thử; không chạy lại hoặc báo kết quả test cũ thành QA mới. Trước push, Railway vẫn chạy930fdf7; cần xác minh deployment mới và bundle trước khi kết luận đã deploy.
 
+Kết quả22/10: đã push `47daf069202875b823c03d0b1c17ee09aaeacd23`, xác nhận remote khớp. Không có deployment mới sau push; đã thử lại CLI up từ snapshot runtime a683643 sau khi git diff xác nhận runtime không đổi so với47daf06. Railway vẫn từ chối **Deploys have been paused temporarily** (exit1), không có deployment mới được tạo. Bản production vẫn là930fdf7/deployment c1958684-ae97-4222-b75b-1d788d0e37ac. Git đã cập nhật; **bản CSV mới chưa triển khai thành công**. Không coi yêu cầu upload thất bại là đang xếp hàng hoặc tự động sẽ chạy. Cần thử lại sau khi Railway cho phép build; không đổi nguồn/volume/cấu hình hoặc restart dịch vụ đang chạy.
+
 ## Giữ giao diện hiện tại, bỏ bản thử Tailwind — 21/10/2026
 
 Người dùng đã xem và quyết định bỏ bản thử, tiếp tục dùng giao diện hiện tại. Đã dừng riêng Vite5181 và chuyển thư mục thử `tailwind-preview/` cùng dependency riêng vào bản lưu bị bỏ trong `.local`, ngoài source và Git. App5173, src, package/lockfile/config chính và database không bị thay đổi. Không đưa Tailwind vào bản chính, không push/deploy. Các mục thử Tailwind bên dưới chỉ là lịch sử đã hủy; không tiếp tục triển khai từ đó. Giữ các ghi chú phát hành CSV/Railway có sẵn.
