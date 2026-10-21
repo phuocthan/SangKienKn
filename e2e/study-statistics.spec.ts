@@ -39,8 +39,18 @@ test("teacher opens per-student day/week/month statistics, old time is preserved
     "4 giờ 0 phút",
   );
   await expect(dialog.locator(".study-statistics-note")).toContainText(
-    "Thời gian cũ chưa được chia theo ngày",
+    "Số liệu tính từ ngày triển khai, kể cả kỳ đầu chưa trọn.",
   );
+  await dialog.getByText("Cách tính thời gian", { exact: true }).click();
+  const pendingCsv = page.waitForEvent("download");
+  await dialog.getByRole("button", { name: "Xuất CSV", exact: true }).click();
+  const csv = await readFile((await (await pendingCsv).path())!, "utf8");
+  expect(csv.charCodeAt(0)).toBe(0xfeff);
+  const lifetime = await dialog
+    .locator(".study-statistics-note strong")
+    .innerText();
+  expect(csv).toContain(`"Tổng tích lũy","${lifetime}"`);
+  expect(csv).toContain('"Học sinh","Học sinh ôn thi"');
   await dialog.getByRole("button", { name: "Tuần", exact: true }).click();
   await expect(table.getByRole("row")).toHaveCount(9);
   await expect(
@@ -73,7 +83,7 @@ test("toolbar statistics includes the full roster despite search and CSV follows
   });
   const created = await page.request.post("/api/classrooms", {
     data: {
-      name: `Thống kê ${info.project.name}`,
+      name: `Thống kê / ${info.project.name} ♥`,
       subject: "Vật lý",
       grade: "10",
     },
@@ -116,11 +126,51 @@ test("toolbar statistics includes the full roster despite search and CSV follows
     };
   };
   const all = await downloadCsv();
-  expect(all.filename).toContain("ca-lop-day");
-  expect(all.text.split("\r\n")).toHaveLength(29);
+  expect(all.filename).toContain(
+    `greenedu-thong-ke-thong-ke-${info.project.name}-ca-lop-day-`,
+  );
+  const expectVisibleTablesInCsv = async (text: string) => {
+    // Compare downloaded cells against the actual displayed tables, including
+    // ordering, missing history and human-readable time/date formatting.
+    const tables = await dialog
+      .getByRole("table")
+      .evaluateAll((tables) =>
+        tables.map((table) =>
+          Array.from(table.querySelectorAll("tr")).map((row) =>
+            Array.from(row.querySelectorAll("th, td")).map((cell) =>
+              (cell.textContent ?? "").trim(),
+            ),
+          ),
+        ),
+      );
+    const csvRow = (cells: string[]) =>
+      cells
+        .map(
+          (cell) =>
+            `"${(/^[\s]*[=+@-]/.test(cell) ? "'" + cell : cell).replace(/"/g, '""')}"`,
+        )
+        .join(",");
+    for (const table of tables)
+      expect(text).toContain(table.map(csvRow).join("\r\n"));
+    const summary = await dialog
+      .locator(".study-statistics-summary dd")
+      .allTextContents();
+    expect(text).toContain(csvRow(summary));
+    expect(text).not.toContain("Mã học sinh");
+    expect(text).not.toContain("(giây)");
+  };
+  await expectVisibleTablesInCsv(all.text);
   expect(all.text).toContain('"\'=SUM(1,2)"');
   expect(all.text).toContain('"Bạn ""An"", lớp 10"');
-  for (const s of students) expect(all.text).toContain(s.id);
+  for (const s of students) expect(all.text).not.toContain(s.id);
+  // All three period views export the same two tables the teacher sees.
+  for (const label of ["Tuần", "Tháng", "Ngày"]) {
+    await dialog.getByRole("button", { name: label, exact: true }).click();
+    await expect(
+      dialog.getByRole("button", { name: "Xuất CSV", exact: true }),
+    ).toBeEnabled();
+    await expectVisibleTablesInCsv((await downloadCsv()).text);
+  }
   const endpoint = `**/api/classrooms/${id}/study-statistics?**`;
   await page.route(endpoint, (route) =>
     route.fulfill({ status: 404, json: { error: "Máy chủ cũ" } }),
@@ -139,8 +189,12 @@ test("toolbar statistics includes the full roster despite search and CSV follows
       .getByRole("row"),
   ).toHaveCount(9);
   const single = await downloadCsv();
-  expect(single.filename).toContain(`${students[1].id}-week-2026-01-01`);
-  expect(single.text.split("\r\n")).toHaveLength(9);
+  expect(single.filename).toBe(
+    `greenedu-thong-ke-thong-ke-${info.project.name}-${students[1].id}-week-2026-01-01.csv`,
+  );
+  await expectVisibleTablesInCsv(single.text);
+  expect(single.text).not.toContain("Thống kê từng học sinh");
+  expect(single.text).toContain('"Ngày xem","01/01/2026"');
   expect(single.text).not.toContain(students[0].id);
   expect(single.text).toContain('"Chưa có lịch sử"');
   await page.unroute(endpoint);

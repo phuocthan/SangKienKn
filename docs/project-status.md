@@ -1,5 +1,23 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Phát hành CSV thống kê — 21/10/2026
+
+Theo yêu cầu deploy, chốt bản CSV khớp bảng giáo viên và tên file kèm tên lớp lên main cho Railway tự triển khai. Fetch trước phát hành xác nhận main/origin main cùng930fdf7, không có thay đổi remote cần ghép. Chỉ gồm frontend, test và tài liệu; không sửa backend/database. Đã đối chiếu report của lượt trước: 10/10 E2E thống kê, 2/2 xác nhận tên file, build/diff check đạt; không báo các lượt này thành QA chạy mới khi push. Các ghi chú chưa push bên dưới là trạng thái trước yêu cầu phát hành. Chỉ xác nhận production sau khi kiểm tra SHA deployment và bundle thực tế.
+
+## Tên file CSV kèm tên lớp — 21/10/2026
+
+Theo yêu cầu bổ sung, tên file CSV trong thống kê có tên lớp ở trước phạm vi học sinh/kỳ/ngày: ví dụ `greenedu-thong-ke-lop-11-2-ca-lop-day-2026-10-21.csv`. Tên lớp được chuyển không dấu và thay dấu cách, dấu /, ký tự đặc biệt bằng dấu gạch ngang để lưu được trên Windows; nội dung file vẫn giữ nguyên tiếng Việt. Áp dụng cả xuất cả lớp và cá nhân. Giữ toàn bộ thay đổi CSV trước đó; chưa push/deploy.
+
+QA bổ sung: build TypeScript/Vite và diff check đạt; 2/2 E2E desktop/mobile đạt (17,9 giây), xác nhận tên lớp có dấu, / và ♥ được chuẩn hóa, tên file cả lớp/cá nhân đúng và nội dung vẫn khớp bảng. Report `.local/statistics-csv-20261021/filename-report.json`, server3338/SQLite e2e riêng; không ghi dữ liệu Railway.
+
+## CSV thống kê khớp nội dung giáo viên đang xem — 21/10/2026
+
+Xuất CSV trong popup Thống kê thời gian học dùng chính snapshot đang hiển thị và cùng các hàm định dạng ngày/thời gian của giao diện. File gồm lớp/môn/học sinh/kỳ/ngày xem, tổng ngày–tuần–tháng/tích lũy/mốc theo dõi, bảng từng học sinh khi xem cả lớp và bảng thời gian theo kỳ. Giữ thứ tự học sinh và kỳ mới nhất trước như màn hình; thời gian là giờ–phút–giây, ngày theo Việt Nam, kỳ không có lịch sử ghi Chưa có lịch sử. Bỏ dạng dữ liệu thô lặp mỗi học sinh theo từng kỳ, mã nội bộ và giây chưa định dạng. Quyết định này thay mô tả ô thiếu lịch sử để trống ở bản thiết kế cũ.
+
+Giữ BOM UTF-8, escape dấu phẩy/ngoặc kép, chống công thức trong tên và khóa xuất khi tải/lỗi/rỗng. Chỉ sửa frontend của popup; nút xuất tiến độ ở ngoài danh sách học sinh vẫn là báo cáo riêng. Không sửa API/database hoặc thay cách tính thời gian. Local5173 dùng API/database Railway như mặc định; chưa push/deploy.
+
+QA mới: TypeScript/Vite build đạt tại `.local/statistics-csv-20261021/build`; Prettier và diff check đạt. **10/10 E2E desktop/mobile đạt (46,7 giây)**: đối chiếu từng ô CSV với hai bảng trên màn hình cho Ngày/Tuần/Tháng, cả lớp/cá nhân, tổng tích lũy khác 0, kỳ chưa có lịch sử, BOM/escape/chống công thức, tải lại và lỗi/khóa xuất/lớp rỗng. Hai lượt đầu vướng assertion mới của test (cố định giây dù ca desktop đã ghi thêm thời gian; sau đó innerText ở details đóng trả rỗng); đã đổi sang mở Cách tính thời gian và so với giá trị thật, giữ các assertions đầy đủ. Test cũng thay kỳ vọng lời giải thích cũ bằng quy tắc triển khai hiện hành. Không đổi runtime sau build. Report cuối `.local/statistics-csv-20261021/final-report.json`; server3338 và SQLite e2e riêng, không ghi Railway. Đã bật lại frontend local5173, HTTP200 và health proxy ok=true/demo=false/quickLogin=false; chỉ đọc health, không đăng nhập hoặc tạo dữ liệu thật. Chưa commit/push/deploy.
+
 ## Lưu bộ thiết kế và tài liệu lên Git — 20/10/2026
 
 Theo yêu cầu “push git”, bổ sung các poster giới thiệu/hồ sơ v1–v8, nguồn icon 3D đã duyệt, tài liệu thiết kế/bàn giao và đề xuất ảnh câu hỏi vào Git. Poster hiện hành là v8; các bản trước giữ làm lịch sử. Bộ icon ứng dụng đã phát hành ở commit 4e0823b và đã xác minh Railway thành công; lượt này chỉ lưu tài liệu/nguồn thiết kế, không sửa runtime hoặc dữ liệu. Các ghi chú “chưa push” trong nhật ký bên dưới mô tả thời điểm trước đợt Git này.

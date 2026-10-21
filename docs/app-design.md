@@ -1,5 +1,15 @@
 # Thiết kế giao diện GreenEdu
 
+## Tên file CSV kèm tên lớp — 21/10/2026
+
+Theo yêu cầu bổ sung, tên file CSV trong thống kê có tên lớp ở trước phạm vi học sinh/kỳ/ngày: ví dụ `greenedu-thong-ke-lop-11-2-ca-lop-day-2026-10-21.csv`. Tên lớp được chuyển không dấu và thay dấu cách, dấu /, ký tự đặc biệt bằng dấu gạch ngang để lưu được trên Windows; nội dung file vẫn giữ nguyên tiếng Việt. Áp dụng cả xuất cả lớp và cá nhân. Giữ toàn bộ thay đổi CSV trước đó; chưa push/deploy.
+
+## CSV thống kê khớp nội dung giáo viên đang xem — 21/10/2026
+
+Xuất CSV trong popup Thống kê thời gian học dùng chính snapshot đang hiển thị và cùng các hàm định dạng ngày/thời gian của giao diện. File gồm lớp/môn/học sinh/kỳ/ngày xem, tổng ngày–tuần–tháng/tích lũy/mốc theo dõi, bảng từng học sinh khi xem cả lớp và bảng thời gian theo kỳ. Giữ thứ tự học sinh và kỳ mới nhất trước như màn hình; thời gian là giờ–phút–giây, ngày theo Việt Nam, kỳ không có lịch sử ghi Chưa có lịch sử. Bỏ dạng dữ liệu thô lặp mỗi học sinh theo từng kỳ, mã nội bộ và giây chưa định dạng. Quyết định này thay mô tả ô thiếu lịch sử để trống ở bản thiết kế cũ.
+
+Giữ BOM UTF-8, escape dấu phẩy/ngoặc kép, chống công thức trong tên và khóa xuất khi tải/lỗi/rỗng. Chỉ sửa frontend của popup; nút xuất tiến độ ở ngoài danh sách học sinh vẫn là báo cáo riêng. Không sửa API/database hoặc thay cách tính thời gian. Local5173 dùng API/database Railway như mặc định; chưa push/deploy.
+
 ## Bản phát hành icon cấp độ 3D — 20/10/2026
 
 Theo yêu cầu đưa bộ icon mới lên remote, bản phát hành dùng năm WebP trong suốt 320 × 320 tại `public/assets/student-levels-3d-v1`, thay hình trong LevelArtwork và family greenedu-3d. Thứ tự Mầm / Chồi / Cây Non / Đơm Hoa / Kết Trái, accessible name, kích thước và hiệu ứng lên cấp/vườn giữ nguyên; không đổi phạm vi lớp–môn–chương hoặc ngưỡng thời gian. Chỉ ảnh đã tối ưu dùng trong ứng dụng, không đưa tài liệu poster hoặc database vào bản phát hành này.

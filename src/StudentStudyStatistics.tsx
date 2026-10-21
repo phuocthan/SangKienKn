@@ -124,55 +124,53 @@ export function StudentStudyStatistics({
   }, [classroom.id, studentId, student?.name, period, date, retry]);
   function exportCsv() {
     if (!data || loading || error) return;
-    const coverageLabel = {
-      none: "Chưa có lịch sử",
-      partial: "Đã theo dõi",
-      full: "Đã theo dõi",
-    };
     const periodLabel = { day: "Ngày", week: "Tuần", month: "Tháng" };
-    const records: (string | number | null)[][] = [
+    const records: string[][] = [
+      ["Thống kê thời gian học"],
+      ["Lớp", classroom.name],
+      ["Môn", classroom.subject],
+      ["Học sinh", student?.name ?? "Tất cả học sinh"],
+      ["Khoảng thống kê", periodLabel[data.period]],
+      ["Ngày xem", dateLabel(data.date)],
+      [],
+      ["Ngày đã chọn", "Tuần chứa ngày đã chọn", "Tháng chứa ngày đã chọn"],
       [
-        "Lớp",
-        "Môn",
-        "Mã học sinh",
-        "Học sinh",
-        "Kỳ",
-        "Ngày xem",
-        "Từ ngày",
-        "Đến ngày",
-        "Thời gian (giây)",
-        "Lịch sử",
-        "Tổng ngày (giây)",
-        "Tổng tuần (giây)",
-        "Tổng tháng (giây)",
-        "Tổng tích lũy (giây)",
-        "Bắt đầu theo dõi (giờ Việt Nam)",
+        timeLabel(data.summaries.day.seconds),
+        timeLabel(data.summaries.week.seconds),
+        timeLabel(data.summaries.month.seconds),
+      ],
+      ["Tổng tích lũy", timeLabel(data.lifetimeSeconds)],
+      [
+        "Lịch sử từ",
+        new Date(data.trackingStartedAt).toLocaleString("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          hour12: false,
+        }),
       ],
     ];
-    for (const member of data.members) {
-      for (const bucket of member.statistics.buckets.slice().reverse()) {
-        records.push([
-          classroom.name,
-          classroom.subject,
-          member.id,
+    if (!studentId) {
+      records.push(
+        [],
+        ["Thống kê từng học sinh"],
+        ["Học sinh", "Ngày", "Tuần", "Tháng", "Tích lũy"],
+        ...data.members.map((member) => [
           member.name,
-          periodLabel[data.period],
-          data.date,
-          bucket.start,
-          bucket.end,
-          bucket.seconds,
-          coverageLabel[bucket.coverage],
-          member.statistics.summaries.day.seconds,
-          member.statistics.summaries.week.seconds,
-          member.statistics.summaries.month.seconds,
-          member.statistics.lifetimeSeconds,
-          new Date(member.statistics.trackingStartedAt).toLocaleString(
-            "vi-VN",
-            { timeZone: "Asia/Ho_Chi_Minh", hour12: false },
-          ),
-        ]);
-      }
+          timeLabel(member.statistics.summaries.day.seconds),
+          timeLabel(member.statistics.summaries.week.seconds),
+          timeLabel(member.statistics.summaries.month.seconds),
+          timeLabel(member.statistics.lifetimeSeconds),
+        ]),
+      );
     }
+    records.push(
+      [],
+      ["Thời gian luyện tập theo kỳ"],
+      [periodLabel[data.period], "Thời gian luyện tập"],
+      ...data.buckets
+        .slice()
+        .reverse()
+        .map((bucket) => [rangeLabel(bucket), timeLabel(bucket.seconds)]),
+    );
     // Quoting protects delimiters; prefix spreadsheet formulas in user text.
     const csv =
       "\uFEFF" +
@@ -191,7 +189,15 @@ export function StudentStudyStatistics({
     );
     const link = document.createElement("a");
     link.href = url;
-    link.download = `greenedu-thong-ke-${studentId || "ca-lop"}-${data.period}-${data.date}.csv`;
+    const className =
+      classroom.name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[đĐ]/g, "d")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "lop";
+    link.download = `greenedu-thong-ke-${className}-${studentId || "ca-lop"}-${data.period}-${data.date}.csv`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
