@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Bộ 15 slide từ tài liệu người dùng — 23/10/2026
+
+Đã pull --ff-only main từb21edc2 lên e0648c2; giữ hai tài liệu local bằng patch/stash và ghép cả hai phía khi xung đột. Patch tại.local/slides-20261023-build/pre-pull-docs.patch; stash preserve-local-docs-before-slide-pull-20261023 còn để khôi phục. Không sửa runtime/database, không push/deploy.
+
+Bộ mới: artifacts/presentations/20261023/README.md (PPTX15slide, PDF15trang, ghi chú thuyết trình). Dùng skill Presentations cùng đọc PDF/Word/Excel; số liệu90phản hồi khảo sát được tính lại, không dùng báo cáo lớp7/14 làm bằng chứng của lớp11/2–11/6. Đã xem15ảnh xuất từ PowerPoint; xác nhận15slide/15ghi chú/1chart native, ZIP hợp lệ. Không chạy test ứng dụng vì chỉ tạo artifact/tài liệu. Bản9slide cũ vẫn giữ; bản mới không có animation. Đây không phải xác nhận Railway đã phát hành.
+
 ## Push lại và thử phát hành — 22/10/2026
 
 Theo yêu cầu “deploy lại lên git”, fetch xác nhận main/origin main cùnga683643. Bản sửa CSV đã ở Git; lượt này lưu thêm quyết định bỏ Tailwind/giữ giao diện hiện tại và kết quả Railway chặn build ngày21/10, rồi thử phát hành lại. Không đưa preview đã hủy hoặc .local/database/secrets lên Git. Không đổi runtime từ bản CSV đã kiểm thử; không chạy lại hoặc báo kết quả test cũ thành QA mới. Trước push, Railway vẫn chạy930fdf7; cần xác minh deployment mới và bundle trước khi kết luận đã deploy.
@@ -51,6 +57,10 @@ Theo yêu cầu mới, đưa bộ Mầm / Chồi / Cây Non / Đơm Hoa / Kết 
 QA mới TypeScript/Vite build đạt, 12/12 E2E desktop/mobile đạt (32,5 giây) trên cổng3336/SQLite riêng; ảnh/URI/MIME/kích thước và các cấp/reload/vườn/roster/motion đều đạt, đã xem thanh cấp hai kích thước. Log `.local/icon-push-20261020`. Không sửa backend/database, không đưa poster hoặc nguồn PNG lớn vào đợt push. Cần đối chiếu deployment Railway và tài nguyên thực tế để xác nhận production; các dòng chưa push của lượt áp dụng local trước đây là lịch sử.
 
 Xác nhận sau push: commit `4e0823b561e520aa8b275abe9f9eaa2f93f4cbea` đã có trên origin/main. Railway deployment `c7b6c25e-4c82-40a0-bf8c-6b6084afdf18` SUCCESS, đúng SHA. HTTP health200/ok=true/demo=false/quickLogin=false; cả năm WebP production trả200/image-webp, byte và SHA-256 khớp bộ đã test. Bundle `/assets/index-CjBszAa2.js` chứa family greenedu-3d và đường dẫn ảnh mới. Báo cáo `.local/icon-push-20261020/release-verification.json`. Ghi chú kiểm tra sau phát hành này lưu tại workspace; không tạo thêm đợt deploy chỉ để đổi tài liệu.
+
+## Xác thực thời gian production — 20/10/2026
+
+Đã pull --ff-only lên b21edc2 và truy vấn SQLite Railway bằng kết nối chỉ đọc theo yêu cầu kiểm tra thời gian học sinh. Thời gian ngày20/10 khớp tổng từng phiên được giữ lại; phiên bị đóng do idle đã bị trừ. Kiểm tra cấu trúc quick_check/foreign_key_check đạt. Thời lượng heartbeat không chứng minh liên tục làm bài; phát hiện chênh120,036giây giữa tổng tích lũy và lịch sử của tài khoản được kiểm tra, chưa xác định nguồn và không thuộc phần cộng ngày20/10 đã đối soát. Chi tiết/phạm vi ở đầu session-handoff; bằng chứng riêng giữ.local, không công bố file học sinh lên Git. QA mới9/9 study-history trên database thử riêng. Không sửa dữ liệu, backend, push hoặc deploy trong lượt kiểm tra này.
 
 ## Chốt phát hành Git hẹn giờ/chỉnh sửa đề —20/10/2026
 

@@ -1,5 +1,11 @@
 # Bàn giao session GreenEdu
 
+## Bộ 15 slide từ tài liệu người dùng — 23/10/2026
+
+Đã pull --ff-only main từb21edc2 lên e0648c2; giữ hai tài liệu local bằng patch/stash và ghép cả hai phía khi xung đột. Patch tại.local/slides-20261023-build/pre-pull-docs.patch; stash preserve-local-docs-before-slide-pull-20261023 còn để khôi phục. Không sửa runtime/database, không push/deploy.
+
+Bộ mới: artifacts/presentations/20261023/README.md (PPTX15slide, PDF15trang, ghi chú thuyết trình). Dùng skill Presentations cùng đọc PDF/Word/Excel; số liệu90phản hồi khảo sát được tính lại, không dùng báo cáo lớp7/14 làm bằng chứng của lớp11/2–11/6. Đã xem15ảnh xuất từ PowerPoint; xác nhận15slide/15ghi chú/1chart native, ZIP hợp lệ. Không chạy test ứng dụng vì chỉ tạo artifact/tài liệu. Bản9slide cũ vẫn giữ; bản mới không có animation. Đây không phải xác nhận Railway đã phát hành.
+
 ## Push lại và thử phát hành — 22/10/2026
 
 Theo yêu cầu “deploy lại lên git”, fetch xác nhận main/origin main cùnga683643. Bản sửa CSV đã ở Git; lượt này lưu thêm quyết định bỏ Tailwind/giữ giao diện hiện tại và kết quả Railway chặn build ngày21/10, rồi thử phát hành lại. Không đưa preview đã hủy hoặc .local/database/secrets lên Git. Không đổi runtime từ bản CSV đã kiểm thử; không chạy lại hoặc báo kết quả test cũ thành QA mới. Trước push, Railway vẫn chạy930fdf7; cần xác minh deployment mới và bundle trước khi kết luận đã deploy.
@@ -53,6 +59,16 @@ Bản phát hành thêm năm WebP320×320 alpha, tổng163.384byte tại public/
 Commit chỉ gồm phần tích hợp/ảnh tối ưu/test và ghi chú icon trong tài liệu; các bản poster và nguồn PNG lớn vẫn ở workspace. Railway tự triển khai từ main; không dùng deploy SQLite local. Push không đồng nghĩa đã triển khai xong, cần kiểm tra deployment và năm file ảnh production trước khi báo thành công.
 
 Xác nhận sau push: commit `4e0823b561e520aa8b275abe9f9eaa2f93f4cbea` đã có trên origin/main. Railway deployment `c7b6c25e-4c82-40a0-bf8c-6b6084afdf18` SUCCESS, đúng SHA. HTTP health200/ok=true/demo=false/quickLogin=false; cả năm WebP production trả200/image-webp, byte và SHA-256 khớp bộ đã test. Bundle `/assets/index-CjBszAa2.js` chứa family greenedu-3d và đường dẫn ảnh mới. Báo cáo `.local/icon-push-20261020/release-verification.json`. Ghi chú kiểm tra sau phát hành này lưu tại workspace; không tạo thêm đợt deploy chỉ để đổi tài liệu.
+
+## Pull và xác thực thời gian Railway — 20/10/2026
+
+Theo yêu cầu kiểm tra học sinh có hơn một giờ luyện tập hôm nay, đã pull --ff-only từ70b6aae lên b21edc2; working tree ban đầu sạch. Railway CLI chưa đăng nhập, nhưng browser Railway có phiên hợp lệ: zooming-light/production/SangKienKn, deployment16d068c5-55f3-4b41-9bb5-04232376f02a hiển thị ACTIVE/Deployment successful, tiêu đề Schedule online exams and edit prepared exam settings. Health HTTP200/demo:false/quickLogin:false. Không suy SHA deployment từ tên commit.
+
+Đọc trực tiếp /data/greenedu.sqlite bằng node:sqlite DatabaseSync với readOnly:true; không tạo session học, sửa dữ liệu, deploy hoặc push. Đúng Lê Viết Hiếu/Lớp11/2♥/ChươngI: DAO ĐỘNG. Ngày20/10 theo UTC+7 có7023,807giây (1giờ57phút3giây): phiên00:26:32 có3830,239giây,01:31:02 có15,009giây,05:27:59 có3178,559giây. Phiên01:33:02 có11849,616giây nhưng closed_reason=idle, đã bị trừ khỏi ledger. Không có study_sessions đang hoạt động khi kiểm tra khoảng08:20VN. Có5attempts practice trong ngày,4đúng/1sai, từ00:26:36 đến05:28:02. Chính sách lớp nhắc idle60/đóng120giây, tab2/4.
+
+Đối soát tổng days của các control không bị idle/tabs với study_daily_time: toàn bộ các ngày16–20/10 của tài khoản khớp từngms, bao gồm ngày20/10; không thấy cộng trùng ở các tổng đã kiểm tra. PRAGMA quick_check=ok, foreign_key_check không có lỗi. Tuy nhiên tổng progress12517,096giây cao hơn tổng ledger/control giữ lại12397,060giây là120,036giây; chưa xác định được nguồn phần chênh cũ, không quy cho ngày20/10 hoặc tự sửa. Thời gian là heartbeat/tín hiệu tương tác do client gửi, không đồng nghĩa thời gian trả lời thực chất; chưa có log chi tiết từngheartbeat để chứng minh liên tục tập trung/gian lận. Bằng chứng số liệu riêng trong.local/study-audit-20261020.md (không đưa dữ liệu riêng lên Git).
+
+QA mới: node --import tsx --test server/study-history.test.ts đạt9/9, database thử riêng; gồm timezone/midnight/retry/stop/rollback/aggregation/quyền. Không báo các kết quả kiểm thử phiên trước thành mới. Chỉ cập nhật tài liệu, không sửa logic ứng dụng hoặc dữ liệu production.
 
 ## Chốt Git theo yêu cầu deploy —20/10/2026
 
