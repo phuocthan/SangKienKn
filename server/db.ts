@@ -44,6 +44,9 @@ export function openDatabase(path: string) {
       id TEXT PRIMARY KEY, name TEXT NOT NULL, subject TEXT NOT NULL, grade TEXT NOT NULL,
       teacher_id TEXT NOT NULL REFERENCES users(id)
     );
+    CREATE TABLE IF NOT EXISTS archived_classrooms (
+      classroom_id TEXT PRIMARY KEY REFERENCES classrooms(id), deleted_at INTEGER NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS memberships (
       classroom_id TEXT NOT NULL REFERENCES classrooms(id), student_id TEXT NOT NULL REFERENCES users(id),
       PRIMARY KEY(classroom_id, student_id)

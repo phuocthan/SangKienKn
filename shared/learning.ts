@@ -52,6 +52,8 @@ export type ExamDefinition = {
   preparationMinutes?: number;
   startedAt?: number | null;
   scheduledStartAt?: number | null;
+  progressChapterId?: string | null;
+  progressChapterTitle?: string | null;
   id: string;
   title: string;
   startsAt: number;
@@ -99,6 +101,7 @@ export type LearningOverview = {
   examDeletion?: boolean;
   examScheduling?: boolean;
   examEditing?: boolean;
+  examProgressCredit?: boolean;
   reviewPapers?: boolean;
   classManagement?: boolean;
   sessionPolicy?: SessionPolicy;

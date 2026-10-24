@@ -1,3 +1,4 @@
+import { creditExamTime } from "./exam-study-credit.js";
 import {
   answerCorrect,
   statementCorrectness,
@@ -160,6 +161,7 @@ function finalize(
     db.prepare(
       "UPDATE exam_runs SET status='submitted',reason=?,score=?,submitted_at=? WHERE id=? AND status='active'",
     ).run(reason, score, timestamp, run.id);
+    creditExamTime(db, run, reason, timestamp);
     if (run.kind === "hunt") {
       releaseCorrections(db, run, timestamp);
       if (score >= 8)
@@ -636,6 +638,7 @@ export function registerLearningRoutes(
       examDeletion: true,
       examScheduling: true,
       examEditing: true,
+      examProgressCredit: true,
       classManagement: true,
       sessionPolicy: sessionPolicy(db, String(c.id)),
       levelMinutes: classroomLevelMinutes(db, String(c.id)),
@@ -696,6 +699,12 @@ export function registerLearningRoutes(
             preparationMinutes: online?.preparation_minutes ?? 0,
             startedAt: online?.started_at ?? null,
             scheduledStartAt: online?.scheduled_start_at ?? null,
+            progressChapterId: online?.progress_chapter_id ?? null,
+            progressChapterTitle: online?.progress_chapter_id
+              ? (db
+                  .prepare("SELECT title FROM chapters WHERE id=?")
+                  .get(online.progress_chapter_id)?.title ?? null)
+              : null,
             participants: {
               joined: Number(participants.joined),
               submitted: Number(participants.submitted ?? 0),
@@ -1586,6 +1595,7 @@ export function registerLearningRoutes(
       durationMinutes: online.duration_minutes,
       preparationMinutes: online.preparation_minutes,
       scheduledStartAt: online.scheduled_start_at ?? null,
+      progressChapterId: online.progress_chapter_id ?? null,
       ...(selection ?? {
         questions: json<Snapshot[]>(exam.questions).map((q) => ({
           chapterId: q.chapterId,
@@ -1615,6 +1625,19 @@ export function registerLearningRoutes(
       fail(400, "Loại kiểm tra không hợp lệ.");
     const online = delivery === "online";
     if (editing && !online) fail(400, "Không thể đổi loại kiểm tra.");
+    const progressChapterId = req.body?.progressChapterId || null;
+    if (progressChapterId != null) {
+      if (
+        !online ||
+        typeof progressChapterId !== "string" ||
+        !db
+          .prepare(
+            "SELECT 1 FROM chapters WHERE id=? AND classroom_id=? AND id NOT IN (SELECT chapter_id FROM archived_chapters)",
+          )
+          .get(progressChapterId, c.id)
+      )
+        fail(400, "Chọn chương nhận thời gian trong lớp hiện tại.");
+    }
     const durationMinutes = online
       ? number(req.body?.durationMinutes ?? 20, "Thời gian làm bài", 1, 180)
       : 20;
@@ -1815,6 +1838,10 @@ export function registerLearningRoutes(
             ? null
             : Math.max(now(), scheduledStartAt - preparationMinutes * 60000),
         );
+      if (online)
+        db.prepare(
+          "UPDATE online_exam_sessions SET progress_chapter_id=? WHERE exam_id=?",
+        ).run(progressChapterId, id);
       if (requestId)
         db.prepare("INSERT INTO exam_creation_requests VALUES(?,?,?,?,?)").run(
           requestId,

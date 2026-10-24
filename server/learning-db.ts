@@ -87,6 +87,19 @@ export function ensureLearningSchema(db: DatabaseSync) {
     db.exec(
       "ALTER TABLE online_exam_sessions ADD COLUMN scheduled_start_at INTEGER",
     );
+  if (
+    !db
+      .prepare("PRAGMA table_info(online_exam_sessions)")
+      .all()
+      .some((c) => c.name === "progress_chapter_id")
+  )
+    db.exec(
+      "ALTER TABLE online_exam_sessions ADD COLUMN progress_chapter_id TEXT REFERENCES chapters(id)",
+    );
+  db.exec(`CREATE TABLE IF NOT EXISTS exam_study_credit (
+    run_id TEXT PRIMARY KEY, student_id TEXT NOT NULL REFERENCES users(id),
+    chapter_id TEXT NOT NULL REFERENCES chapters(id), credited_ms INTEGER NOT NULL CHECK(credited_ms>=0)
+  )`);
   const columns = new Set(
     db
       .prepare("PRAGMA table_info(exam_runs)")

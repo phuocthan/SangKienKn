@@ -109,6 +109,7 @@ export function Learning({
   const [editingExamId, setEditingExamId] = useState<string | null>(null);
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
   const [scheduledDate, setScheduledDate] = useState("");
+  const [progressChapterId, setProgressChapterId] = useState("");
   const vietnamInput = (timestamp: number) =>
     new Date(timestamp + 7 * 3600000).toISOString().slice(0, 16);
   const scheduleDate = (timestamp: number) =>
@@ -128,12 +129,14 @@ export function Learning({
         durationMinutes: number;
         preparationMinutes: number;
         scheduledStartAt: number | null;
+        progressChapterId?: string | null;
         chapterIds?: string[];
         questionCount?: number;
         lessonKeys?: string[];
         weights?: Record<string, number>;
         questions?: UploadedExamQuestion[];
       }>(`/learning/exams/${id}/edit`);
+      setProgressChapterId(draft.progressChapterId ?? "");
       setTitle(draft.title);
       setExamSource(draft.source);
       setTabLimit(draft.tabLimit);
@@ -352,6 +355,9 @@ export function Learning({
       durationMinutes,
       preparationMinutes,
       ...(data?.examScheduling ? { scheduledStartAt } : {}),
+      ...(data?.examProgressCredit
+        ? { progressChapterId: progressChapterId || null }
+        : {}),
       ...(examSource === "upload"
         ? { questions: uploaded }
         : Object.values(bankSelection).some(Array.isArray)
@@ -420,6 +426,7 @@ export function Learning({
                 setWeights({});
                 setScheduleEnabled(false);
                 setScheduledDate("");
+                setProgressChapterId("");
               }
               setEditingExamId(null);
               setFormError("");
@@ -765,6 +772,27 @@ export function Learning({
                   )}
                   <fieldset disabled={busy || uploadBusy}>
                     <legend className="sr-only">Thời gian và giới hạn</legend>
+                    <label>
+                      Cộng thời gian làm bài vào chương
+                      <select
+                        name="progressChapterId"
+                        value={progressChapterId}
+                        disabled={!data.examProgressCredit}
+                        onChange={(e) => setProgressChapterId(e.target.value)}
+                      >
+                        <option value="">Không cộng</option>
+                        {classroom.chapters.map((ch) => (
+                          <option key={ch.id} value={ch.id}>
+                            {ch.title}
+                          </option>
+                        ))}
+                      </select>
+                      <small>
+                        Chỉ cộng thời gian thực tế khi nộp bài hợp lệ, tối đa
+                        đến hạn thi. Không tính thời gian chuẩn bị hoặc lượt bị
+                        đóng do vi phạm.
+                      </small>
+                    </label>
                     <div className="learning-options">
                       <label>
                         <input

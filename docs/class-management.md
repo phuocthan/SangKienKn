@@ -1,5 +1,13 @@
 # Quản lý lớp: quyền học tập và quy tắc phiên
 
+## Sao chép danh sách học sinh và xóa lớp — 24/10/2026
+
+Trong **Lớp học của tôi → Tạo lớp mới**, giáo viên chọn lớp nguồn thuộc quyền mình, nhập tên lớp và môn mới. Chỉ sao chép các liên kết học sinh đang thuộc lớp; giữ tài khoản/mật khẩu/avatar, kế thừa khối lớp. Lớp mới không có chương, câu hỏi, tiến độ, kết quả hay hoạt động nhóm. Bỏ chọn nguồn để tạo lớp trống theo cách cũ. Tạo lớp và sao chép roster trong một transaction; kiểm tra trùng tên/môn/khối chỉ tính lớp chưa xóa.
+
+**Quản lý lớp → Xóa lớp** chỉ dành cho giáo viên sở hữu lớp. Hộp xác nhận yêu cầu nhập đúng tên; đang xóa khóa đóng/hủy. Nếu có lượt thi active, phải đóng/thu bài trước. Server lưu dấu xóa trong `archived_classrooms`, khóa đề đã hẹn, kết thúc phiên học và gỡ memberships của đúng lớp trong một transaction. Lớp biến mất khỏi danh sách, URL/API cũ bị chặn; tài khoản học sinh, các lớp khác và dữ liệu lịch sử/tệp của lớp bị xóa vẫn được giữ trong database. Không xóa vật lý bảng phụ hoặc học sinh. Không có nút phục hồi trong đợt này.
+
+API tạo `/api/classrooms` nhận `sourceClassroomId` tùy chọn; POST `/api/classrooms/:id/delete` nhận `confirmName`. Capability `canManageClass` trên lớp giúp frontend ẩn thao tác chưa được server hỗ trợ. Kiểm thử dùng database riêng, không xóa/sao chép lớp thật Railway.
+
 ## Mức luyện tập tối thiểu mỗi tuần — 16/10/2026
 
 Cài đặt chung có thêm số phút tối thiểu theo lớp/môn và báo cáo hai danh sách Đã hoàn thành / Chưa hoàn thành. Tuần 00:00 thứ Hai–24:00 Chủ nhật giờ Việt Nam; tạm chốt lúc 12:00 Chủ nhật để nhắc nhở, tiếp tục cộng học bù và chốt lần cuối cuối ngày; thay đổi mức áp dụng tuần sau, lịch sử giữ mức và roster đã giao. Không thay cấp độ từng chương hoặc quyền kiểm tra. [Đặc tả đầy đủ](weekly-practice.md).
