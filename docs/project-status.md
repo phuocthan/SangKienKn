@@ -60,6 +60,10 @@ QA mới TypeScript/Vite build đạt, 12/12 E2E desktop/mobile đạt (32,5 gi�
 
 Xác nhận sau push: commit `4e0823b561e520aa8b275abe9f9eaa2f93f4cbea` đã có trên origin/main. Railway deployment `c7b6c25e-4c82-40a0-bf8c-6b6084afdf18` SUCCESS, đúng SHA. HTTP health200/ok=true/demo=false/quickLogin=false; cả năm WebP production trả200/image-webp, byte và SHA-256 khớp bộ đã test. Bundle `/assets/index-CjBszAa2.js` chứa family greenedu-3d và đường dẫn ảnh mới. Báo cáo `.local/icon-push-20261020/release-verification.json`. Ghi chú kiểm tra sau phát hành này lưu tại workspace; không tạo thêm đợt deploy chỉ để đổi tài liệu.
 
+## Xác thực thời gian production — 20/10/2026
+
+Đã pull --ff-only lên b21edc2 và truy vấn SQLite Railway bằng kết nối chỉ đọc theo yêu cầu kiểm tra thời gian học sinh. Thời gian ngày20/10 khớp tổng từng phiên được giữ lại; phiên bị đóng do idle đã bị trừ. Kiểm tra cấu trúc quick_check/foreign_key_check đạt. Thời lượng heartbeat không chứng minh liên tục làm bài; phát hiện chênh120,036giây giữa tổng tích lũy và lịch sử của tài khoản được kiểm tra, chưa xác định nguồn và không thuộc phần cộng ngày20/10 đã đối soát. Chi tiết/phạm vi ở đầu session-handoff; bằng chứng riêng giữ.local, không công bố file học sinh lên Git. QA mới9/9 study-history trên database thử riêng. Không sửa dữ liệu, backend, push hoặc deploy trong lượt kiểm tra này.
+
 ## Chốt phát hành Git hẹn giờ/chỉnh sửa đề —20/10/2026
 
 Theo yêu cầu deploy Git, đưa bản đã kiểm thử lên origin/main cho luồng Railway autobuild hiện có. Fetch trước chốt không có commit remote mới ngoài13c638e. Bộ poster vẫn riêng working tree; không kèm dữ liệu/.local/secrets. API deployment và trang production bị403 trong môi trường này, nên chỉ xác nhận SHA remote qua Git, chưa xác nhận Railway deploy thành công. QA và phạm vi tính năng giữ theo lượt triển khai bên dưới; ghi chú chưa push là trạng thái trước yêu cầu này.

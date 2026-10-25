@@ -68,6 +68,16 @@ Commit chỉ gồm phần tích hợp/ảnh tối ưu/test và ghi chú icon tro
 
 Xác nhận sau push: commit `4e0823b561e520aa8b275abe9f9eaa2f93f4cbea` đã có trên origin/main. Railway deployment `c7b6c25e-4c82-40a0-bf8c-6b6084afdf18` SUCCESS, đúng SHA. HTTP health200/ok=true/demo=false/quickLogin=false; cả năm WebP production trả200/image-webp, byte và SHA-256 khớp bộ đã test. Bundle `/assets/index-CjBszAa2.js` chứa family greenedu-3d và đường dẫn ảnh mới. Báo cáo `.local/icon-push-20261020/release-verification.json`. Ghi chú kiểm tra sau phát hành này lưu tại workspace; không tạo thêm đợt deploy chỉ để đổi tài liệu.
 
+## Pull và xác thực thời gian Railway — 20/10/2026
+
+Theo yêu cầu kiểm tra học sinh có hơn một giờ luyện tập hôm nay, đã pull --ff-only từ70b6aae lên b21edc2; working tree ban đầu sạch. Railway CLI chưa đăng nhập, nhưng browser Railway có phiên hợp lệ: zooming-light/production/SangKienKn, deployment16d068c5-55f3-4b41-9bb5-04232376f02a hiển thị ACTIVE/Deployment successful, tiêu đề Schedule online exams and edit prepared exam settings. Health HTTP200/demo:false/quickLogin:false. Không suy SHA deployment từ tên commit.
+
+Đọc trực tiếp /data/greenedu.sqlite bằng node:sqlite DatabaseSync với readOnly:true; không tạo session học, sửa dữ liệu, deploy hoặc push. Đúng Lê Viết Hiếu/Lớp11/2♥/ChươngI: DAO ĐỘNG. Ngày20/10 theo UTC+7 có7023,807giây (1giờ57phút3giây): phiên00:26:32 có3830,239giây,01:31:02 có15,009giây,05:27:59 có3178,559giây. Phiên01:33:02 có11849,616giây nhưng closed_reason=idle, đã bị trừ khỏi ledger. Không có study_sessions đang hoạt động khi kiểm tra khoảng08:20VN. Có5attempts practice trong ngày,4đúng/1sai, từ00:26:36 đến05:28:02. Chính sách lớp nhắc idle60/đóng120giây, tab2/4.
+
+Đối soát tổng days của các control không bị idle/tabs với study_daily_time: toàn bộ các ngày16–20/10 của tài khoản khớp từngms, bao gồm ngày20/10; không thấy cộng trùng ở các tổng đã kiểm tra. PRAGMA quick_check=ok, foreign_key_check không có lỗi. Tuy nhiên tổng progress12517,096giây cao hơn tổng ledger/control giữ lại12397,060giây là120,036giây; chưa xác định được nguồn phần chênh cũ, không quy cho ngày20/10 hoặc tự sửa. Thời gian là heartbeat/tín hiệu tương tác do client gửi, không đồng nghĩa thời gian trả lời thực chất; chưa có log chi tiết từngheartbeat để chứng minh liên tục tập trung/gian lận. Bằng chứng số liệu riêng trong.local/study-audit-20261020.md (không đưa dữ liệu riêng lên Git).
+
+QA mới: node --import tsx --test server/study-history.test.ts đạt9/9, database thử riêng; gồm timezone/midnight/retry/stop/rollback/aggregation/quyền. Không báo các kết quả kiểm thử phiên trước thành mới. Chỉ cập nhật tài liệu, không sửa logic ứng dụng hoặc dữ liệu production.
+
 ## Chốt Git theo yêu cầu deploy —20/10/2026
 
 Người dùng yêu cầu “Xong deploy git” sau khi hẹn giờ/chỉnh sửa bài kiểm tra đã hoàn tất. Fetch xác nhận main/origin main cùng13c638e, không có commit remote mới. Lượt này chốt source, migration, test và tài liệu của tính năng lên main cho Railway autobuild; giữ riêng bộ poster chưa commit và phần bàn giao poster ở working tree. Không đưa database/.local/secrets hoặc thay cấu hình Railway.

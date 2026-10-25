@@ -5,6 +5,293 @@ import { unzipSync, strFromU8 } from "fflate";
 import { createApp } from "./app.js";
 import { openDatabase, seedDemo, hashPassword } from "./db.js";
 import { grantLearningMilestones, sweepLearningExams } from "./learning.js";
+import { ensureLearningSchema } from "./learning-db.js";
+
+test("class clone copies only existing student memberships and deletion preserves accounts and source data", async (t) => {
+  const f = await fixture(t);
+  const users = f.db.prepare("SELECT * FROM users ORDER BY id").all();
+  const members = f.db
+    .prepare(
+      "SELECT student_id FROM memberships WHERE classroom_id='class-demo' ORDER BY student_id",
+    )
+    .all();
+  const body = {
+    name: "Lớp sao chép",
+    subject: "Hóa học",
+    sourceClassroomId: "class-demo",
+  };
+  assert.equal((await f.request("/classrooms", body, f.student)).status, 403);
+  assert.equal((await f.request("/classrooms", body, f.other)).status, 403);
+  const { id } = await f.post("/classrooms", body, f.teacher);
+  assert.deepEqual(
+    f.db
+      .prepare(
+        "SELECT student_id FROM memberships WHERE classroom_id=? ORDER BY student_id",
+      )
+      .all(id),
+    members,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT COUNT(*) n FROM chapters WHERE classroom_id=?")
+      .get(id)!.n,
+    0,
+  );
+  assert.equal((await f.request("/classrooms", body, f.teacher)).status, 409);
+  assert.equal(
+    (
+      await f.request(
+        `/classrooms/${id}/delete`,
+        { confirmName: body.name },
+        f.other,
+      )
+    ).status,
+    403,
+  );
+  assert.equal(
+    (
+      await f.request(
+        `/classrooms/${id}/delete`,
+        { confirmName: body.name },
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  assert.equal(
+    (
+      await f.request(
+        `/classrooms/${id}/delete`,
+        { confirmName: "sai" },
+        f.teacher,
+      )
+    ).status,
+    400,
+  );
+  f.db.exec("CREATE TRIGGER reject_class_delete BEFORE DELETE ON memberships BEGIN SELECT RAISE(ABORT,'test rollback'); END");
+  assert.equal((await f.request(`/classrooms/${id}/delete`, { confirmName: body.name }, f.teacher)).status, 500);
+  assert.equal(f.db.prepare("SELECT 1 FROM archived_classrooms WHERE classroom_id=?").get(id), undefined);
+  assert.equal(f.db.prepare("SELECT COUNT(*) n FROM memberships WHERE classroom_id=?").get(id)!.n, members.length);
+  f.db.exec("DROP TRIGGER reject_class_delete");
+  await f.post(
+    `/classrooms/${id}/delete`,
+    { confirmName: body.name },
+    f.teacher,
+  );
+  assert.deepEqual(
+    f.db.prepare("SELECT * FROM users ORDER BY id").all(),
+    users,
+  );
+  assert.deepEqual(
+    f.db
+      .prepare(
+        "SELECT student_id FROM memberships WHERE classroom_id='class-demo' ORDER BY student_id",
+      )
+      .all(),
+    members,
+  );
+  assert.ok(
+    !(await f.read("/classrooms", f.teacher)).some((c: any) => c.id === id),
+  );
+  assert.ok(
+    !(await f.read("/classrooms", f.student)).some((c: any) => c.id === id),
+  );
+  assert.equal(
+    (await f.request(`/classrooms/${id}/learning`, undefined, f.teacher))
+      .status,
+    404,
+  );
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms",
+        { ...body, name: "Khác", sourceClassroomId: id },
+        f.teacher,
+      )
+    ).status,
+    404,
+  );
+  assert.equal(f.db.prepare("PRAGMA foreign_key_check").all().length, 0);
+});
+
+test("online time credits the chosen chapter and calendar once; editing persists and invalid targets fail", async (t) => {
+  const f = await fixture(t);
+  ensureLearningSchema(f.db);
+  ensureLearningSchema(f.db);
+  const body = {
+    title: "Cộng giờ",
+    delivery: "online",
+    chapterIds: ["chapter-1"],
+    questionCount: 2,
+    preparationMinutes: 1,
+    durationMinutes: 10,
+    progressChapterId: "chapter-2",
+  };
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exams",
+        { ...body, progressChapterId: "missing" },
+        f.teacher,
+      )
+    ).status,
+    400,
+  );
+  f.db
+    .prepare(
+      "INSERT INTO chapters VALUES('foreign-chapter','other-class','Khác')",
+    )
+    .run();
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exams",
+        { ...body, progressChapterId: "foreign-chapter" },
+        f.teacher,
+      )
+    ).status,
+    400,
+  );
+  const { id } = await f.post("/classrooms/class-demo/exams", body, f.teacher);
+  assert.equal(
+    (await f.read(`/learning/exams/${id}/edit`, f.teacher)).progressChapterId,
+    "chapter-2",
+  );
+  await f.post(
+    `/learning/exams/${id}/update`,
+    { ...body, title: "Đã sửa" },
+    f.teacher,
+  );
+  await f.post(`/learning/exams/${id}/open`, {}, f.teacher);
+  f.advance(90000);
+  const run = await f.start({ examId: id });
+  const before = Number(
+    f.db
+      .prepare(
+        "SELECT seconds FROM progress WHERE student_id='student-demo' AND chapter_id='chapter-2'",
+      )
+      .get()?.seconds ?? 0,
+  );
+  f.advance(45000);
+  f.db.exec("CREATE TRIGGER reject_exam_credit BEFORE INSERT ON exam_study_credit BEGIN SELECT RAISE(ABORT,'test rollback'); END");
+  assert.equal((await f.request(`/learning/exam-runs/${run.id}/submit`, {}, f.student)).status, 500);
+  assert.equal(f.db.prepare("SELECT status FROM exam_runs WHERE id=?").get(run.id)!.status, "active");
+  assert.equal(Number(f.db.prepare("SELECT seconds FROM progress WHERE student_id='student-demo' AND chapter_id='chapter-2'").get()?.seconds ?? 0), before);
+  f.db.exec("DROP TRIGGER reject_exam_credit");
+  await f.post(`/learning/exam-runs/${run.id}/submit`, {});
+  await f.post(`/learning/exam-runs/${run.id}/submit`, {});
+  sweepLearningExams(f.db, f.now());
+  assert.equal(
+    Number(
+      f.db
+        .prepare(
+          "SELECT seconds FROM progress WHERE student_id='student-demo' AND chapter_id='chapter-2'",
+        )
+        .get()!.seconds,
+    ) - before,
+    45,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT credited_ms FROM exam_study_credit WHERE run_id=?")
+      .get(run.id)!.credited_ms,
+    45000,
+  );
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT SUM(credited_ms) n FROM study_daily_time WHERE student_id='student-demo' AND chapter_id='chapter-2'",
+      )
+      .get()!.n,
+    45000,
+  );
+  assert.equal(
+    (await f.request(`/learning/exams/${id}/update`, body, f.teacher)).status,
+    409,
+  );
+});
+
+test("exam credit crosses Vietnam midnight, caps the deadline, excludes idle and tab violations and defaults off", async (t) => {
+  for (const mode of ["midnight", "deadline", "idle", "tabs", "off"] as const) {
+    await t.test(mode, async (t) => {
+      const f = await fixture(t);
+      f.advance(Date.parse("2026-10-24T23:59:30+07:00") - f.now());
+      f.db.prepare("UPDATE sessions SET expires_at=?").run(f.now() + 86400000);
+      const body = {
+        title: mode,
+        delivery: "online",
+        chapterIds: ["chapter-1"],
+        questionCount: 2,
+        preparationMinutes: 0,
+        durationMinutes: 2,
+        progressChapterId: mode === "off" ? null : "chapter-2",
+      };
+      const { id } = await f.post(
+        "/classrooms/class-demo/exams",
+        body,
+        f.teacher,
+      );
+      await f.post(`/learning/exams/${id}/open`, {}, f.teacher);
+      const run = await f.start({ examId: id });
+      assert.equal(
+        (
+          await f.request(
+            "/classrooms/class-demo/delete",
+            {
+              confirmName: String(
+                f.db
+                  .prepare("SELECT name FROM classrooms WHERE id='class-demo'")
+                  .get()!.name,
+              ),
+            },
+            f.teacher,
+          )
+        ).status,
+        409,
+      );
+      if (mode === "idle")
+        f.db
+          .prepare(
+            "UPDATE classroom_session_policy SET policy=? WHERE classroom_id='class-demo'",
+          )
+          .run(
+            JSON.stringify({
+              warningTabs: 2,
+              closeTabs: 4,
+              warningIdleSeconds: 10,
+              closeIdleSeconds: 30,
+            }),
+          );
+      f.advance(mode === "deadline" ? 180000 : 60000);
+      if (mode === "tabs")
+        for (let i = 0; i < 4; i++)
+          await f.post(`/learning/exam-runs/${run.id}/tab`, {
+            eventId: String(i),
+          });
+      await f.post(`/learning/exam-runs/${run.id}/submit`, {});
+      const credit = f.db
+        .prepare("SELECT credited_ms FROM exam_study_credit WHERE run_id=?")
+        .get(run.id);
+      if (["idle", "tabs", "off"].includes(mode))
+        assert.equal(credit, undefined);
+      else
+        assert.equal(credit!.credited_ms, mode === "deadline" ? 120000 : 60000);
+      if (mode === "midnight")
+        assert.deepEqual(
+          f.db
+            .prepare(
+              "SELECT day,credited_ms FROM study_daily_time WHERE student_id='student-demo' AND chapter_id='chapter-2' ORDER BY day",
+            )
+            .all()
+            .map((r) => [r.day, r.credited_ms]),
+          [
+            ["2026-10-24", 30000],
+            ["2026-10-25", 30000],
+          ],
+        );
+    });
+  }
+});
 
 async function fixture(t: TestContext) {
   const db = openDatabase(":memory:");

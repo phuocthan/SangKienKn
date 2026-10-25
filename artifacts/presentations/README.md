@@ -1,6 +1,8 @@
 # Slide giới thiệu GreenEdu
 
-Bản PowerPoint hiện hành: [GreenEdu-Thanh-Phuong-Animation-2026.pptx](GreenEdu-Thanh-Phuong-Animation-2026.pptx). Bản theo sát bố cục mẫu ban đầu vẫn giữ tại [GreenEdu-Nguyen-Thi-Thanh-Phuong-2026.pptx](GreenEdu-Nguyen-Thi-Thanh-Phuong-2026.pptx).
+Bản mới ngày23/10/2026: [bộ15slide từ tài liệu khảo sát và dàn ý người dùng](20261023/README.md), kèm PDF và ghi chú thuyết trình.
+
+Bản9slide có animation trước đó: [GreenEdu-Thanh-Phuong-Animation-2026.pptx](GreenEdu-Thanh-Phuong-Animation-2026.pptx). Bản theo sát bố cục mẫu ban đầu vẫn giữ tại [GreenEdu-Nguyen-Thi-Thanh-Phuong-2026.pptx](GreenEdu-Nguyen-Thi-Thanh-Phuong-2026.pptx).
 
 ## Bản rework có animation
 

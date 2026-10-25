@@ -33,6 +33,12 @@ export function ExamMetadata({ exam }: { exam: ExamDefinition }) {
           Tự nộp ở lần rời tab <strong>{exam.tabLimit}</strong>
         </span>
       </li>
+      {exam.progressChapterTitle && (
+        <li className="exam-meta-duration">
+          <Clock3 size={18} />
+          <span>Cộng giờ: {exam.progressChapterTitle}</span>
+        </li>
+      )}
     </ul>
   );
 }

@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Tạo/xóa lớp và chương nhận giờ kiểm tra — 24/10/2026
+
+Tạo lớp thêm bộ chọn nguồn roster, mặc định lớp trống; chọn nguồn thì ẩn khối nhập tay, hiển thị số học sinh/khối kế thừa, chỉ nhập tên lớp và môn mới. Quản lý lớp có nút Xóa lớp mở modal nhập tên để xác nhận, giữ lỗi để thử lại và khóa đóng khi gửi. Tạo/chỉnh bài online thêm select chương nhận giờ, mặc định Không cộng; metadata buổi thi nêu tên chương được chọn. Giữ CSS và hệ thống modal hiện có, nhãn form đầy đủ, focus trap/Escape và thông báo lỗi; không thêm thư viện giao diện.
+
 ## Giữ giao diện hiện tại, bỏ bản thử Tailwind — 21/10/2026
 
 Người dùng đã xem và quyết định bỏ bản thử, tiếp tục dùng giao diện hiện tại. Đã dừng riêng Vite5181 và chuyển thư mục thử `tailwind-preview/` cùng dependency riêng vào bản lưu bị bỏ trong `.local`, ngoài source và Git. App5173, src, package/lockfile/config chính và database không bị thay đổi. Không đưa Tailwind vào bản chính, không push/deploy. Các mục thử Tailwind bên dưới chỉ là lịch sử đã hủy; không tiếp tục triển khai từ đó. Giữ các ghi chú phát hành CSV/Railway có sẵn.

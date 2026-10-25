@@ -29,6 +29,7 @@ export type Chapter = {
   openCorrections: number;
 };
 export type Classroom = {
+  canManageClass?: boolean;
   levelMinutes?: number;
   studentLevel?: StudentLevel | null;
   id: string;

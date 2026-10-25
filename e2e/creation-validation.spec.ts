@@ -46,6 +46,7 @@ test("teacher creates a class/student and duplicate forms keep one class/account
   await dialog.getByRole("button", { name: "Đóng", exact: true }).click();
 
   async function studentForm(existing = false, duplicate = false) {
+    await navigateTo(page, { name: "Quản lý lớp", exact: true });
     await page
       .getByRole("button", { name: "Thêm học sinh", exact: true })
       .click();

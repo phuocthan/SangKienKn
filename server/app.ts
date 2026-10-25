@@ -394,7 +394,7 @@ export function createApp(
       db
         .prepare(
           `SELECT c.id,c.name,c.subject,u.name AS teacherName
-      FROM classrooms c JOIN users u ON u.id = c.teacher_id ORDER BY c.name`,
+      FROM classrooms c JOIN users u ON u.id = c.teacher_id WHERE c.id NOT IN (SELECT classroom_id FROM archived_classrooms) ORDER BY c.name`,
         )
         .all(),
     );
@@ -416,7 +416,11 @@ export function createApp(
       classId &&
       (role !== "student" ||
         typeof classId !== "string" ||
-        !db.prepare("SELECT id FROM classrooms WHERE id = ?").get(classId))
+        !db
+          .prepare(
+            "SELECT id FROM classrooms WHERE id = ? AND id NOT IN (SELECT classroom_id FROM archived_classrooms)",
+          )
+          .get(classId))
     )
       fail(400, "Lớp học không hợp lệ; chỉ học sinh được thêm vào lớp.");
     const id = randomUUID();
@@ -457,7 +461,13 @@ export function createApp(
   function classroom(req: AppRequest, id: string) {
     const row = db.prepare("SELECT * FROM classrooms WHERE id = ?").get(id) as
       Row | undefined;
-    if (!row) fail(404, "Không tìm thấy lớp học.");
+    if (
+      !row ||
+      db
+        .prepare("SELECT 1 FROM archived_classrooms WHERE classroom_id=?")
+        .get(id)
+    )
+      fail(404, "Không tìm thấy lớp học.");
     if (
       req.user!.role === "teacher"
         ? row.teacher_id !== req.user!.id
@@ -514,8 +524,8 @@ export function createApp(
     const rows = db
       .prepare(
         req.user!.role === "teacher"
-          ? "SELECT c.*, u.name AS teacherName FROM classrooms c JOIN users u ON u.id = c.teacher_id WHERE c.teacher_id = ? ORDER BY c.rowid"
-          : "SELECT c.*, u.name AS teacherName FROM classrooms c JOIN users u ON u.id = c.teacher_id JOIN memberships m ON m.classroom_id = c.id WHERE m.student_id = ? ORDER BY c.rowid",
+          ? "SELECT c.*, u.name AS teacherName FROM classrooms c JOIN users u ON u.id = c.teacher_id WHERE c.teacher_id = ? AND c.id NOT IN (SELECT classroom_id FROM archived_classrooms) ORDER BY c.rowid"
+          : "SELECT c.*, u.name AS teacherName FROM classrooms c JOIN users u ON u.id = c.teacher_id JOIN memberships m ON m.classroom_id = c.id WHERE m.student_id = ? AND c.id NOT IN (SELECT classroom_id FROM archived_classrooms) ORDER BY c.rowid",
       )
       .all(req.user!.id) as Row[];
     res.json(
@@ -525,6 +535,7 @@ export function createApp(
         subject: c.subject,
         grade: c.grade,
         teacherName: c.teacherName,
+        canManageClass: req.user!.role === "teacher",
         levelMinutes: classroomLevelMinutes(db, c.id),
         studentLevel:
           req.user!.role === "student"
@@ -575,9 +586,14 @@ export function createApp(
   });
   app.post("/api/classrooms", (req: AppRequest, res) => {
     teacher(req);
+    const source = req.body?.sourceClassroomId
+      ? classroom(req, text(req.body.sourceClassroomId, "Lớp nguồn", 100))
+      : null;
     const name = text(req.body?.name, "Tên lớp", 80),
       subject = text(req.body?.subject, "Môn học", 80),
-      grade = text(req.body?.grade, "Khối lớp", 20);
+      grade = source
+        ? String(source.grade)
+        : text(req.body?.grade, "Khối lớp", 20);
     const id = randomUUID();
     const key = (value: string) =>
       value
@@ -590,7 +606,7 @@ export function createApp(
     try {
       const existing = db
         .prepare(
-          "SELECT name,subject,grade FROM classrooms WHERE teacher_id = ?",
+          "SELECT name,subject,grade FROM classrooms WHERE teacher_id = ? AND id NOT IN (SELECT classroom_id FROM archived_classrooms)",
         )
         .all(req.user!.id);
       if (
@@ -612,12 +628,53 @@ export function createApp(
         grade,
         req.user!.id,
       );
+      if (source)
+        db.prepare(
+          "INSERT INTO memberships(classroom_id,student_id) SELECT ?,student_id FROM memberships WHERE classroom_id=?",
+        ).run(id, source.id);
       db.exec("COMMIT");
     } catch (error) {
       db.exec("ROLLBACK");
       throw error;
     }
     res.status(201).json({ id });
+  });
+  app.post("/api/classrooms/:id/delete", (req: AppRequest, res) => {
+    teacher(req);
+    const c = classroom(req, String(req.params.id));
+    if (req.body?.confirmName !== c.name)
+      fail(400, "Nhập đúng tên lớp để xác nhận xóa.");
+    if (
+      db
+        .prepare(
+          "SELECT 1 FROM exam_runs WHERE classroom_id=? AND status='active'",
+        )
+        .get(c.id)
+    )
+      fail(409, "Hãy đóng các bài kiểm tra đang làm trước khi xóa lớp.");
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      // Logical deletion keeps dependent learning records and uploaded files safe.
+      db.prepare("INSERT INTO archived_classrooms VALUES(?,?)").run(
+        c.id,
+        now(),
+      );
+      db.prepare(
+        "UPDATE exam_definitions SET enabled=0 WHERE classroom_id=?",
+      ).run(c.id);
+      db.prepare(
+        "UPDATE study_session_controls SET closed_reason='class-deleted' WHERE closed_reason IS NULL AND chapter_id IN (SELECT id FROM chapters WHERE classroom_id=?)",
+      ).run(c.id);
+      db.prepare(
+        "DELETE FROM study_sessions WHERE chapter_id IN (SELECT id FROM chapters WHERE classroom_id=?)",
+      ).run(c.id);
+      db.prepare("DELETE FROM memberships WHERE classroom_id=?").run(c.id);
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+    res.json({ ok: true });
   });
   app.get("/api/chapters/:id", (req: AppRequest, res) => {
     const ch = chapter(req, String(req.params.id), true);

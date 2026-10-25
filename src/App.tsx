@@ -215,6 +215,32 @@ export default function App() {
   const [notice, setNotice] = useState("");
   const [studyExitNotice, setStudyExitNotice] = useState("");
   const [editor, setEditor] = useState<Editor>(null);
+  const [deletingClass, setDeletingClass] = useState<Classroom | null>(null);
+  const [deleteClassBusy, setDeleteClassBusy] = useState(false);
+  const [deleteClassError, setDeleteClassError] = useState("");
+  const [deleteClassName, setDeleteClassName] = useState("");
+  async function deleteClass(event: FormEvent) {
+    event.preventDefault();
+    if (!deletingClass || deleteClassBusy) return;
+    setDeleteClassBusy(true);
+    setDeleteClassError("");
+    try {
+      await api(`/classrooms/${deletingClass.id}/delete`, {
+        confirmName: deleteClassName,
+      });
+      setClassId("");
+      setPage("classes");
+      setStudy(null);
+      await reload();
+      setRevision((r) => r + 1);
+      setDeletingClass(null);
+      setNotice("Đã xóa lớp. Tài khoản học sinh được giữ nguyên.");
+    } catch (err) {
+      setDeleteClassError(errorMessage(err));
+    } finally {
+      setDeleteClassBusy(false);
+    }
+  }
   const [accountDialog, setAccountDialog] = useState<
     "avatar" | "password" | null
   >(null);
@@ -1048,7 +1074,10 @@ export default function App() {
                   entryRunId={
                     entryClassId === current.id ? entryRunId : undefined
                   }
-                  onExamExit={() => setEntryRunId("")}
+                  onExamExit={() => {
+                    setEntryRunId("");
+                    refresh();
+                  }}
                   onCorrections={(chapterId) =>
                     navigate("corrections", chapterId)
                   }
@@ -1103,7 +1132,23 @@ export default function App() {
               )}
               {isClassManagementPage && (
                 <>
-                  <PageHeading title="Quản lý lớp" />
+                  <PageHeading
+                    title="Quản lý lớp"
+                    action={
+                      current.canManageClass && (
+                        <button
+                          className="button danger"
+                          onClick={() => {
+                            setDeletingClass(current);
+                            setDeleteClassName("");
+                            setDeleteClassError("");
+                          }}
+                        >
+                          Xóa lớp
+                        </button>
+                      )
+                    }
+                  />
                   <section
                     id="class-general"
                     hidden={page !== "class-general"}
@@ -1472,6 +1517,57 @@ export default function App() {
           )}
         </Modal>
       )}
+      {deletingClass && (
+        <Modal
+          title="Xóa lớp học"
+          dismissible={!deleteClassBusy}
+          onClose={() => {
+            if (!deleteClassBusy) setDeletingClass(null);
+          }}
+        >
+          <form onSubmit={deleteClass}>
+            <p>
+              Xóa “{deletingClass.name} · {deletingClass.subject}” khỏi danh
+              sách và dừng quyền truy cập lớp. Tài khoản học sinh và các lớp
+              khác được giữ nguyên; dữ liệu lớp này được lưu trữ.
+            </p>
+            <label>
+              Nhập tên lớp để xác nhận
+              <input
+                name="confirmName"
+                autoComplete="off"
+                required
+                value={deleteClassName}
+                disabled={deleteClassBusy}
+                onChange={(e) => setDeleteClassName(e.target.value)}
+              />
+            </label>
+            {deleteClassError && (
+              <p role="alert" className="error-banner">
+                {deleteClassError}
+              </p>
+            )}
+            <div className="form-actions">
+              <button
+                type="button"
+                className="button"
+                disabled={deleteClassBusy}
+                onClick={() => setDeletingClass(null)}
+              >
+                Hủy
+              </button>
+              <button
+                className="button danger"
+                disabled={
+                  deleteClassBusy || deleteClassName !== deletingClass.name
+                }
+              >
+                {deleteClassBusy ? "Đang xóa…" : "Xóa lớp"}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
       {editor && (
         <Modal
           title={
@@ -1489,6 +1585,7 @@ export default function App() {
         >
           <EditorForm
             editor={editor}
+            classrooms={classes}
             classroom={current}
             chapterId={questionChapter}
             onSave={saveEditor}
@@ -2657,16 +2754,20 @@ function PasswordForm({ onUpdate }: { onUpdate: (u: User) => void }) {
   );
 }
 function EditorForm({
+  classrooms,
   editor,
   classroom,
   chapterId,
   onSave,
 }: {
+  classrooms: Classroom[];
   editor: NonNullable<Editor>;
   classroom?: Classroom;
   chapterId: string;
   onSave: (e: FormEvent<HTMLFormElement>) => Promise<void>;
 }) {
+  const [sourceClassroomId, setSourceClassroomId] = useState("");
+  const sourceClassroom = classrooms.find((c) => c.id === sourceClassroomId);
   const [accountMode, setAccountMode] = useState("new");
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -2687,8 +2788,33 @@ function EditorForm({
       {editor === "class" && (
         <>
           <p className="form-intro">
-            Tạo không gian học tập riêng cho lớp của bạn.
+            Tạo lớp trống hoặc dùng lại danh sách học sinh. Chương, câu hỏi và
+            tiến độ của lớp mới bắt đầu trống.
           </p>
+          <label>
+            Lấy danh sách học sinh từ lớp
+            <select
+              name="sourceClassroomId"
+              value={sourceClassroomId}
+              onChange={(e) => setSourceClassroomId(e.target.value)}
+              disabled={busy}
+            >
+              <option value="">Không sao chép — tạo lớp trống</option>
+              {classrooms
+                .filter((c) => c.canManageClass)
+                .map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} · {c.subject} ({c.studentCount} học sinh)
+                  </option>
+                ))}
+            </select>
+          </label>
+          {sourceClassroom && (
+            <p className="muted">
+              Dùng lại {sourceClassroom.studentCount} tài khoản học sinh; giữ
+              khối {sourceClassroom.grade}.
+            </p>
+          )}
           <label>
             Tên lớp
             <input
@@ -2708,15 +2834,17 @@ function EditorForm({
                 placeholder="Ví dụ: Vật lý"
               />
             </label>
-            <label>
-              Khối lớp
-              <input
-                name="grade"
-                required
-                maxLength={20}
-                placeholder="Ví dụ: 10"
-              />
-            </label>
+            {!sourceClassroom && (
+              <label>
+                Khối lớp
+                <input
+                  name="grade"
+                  required
+                  maxLength={20}
+                  placeholder="Ví dụ: 10"
+                />
+              </label>
+            )}
           </div>
         </>
       )}

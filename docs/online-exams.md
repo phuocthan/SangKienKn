@@ -1,5 +1,15 @@
 # Kiểm tra online do giáo viên bắt đầu
 
+## Cộng thời gian kiểm tra vào chương — 24/10/2026
+
+Form tạo/chỉnh sửa thêm **Cộng thời gian làm bài vào chương**: mặc định Không cộng, hoặc chọn một chương đang dùng trong lớp. Chương nhận giờ độc lập với chương lấy câu hỏi; lưu `online_exam_sessions.progress_chapter_id`, trả lại khi chỉnh sửa và hiển thị ở thông tin buổi thi. Chỉ đổi khi buổi còn được chỉnh sửa theo quy tắc hiện hành. Bài cũ mặc định null, không hồi tố thời gian.
+
+Khi học sinh nộp hợp lệ, giáo viên thu bài hoặc hết hạn, cộng khoảng từ lúc học sinh bắt đầu lượt đến min(thời điểm kết thúc, hạn thi). Không cộng thời gian chuẩn bị, thời gian trước khi học sinh vào, phần quá hạn hoặc lượt bị đóng do tabs/idle. Ngay cả worker chạy muộn và chốt lý do deadline, vẫn kiểm tra idle/tab tại hạn thi trước khi cộng. Đây là thời lượng lượt thi theo server, không khẳng định đo được mức độ tập trung thực tế.
+
+`exam_study_credit` lưu một receipt mỗi run; cùng transaction nộp bài cập nhật progress và study_daily_time theo ngày UTC+7, nên tải lại/nộp lại/worker không cộng hai lần. Receipt không phụ thuộc FK vào run để xóa buổi thi không xóa giờ đã ghi; thống kê ngày/tuần/tháng đọc được giờ này. Không cộng vào chỉ tiêu **luyện tập tối thiểu mỗi tuần**, vốn là yêu cầu luyện tập riêng. Không đổi gate cấp/vé cho kiểm tra chính thức. Tùy chọn này thay quy tắc lịch sử “thi không cộng giờ” chỉ đối với buổi online có chọn chương.
+
+Overview thêm `examProgressCredit`; migration bổ sung cột/bảng an toàn, không reset database. Chỉ có hiệu lực trên Railway sau khi backend mới được triển khai.
+
 ## Hẹn giờ bắt đầu và chỉnh sửa đề —20/10/2026
 
 Giáo viên vào **Kiểm tra → Tạo bài kiểm tra**, chọn nguồn đề rồi bật **Hẹn giờ bắt đầu**. Chọn **Ngày và giờ bắt đầu (giờ Việt Nam)**; ứng dụng dùng UTC+7, không phụ thuộc múi giờ máy giáo viên. Đây là giờ bắt đầu làm bài, không phải giờ bắt đầu đếm thời gian chuẩn bị. Hạn kết thúc bằng giờ đã chọn cộng số phút làm bài; học sinh vào muộn chỉ có phần thời gian còn lại. Không bật hẹn giờ thì vẫn lưu bản nháp và bắt đầu thủ công như trước.
