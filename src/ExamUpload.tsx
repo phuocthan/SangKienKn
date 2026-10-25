@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { QuestionText } from "./QuestionText";
 import {
   csvTemplate,
   parseQuestionCsv,
@@ -189,7 +190,7 @@ export function ExamUpload({
             <div className="learning-row" key={index}>
               <div>
                 <strong>
-                  {index + 1}. {row.question.text}
+                  {index + 1}. <QuestionText>{row.question.text}</QuestionText>
                 </strong>
                 <p>
                   {chapters.find((ch) => ch.id === row.chapterId)?.title ??

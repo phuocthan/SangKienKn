@@ -9,6 +9,8 @@ import {
   type StudyPeriod,
   type StudyStatistics,
   type ClassroomStudyStatistics,
+  type StudyRangeMember,
+  validStudyDate,
 } from "../shared/study-statistics";
 import "./study-statistics.css";
 
@@ -28,6 +30,19 @@ const rangeLabel = (bucket: StudyBucket) =>
   bucket.start === bucket.end
     ? dateLabel(bucket.start)
     : `${dateLabel(bucket.start)} – ${dateLabel(bucket.end)}`;
+const accuracyLabel = (member: StudyRangeMember) =>
+  member.attempts
+    ? `${((100 * member.correct) / member.attempts).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}% (${member.correct}/${member.attempts})`
+    : "Chưa có lượt làm";
+const examLabel = (member: StudyRangeMember) =>
+  member.onlineExams.length
+    ? member.onlineExams
+        .map(
+          (exam) =>
+            `${exam.title}: ${exam.score.toLocaleString("vi-VN")} / 10 (${dateLabel(studyDate(exam.submittedAt))})`,
+        )
+        .join("; ")
+    : "Chưa có bài nộp";
 
 export function StudentStudyStatistics({
   classroom,
@@ -44,13 +59,28 @@ export function StudentStudyStatistics({
   const [studentId, setStudentId] = useState(initialStudentId);
   const student = students.find((s) => s.id === studentId);
   const [date, setDate] = useState(() => studyDate(Date.now()));
+  const [from, setFrom] = useState(
+    () => `${studyDate(Date.now()).slice(0, 7)}-01`,
+  );
+  const [to, setTo] = useState(() => studyDate(Date.now()));
+  const validRange =
+    validStudyDate(from) &&
+    validStudyDate(to) &&
+    from <= to &&
+    to <= studyDate(Date.now());
   const [snapshot, setData] = useState<
-    ClassroomStudyStatistics & { selectedStudentId: string }
+    ClassroomStudyStatistics & {
+      selectedStudentId: string;
+      from: string;
+      to: string;
+    }
   >();
   const data =
     snapshot?.selectedStudentId === studentId &&
     snapshot.period === period &&
-    snapshot.date === date
+    snapshot.date === date &&
+    snapshot.from === from &&
+    snapshot.to === to
       ? snapshot
       : undefined;
   const [error, setError] = useState("");
@@ -62,6 +92,10 @@ export function StudentStudyStatistics({
     setData(undefined);
     setLoading(true);
     setError("");
+    if (!validRange) {
+      setLoading(false);
+      return;
+    }
     async function refresh() {
       if (!alive || inFlight || document.hidden) return;
       if (!navigator.onLine) {
@@ -72,15 +106,17 @@ export function StudentStudyStatistics({
       inFlight = true;
       try {
         const result = await api<StudyStatistics | ClassroomStudyStatistics>(
-          `/classrooms/${classroom.id}${studentId ? `/students/${studentId}` : ""}/study-statistics?period=${period}&date=${date}`,
+          `/classrooms/${classroom.id}${studentId ? `/students/${studentId}` : ""}/study-statistics?period=${period}&date=${date}&from=${from}&to=${to}`,
         );
         if (alive) {
           setData(
             "members" in result
-              ? { ...result, selectedStudentId: studentId }
+              ? { ...result, selectedStudentId: studentId, from, to }
               : {
                   ...result,
                   selectedStudentId: studentId,
+                  from,
+                  to,
                   members: [
                     {
                       id: studentId,
@@ -121,56 +157,68 @@ export function StudentStudyStatistics({
       window.removeEventListener("focus", update);
       document.removeEventListener("visibilitychange", update);
     };
-  }, [classroom.id, studentId, student?.name, period, date, retry]);
+  }, [
+    classroom.id,
+    studentId,
+    student?.name,
+    period,
+    date,
+    from,
+    to,
+    validRange,
+    retry,
+  ]);
   function exportCsv() {
-    if (!data || loading || error) return;
-    const periodLabel = { day: "Ngày", week: "Tuần", month: "Tháng" };
+    if (!data?.report || loading || error || !validRange) return;
     const records: string[][] = [
-      ["Thống kê thời gian học"],
+      ["Thống kê học tập"],
       ["Lớp", classroom.name],
       ["Môn", classroom.subject],
       ["Học sinh", student?.name ?? "Tất cả học sinh"],
-      ["Khoảng thống kê", periodLabel[data.period]],
-      ["Ngày xem", dateLabel(data.date)],
-      [],
-      ["Ngày đã chọn", "Tuần chứa ngày đã chọn", "Tháng chứa ngày đã chọn"],
       [
-        timeLabel(data.summaries.day.seconds),
-        timeLabel(data.summaries.week.seconds),
-        timeLabel(data.summaries.month.seconds),
+        "Từ ngày",
+        dateLabel(data.report.from),
+        "Đến ngày",
+        dateLabel(data.report.to),
       ],
-      ["Tổng tích lũy", timeLabel(data.lifetimeSeconds)],
+      [],
       [
-        "Lịch sử từ",
+        "Học sinh",
+        "Thời gian học",
+        "Tỉ lệ đúng",
+        "Điểm cộng săn điểm đã duyệt",
+        "Điểm săn điểm chờ duyệt",
+        "Điểm bài kiểm tra online",
+      ],
+      ...data.report.members.map((member) => [
+        member.name,
+        timeLabel(member.seconds),
+        accuracyLabel(member),
+        String(member.huntPoints),
+        String(member.pendingHuntPoints),
+        examLabel(member),
+      ]),
+      [],
+      [
+        "Cách tính",
+        "Tỉ lệ đúng = số lượt đúng / tổng lượt luyện, ôn và sửa sai trong khoảng ngày. Điểm săn điểm tính theo ngày đạt thưởng; tách đã duyệt và chờ duyệt. Bài online tính theo ngày nộp, thang 10.",
+      ],
+      [
+        "Lịch sử thời gian từ",
         new Date(data.trackingStartedAt).toLocaleString("vi-VN", {
           timeZone: "Asia/Ho_Chi_Minh",
           hour12: false,
         }),
       ],
+      [
+        "Lịch sử thời gian",
+        data.report.coverage === "none"
+          ? "Chưa có lịch sử"
+          : data.report.coverage === "partial"
+            ? "Lịch sử chưa đủ khoảng ngày"
+            : "Đủ khoảng ngày",
+      ],
     ];
-    if (!studentId) {
-      records.push(
-        [],
-        ["Thống kê từng học sinh"],
-        ["Học sinh", "Ngày", "Tuần", "Tháng", "Tích lũy"],
-        ...data.members.map((member) => [
-          member.name,
-          timeLabel(member.statistics.summaries.day.seconds),
-          timeLabel(member.statistics.summaries.week.seconds),
-          timeLabel(member.statistics.summaries.month.seconds),
-          timeLabel(member.statistics.lifetimeSeconds),
-        ]),
-      );
-    }
-    records.push(
-      [],
-      ["Thời gian luyện tập theo kỳ"],
-      [periodLabel[data.period], "Thời gian luyện tập"],
-      ...data.buckets
-        .slice()
-        .reverse()
-        .map((bucket) => [rangeLabel(bucket), timeLabel(bucket.seconds)]),
-    );
     // Quoting protects delimiters; prefix spreadsheet formulas in user text.
     const csv =
       "\uFEFF" +
@@ -197,7 +245,7 @@ export function StudentStudyStatistics({
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "") || "lop";
-    link.download = `greenedu-thong-ke-${className}-${studentId || "ca-lop"}-${data.period}-${data.date}.csv`;
+    link.download = `greenedu-thong-ke-${className}-${studentId || "ca-lop"}-${data.report.from}-den-${data.report.to}.csv`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -231,6 +279,28 @@ export function StudentStudyStatistics({
                 </option>
               ))}
             </select>
+          </label>
+          <label>
+            Từ ngày
+            <input
+              type="date"
+              name="statistics-from"
+              value={from}
+              min="2000-01-01"
+              max={to || studyDate(Date.now())}
+              onChange={(e) => setFrom(e.target.value)}
+            />
+          </label>
+          <label>
+            Đến ngày
+            <input
+              type="date"
+              name="statistics-to"
+              value={to}
+              min={from || "2000-01-01"}
+              max={studyDate(Date.now())}
+              onChange={(e) => setTo(e.target.value)}
+            />
           </label>
           <div
             className="study-periods"
@@ -277,12 +347,75 @@ export function StudentStudyStatistics({
           <button
             type="button"
             className="button outline small"
-            disabled={!data || loading || !!error || data.members.length === 0}
+            disabled={
+              !data?.report ||
+              loading ||
+              !!error ||
+              !validRange ||
+              data.report.members.length === 0
+            }
             onClick={exportCsv}
           >
             <Download size={16} /> Xuất CSV
           </button>
         </div>
+        {!validRange && (
+          <p className="error-banner" role="alert">
+            Chọn khoảng từ ngày đến ngày hợp lệ, không vượt ngày hiện tại.
+          </p>
+        )}
+        {data && !loading && !data.report && (
+          <p role="status">
+            Cần cập nhật backend Railway để xuất thống kê theo khoảng ngày và
+            điểm.
+          </p>
+        )}
+        {data?.report && (
+          <>
+            <p>
+              Từ ngày {dateLabel(data.report.from)} đến ngày{" "}
+              {dateLabel(data.report.to)}
+            </p>
+            <div className="table-scroll">
+              <table
+                className="study-statistics-table study-members-table"
+                aria-label="Thống kê theo khoảng ngày"
+              >
+                <thead>
+                  <tr>
+                    <th scope="col">Học sinh</th>
+                    <th scope="col">Thời gian học</th>
+                    <th scope="col">Tỉ lệ đúng</th>
+                    <th scope="col">Điểm cộng săn điểm đã duyệt</th>
+                    <th scope="col">Điểm săn điểm chờ duyệt</th>
+                    <th scope="col">Điểm bài kiểm tra online</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.report.members.map((member) => (
+                    <tr key={member.id}>
+                      <th scope="row">{member.name}</th>
+                      <td>{timeLabel(member.seconds)}</td>
+                      <td>{accuracyLabel(member)}</td>
+                      <td>{member.huntPoints}</td>
+                      <td>{member.pendingHuntPoints}</td>
+                      <td>{examLabel(member)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="study-statistics-note">
+              Tỉ lệ đúng tính trên lượt luyện, ôn và sửa sai. Điểm săn điểm theo
+              ngày đạt thưởng; bài online theo ngày nộp, thang 10.{" "}
+              {data.report.coverage === "partial"
+                ? "Lịch sử thời gian chưa đủ khoảng ngày đã chọn."
+                : data.report.coverage === "none"
+                  ? "Khoảng ngày này chưa có lịch sử thời gian."
+                  : ""}
+            </p>
+          </>
+        )}
         {error && (
           <div className="error-banner" role="alert">
             {error}

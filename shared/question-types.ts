@@ -1,6 +1,7 @@
 export type QuestionKind = "multiple-choice" | "true-false" | "short-answer";
 export type QuestionAnswer = number | string;
 export type AnswerQuestion = {
+  text?: string;
   kind?: QuestionKind;
   choices: string[];
   correctIndex?: number;
@@ -85,6 +86,12 @@ export function validateQuestionAnswer(
   if (partial) return value.normalize("NFC");
   const answer = normalizeShortAnswer(value);
   if (!partial && !answer) throw new Error("Nhập câu trả lời.");
+  // Keep unit case (mJ differs from MJ) until the grading comparison.
+  if (
+    shortAnswerContext(q.text ?? "").unit &&
+    !/^-?\d+(?:\.\d+)?$/.test(answer)
+  )
+    return value.normalize("NFC").trim();
   return answer;
 }
 export function answerComplete(q: AnswerQuestion, value: unknown) {
@@ -95,11 +102,48 @@ export function answerComplete(q: AnswerQuestion, value: unknown) {
     return false;
   }
 }
-export function answerCorrect(q: AnswerQuestion, value: unknown) {
+export function answerCorrect(
+  q: AnswerQuestion,
+  value: unknown,
+  allowUnits = true,
+) {
   if (!answerComplete(q, value)) return false;
-  return questionKind(q) === "multiple-choice"
-    ? value === q.correctIndex
-    : validateQuestionAnswer(q, value) === q.correctAnswer;
+  if (questionKind(q) === "multiple-choice") return value === q.correctIndex;
+  if (questionKind(q) === "true-false") return value === q.correctAnswer;
+  const expected = normalizeShortAnswer(q.correctAnswer ?? "");
+  if (normalizeShortAnswer(String(value)) === expected) return true;
+  if (!allowUnits) return false;
+  // Accept a numeric response with the unit explicitly requested by the
+  // question. Never discard arbitrary suffixes or convert different units.
+  if (!/^-?\d+(?:\.\d+)?$/.test(expected)) return false;
+  const context = shortAnswerContext(q.text ?? "");
+  if (!context.unit) return false;
+  let answer = String(value).normalize("NFC").trim();
+  if (context.variable) {
+    const prefix = new RegExp(`^${context.variable}\\s*=\\s*`);
+    answer = answer.replace(prefix, "");
+  }
+  const unit = context.unit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = new RegExp(
+    `^([+−-]?(?:\\d+(?:[.,]\\d*)?|[.,]\\d+))\\s*(?:${unit}|\\(\\s*${unit}\\s*\\))$`,
+  ).exec(answer);
+  return !!match && normalizeShortAnswer(match[1]) === expected;
+}
+
+export function shortAnswerContext(text: string) {
+  const units = "rad/s|cm/s|m/s|mJ|kJ|J|cm|mm|km|m|ms|s|Hz|N|kg|g|V|A|W|Pa|°C";
+  const explicit = /theo đơn vị\s+([^.!?]+)\.?\s*$/iu.exec(text)?.[1].trim();
+  const named: Record<string, string> = { "giây (s)": "s", giây: "s" };
+  if (
+    explicit &&
+    (new RegExp(`^(?:${units})$`).test(explicit) || named[explicit])
+  )
+    return { unit: named[explicit] ?? explicit, variable: undefined };
+  const variable = new RegExp(
+    `Tính[^.!?]*?\\b([a-zA-Z])\\s*\\((${units})\\)`,
+    "u",
+  ).exec(text);
+  return { unit: variable?.[2], variable: variable?.[1] };
 }
 export const storedAnswer = (answer: QuestionAnswer) =>
   typeof answer === "number" ? answer : JSON.stringify(answer);

@@ -1,5 +1,6 @@
 import { answerLabel, questionKind } from "../shared/question-types";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { QuestionText } from "./QuestionText";
 import {
   CheckCircle2,
   Download,
@@ -499,7 +500,9 @@ function QuestionCard({
               : "Đang sử dụng"}
         </span>
       </div>
-      <h3>{q.text}</h3>
+      <h3>
+        <QuestionText>{q.text}</QuestionText>
+      </h3>
       {q.topic && <p className="subtle-note">Chủ đề: {q.topic}</p>}
       <div className="bank-choices">
         {q.choices.map((choice, index) => (
@@ -508,7 +511,7 @@ function QuestionCard({
             className={index === q.correctIndex ? "answer-key" : ""}
           >
             <span>{"ABCD"[index]}</span>
-            {choice}
+            <QuestionText>{choice}</QuestionText>
             {questionKind(q) === "true-false" && (
               <strong>
                 {q.correctAnswer?.[index] === "1" ? "Đúng" : "Sai"}
@@ -525,7 +528,9 @@ function QuestionCard({
       )}
       <details className="bank-explanation">
         <summary>Lời giải</summary>
-        <p>{q.explanation}</p>
+        <p>
+          <QuestionText>{q.explanation}</QuestionText>
+        </p>
       </details>
       {children}
     </article>
@@ -862,14 +867,14 @@ function ImportForm({
             {mappedQuestions.map((q, index) => (
               <details key={index}>
                 <summary>
-                  {index + 1}. {q.text}
+                  {index + 1}. <QuestionText>{q.text}</QuestionText>
                 </summary>
                 <p>{q.lesson}</p>
                 {q.topic && <p>Chủ đề: {q.topic}</p>}
                 <ol type="A">
                   {q.choices.map((choice, i) => (
                     <li key={i}>
-                      {choice}
+                      <QuestionText>{choice}</QuestionText>
                       {i === q.correctIndex && " ✓"}
                       {questionKind(q) === "true-false" &&
                         (q.correctAnswer?.[i] === "1" ? " · Đúng" : " · Sai")}
@@ -879,7 +884,9 @@ function ImportForm({
                 {questionKind(q) === "short-answer" && (
                   <p>Đáp án: {answerLabel(q)}</p>
                 )}
-                <p>{q.explanation}</p>
+                <p>
+                  <QuestionText>{q.explanation}</QuestionText>
+                </p>
               </details>
             ))}
           </div>

@@ -6,12 +6,35 @@ export type StudyBucket = {
   coverage: "none" | "partial" | "full";
 };
 export type StudyStatistics = {
+  report?: StudyRangeReport;
   period: StudyPeriod;
   date: string;
   trackingStartedAt: number;
   lifetimeSeconds: number;
   summaries: { day: StudyBucket; week: StudyBucket; month: StudyBucket };
   buckets: StudyBucket[];
+};
+
+export type StudyRangeMember = {
+  id: string;
+  name: string;
+  seconds: number | null;
+  attempts: number;
+  correct: number;
+  huntPoints: number;
+  pendingHuntPoints: number;
+  onlineExams: {
+    id: string;
+    title: string;
+    score: number;
+    submittedAt: number;
+  }[];
+};
+export type StudyRangeReport = {
+  from: string;
+  to: string;
+  coverage: "none" | "partial" | "full";
+  members: StudyRangeMember[];
 };
 
 export type ClassroomStudyStatistics = StudyStatistics & {

@@ -1,5 +1,13 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: mũ trên/dưới, báo cáo khoảng ngày và rà điểm — 25/10/2026
+
+Đã sửa mã local trong đúng ba phạm vi người dùng yêu cầu: giữ/hiển thị chỉ số trên/dưới từ Word (cả Equation script đơn giản), xuất CSV Từ ngày–Đến ngày có thời gian học/tỉ lệ đúng/điểm săn điểm đã duyệt–chờ duyệt/từng điểm online, và nhận đáp án số kèm đúng đơn vị của đề. Không tự đoán định dạng đã mất trong câu cũ hoặc chuyển đổi đơn vị. Lượt thi mới có marker gradingVersion2 trong snapshot; kết quả lượt cũ giữ cách chấm cũ tới khi giáo viên duyệt điều chỉnh, không migration.
+
+Rà67bài vừa nộp ở11/2 và11/6 bằng Railway SQLite readOnly: không có sai lệch điểm tính theo luật cũ hoặc khóa đáp án khác nhau giữa học sinh. Phát hiện25đáp án của7em đúng số kèm đúng đơn vị nên bị chấm sai; người dùng chọn **lập danh sách để duyệt trước**, chưa thay dữ liệu thật. Báo cáo có dữ liệu học sinh giữ riêng `.local/exam-audit-20261025/`, không Git. Một câu đúng/sai a=-500x/ω=10 có mâu thuẫn cần giáo viên đối chiếu. Câu cũ mất mũ cần Word gốc để khôi phục.
+
+QA mới42/42 backend liên quan,12/12 E2E desktop/mobile (52,3giây), build/typecheck đạt; server/database kiểm thử riêng. Chưa commit/push/deploy, backend mới chưa có hiệu lực trên Railway. Local main e0648c2 chậm origin/main6528493 hai commit; đã fetch/đọc diff, không tự pull để giữ giới hạn file. Trước deploy cần ghép cập nhật remote và xác nhận lại phần giao nhau. Railway được xác minh đang SUCCESS ở6528493/deployment6d119f2c-f5da-447e-874f-2e2cd3d919d9; ghi chú build paused bên dưới là lịch sử. Chi tiết tại đầu session-handoff.
+
 ## Push lại và thử phát hành — 22/10/2026
 
 Theo yêu cầu “deploy lại lên git”, fetch xác nhận main/origin main cùnga683643. Bản sửa CSV đã ở Git; lượt này lưu thêm quyết định bỏ Tailwind/giữ giao diện hiện tại và kết quả Railway chặn build ngày21/10, rồi thử phát hành lại. Không đưa preview đã hủy hoặc .local/database/secrets lên Git. Không đổi runtime từ bản CSV đã kiểm thử; không chạy lại hoặc báo kết quả test cũ thành QA mới. Trước push, Railway vẫn chạy930fdf7; cần xác minh deployment mới và bundle trước khi kết luận đã deploy.

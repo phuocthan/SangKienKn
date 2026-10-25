@@ -1,6 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
 import { recordWeeklyPractice } from "./weekly-practice.js";
-import { recordSessionCredit } from './class-management.js';
+import { recordSessionCredit } from "./class-management.js";
 import {
   STUDY_DAY_MS,
   studyDate,
@@ -11,7 +11,81 @@ import {
   type StudyBucket,
   type StudyStatistics,
   type ClassroomStudyStatistics,
+  type StudyRangeReport,
 } from "../shared/study-statistics.js";
+
+// Read-only report. The end date includes the entire Vietnam calendar day.
+export function studyRangeReport(
+  db: DatabaseSync,
+  classroomId: string,
+  studentId: string | undefined,
+  from: string,
+  to: string,
+): StudyRangeReport {
+  const start = studyDayStart(from),
+    end = studyDayStart(to) + STUDY_DAY_MS;
+  const tracking = Number(
+    db
+      .prepare("SELECT started_at FROM study_history_tracking WHERE id=1")
+      .get()!.started_at,
+  );
+  const coverage =
+    end <= tracking ? "none" : start < tracking ? "partial" : "full";
+  const students = db
+    .prepare(
+      `SELECT u.id,u.name FROM users u JOIN memberships m ON m.student_id=u.id
+    WHERE m.classroom_id=? AND (? IS NULL OR u.id=?) ORDER BY u.name,u.id`,
+    )
+    .all(classroomId, studentId ?? null, studentId ?? null);
+  return {
+    from,
+    to,
+    coverage,
+    members: students.map((u) => {
+      const time = db
+        .prepare(
+          `SELECT COALESCE(SUM(h.credited_ms),0) AS ms FROM study_daily_time h JOIN chapters c ON c.id=h.chapter_id
+      WHERE c.classroom_id=? AND h.student_id=? AND h.day>=? AND h.day<=?`,
+        )
+        .get(classroomId, u.id, from, to)!;
+      const accuracy = db
+        .prepare(
+          `SELECT COUNT(*) AS attempts,COALESCE(SUM(a.correct),0) AS correct FROM attempts a JOIN questions q ON q.id=a.question_id
+      JOIN chapters c ON c.id=q.chapter_id WHERE c.classroom_id=? AND a.student_id=? AND a.created_at>=? AND a.created_at<?`,
+        )
+        .get(classroomId, u.id, start, end)!;
+      const rewards = db
+        .prepare(
+          `SELECT COALESCE(SUM(CASE WHEN status='approved' THEN points ELSE 0 END),0) AS approved,
+      COALESCE(SUM(CASE WHEN status='pending' THEN points ELSE 0 END),0) AS pending FROM learning_rewards
+      WHERE classroom_id=? AND student_id=? AND source LIKE 'exam:%' AND created_at>=? AND created_at<?`,
+        )
+        .get(classroomId, u.id, start, end)!;
+      const onlineExams = db
+        .prepare(
+          `SELECT r.id,r.title,r.score,r.submitted_at FROM exam_runs r JOIN online_exam_sessions o ON o.exam_id=r.exam_id
+      WHERE r.classroom_id=? AND r.student_id=? AND r.status='submitted' AND r.submitted_at>=? AND r.submitted_at<? ORDER BY r.submitted_at,r.id`,
+        )
+        .all(classroomId, u.id, start, end);
+      return {
+        id: String(u.id),
+        name: String(u.name),
+        seconds:
+          coverage === "none" ? null : Math.floor(Number(time.ms) / 1000),
+        attempts: Number(accuracy.attempts),
+        correct: Number(accuracy.correct),
+        huntPoints: Number(rewards.approved),
+        pendingHuntPoints: Number(rewards.pending),
+        onlineExams: onlineExams.map((r) => ({
+          id: String(r.id),
+          title: String(r.title),
+          score: Number(r.score),
+          submittedAt: Number(r.submitted_at),
+        })),
+      };
+    }),
+  };
+}
 
 export function ensureStudyHistorySchema(db: DatabaseSync) {
   db.exec(`

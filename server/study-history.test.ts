@@ -7,6 +7,7 @@ import {
   startStudyHistory,
   creditStudyInterval,
   studentStudyStatistics,
+  studyRangeReport,
 } from "./study-history.js";
 import {
   studyDate,
@@ -59,6 +60,117 @@ async function fixture(
   };
 }
 const path = "/classrooms/class-demo/students/student-demo/study-statistics";
+
+test("date-range reports include the full Vietnam end day, exact class, saved accuracy, reviewed hunt points and each online score", async (t) => {
+  const f = await fixture(t, studyDayStart("2026-10-20"));
+  const start = studyDayStart("2026-10-19"),
+    end = studyDayStart("2026-10-20");
+  // Start tracking before the selected date without modifying a real database.
+  f.db.prepare("UPDATE study_history_tracking SET started_at=?").run(start);
+  creditStudyInterval(
+    f.db,
+    "student-demo",
+    "chapter-1",
+    start,
+    start + 61000,
+    () => {},
+  );
+  creditStudyInterval(
+    f.db,
+    "student-demo",
+    "chapter-1",
+    end,
+    end + 99000,
+    () => {},
+  );
+  const question = f.db
+    .prepare("SELECT id FROM questions WHERE chapter_id='chapter-1' LIMIT 1")
+    .get()!;
+  for (const [id, correct, at] of [
+    ["r-a", 1, start],
+    ["r-b", 0, end - 1],
+    ["r-out", 1, end],
+  ] as const)
+    f.db
+      .prepare("INSERT INTO attempts VALUES(?,?,?,0,?,'practice',?)")
+      .run(id, "student-demo", question.id, correct, at);
+  for (const [id, status, source, at] of [
+    ["approved", "approved", "exam:a", start],
+    ["pending", "pending", "exam:b", start],
+    ["rejected", "rejected", "exam:c", start],
+    ["tree", "approved", "tree:a", start],
+    ["outside", "approved", "exam:d", end],
+  ] as const)
+    f.db
+      .prepare(
+        "INSERT INTO learning_rewards(id,student_id,classroom_id,source,label,points,status,created_at) VALUES(?,'student-demo','class-demo',?,'Reward',1,?,?)",
+      )
+      .run(id, source, status, at);
+  f.db
+    .prepare(
+      "INSERT INTO exam_definitions VALUES('range-exam','class-demo','Online','[]',?,?,4,0,?)",
+    )
+    .run(start, end, start);
+  f.db
+    .prepare(
+      "INSERT INTO online_exam_sessions(exam_id,duration_minutes,question_count) VALUES('range-exam',20,1)",
+    )
+    .run();
+  f.db
+    .prepare(
+      `INSERT INTO exam_runs(id,student_id,classroom_id,exam_id,kind,title,questions,answers,started_at,deadline_at,tab_limit,status,score,submitted_at,request_id)
+    VALUES('range-run','student-demo','class-demo','range-exam','official','Online','[]','{}',?,?,4,'submitted',8.5,?,'range-request')`,
+    )
+    .run(start, end, end - 1);
+  const report = studyRangeReport(
+    f.db,
+    "class-demo",
+    "student-demo",
+    "2026-10-19",
+    "2026-10-19",
+  );
+  assert.equal(report.members[0].seconds, 61);
+  assert.equal(report.members[0].attempts, 2);
+  assert.equal(report.members[0].correct, 1);
+  assert.equal(report.members[0].huntPoints, 1);
+  assert.equal(report.members[0].pendingHuntPoints, 1);
+  assert.deepEqual(
+    report.members[0].onlineExams.map((e) => e.score),
+    [8.5],
+  );
+  assert.deepEqual(
+    studyRangeReport(f.db, "class-demo", "unknown", "2026-10-19", "2026-10-19")
+      .members,
+    [],
+  );
+  const response = await f.request(
+    path + "?from=2026-10-19&to=2026-10-19",
+    f.teacher,
+  );
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.data.report, report);
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/study-statistics?from=2026-10-19&to=2026-10-19",
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  for (const query of [
+    "from=2026-10-20&to=2026-10-19",
+    "from=2026-10-19",
+    "from=2026-10-19&to=2026-10-21",
+    "from=2026-02-30&to=2026-10-19",
+    "from=2026-10-19&from=2026-10-18&to=2026-10-19",
+  ])
+    assert.equal(
+      (await f.request(path + "?" + query, f.teacher)).status,
+      400,
+      query,
+    );
+});
 
 test("class statistics sum current members, include archived class history and exclude other classes and former members", async (t) => {
   const f = await fixture(t);

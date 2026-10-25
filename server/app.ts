@@ -68,6 +68,7 @@ import {
   startStudyHistory,
   studentStudyStatistics,
   classroomStudyStatistics,
+  studyRangeReport,
 } from "./study-history.js";
 import {
   studyDate,
@@ -972,6 +973,31 @@ export function createApp(
       })),
     );
   });
+  function rangeReport(req: AppRequest, classId: string, studentId?: string) {
+    if (req.query.from === undefined && req.query.to === undefined) return {};
+    const { from, to } = req.query;
+    if (
+      typeof from !== "string" ||
+      typeof to !== "string" ||
+      !validStudyDate(from) ||
+      !validStudyDate(to) ||
+      from > to ||
+      to > studyDate(now())
+    )
+      fail(
+        400,
+        "Chọn khoảng từ ngày đến ngày hợp lệ, không vượt ngày hiện tại.",
+      );
+    return {
+      report: studyRangeReport(
+        db,
+        classId,
+        studentId,
+        from as string,
+        to as string,
+      ),
+    };
+  }
   app.get(
     "/api/classrooms/:id/students/:studentId/study-statistics",
     (req: AppRequest, res) => {
@@ -997,15 +1023,16 @@ export function createApp(
         date > studyDate(now())
       )
         fail(400, "Ngày thống kê không hợp lệ.");
-      res.json(
-        studentStudyStatistics(
+      res.json({
+        ...studentStudyStatistics(
           db,
           classId,
           studentId,
           period as StudyPeriod,
           date,
         ),
-      );
+        ...rangeReport(req, classId, studentId),
+      });
     },
   );
   app.get("/api/classrooms/:id/study-statistics", (req: AppRequest, res) => {
@@ -1022,9 +1049,10 @@ export function createApp(
       date > studyDate(now())
     )
       fail(400, "Ngày thống kê không hợp lệ.");
-    res.json(
-      classroomStudyStatistics(db, classId, period as StudyPeriod, date),
-    );
+    res.json({
+      ...classroomStudyStatistics(db, classId, period as StudyPeriod, date),
+      ...rangeReport(req, classId),
+    });
   });
   app.get("/api/classrooms/:id/weekly-practice", (req: AppRequest, res) => {
     teacher(req);
@@ -1691,6 +1719,7 @@ export function createApp(
       for (const run of examRuns) {
         const questions = JSON.parse(run.questions) as (AnswerQuestion & {
           id: string;
+          gradingVersion?: 2;
         })[];
         const answers = JSON.parse(run.answers) as Record<
           string,
@@ -1700,7 +1729,7 @@ export function createApp(
           const selected = answers[question.id];
           if (
             answerComplete(question, selected) &&
-            !answerCorrect(question, selected)
+            !answerCorrect(question, selected, question.gradingVersion === 2)
           )
             addWrong(
               question.id,

@@ -4,6 +4,7 @@ import {
   type QuestionAnswer,
 } from "../shared/question-types";
 import "./answer-fields.css";
+import { QuestionText } from "./QuestionText";
 export function AnswerFields({
   question,
   value,
@@ -37,6 +38,7 @@ export function AnswerFields({
           onChange={(e) => onChange(e.target.value)}
           autoComplete="off"
         />
+        <small>Có thể nhập số hoặc số kèm đúng đơn vị đề yêu cầu.</small>
         {result?.correctAnswer && !result.correct && (
           <small>Đáp án: {result.correctAnswer}</small>
         )}
@@ -52,7 +54,7 @@ export function AnswerFields({
         {question.choices.map((statement, i) => (
           <fieldset key={i} disabled={disabled}>
             <legend>
-              {"abcd"[i]}. {statement}
+              {"abcd"[i]}. <QuestionText>{statement}</QuestionText>
             </legend>
             <div>
               {[
@@ -96,7 +98,9 @@ export function AnswerFields({
           aria-pressed={value === i}
         >
           <span className="choice-letter">{"ABCD"[i]}</span>
-          <span>{choice}</span>
+          <span>
+            <QuestionText>{choice}</QuestionText>
+          </span>
         </button>
       ))}
     </div>

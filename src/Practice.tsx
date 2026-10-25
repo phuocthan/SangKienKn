@@ -1,3 +1,4 @@
+import { QuestionText } from "./QuestionText";
 import {
   DEFAULT_SESSION_POLICY,
   type SessionPolicy,
@@ -663,7 +664,9 @@ export function Practice({
         <div className="progress-track">
           <span style={{ width: `${(index / questions.length) * 100}%` }} />
         </div>
-        <h2>{q.text}</h2>
+        <h2>
+          <QuestionText>{q.text}</QuestionText>
+        </h2>
         <AnswerFields
           question={q}
           value={selected}
@@ -700,9 +703,11 @@ export function Practice({
               </strong>
             </div>
             <p>
-              {result.correct
-                ? result.explanation
-                : "Hãy xem lại kiến thức và tự làm lại câu này."}
+              <QuestionText>
+                {result.correct
+                  ? result.explanation
+                  : "Hãy xem lại kiến thức và tự làm lại câu này."}
+              </QuestionText>
             </p>
             {!result.correct && (
               <small>

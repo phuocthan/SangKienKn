@@ -21,9 +21,7 @@ export function parseWordFile(data: Uint8Array) {
   if (
     ["drawing", "pict", "object", "altChunk", "txbxContent"].some(
       (tag) => body.getElementsByTagNameNS(wordNamespace, tag).length,
-    ) ||
-    body.getElementsByTagNameNS(mathNamespace, "oMath").length ||
-    body.getElementsByTagNameNS(mathNamespace, "oMathPara").length
+    )
   )
     throw new Error(
       "File có hình ảnh, công thức hoặc nội dung nhúng. Mẫu nhập hiện hỗ trợ văn bản; hãy chuyển nội dung cần dùng thành chữ trước khi nhập.",
@@ -37,12 +35,67 @@ export function parseWordFile(data: Uint8Array) {
       "File còn Track Changes. Hãy chấp nhận hoặc từ chối các chỉnh sửa trong Word trước khi nhập.",
     );
   function text(node: Element): string {
+    const children = () =>
+      Array.from(node.childNodes)
+        .filter((child) => child.nodeType === 1)
+        .map((child) => text(child as Element))
+        .join("");
+    if (node.namespaceURI === mathNamespace) {
+      if (node.localName === "t") return node.textContent ?? "";
+      if (["sSup", "sSub", "sSubSup"].includes(node.localName)) {
+        const part = (name: string) => {
+          const child = Array.from(node.childNodes).find(
+            (child) =>
+              child.nodeType === 1 && (child as Element).localName === name,
+          );
+          return child ? text(child as Element) : "";
+        };
+        const sub = part("sub"),
+          sup = part("sup");
+        return part("e") + (sub ? `_{${sub}}` : "") + (sup ? `^{${sup}}` : "");
+      }
+      if (
+        [
+          "f",
+          "rad",
+          "nary",
+          "m",
+          "limLow",
+          "limUpp",
+          "d",
+          "eqArr",
+          "func",
+          "acc",
+          "bar",
+          "groupChr",
+          "sPre",
+        ].includes(node.localName)
+      )
+        throw new Error(
+          "Công thức Word này chưa được hỗ trợ. Hiện đọc được chỉ số trên/dưới; hãy đổi công thức phức tạp sang văn bản trước khi nhập.",
+        );
+      if (node.localName.endsWith("Pr")) return "";
+    }
     if (node.namespaceURI === wordNamespace) {
       if (node.localName === "t") return node.textContent ?? "";
       if (node.localName === "br" || node.localName === "cr") return "\n";
       if (node.localName === "tab") return " ";
+      if (node.localName === "rPr") return "";
+      if (node.localName === "r") {
+        const value = children();
+        const align = node.getElementsByTagNameNS(
+          wordNamespace,
+          "vertAlign",
+        )[0];
+        const kind = align?.getAttributeNS(wordNamespace, "val");
+        return kind === "superscript"
+          ? `^{${value}}`
+          : kind === "subscript"
+            ? `_{${value}}`
+            : value;
+      }
     }
-    return Array.from(node.children).map(text).join("");
+    return children();
   }
   const paragraphs = Array.from(
     body.getElementsByTagNameNS(wordNamespace, "p"),

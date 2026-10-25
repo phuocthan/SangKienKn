@@ -1,6 +1,7 @@
 import { DEFAULT_SESSION_POLICY } from "../shared/session-policy";
 import { AnswerFields } from "./AnswerFields";
 import { answerComplete, type QuestionAnswer } from "../shared/question-types";
+import { QuestionText } from "./QuestionText";
 import {
   useCallback,
   useEffect,
@@ -1721,7 +1722,9 @@ function ExamRoom({
           <span className="eyebrow">
             CÂU {index + 1}/{run.questions.length} · {q.chapterTitle}
           </span>
-          <h2>{q.text}</h2>
+          <h2>
+            <QuestionText>{q.text}</QuestionText>
+          </h2>
           <AnswerFields
             question={q}
             value={answers[q.id]}
@@ -1734,7 +1737,9 @@ function ExamRoom({
           {run.results && (
             <div className="explanation" role="status">
               <strong>{questionResult?.correct ? "Đúng" : "Cần ôn lại"}</strong>
-              <p>{questionResult?.explanation}</p>
+              <p>
+                <QuestionText>{questionResult?.explanation}</QuestionText>
+              </p>
             </div>
           )}
           <div className="learning-actions">

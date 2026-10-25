@@ -36,6 +36,7 @@ type Context = {
   classroom: (req: AppRequest, id: string) => Row;
 };
 type Snapshot = {
+  gradingVersion?: 2;
   kind?: QuestionKind;
   correctAnswer?: string;
   topic?: string;
@@ -58,6 +59,7 @@ const shuffle = <T>(values: T[]) => {
   return result;
 };
 const cleanQuestion = ({
+  gradingVersion: _gradingVersion,
   correctIndex: _c,
   correctAnswer: _a,
   explanation: _e,
@@ -132,7 +134,7 @@ function releaseCorrections(db: DatabaseSync, run: Row, timestamp: number) {
   const questions = json<Snapshot[]>(run.questions),
     answers = json<Record<string, QuestionAnswer>>(run.answers);
   for (const q of questions)
-    if (!answerCorrect(q, answers[q.id]))
+    if (!answerCorrect(q, answers[q.id], q.gradingVersion === 2))
       db.prepare(
         `INSERT INTO corrections VALUES(?,?,0,?) ON CONFLICT(student_id,question_id)
       DO UPDATE SET resolved=0,updated_at=excluded.updated_at`,
@@ -150,7 +152,7 @@ function finalize(
   const questions = json<Snapshot[]>(run.questions),
     answers = json<Record<string, QuestionAnswer>>(run.answers);
   const correct = questions.filter((q) =>
-    answerCorrect(q, answers[q.id]),
+    answerCorrect(q, answers[q.id], q.gradingVersion === 2),
   ).length;
   const score = questions.length
     ? Math.round((correct / questions.length) * 100) / 10
@@ -570,7 +572,7 @@ export function registerLearningRoutes(
         ? {
             results: questions.map((q) => ({
               questionId: q.id,
-              correct: answerCorrect(q, answers[q.id]),
+              correct: answerCorrect(q, answers[q.id], q.gradingVersion === 2),
               correctIndex: q.correctIndex,
               correctAnswer: q.correctAnswer,
               explanation: q.explanation,
@@ -866,7 +868,9 @@ export function registerLearningRoutes(
           : "Chưa tham gia",
         s.score ?? "",
         s.runId
-          ? questions.filter((q) => answerCorrect(q, answers[q.id])).length
+          ? questions.filter((q) =>
+              answerCorrect(q, answers[q.id], q.gradingVersion === 2),
+            ).length
           : "",
         s.runId ? questions.length : Number(exam.question_count),
         time(s.started_at),
@@ -2095,7 +2099,7 @@ export function registerLearningRoutes(
         examId,
         examId ? "official" : "hunt",
         title,
-        JSON.stringify(questions),
+        JSON.stringify(questions.map((q) => ({ ...q, gradingVersion: 2 }))),
         now(),
         deadline,
         tabLimit,

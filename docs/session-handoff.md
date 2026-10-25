@@ -1,5 +1,19 @@
 # Bàn giao session GreenEdu
 
+## Định dạng câu, thống kê khoảng ngày và rà điểm — 25/10/2026
+
+Yêu cầu mới chỉ trong ba phạm vi: mũ trên/dưới của bài tập/đề kiểm tra; xuất thống kê Từ ngày–Đến ngày gồm thời gian, tỉ lệ đúng, điểm cộng săn điểm và điểm từng bài online; rà báo cáo làm đúng bị chấm sai. Không sửa giao diện chung hoặc dữ liệu thật. Người dùng chọn **chỉ lập danh sách để duyệt trước**, chưa cho chấm lại.
+
+Đã đăng nhập lại CLI và truy vấn Railway bằng SQLite `readOnly:true`. Hai đợt gần nhất lớp11/2 và11/6 có67bài/19câu mỗi bài,1165câu có đáp án/108câu bỏ trống. Điểm lưu khớp bộ chấm cũ; không có khóa đáp án khác nhau theo mã hoặc theo nội dung giữa các em. Nguyên nhân cụ thể: key số thuần so với trả lời có đúng đơn vị. Dự kiến25câu của7học sinh được điều chỉnh; báo cáo riêng (có tên/điểm/mã lượt) tại `.local/exam-audit-20261025/danh-sach-de-nghi-dieu-chinh.md`, CSV và review.json cùng thư mục, bị Git ignore. **Chưa thay điểm/đáp án/sổ tay hoặc snapshot production.** Câu đúng/sai “a=-500.x … ω=10rad/s” có mâu thuẫn đề/lời giải; chưa tự đổi key hay đề nghị đổi điểm câu đó.
+
+Mã local: đọc direct Word vertAlign và Equation chỉ số đơn giản thành `^{…}`/`_{…}`, render React sup/sub an toàn trong luyện/ôn/phòng thi và preview nhập; không diễn giải HTML. Equation phức tạp vẫn báo chưa hỗ trợ. Dữ liệu cũ đã phẳng `x2/π2` không thể khôi phục chắc chắn; cần file Word gốc để đối chiếu trước khi cập nhật. Chấm ngắn nhận thêm đúng đơn vị được đề yêu cầu (giữ mJ/MJ phân biệt), dấu phẩy/chấm, không bỏ suffix tùy ý/không đổi đơn vị. Lượt thi mới lưu `gradingVersion:2` trong snapshot, lượt cũ không có marker tiếp tục dùng cách chấm cũ ở phòng thi/xuất/sổ tay cho tới khi giáo viên duyệt chấm lại; không migration.
+
+Thống kê thêm from/to vào hai endpoint hiện có, xác thực khoảng ngày theo UTC+7. Tính thời gian từ daily history, tỉ lệ lượt đúng trên attempts luyện/ôn/sửa sai, điểm săn điểm theo ngày đạt thưởng tách đã duyệt/chờ duyệt, từng điểm online theo ngày nộp. CSV cùng snapshot bảng khoảng ngày, có BOM/quote/chống công thức và tên lớp/khoảng ngày; vẫn giữ xem ngày/tuần/tháng và thông tin thiếu lịch sử. Backend cũ khóa xuất mới và báo cần cập nhật Railway.
+
+QA mới: build/typecheck đạt tại `.local/question-fixes-20261025/build-final`;42/42 backend liên quan đạt;12/12 E2E desktop/mobile đạt (52,3giây), gồm CSV khớp từng ô/khoảng ngày/cá nhân–cả lớp/BOM/formula/empty/lỗi/refresh/320–1440px, mũ và đáp án có đơn vị. Lượt đầu lỗi quyền sandbox EACCES localhost, chạy lại ngoài sandbox bằng DB riêng đạt; E2E đầu vướng payload thiếu chapterIds/selector trùng của test, đã sửa harness. Không báo các lượt lỗi thành QA đạt. Xác nhận ảnh cận cuối2/2ca đạt (10,6giây), không cộng trùng thành14ca; đã xem ảnh câu hỏi mũ trên/dưới và popup ở390px, ảnh/log tại `.local/question-fixes-20261025/visual-confirmation`.
+
+**Chưa commit/push/deploy.** Fetch phát hiện local main e0648c2 chậm origin/main6528493 hai commit (sao chép lớp/cộng giờ thi/slide); Railway hiện SUCCESS deployment6d119f2c-f5da-447e-874f-2e2cd3d919d9 đúng6528493, không còn trạng thái cũ22/10. Đã đọc diff remote, không pull/checkout hoặc đổi các file ngoài phạm vi người dùng. Trước phát hành phải ghép bản sửa với origin/main mới nhất và kiểm thử phần giao nhau, không deploy nguyên snapshot local cũ làm mất tính năng remote. Không restart/đổi cấu hình/volume Railway.
+
 ## Push lại và thử phát hành — 22/10/2026
 
 Theo yêu cầu “deploy lại lên git”, fetch xác nhận main/origin main cùnga683643. Bản sửa CSV đã ở Git; lượt này lưu thêm quyết định bỏ Tailwind/giữ giao diện hiện tại và kết quả Railway chặn build ngày21/10, rồi thử phát hành lại. Không đưa preview đã hủy hoặc .local/database/secrets lên Git. Không đổi runtime từ bản CSV đã kiểm thử; không chạy lại hoặc báo kết quả test cũ thành QA mới. Trước push, Railway vẫn chạy930fdf7; cần xác minh deployment mới và bundle trước khi kết luận đã deploy.

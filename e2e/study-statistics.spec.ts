@@ -35,21 +35,19 @@ test("teacher opens per-student day/week/month statistics, old time is preserved
   await expect(
     dialog.getByText("Chưa có lịch sử", { exact: true }).first(),
   ).toBeVisible();
-  await expect(dialog.locator(".study-statistics-note")).toContainText(
-    "4 giờ 0 phút",
-  );
-  await expect(dialog.locator(".study-statistics-note")).toContainText(
-    "Số liệu tính từ ngày triển khai, kể cả kỳ đầu chưa trọn.",
-  );
+  await expect(
+    dialog.locator(".workspace-help .study-statistics-note"),
+  ).toContainText("4 giờ 0 phút");
+  await expect(
+    dialog.locator(".workspace-help .study-statistics-note"),
+  ).toContainText("Số liệu tính từ ngày triển khai, kể cả kỳ đầu chưa trọn.");
   await dialog.getByText("Cách tính thời gian", { exact: true }).click();
   const pendingCsv = page.waitForEvent("download");
   await dialog.getByRole("button", { name: "Xuất CSV", exact: true }).click();
   const csv = await readFile((await (await pendingCsv).path())!, "utf8");
   expect(csv.charCodeAt(0)).toBe(0xfeff);
-  const lifetime = await dialog
-    .locator(".study-statistics-note strong")
-    .innerText();
-  expect(csv).toContain(`"Tổng tích lũy","${lifetime}"`);
+  expect(csv).toContain('"Thời gian học","Tỉ lệ đúng"');
+  expect(csv).toContain('"Điểm bài kiểm tra online"');
   expect(csv).toContain('"Học sinh","Học sinh ôn thi"');
   await dialog.getByRole("button", { name: "Tuần", exact: true }).click();
   await expect(table.getByRole("row")).toHaveCount(9);
@@ -127,13 +125,13 @@ test("toolbar statistics includes the full roster despite search and CSV follows
   };
   const all = await downloadCsv();
   expect(all.filename).toContain(
-    `greenedu-thong-ke-thong-ke-${info.project.name}-ca-lop-day-`,
+    `greenedu-thong-ke-thong-ke-${info.project.name}-ca-lop-`,
   );
   const expectVisibleTablesInCsv = async (text: string) => {
     // Compare downloaded cells against the actual displayed tables, including
     // ordering, missing history and human-readable time/date formatting.
     const tables = await dialog
-      .getByRole("table")
+      .getByRole("table", { name: "Thống kê theo khoảng ngày", exact: true })
       .evaluateAll((tables) =>
         tables.map((table) =>
           Array.from(table.querySelectorAll("tr")).map((row) =>
@@ -152,10 +150,6 @@ test("toolbar statistics includes the full roster despite search and CSV follows
         .join(",");
     for (const table of tables)
       expect(text).toContain(table.map(csvRow).join("\r\n"));
-    const summary = await dialog
-      .locator(".study-statistics-summary dd")
-      .allTextContents();
-    expect(text).toContain(csvRow(summary));
     expect(text).not.toContain("Mã học sinh");
     expect(text).not.toContain("(giây)");
   };
@@ -183,6 +177,8 @@ test("toolbar statistics includes the full roster despite search and CSV follows
   await select.selectOption(students[1].id);
   await dialog.getByRole("button", { name: "Tuần", exact: true }).click();
   await dialog.getByLabel("Ngày xem", { exact: true }).fill("2026-01-01");
+  await dialog.getByLabel("Từ ngày", { exact: true }).fill("2026-01-01");
+  await dialog.getByLabel("Đến ngày", { exact: true }).fill("2026-01-01");
   await expect(
     dialog
       .getByRole("table", { name: "Thời gian luyện tập theo kỳ", exact: true })
@@ -190,11 +186,13 @@ test("toolbar statistics includes the full roster despite search and CSV follows
   ).toHaveCount(9);
   const single = await downloadCsv();
   expect(single.filename).toBe(
-    `greenedu-thong-ke-thong-ke-${info.project.name}-${students[1].id}-week-2026-01-01.csv`,
+    `greenedu-thong-ke-thong-ke-${info.project.name}-${students[1].id}-2026-01-01-den-2026-01-01.csv`,
   );
   await expectVisibleTablesInCsv(single.text);
   expect(single.text).not.toContain("Thống kê từng học sinh");
-  expect(single.text).toContain('"Ngày xem","01/01/2026"');
+  expect(single.text).toContain(
+    '"Từ ngày","01/01/2026","Đến ngày","01/01/2026"',
+  );
   expect(single.text).not.toContain(students[0].id);
   expect(single.text).toContain('"Chưa có lịch sử"');
   await page.unroute(endpoint);
