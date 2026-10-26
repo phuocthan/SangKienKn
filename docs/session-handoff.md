@@ -6,6 +6,8 @@ Người dùng yêu cầu “sau khi xong deploy git”. Fetch xác nhận main/
 
 Lượt này cho phép commit/push và xác minh Railway autobuild, không cho phép thay điểm/bài cũ hoặc chạy dữ liệu thử trên production. Chỉ xác nhận đã triển khai sau khi kiểm tra đúng SHA deployment, health/capability, nguồn chạy và bundle production. Các dòng chưa push/deploy ở mục phát triển bên dưới là trạng thái trước yêu cầu phát hành này.
 
+Kết quả: đã push `30c8b536b12a23462443f71e6d766e23222df484`, origin/main khớp. Railway deployment `5a3b7dc6-bcf9-411e-9aca-9fe38cae35f7` **SUCCESS**, xác minh26/10/2026 19:15UTC+7. Tám file source production khớp SHA-256 nội dung commit; health HTTP200/ok=true/demo=false/quickLogin=false/notebookQuestionEditing=true. Entry `/assets/index-BWx0RyYx.js`, chunks Learning-Bzw24wCQ/QuestionBank-KZMT_EuM có tìm kiếm/notebook-edit/huntPaperSlots. Hai cấu hình đề cũ được giữ ở slot1, không mismatch với settings. Hash toàn bộ id/questions/answers/score/submitted_at của78bài đã nộp trước triển khai không đổi. Không đăng nhập/ghi bài thử hoặc sửa điểm production. Log/API/source/database kiểm tra chỉ đọc, báo cáo `.local/hunt-20261026/release-verification.json`, mốc trước deploy release-baseline.json. Ghi chú xác nhận sau phát hành lưu local; không tạo đợt deploy tiếp chỉ để thay tài liệu.
+
 ## Tìm câu, ba đề săn thưởng và sửa nguồn từ sổ tay — 26/10/2026
 
 Yêu cầu mới có đúng ba phạm vi: tìm kiếm ngân hàng; thêm Đề2/3 cho mỗi chương để không dùng một đề lấy3điểm; sửa câu ngay từ sổ tay giáo viên. Người dùng đã chốt qua câu hỏi: **Dùng bản sửa cho lượt mới; giữ bài và điểm cũ**. Không liên quan/chưa cho phép xử lý lại7bài trong audit25/10.

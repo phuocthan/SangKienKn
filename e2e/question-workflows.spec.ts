@@ -125,6 +125,12 @@ test("bank searches without accents and edits the shared source directly from a 
   );
   await text.fill("Dao động với a_{max} và x^{2} đã sửa");
   await edit
+    .getByRole("combobox", { name: "Đáp án đúng", exact: true })
+    .selectOption("2");
+  await edit
+    .getByLabel("Lời giải", { exact: true })
+    .fill("Lời giải mới chọn C.");
+  await edit
     .getByRole("button", { name: "Lưu câu nguồn", exact: true })
     .click();
   await expect(edit.getByRole("alert")).toContainText("Lỗi thử lại");
@@ -134,11 +140,34 @@ test("bank searches without accents and edits the shared source directly from a 
     .getByRole("button", { name: "Lưu câu nguồn", exact: true })
     .click();
   await expect(notebook).toContainText("Đã lưu phiên bản nguồn 2");
-  await expect(notebook).toContainText("Dao động tại vị trí cân bằng");
+  const card = notebook.locator(".question-card");
+  await expect(card.getByRole("heading")).toHaveText(
+    "Dao động với amax và x2 đã sửa",
+  );
+  await expect(card.locator(":scope > .choices .correct-choice")).toHaveText(
+    "CC",
+  );
+  await expect(
+    card.getByText("Lời giải mới chọn C.", { exact: true }),
+  ).toBeVisible();
+  await expect(card.locator(".notebook-wrong-history")).toContainText("B. B");
+  await card
+    .getByText("Câu và đáp án lúc làm bài · Phiên bản 1", { exact: true })
+    .click();
+  await expect(card.locator("details")).toContainText(
+    "Dao động tại vị trí cân bằng",
+  );
+  await expect(card.locator("details .correct-choice")).toHaveText("Avmax");
+  await notebook.screenshot({
+    path: info.outputPath("notebook-updated-answer.png"),
+  });
   await notebook
     .getByRole("button", { name: "Sửa câu hỏi", exact: true })
     .click();
   await expect(text).toHaveValue("Dao động với a_{max} và x^{2} đã sửa");
+  await expect(
+    edit.getByRole("combobox", { name: "Đáp án đúng", exact: true }),
+  ).toHaveValue("2");
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(
@@ -153,6 +182,21 @@ test("bank searches without accents and edits the shared source directly from a 
   });
   await edit.screenshot({ path: info.outputPath("notebook-edit.png") });
   await edit.getByRole("button", { name: "Hủy", exact: true }).click();
+  await notebook.getByRole("button", { name: "Đóng", exact: true }).click();
+  await page.reload();
+  await page.getByLabel("Chọn lớp học").selectOption(f.classroom.id);
+  await navigateTo(page, { name: "Quản lý lớp", exact: true });
+  await page
+    .getByRole("row")
+    .filter({ hasText: "learning@greenedu.test" })
+    .getByRole("button", { name: "Xem sổ tay", exact: true })
+    .click();
+  await expect(card.locator(":scope > .choices .correct-choice")).toHaveText(
+    "CC",
+  );
+  await expect(card.getByRole("heading")).toHaveText(
+    "Dao động với amax và x2 đã sửa",
+  );
   await notebook.getByRole("button", { name: "Đóng", exact: true }).click();
   await navigateTo(page, { name: "Ngân hàng câu hỏi", exact: true });
   await search.fill("da sua");

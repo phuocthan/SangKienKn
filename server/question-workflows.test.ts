@@ -359,6 +359,17 @@ test("notebook editing resolves latest source, updates reusable papers for every
     notebook.find((item: any) => item.id === q.id).canEditSource,
     true,
   );
+  const item = notebook.find((item: any) => item.id === q.id);
+  assert.equal(item.text, q.text);
+  assert.equal(item.correctIndex, source.question.correctIndex);
+  assert.equal(item.sourceQuestion.id, revised.id);
+  assert.equal(item.sourceQuestion.text, content.text);
+  assert.equal(item.sourceQuestion.correctIndex, 2);
+  assert.equal(item.wrongAnswers[0].selected, 1);
+  assert.equal(
+    item.wrongAnswers[0].question.correctIndex,
+    source.question.correctIndex,
+  );
   f.db.exec(
     "CREATE TRIGGER reject_source_update BEFORE UPDATE ON chapter_hunt_settings BEGIN SELECT RAISE(ABORT,'expected source rollback'); END",
   );
@@ -392,6 +403,88 @@ test("notebook editing resolves latest source, updates reusable papers for every
       .get(id),
     frozen,
   );
+});
+
+test("notebook shows the latest answer for all question kinds without rewriting learning history", async (t) => {
+  const f = await fixture(t);
+  for (const sample of [
+    {
+      kind: "multiple-choice",
+      choices: ["A", "B", "C", "D"],
+      correctIndex: 0,
+      selected: 1,
+      revision: { correctIndex: 2 },
+    },
+    {
+      kind: "true-false",
+      choices: ["Ý một", "Ý hai"],
+      correctAnswer: "10",
+      selected: "01",
+      revision: { correctAnswer: "11" },
+    },
+    {
+      kind: "short-answer",
+      choices: [],
+      correctAnswer: "2",
+      selected: "3",
+      revision: { correctAnswer: "4" },
+    },
+  ]) {
+    const content = { ...question(1), ...sample, text: `Câu ${sample.kind}` };
+    const created = await f.post("/chapters/chapter-1/questions", content);
+    await f.post(
+      "/attempts",
+      {
+        questionId: created.id,
+        selected: sample.selected,
+        mode: "practice",
+        requestId: randomUUID(),
+      },
+      f.student,
+    );
+    const original = (
+      await f.request(
+        `/questions/${created.id}/edit-source`,
+        undefined,
+        f.teacher,
+      )
+    ).data.question;
+    const history = {
+      attempts: f.db.prepare("SELECT * FROM attempts").all(),
+      corrections: f.db.prepare("SELECT * FROM corrections").all(),
+    };
+    const revised = await f.post(`/questions/${created.id}/notebook-edit`, {
+      ...original,
+      ...sample.revision,
+      text: `Bản mới ${sample.kind}`,
+      explanation: "Lời giải đã cập nhật",
+      expectedId: created.id,
+    });
+    const rows = (
+      await f.request(
+        "/classrooms/class-demo/students/student-demo/notebook",
+        undefined,
+        f.teacher,
+      )
+    ).data;
+    const item = rows.find((q: any) => q.id === created.id);
+    assert.equal(item.text, original.text);
+    assert.equal(item.correctIndex, original.correctIndex);
+    assert.equal(item.correctAnswer, original.correctAnswer);
+    assert.equal(item.sourceQuestion.id, revised.id);
+    assert.equal(item.sourceQuestion.text, `Bản mới ${sample.kind}`);
+    assert.equal(item.sourceQuestion.explanation, "Lời giải đã cập nhật");
+    for (const [key, value] of Object.entries(sample.revision))
+      assert.equal(item.sourceQuestion[key], value);
+    assert.equal(item.wrongAnswers[0].selected, sample.selected);
+    assert.deepEqual(
+      {
+        attempts: f.db.prepare("SELECT * FROM attempts").all(),
+        corrections: f.db.prepare("SELECT * FROM corrections").all(),
+      },
+      history,
+    );
+  }
 });
 
 test("editing a bank source from notebook updates the current bank version", async (t) => {

@@ -4,6 +4,8 @@
 
 Theo yêu cầu deploy Git, chốt bản tìm kiếm/3đề săn thưởng/sửa câu nguồn từ sổ tay lên main. Fetch không có thay đổi remote ngoài2d78856; QA197backend/12E2E là kết quả của lượt phát triển đã đối chiếu, không chạy lại để báo thành lượt mới. Chỉ gồm source/test/tài liệu liên quan, không .local/database/secrets/dữ liệu học sinh. Cần xác minh Railway đúng SHA và tài nguyên production trước khi kết luận đã triển khai; ghi chú chưa push/deploy bên dưới thuộc trước yêu cầu này.
 
+Đã phát hành: origin/main `30c8b536b12a23462443f71e6d766e23222df484`; Railway `5a3b7dc6-bcf9-411e-9aca-9fe38cae35f7` SUCCESS đúng commit, xác minh26/10 19:15UTC+7. Source8file và bundle mới khớp, health200/production/không quickLogin, capability notebookQuestionEditing có hiệu lực. Migration giữ2đề cũ ở slot1;78bài đã nộp có nội dung/đáp án/điểm không đổi theo hash trước-sau. Báo cáo `.local/hunt-20261026/release-verification.json`; không ghi dữ liệu thử hoặc điều chỉnh điểm thật. Ghi nhận xác minh này lưu local, không tự deploy thêm chỉ để đổi tài liệu.
+
 ## Hiện hành: tìm câu, ba đề săn thưởng, sửa từ sổ tay — 26/10/2026
 
 Mã local có ô tìm kiếm ngân hàng theo bộ lọc chương/bài, không phân biệt dấu/hoa-thường; chọn hàng loạt theo kết quả tìm. Mỗi chương lưu3đề săn thưởng riêng cho vé cấp3/4/5, chặn cùng nội dung dù đổi tên/thứ tự và không tiêu vé khi thiếu đề; đề cũ migrate vào1, giữ điểm/vé/lượt cũ. Giáo viên có Sửa câu hỏi ngay trong sổ tay, luôn mở nguồn mới nhất, cập nhật nguồn tái sử dụng cho mọi học sinh dùng chung câu, giữ câu tải riêng ở trạng thái riêng.

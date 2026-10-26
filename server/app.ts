@@ -1848,6 +1848,7 @@ export function createApp(
       res.json(
         items.map((q) => ({
           ...questionView(q, req),
+          sourceQuestion: questionView(latestQuestion(q), req),
           chapterTitle: q.chapterTitle,
           resolved: !!q.resolved,
           updatedAt: q.updatedAt,

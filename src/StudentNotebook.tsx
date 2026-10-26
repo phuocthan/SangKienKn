@@ -14,6 +14,7 @@ import "./answer-fields.css";
 import type { Classroom, Question, Student } from "./types";
 type Item = Question & {
   canEditSource?: boolean;
+  sourceQuestion?: Question;
   chapterTitle: string;
   resolved: boolean;
   updatedAt: number;
@@ -125,63 +126,93 @@ export function StudentNotebook({
       ) : !visible.length ? (
         <Empty title="Không có câu hỏi" text="" />
       ) : (
-        visible.map((q) => (
-          <article className="card question-card" key={q.id}>
-            <span className="eyebrow">
-              {q.chapterTitle} · {q.resolved ? "Đã khắc phục" : "Cần sửa"}
-            </span>
-            <h3>
-              <QuestionText>{q.text}</QuestionText>
-            </h3>
-            {q.canEditSource && (
-              <button
-                type="button"
-                className="button outline small"
-                onClick={() => setEditing(q)}
-              >
-                <Pencil size={16} /> Sửa câu hỏi
-              </button>
-            )}
-            {!!q.wrongAnswers?.length && (
-              <div className="notebook-wrong-history">
-                <strong>Câu trả lời sai trước đó</strong>
-                <ul>
-                  {q.wrongAnswers.map((entry, index) => (
-                    <li key={`${entry.at}-${index}`}>
-                      <small>
-                        {entry.source} ·{" "}
-                        {new Date(entry.at).toLocaleString("vi-VN")}
-                      </small>
-                      <span>
-                        {wrongAnswerText(entry.question, entry.selected)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <AnswerFields
-              question={q}
-              value={
-                questionKind(q) === "multiple-choice"
-                  ? q.correctIndex
-                  : q.correctAnswer
-              }
-              result={{
-                correct: true,
-                correctIndex: q.correctIndex,
-                correctAnswer: q.correctAnswer,
-              }}
-              disabled
-              onChange={() => {}}
-            />
-            <p>
-              <QuestionText>{q.explanation}</QuestionText>
-            </p>
-          </article>
-        ))
+        visible.map((q) => {
+          const source = q.sourceQuestion ?? q;
+          const updated = source.id !== q.id;
+          return (
+            <article className="card question-card" key={q.id}>
+              <span className="eyebrow">
+                {q.chapterTitle} · {q.resolved ? "Đã khắc phục" : "Cần sửa"}
+              </span>
+              <h3>
+                <QuestionText>{source.text}</QuestionText>
+              </h3>
+              {updated && (
+                <p>
+                  Câu và đáp án hiện tại · Phiên bản {source.version}. Lịch sử
+                  trả lời bên dưới thuộc phiên bản {q.version}; điểm cũ giữ
+                  nguyên.
+                </p>
+              )}
+              {q.canEditSource && (
+                <button
+                  type="button"
+                  className="button outline small"
+                  onClick={() => setEditing(q)}
+                >
+                  <Pencil size={16} /> Sửa câu hỏi
+                </button>
+              )}
+              <NotebookAnswer question={source} />
+              {!!q.wrongAnswers?.length && (
+                <div className="notebook-wrong-history">
+                  <strong>Câu trả lời sai trước đó</strong>
+                  <ul>
+                    {q.wrongAnswers.map((entry, index) => (
+                      <li key={`${entry.at}-${index}`}>
+                        <small>
+                          {entry.source} ·{" "}
+                          {new Date(entry.at).toLocaleString("vi-VN")}
+                        </small>
+                        <span>
+                          {wrongAnswerText(entry.question, entry.selected)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {updated && (
+                <details>
+                  <summary>
+                    Câu và đáp án lúc làm bài · Phiên bản {q.version}
+                  </summary>
+                  <p>
+                    <QuestionText>{q.text}</QuestionText>
+                  </p>
+                  <NotebookAnswer question={q} />
+                </details>
+              )}
+            </article>
+          );
+        })
       )}
     </Modal>
+  );
+}
+
+function NotebookAnswer({ question }: { question: Question }) {
+  return (
+    <>
+      <AnswerFields
+        question={question}
+        value={
+          questionKind(question) === "multiple-choice"
+            ? question.correctIndex
+            : question.correctAnswer
+        }
+        result={{
+          correct: true,
+          correctIndex: question.correctIndex,
+          correctAnswer: question.correctAnswer,
+        }}
+        disabled
+        onChange={() => {}}
+      />
+      <p>
+        <QuestionText>{question.explanation}</QuestionText>
+      </p>
+    </>
   );
 }
 
