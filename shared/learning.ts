@@ -97,6 +97,11 @@ export type ExamRun = {
   revision: number;
 };
 export type LearningReward = {
+  sourceType?: "hunt" | "online" | "tree";
+  examId?: string;
+  rank?: number;
+  score?: number;
+  elapsedMs?: number;
   id: string;
   studentName: string;
   label: string;
@@ -105,6 +110,8 @@ export type LearningReward = {
   createdAt: number;
 };
 export type LearningOverview = {
+  rewardRules?: boolean;
+  huntMinimumScore?: number;
   huntTeacherControlled?: boolean;
   huntPaperSlots?: boolean;
   examDeletion?: boolean;

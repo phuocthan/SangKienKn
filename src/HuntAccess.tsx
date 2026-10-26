@@ -41,7 +41,7 @@ export function HuntAccess({
   );
   const [remove, setRemove] = useState(false);
   const [title, setTitle] = useState(
-    state.hunt?.title || `Săn thưởng · ${chapter.title}`,
+    (state.hunt?.title || `Săn thưởng · ${chapter.title}`).slice(0, 120),
   );
   const [wait, setWait] = useState(state.hunt?.preparationMinutes ?? 0);
   const [minutes, setMinutes] = useState(state.hunt?.durationMinutes ?? 20);

@@ -7,6 +7,35 @@ import { grantLearningMilestones } from "./learning.js";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { huntMinimumScore } from "./reward-rules.js";
+
+test("class reward setting migration defaults to eight and preserves history across reopen", (t) => {
+  const dir = mkdtempSync(join(tmpdir(), "greenedu-reward-rules-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, "reward.sqlite");
+  let db = openDatabase(path);
+  try {
+    seedDemo(db);
+    db.exec("DROP TABLE classroom_reward_settings");
+    const users = db.prepare("SELECT * FROM users ORDER BY id").all();
+    ensureLearningSchema(db);
+    ensureLearningSchema(db);
+    assert.equal(huntMinimumScore(db, "class-demo"), 8);
+    db.prepare(
+      "INSERT INTO classroom_reward_settings VALUES('class-demo',7.5,'teacher-demo',123)",
+    ).run();
+    db.close();
+    db = openDatabase(path);
+    assert.equal(huntMinimumScore(db, "class-demo"), 7.5);
+    assert.deepEqual(
+      db.prepare("SELECT * FROM users ORDER BY id").all(),
+      users,
+    );
+    assert.deepEqual(db.prepare("PRAGMA foreign_key_check").all(), []);
+  } finally {
+    db.close();
+  }
+});
 
 test("chapter exam permission migration preserves old settings and progress, defaults closed and persists on reopen", (t) => {
   const dir = mkdtempSync(join(tmpdir(), "greenedu-exam-access-"));

@@ -1,5 +1,10 @@
 import { creditExamTime } from "./exam-study-credit.js";
 import {
+  huntMinimumScore,
+  onlineRewardCandidates,
+  learningRewards,
+} from "./reward-rules.js";
+import {
   huntPapers,
   nextHuntPaper,
   hasUsedHuntPaper,
@@ -176,7 +181,8 @@ function finalize(
     creditExamTime(db, run, reason, timestamp);
     if (run.kind === "hunt") {
       releaseCorrections(db, run, timestamp);
-      if (score >= 8)
+      const minimumScore = huntMinimumScore(db, String(run.classroom_id));
+      if (score >= minimumScore)
         db.prepare(
           "INSERT OR IGNORE INTO learning_rewards(id,student_id,classroom_id,chapter_id,source,label,points,created_at) VALUES(?,?,?,?,?,?,1,?)",
         ).run(
@@ -185,7 +191,7 @@ function finalize(
           run.classroom_id,
           run.chapter_id,
           `exam:${run.id}`,
-          "Săn điểm đạt từ 8,0",
+          `Săn điểm đạt từ ${minimumScore.toLocaleString("vi-VN", { minimumFractionDigits: 1 })}`,
           timestamp,
         );
     }
@@ -677,6 +683,8 @@ export function registerLearningRoutes(
       examScheduling: true,
       examEditing: true,
       huntPaperSlots: true,
+      rewardRules: true,
+      huntMinimumScore: huntMinimumScore(db, String(c.id)),
       huntTeacherControlled: true,
       examProgressCredit: true,
       classManagement: true,
@@ -788,20 +796,12 @@ export function registerLearningRoutes(
           currentIndex: r.current_index,
           questionCount: json<unknown[]>(r.questions).length,
         })),
-      rewards: db
-        .prepare(
-          `SELECT r.*,u.name AS studentName FROM learning_rewards r JOIN users u ON u.id=r.student_id
-        WHERE r.classroom_id=?${own} ORDER BY r.created_at DESC LIMIT 500`,
-        )
-        .all(...args)
-        .map((r) => ({
-          id: r.id,
-          studentName: r.studentName,
-          label: r.label,
-          points: r.points,
-          status: r.status,
-          createdAt: r.created_at,
-        })),
+      rewards: learningRewards(
+        db,
+        String(c.id),
+        now(),
+        req.user!.role === "student" ? req.user!.id : undefined,
+      ),
     });
   });
   function onlineSession(req: AppRequest) {
@@ -933,6 +933,27 @@ export function registerLearningRoutes(
     res
       .type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
       .send(examResultsWorkbook(metadata, results));
+  });
+  app.post("/api/classrooms/:id/reward-settings", (req: AppRequest, res) => {
+    teacher(req);
+    const c = classroom(req, String(req.params.id));
+    const minimum = req.body?.huntMinimumScore;
+    if (
+      typeof minimum !== "number" ||
+      !Number.isFinite(minimum) ||
+      minimum < 0 ||
+      minimum > 10 ||
+      Math.abs(minimum * 10 - Math.round(minimum * 10)) > 1e-8
+    )
+      fail(
+        400,
+        "Điểm tối thiểu phải từ 0 đến 10, tối đa một chữ số thập phân.",
+      );
+    db.prepare(
+      `INSERT INTO classroom_reward_settings VALUES(?,?,?,?) ON CONFLICT(classroom_id) DO UPDATE SET
+      hunt_minimum_score=excluded.hunt_minimum_score,updated_by=excluded.updated_by,updated_at=excluded.updated_at`,
+    ).run(c.id, minimum, req.user!.id, now());
+    res.json({ ok: true, huntMinimumScore: minimum });
   });
   app.post("/api/classrooms/:id/level-settings", (req: AppRequest, res) => {
     teacher(req);
@@ -2348,11 +2369,41 @@ export function registerLearningRoutes(
     const r = db
       .prepare("SELECT * FROM learning_rewards WHERE id=?")
       .get(String(req.params.id));
-    if (!r) fail(404, "Không tìm thấy điểm thưởng.");
-    classroom(req, String(r.classroom_id));
     const status = req.body?.status;
     if (!["approved", "rejected"].includes(status))
       fail(400, "Chọn duyệt hoặc từ chối.");
+    if (!r && String(req.params.id).startsWith("online:")) {
+      const run = db
+        .prepare("SELECT classroom_id FROM exam_runs WHERE id=?")
+        .get(String(req.params.id).slice(7));
+      if (!run) fail(404, "Không tìm thấy bài làm.");
+      classroom(req, String(run.classroom_id));
+      sweepLearningExams(db, now());
+      const candidate = onlineRewardCandidates(
+        db,
+        String(run.classroom_id),
+        now(),
+      ).find((row) => row.id === req.params.id);
+      if (!candidate)
+        fail(409, "Chỉ duyệt được top 10 khi bài kiểm tra đã kết thúc.");
+      db.prepare(
+        `INSERT OR IGNORE INTO learning_rewards(id,student_id,classroom_id,source,label,points,created_at,status,reviewed_by,reviewed_at)
+        VALUES(?,?,?,?,?,1,?,?,?,?)`,
+      ).run(
+        candidate.id,
+        candidate.studentId,
+        candidate.classroomId,
+        candidate.id,
+        `${candidate.label} · Hạng ${candidate.rank} · ${candidate.score}/10 · ${Math.ceil(candidate.elapsedMs! / 1000)} giây`,
+        candidate.createdAt,
+        status,
+        req.user!.id,
+        now(),
+      );
+      return res.json({ ok: true });
+    }
+    if (!r) fail(404, "Không tìm thấy điểm thưởng.");
+    classroom(req, String(r.classroom_id));
     if (r.status !== "pending" && r.status !== status)
       fail(409, "Điểm thưởng đã được xử lý.");
     db.prepare(

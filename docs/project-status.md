@@ -1,5 +1,13 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: ngưỡng Săn thưởng riêng lớp, top10 chỉ online — 26/10/2026
+
+Săn thưởng cho GV đặt ngưỡng0–10 (mặc định8) riêng lớp; lượt mới đạt ngưỡng chờ duyệt +1, không giới hạn10 bạn. Giữ cấp3/4/5→Đề1/2/3, hết lỗi sổ tay trong chương và tỷ lệ đúng≥70%; giờ làm Hunt hợp lệ nay cộng đúng chương và tổng tuần, không lấy giờ chương khác để lên cấp. Sửa lỗi chunk importWord không tải được trong ảnh bằng parser tải cùng workspace; kiểm tra mở Hunt sau tải DOCX.
+
+Online đề xuất tối đa10/bài sau kết thúc, đạt từ8điểm, xếp điểm cao rồi thời gian làm ngắn; GV duyệt/từ chối từng bạn, không tự cộng hoặc đổi bài cũ. Quyền/loại vi phạm/idempotency do server kiểm tra, học sinh chỉ xem đề xuất của mình. Chi tiết đầu class-management.md/online-exams.md/app-design.md/session-handoff. QA205/205backend,14/14E2E desktop/mobile và build đạt; lượt xác nhận cuối sau chốt8điểm ở log `.local/reward-rules-20261026/`.
+
+**Phát hành theo yêu cầu mới: hoàn tất thì commit/push Git, không chờ/kiểm tra Railway deploy**. Quy tắc này thay hướng dẫn xác minh production trong các mục cũ bên dưới; push không phải bằng chứng đã deploy. Không test/ghi dữ liệu production.
+
 ## Hiện hành: lượt sửa sai mới theo đáp án đã sửa — 26/10/2026
 
 Sửa lỗi luồng Làm lại dùng khóa cũ dù nguồn đã cập nhật (ca -346 bị so với -200). Nội dung học sinh thấy và bản chấm đồng nhất qua sourceQuestionId; stale trả409, không ghi sai. Bảng cộng thêm attempt_question_versions lưu phiên bản chấm cho lượt sửa sai mới, giữ retry/lịch sử cũ; chỉ đánh dấu khắc phục khi học sinh nộp đúng, không tự chấm lại/đổi điểm hoặc snapshot đã có. Chi tiết đầu question-bank.md/session-handoff. Rà dữ liệu thật chỉ đọc, bằng chứng riêng giữ.local; không public dữ liệu cá nhân.

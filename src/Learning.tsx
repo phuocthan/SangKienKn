@@ -224,6 +224,10 @@ export function Learning({
         ? run.kind === "official" && run.delivery !== "online"
         : run.kind === "hunt",
     ) ?? [];
+  const rewards =
+    data?.rewards.filter((r) =>
+      onlinePage ? r.sourceType === "online" : r.sourceType !== "online",
+    ) ?? [];
   const startKeys = useRef(new Map<string, string>());
   const refreshSequence = useRef(0);
   const requestKey = (intent: string) => {
@@ -1251,67 +1255,145 @@ export function Learning({
               </div>
             )}
           </section>
-          {!onlinePage && (
-            <section className="card learning-section">
-              <h2>Điểm thưởng hệ thống</h2>
-              <p>
-                Mỗi chương đạt Kết Trái (cấp 5) nhận 1 điểm; mỗi lượt Săn điểm
-                đạt từ 8,0 nhận 1 điểm. Giáo viên duyệt việc ghi nhận.
-              </p>
-              {!data.rewards.length ? (
-                <p className="muted">Chưa có điểm thưởng.</p>
-              ) : (
-                <div className="learning-list">
-                  {data.rewards.map((r) => (
-                    <div className="learning-row" key={r.id}>
-                      <div>
-                        <strong>
-                          {teacher ? `${r.studentName} · ` : ""}
-                          {r.label} · +{r.points}
-                        </strong>
+          <section
+            className="card learning-section"
+            aria-label={
+              onlinePage ? "Điểm cộng kiểm tra online" : "Điểm thưởng hệ thống"
+            }
+          >
+            <h2>
+              {onlinePage
+                ? "Top 10 xét điểm cộng online"
+                : "Điểm thưởng hệ thống"}
+            </h2>
+            <p>
+              {onlinePage
+                ? "Mỗi bài kiểm tra kết thúc đề xuất tối đa 10 bạn đạt từ 8 điểm, xếp điểm cao trước; bằng điểm ưu tiên thời gian làm bài ngắn hơn. Giáo viên duyệt +1 điểm cho từng bạn."
+                : `Mỗi chương đạt Kết Trái (cấp 5) nhận 1 điểm; mỗi lượt Săn điểm đạt từ ${(data.huntMinimumScore ?? 8).toLocaleString("vi-VN")} được đề xuất +1 điểm. Giáo viên duyệt việc ghi nhận; không giới hạn top 10 ở Săn thưởng.`}
+            </p>
+            {!onlinePage && teacher && (
+              <HuntRewardSettings
+                key={`${classroom.id}-${data.huntMinimumScore ?? 8}`}
+                minimum={data.huntMinimumScore ?? 8}
+                disabled={busy || !data.rewardRules}
+                onSave={(minimum) =>
+                  act(
+                    () =>
+                      api(`/classrooms/${classroom.id}/reward-settings`, {
+                        huntMinimumScore: minimum,
+                      }),
+                    "Đã lưu ngưỡng điểm Săn thưởng cho lớp này.",
+                  )
+                }
+              />
+            )}
+            {!rewards.length ? (
+              <p className="muted">Chưa có điểm thưởng.</p>
+            ) : (
+              <div className="learning-list">
+                {rewards.map((r) => (
+                  <div className="learning-row" key={r.id}>
+                    <div>
+                      <strong>
+                        {teacher ? `${r.studentName} · ` : ""}
+                        {r.label} · +{r.points}
+                      </strong>
+                      <p>
+                        {statusText[r.status]} · {date(r.createdAt)}
+                      </p>
+                      {r.rank != null && (
                         <p>
-                          {statusText[r.status]} · {date(r.createdAt)}
+                          Hạng {r.rank} · {r.score}/10 ·{" "}
+                          {duration(Math.floor((r.elapsedMs ?? 0) / 1000))}{" "}
+                          {Math.floor((r.elapsedMs ?? 0) / 1000) % 60} giây làm
+                          bài
                         </p>
-                      </div>
-                      {teacher && r.status === "pending" && (
-                        <div className="learning-actions">
-                          <button
-                            className="button primary small"
-                            disabled={busy}
-                            onClick={() =>
-                              void act(() =>
-                                api(`/learning/rewards/${r.id}/review`, {
-                                  status: "approved",
-                                }),
-                              )
-                            }
-                          >
-                            Duyệt
-                          </button>
-                          <button
-                            className="button secondary small"
-                            disabled={busy}
-                            onClick={() =>
-                              void act(() =>
-                                api(`/learning/rewards/${r.id}/review`, {
-                                  status: "rejected",
-                                }),
-                              )
-                            }
-                          >
-                            Từ chối
-                          </button>
-                        </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          )}
+                    {teacher && r.status === "pending" && (
+                      <div className="learning-actions">
+                        <button
+                          className="button primary small"
+                          disabled={busy}
+                          onClick={() =>
+                            void act(() =>
+                              api(`/learning/rewards/${r.id}/review`, {
+                                status: "approved",
+                              }),
+                            )
+                          }
+                        >
+                          Duyệt
+                        </button>
+                        <button
+                          className="button secondary small"
+                          disabled={busy}
+                          onClick={() =>
+                            void act(() =>
+                              api(`/learning/rewards/${r.id}/review`, {
+                                status: "rejected",
+                              }),
+                            )
+                          }
+                        >
+                          Từ chối
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         </>
       )}
     </div>
+  );
+}
+
+function HuntRewardSettings({
+  minimum,
+  disabled,
+  onSave,
+}: {
+  minimum: number;
+  disabled: boolean;
+  onSave: (minimum: number) => Promise<void>;
+}) {
+  const [value, setValue] = useState(String(minimum));
+  return (
+    <form
+      className="learning-form"
+      aria-label="Ngưỡng điểm Săn thưởng"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void onSave(Number(value));
+      }}
+    >
+      <fieldset disabled={disabled}>
+        <legend>Điểm cộng Săn thưởng · Cài đặt riêng lớp này</legend>
+        <label>
+          Điểm tối thiểu để xét điểm cộng
+          <input
+            name="huntMinimumScore"
+            autoComplete="off"
+            inputMode="decimal"
+            type="number"
+            min={0}
+            max={10}
+            step={0.1}
+            required
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+          />
+        </label>
+        <small>
+          Áp dụng cho lượt nộp mới. Điểm đã duyệt và các đề xuất trước đó giữ
+          nguyên.
+        </small>
+        <button className="button secondary small">Lưu ngưỡng điểm</button>
+      </fieldset>
+    </form>
   );
 }
 

@@ -43,6 +43,11 @@ export function ensureLearningSchema(db: DatabaseSync) {
       status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
       created_at INTEGER NOT NULL, reviewed_by TEXT REFERENCES users(id), reviewed_at INTEGER
     );
+    CREATE TABLE IF NOT EXISTS classroom_reward_settings (
+      classroom_id TEXT PRIMARY KEY REFERENCES classrooms(id),
+      hunt_minimum_score REAL NOT NULL CHECK(hunt_minimum_score BETWEEN 0 AND 10),
+      updated_by TEXT NOT NULL REFERENCES users(id), updated_at INTEGER NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS exam_definitions (
       id TEXT PRIMARY KEY, classroom_id TEXT NOT NULL REFERENCES classrooms(id), title TEXT NOT NULL,
       questions TEXT NOT NULL, starts_at INTEGER NOT NULL, closes_at INTEGER NOT NULL,

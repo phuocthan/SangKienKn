@@ -1,5 +1,13 @@
 # Quản lý lớp: quyền học tập và quy tắc phiên
 
+## Ngưỡng điểm Săn thưởng riêng từng lớp — 26/10/2026
+
+Giáo viên đặt **Điểm tối thiểu để xét điểm cộng** trong Săn thưởng, mặc định8, từ0–10 với tối đa một chữ số thập phân. Lượt nộp mới đạt ngưỡng đề xuất +1, chỉ ghi nhận khi chủ lớp duyệt; không giới hạn10 bạn ở Săn thưởng. Thay ngưỡng không chấm lại bài cũ, không thay đề xuất/điểm đã duyệt. Bảng bổ sung classroom_reward_settings lưu theo lớp, endpoint POST /classrooms/:id/reward-settings kiểm tra chủ lớp và giá trị; overview trả rewardRules/huntMinimumScore.
+
+Điều kiện hiện có giữ nguyên: giờ và cấp tính riêng chương; cấp3/4/5 lần lượt mở Đề1/2/3, tối đa3vé; hết câu sai chưa khắc phục trong chương và tỷ lệ đúng từ70%. Không lấy giờ chương khác để lên cấp/mở vé. Thời gian làm Săn thưởng hợp lệ nay cộng đúng chương và daily ledger một lần khi nộp, giới hạn deadline, không tính chuẩn bị hoặc lượt vi phạm tab/idle. Tổng **Tuần này** trong vườn cộng các chương của lớp đang chọn theo tuần UTC+7; chỉ tiêu luyện tập tuần vẫn theo quy tắc riêng.
+
+Lỗi ảnh `Failed to fetch dynamically imported module .../importWord-....js` được sửa ở ExamUpload dùng chung Săn thưởng/online: parser Word được tải cùng workspace, không bắt đầu tải chunk cũ khi chọn file sau cập nhật. Giữ3ô tải đề và callback ổn định, giới hạn tên mặc định120ký tự. Không đổi định dạng đề hoặc dữ liệu đã nộp.
+
 ## Săn thưởng mở đến khi giáo viên khóa — 26/10/2026
 
 Người dùng đã chốt: **Mở đến khi giáo viên khóa; thời gian làm bài tính riêng cho từng lượt của học sinh**. Thời gian chuẩn bị X vẫn quyết định giờ bắt đầu được vào; Y phút tính từ lúc học sinh bắt đầu lượt, không dùng làm hạn mở chung. Hết Y chỉ thu bài của lượt đó; chương vẫn mở cho học sinh khác. Giáo viên khóa sẽ chặn lượt mới và thu các lượt đang làm; tab/idle, vé, điều kiện và ba đề khác nhau giữ nguyên. Kiểm tra online không đổi.

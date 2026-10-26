@@ -23,6 +23,8 @@ Chạy kiểm tra phù hợp thay đổi. Kết quả kiểm thử ghi trong bà
 
 ## Cách chạy mặc định từ 11/10/2026
 
+Yêu cầu phát hành mới nhất ngày26/10/2026: sau khi hoàn thành và kiểm thử, **commit/push Git; không chờ hoặc kiểm tra Railway deploy** để tiết kiệm token. Không báo đã deploy thành công chỉ từ push. Quyết định này thay các bước theo dõi/xác minh Railway trong nhật ký cũ; vẫn không thử ghi dữ liệu production.
+
 Theo yêu cầu mới của người dùng, **giao diện chạy local để test nhanh; API/server và database dùng trực tiếp Railway** (`https://greenedu.up.railway.app`). Chạy `npm run local` để mở Vite trong nền tại `http://localhost:5173`; `npm run dev` chạy cùng chế độ trong terminal. Sửa frontend cập nhật bằng HMR, không build/deploy lại mỗi lượt. Xem [docs/dev-railway.md](docs/dev-railway.md).
 
 Quy tắc này thay cách tự `npm run deploy` local sau mỗi thay đổi trước đây. Không tự khởi động API SQLite local, không tự push/deploy Railway. Sửa backend chỉ có hiệu lực trong chế độ này sau khi backend Railway được triển khai; báo rõ nếu cần bước đó. Khi người dùng yêu cầu deploy mà chưa rõ đích, dùng bối cảnh để xác định hoặc hỏi đích, không tự coi đó là deploy local cũ.

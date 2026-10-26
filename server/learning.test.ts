@@ -6,6 +6,94 @@ import { createApp } from "./app.js";
 import { openDatabase, seedDemo, hashPassword } from "./db.js";
 import { grantLearningMilestones, sweepLearningExams } from "./learning.js";
 import { ensureLearningSchema } from "./learning-db.js";
+import { learningRewards, onlineRewardCandidates } from "./reward-rules.js";
+
+test("hunt threshold belongs to each class, validates access and applies only to new submissions; hunt time credits its own chapter once", async (t) => {
+  const f = await fixture(t);
+  const settings = "/classrooms/class-demo/reward-settings";
+  assert.equal((await f.read("/classrooms/class-demo/learning")).huntMinimumScore, 8);
+  for (const cookie of [f.student, f.other])
+    assert.equal((await f.request(settings, { huntMinimumScore: 7 }, cookie)).status, 403);
+  for (const value of [-1, 11, "8", null, 8.55])
+    assert.equal((await f.request(settings, { huntMinimumScore: value }, f.teacher)).status, 400);
+  await f.post(settings, { huntMinimumScore: 9.5 }, f.teacher);
+  assert.equal((await f.read("/classrooms/class-demo/learning")).huntMinimumScore, 9.5);
+  assert.equal((await f.read("/classrooms/other-class/learning", f.other)).huntMinimumScore, 8);
+  f.eligible();
+  await f.post("/chapters/chapter-1/hunt-access", {
+    enabled: true, preparationMinutes: 0,
+    papers: [1, 2].map(slot => ({ slot, questions: [0, 1].map(i => ({ chapterId: "chapter-1", question: {
+      text: `Đề ${slot} câu ${i}`, choices: ["Đúng", "Sai", "C", "D"], correctIndex: 0,
+      lesson: "Bài luyện tập chung", explanation: "Chọn A",
+    } })) })),
+  }, f.teacher);
+  const submitHalf = async () => {
+    const { id } = await f.start({ chapterId: "chapter-1" });
+    const run = await f.read(`/learning/exam-runs/${id}`);
+    await f.post(`/learning/exam-runs/${id}/answers`, { revision: 0, answers: { [run.questions[0].id]: 0 } });
+    f.advance(45000);
+    const result = await f.post(`/learning/exam-runs/${id}/submit`, {});
+    assert.equal(result.score, 5);
+    await f.post(`/learning/exam-runs/${id}/submit`, {});
+    return id;
+  };
+  const first = await submitHalf();
+  assert.equal(f.db.prepare("SELECT 1 FROM learning_rewards WHERE source=?").get(`exam:${first}`), undefined);
+  await f.post(settings, { huntMinimumScore: 5 }, f.teacher);
+  assert.equal(f.db.prepare("SELECT 1 FROM learning_rewards WHERE source=?").get(`exam:${first}`), undefined);
+  f.db.prepare("UPDATE corrections SET resolved=1").run();
+  const second = await submitHalf();
+  const reward = f.db.prepare("SELECT * FROM learning_rewards WHERE source=?").get(`exam:${second}`)!;
+  assert.equal(reward.status, "pending");
+  assert.equal(f.db.prepare("SELECT seconds FROM progress WHERE student_id='student-demo' AND chapter_id='chapter-1'").get()!.seconds, 14490);
+  assert.equal(f.db.prepare("SELECT 1 FROM progress WHERE student_id='student-demo' AND chapter_id='chapter-2'").get(), undefined);
+  assert.equal(f.db.prepare("SELECT SUM(credited_ms) ms FROM study_daily_time WHERE student_id='student-demo'").get()!.ms, 90000);
+  await f.post(`/learning/rewards/${reward.id}/review`, { status: "approved" }, f.teacher);
+  await f.post(settings, { huntMinimumScore: 10 }, f.teacher);
+  assert.equal(f.db.prepare("SELECT status FROM learning_rewards WHERE id=?").get(reward.id)!.status, "approved");
+});
+
+test("online proposals rank each ended paper before student filtering, require teacher review and never exceed ten", async (t) => {
+  const f = await fixture(t);
+  for (const examId of ["rank-a", "rank-b", "rank-active", "rank-low"]) {
+    f.db.prepare("INSERT INTO exam_definitions VALUES(?,'class-demo',?,'[]',1000,?,4,1,1000)").run(examId, examId, examId === "rank-active" ? f.now() + 60000 : f.now() - 1);
+    f.db.prepare("INSERT INTO online_exam_sessions(exam_id,duration_minutes,question_count,started_at) VALUES(?,1,1,1000)").run(examId);
+    for (let i = 0; i < 13; i++) {
+      const student = i === 0 ? "student-demo" : `rank-student-${i}`;
+      if (examId === "rank-a" && i) {
+        f.db.prepare("INSERT INTO users VALUES(?,?,?,?,?,0)").run(student, `${student}@test.local`, student, "unused", "student");
+        f.db.prepare("INSERT INTO memberships VALUES('class-demo',?)").run(student);
+      }
+      f.db.prepare(`INSERT INTO exam_runs(id,student_id,classroom_id,exam_id,kind,title,questions,answers,started_at,deadline_at,tab_limit,status,reason,score,submitted_at,request_id)
+        VALUES(?,?,'class-demo',?,'official',?,'[]','{}',1000,100000,4,'submitted',?,?,?,?)`)
+        .run(`${examId}-${i}`, student, examId, examId, i === 12 ? "tabs" : "student", examId === "rank-low" ? 7.5 : i === 12 ? 10 : i < 2 ? 10 : 8, 1000 + (13 - i) * 1000, `${examId}-request-${i}`);
+    }
+  }
+  const candidates = onlineRewardCandidates(f.db, "class-demo", f.now());
+  assert.equal(candidates.length, 20);
+  assert.deepEqual(candidates.filter(r => r.examId === "rank-a").map(r => r.id), [1, 0, 11, 10, 9, 8, 7, 6, 5, 4].map(i => `online:rank-a-${i}`));
+  assert.equal(learningRewards(f.db, "class-demo", f.now(), "student-demo").filter(r => r.sourceType === "online").length, 2);
+  assert.equal(learningRewards(f.db, "class-demo", f.now(), "student-demo")[0].rank, 2);
+  assert.equal(f.db.prepare("SELECT COUNT(*) n FROM learning_rewards").get()!.n, 0);
+  const review = "/learning/rewards/online:rank-a-0/review";
+  for (const cookie of [f.student, f.other])
+    assert.equal((await f.request(review, { status: "approved" }, cookie)).status, 403);
+  for (const id of ["rank-a-2", "rank-a-12", "rank-active-0", "rank-low-0"])
+    assert.equal((await f.request(`/learning/rewards/online:${id}/review`, { status: "approved" }, f.teacher)).status, 409);
+  await f.post(review, { status: "approved" }, f.teacher);
+  await f.post(review, { status: "approved" }, f.teacher);
+  assert.equal(f.db.prepare("SELECT SUM(points) n FROM learning_rewards WHERE status='approved'").get()!.n, 1);
+  const reject = "/learning/rewards/online:rank-b-0/review";
+  await f.post(reject, { status: "rejected" }, f.teacher);
+  assert.equal((await f.request(reject, { status: "approved" }, f.teacher)).status, 409);
+  // A long newer ledger must not turn a reviewed online result back into pending.
+  for (let i = 0; i < 501; i++) f.db.prepare("INSERT INTO learning_rewards(id,student_id,classroom_id,source,label,points,created_at) VALUES(?,'student-demo','class-demo',?,'Cây',1,?)").run(`ledger-${i}`, `ledger-${i}`, f.now() + i);
+  const shown = learningRewards(f.db, "class-demo", f.now(), "student-demo");
+  assert.equal(shown.filter(r => r.id === "online:rank-a-0").length, 1);
+  assert.equal(shown.find(r => r.id === "online:rank-a-0")!.status, "approved");
+  assert.equal(shown.find(r => r.id === "online:rank-b-0")!.status, "rejected");
+  assert.equal(f.db.prepare("SELECT score FROM exam_runs WHERE id='rank-a-0'").get()!.score, 10);
+});
 
 test("class clone copies only existing student memberships and deletion preserves accounts and source data", async (t) => {
   const f = await fixture(t);

@@ -1,5 +1,11 @@
 # Kiểm tra online do giáo viên bắt đầu
 
+## Top 10 chờ giáo viên duyệt điểm cộng — 26/10/2026
+
+Người dùng xác nhận **top10 chỉ ở kiểm tra online**, tính riêng từng bài kiểm tra. Sau khi buổi kết thúc/giáo viên đóng, đề xuất tối đa10 học sinh đạt từ8điểm: điểm cao trước, bằng điểm ưu tiên thời gian làm ngắn hơn; tiếp tục bằng nhau dùng thời điểm nộp/ID để kết quả ổn định. Loại lượt thu do vi phạm tab/idle. Giáo viên duyệt hoặc từ chối từng đề xuất, duyệt nhận +1; không tự cộng. Online giữ mốc8điểm; ngưỡng Săn thưởng riêng lớp không thay mốc này.
+
+Trang Kiểm tra có danh sách riêng, hiện tên, bài, hạng, điểm và thời gian. Server xếp toàn bộ buổi trước khi lọc học sinh; học sinh chỉ thấy đề xuất của mình. Đề xuất tính chỉ đọc, kể cả bài cũ đã kết thúc; không ghi điểm/đổi bài khi mở danh sách. POST /learning/rewards/online:{runId}/review kiểm tra chủ lớp, buổi đã kết thúc và top10 rồi lưu quyết định duy nhất vào learning_rewards. Retry không cộng lặp, từ chối/duyệt rồi không tự đổi trạng thái. Kết quả/điểm bài cũ giữ nguyên; xem nguồn đã xóa vẫn giữ quyết định đã lưu.
+
 ## Cộng thời gian kiểm tra vào chương — 24/10/2026
 
 Form tạo/chỉnh sửa thêm **Cộng thời gian làm bài vào chương**: mặc định Không cộng, hoặc chọn một chương đang dùng trong lớp. Chương nhận giờ độc lập với chương lấy câu hỏi; lưu `online_exam_sessions.progress_chapter_id`, trả lại khi chỉnh sửa và hiển thị ở thông tin buổi thi. Chỉ đổi khi buổi còn được chỉnh sửa theo quy tắc hiện hành. Bài cũ mặc định null, không hồi tố thời gian.

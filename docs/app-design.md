@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Duyệt điểm cộng Săn thưởng và online — 26/10/2026
+
+Giữ bố cục/style hiện có. Săn thưởng thêm form **Điểm tối thiểu để xét điểm cộng** riêng lớp (mặc định8), ghi rõ chỉ áp dụng lượt nộp mới; học sinh đọc ngưỡng, chủ lớp mới được sửa. Kiểm tra online có vùng **Top 10 xét điểm cộng online**, hiện hạng/điểm/thời gian và nút Duyệt/Từ chối từng bạn đạt từ8điểm sau khi kết thúc. Hai trang lọc đúng loại đề xuất; Săn thưởng không giới hạn top10. Dùng redesign-existing-projects và rà web-design-guidelines, nhãn input, khóa khi gửi, trạng thái lỗi/thành công dùng luồng act hiện có.
+
 ## Tuần học và hình sách/cây trong vườn cá nhân — 26/10/2026
 
 Khung **Tiếp tục học** ở Khu vườn của tôi giữ tổng tích lũy và thêm **Tuần này** của chính học sinh trong lớp/môn đang chọn. Tuần thứ Hai–Chủ nhật theo giờ Việt Nam; hiển thị giờ/phút và giây lẻ, ghi rõ khi chưa đủ lịch sử hoặc backend chưa có dữ liệu tuần. Số liệu cập nhật cùng polling lớp10giây/focus/online hiện có, không mở quyền xem thống kê học sinh khác.

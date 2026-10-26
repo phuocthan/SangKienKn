@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { QuestionText } from "./QuestionText";
+import { parseWordFile } from "./importWord";
 import {
   csvTemplate,
   parseQuestionCsv,
@@ -57,7 +58,7 @@ export function ExamUpload({
         );
       const bytes = new Uint8Array(await file.arrayBuffer());
       const parsed = /\.docx$/i.test(file.name)
-        ? (await import("./importWord")).parseWordFile(bytes)
+        ? parseWordFile(bytes)
         : /\.csv$/i.test(file.name)
           ? parseQuestionCsv(
               new TextDecoder("utf-8", { fatal: true }).decode(bytes),

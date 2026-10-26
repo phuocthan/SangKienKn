@@ -15,16 +15,23 @@ export function creditExamTime(
   timestamp: number,
 ) {
   if (
-    run.kind !== "official" ||
+    !["official", "hunt"].includes(run.kind) ||
     !["student", "teacher", "deadline"].includes(reason)
   )
     return;
-  const target = db
-    .prepare(
-      `SELECT o.progress_chapter_id AS chapterId FROM online_exam_sessions o
+  const target =
+    run.kind === "hunt"
+      ? db
+          .prepare(
+            "SELECT id AS chapterId FROM chapters WHERE id=? AND classroom_id=?",
+          )
+          .get(run.chapter_id, run.classroom_id)
+      : db
+          .prepare(
+            `SELECT o.progress_chapter_id AS chapterId FROM online_exam_sessions o
     JOIN chapters ch ON ch.id=o.progress_chapter_id WHERE o.exam_id=? AND ch.classroom_id=?`,
-    )
-    .get(run.exam_id, run.classroom_id);
+          )
+          .get(run.exam_id, run.classroom_id);
   if (!target?.chapterId) return;
   const last = Number(
     db
