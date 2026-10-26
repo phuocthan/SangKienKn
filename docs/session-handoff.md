@@ -1,5 +1,15 @@
 # Bàn giao session GreenEdu
 
+## Giờ học trong tuần và hình sách/cây ở vườn cá nhân — 26/10/2026
+
+Yêu cầu đúng hai phần trong **Khu vườn của tôi** học sinh: show thời gian đã học trong tuần, tăng hình sách/cây đang quá nhỏ; người dùng yêu cầu deploy Git khi xong. Khởi điểm main7cc06e0, hai ghi chú sau phát hành còn local được giữ. Dùng redesign-existing-projects/web-design-guidelines; giữ UI hiện có và asset knowledge-garden-v1.webp.
+
+API GET /classrooms thêm studyWeek chỉ cho học sinh, dùng studentStudyStatistics.summaries.week sẵn có với req.user.id và đúng lớp; không mở endpoint teacher hoặc trả dữ liệu bạn khác. Tuần thứ Hai–Chủ nhật UTC+7, số liệu từ daily ledger khớp thống kê giáo viên, không suy từ tổng tích lũy. App thêm dòng Tuần này, có giây lẻ và trạng thái chưa có/thiếu lịch sử; polling lớp10giây/focus/online hiện có tự cập nhật. CSS giới hạn student-welcome-hero: khung sách/cây100px→180–300px desktop, mobile hiện220px thay vì ẩn. Không đổi ảnh/luồng khác hoặc cách cộng giờ, không migration/seed production.
+
+QA mới build/typecheck/format/diff check đạt; full **201/201 backend đạt (19giây)**, trong đó ca tuần UTC+7 cắt đúng thứ Hai00:00, cộng nhiều chương đúng lớp, tách lớp/môn và học sinh khác, khớp thống kê giáo viên, không trả tuần học sinh cho teacher. **4/4 E2E desktop/mobile đạt (10,2giây)**: phân biệt tuần/tổng tích lũy, không dữ liệu/0/partial, refresh focus, hình hiện180–300px desktop/220px mobile,320/390/768/1440/1920px không tràn và nút luyện tập vẫn hoạt động. Đã xem ảnh hero hai kích thước; log/ảnh `.local/garden-week-20261026/`. Lượt đầu test mới truyền nhầm chữ ký creditStudyInterval, đã sửa fixture rồi chạy lại; không báo lượt lỗi thành đạt. Không sửa runtime sau build. Dữ liệu kiểm thử dùng database riêng.
+
+Fetch xác nhận main/origin main cùng7cc06e0. Người dùng yêu cầu deploy Git, chốt9file code/test/tài liệu liên quan, giữ ghi chú phát hành săn thưởng có sẵn; không đưa .local/database/secrets/dữ liệu học sinh vào Git. Production chỉ đọc lấy mốc78bài đã nộp trước triển khai, không đăng nhập/ghi dữ liệu thử. Kết quả phát hành ghi tiếp sau khi đối chiếu đúng commit/source/bundle/health và hash bài cũ.
+
 ## Săn thưởng không tự đóng theo thời gian làm bài — 26/10/2026
 
 Người dùng báo sau một thời gian Săn thưởng tự đóng dù giáo viên chưa khóa. Kiểm tra Railway readOnly thấy hai cấu hình 11/2 và11/6 có enabled=1 nhưng hạn chung20phút đã hết; nguồn hiện tại gán closes_at=T+X+Y. Người dùng chốt qua câu hỏi: **Mở đến khi giáo viên khóa; thời gian làm bài tính riêng cho từng lượt của học sinh**. Thay đúng luồng săn thưởng, không đổi kiểm tra online/tab/idle/vé/ba đề/lịch sử và điểm.
@@ -9,6 +19,8 @@ Lần mở mới lưu closes_at=0 (API null), capability huntTeacherControlled. 
 QA mới: build/typecheck đạt; full **200/200 backend đạt (21,7giây)**, trong đó có ca vào sau hạn20phút cũ vẫn được đủ thời lượng, hai học sinh bắt đầu lệch nhau có hạn riêng, hết giờ chỉ nộp đúng lượt, giáo viên khóa thu bài/chặn lượt mới, giữ hạn dương cũ và lịch sử khi mở lại, sau một ngày vẫn mở. **6/6 E2E desktop/mobile đạt (30giây)**: mở/khóa/dùng lại/xóa đề giữ snapshot, ba đề, trạng thái đợt cũ và lời giải thích giờ riêng; không hiện1970 khi không có hạn chung. Format/diff check đạt; kiểm tra320/390/768/1440px trong ca ba đề. Log `.local/hunt-window-20261026/`; giữ các ghi chú và selector test từ đợt sổ tay có sẵn.
 
 Fetch xác nhận main/origin main cùng06dd445, không có thay đổi remote cần ghép. Theo yêu cầu phát hành Git còn hiệu lực, chốt đúng10file source/test/tài liệu liên quan, không .local/database/dữ liệu học sinh/secrets. Production chỉ đọc lấy mốc78bài đã nộp và2cấu hình săn thưởng cũ trước phát hành; không đăng nhập thử/ghi dữ liệu thật. Chỉ xác nhận đã triển khai sau khi kiểm tra đúng commit, source, bundle và hash dữ liệu. Kết quả phát hành ghi tiếp sau xác minh.
+
+Đã push `7cc06e08fd92fc35d67a53d75fa737634b6a3363`, origin/main khớp; Railway deployment `ba6a918b-9a3b-4d89-80b7-54b9f272ad6f` **SUCCESS**. Xác minh26/10 19:49UTC+7: source4file khớp commit; health200/ok=true/demo=false/quickLogin=false; entry `/assets/index-DNnaRR-P.js`, chunk Learning-HYaMGv8l có capability và lời giải thích mở tới giáo viên khóa cho hai vai trò. Hash78bài đã nộp và toàn bộ2cấu hình săn thưởng cũ giữ nguyên trước-sau; không tự mở các đợt cũ. Báo cáo `.local/hunt-window-20261026/release-verification.json`, baseline cùng thư mục. Ghi chú kết quả phát hành lưu local; không tạo thêm deploy chỉ để lưu ghi chú.
 
 ## Thẻ sổ tay hiện ngay đáp án mới — 26/10/2026
 

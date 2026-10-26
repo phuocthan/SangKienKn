@@ -1,5 +1,6 @@
 import type { QuestionKind } from "../shared/question-types";
 import type { StudentLevel } from "../shared/student-levels";
+import type { StudyBucket } from "../shared/study-statistics";
 
 export type User = {
   id: string;
@@ -29,6 +30,7 @@ export type Chapter = {
   openCorrections: number;
 };
 export type Classroom = {
+  studyWeek?: StudyBucket;
   canManageClass?: boolean;
   levelMinutes?: number;
   studentLevel?: StudentLevel | null;

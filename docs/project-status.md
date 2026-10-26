@@ -1,10 +1,18 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: giờ học tuần này trên vườn cá nhân — 26/10/2026
+
+Khu vườn của tôi thêm giờ học **Tuần này** cạnh tổng tích lũy, đúng học sinh/lớp/môn; thứ Hai–Chủ nhật UTC+7, cùng nguồn daily ledger với thống kê giáo viên. GET /classrooms chỉ bổ sung studyWeek cho học sinh; không mở quyền thống kê bạn khác, không thay cách cộng giờ. Hình cây trên sách trong Tiếp tục học tăng180–300px desktop và hiện220px mobile, không đổi ảnh/icon nơi khác. QA/phát hành đầu session-handoff, thiết kế đầu app-design.md. Người dùng đã yêu cầu deploy Git sau khi hoàn thành.
+
+QA mới full201/201backend,4/4E2E desktop/mobile, build/typecheck/format/diff check đạt. Đã xem ảnh và kiểm tra320–1920px; log `.local/garden-week-20261026/`. Không migration/dữ liệu thử trên production; chốt phát hành sau fetch xác nhận7cc06e0, chỉ xác nhận Railway khi kiểm tra đúng source/bundle/health.
+
 ## Hiện hành: mở săn thưởng đến khi giáo viên khóa — 26/10/2026
 
 Người dùng chốt bỏ hạn đóng chung T+X+Y: X vẫn là thời gian chuẩn bị, Y tính riêng từ lúc mỗi học sinh bắt đầu lượt. Lần mở mới closes_at=0/API null, chỉ khóa chương khi giáo viên khóa; mỗi lượt vẫn tự nộp khi hết thời gian hoặc vi phạm tab/idle. Giữ ba đề/vé/điều kiện/điểm, không sửa kiểm tra online. Đợt/lượt cũ có hạn dương giữ nguyên, không tự mở lại dữ liệu thật; đợt đã hết hạn cần mở lại một lần, dùng lại đề đã lưu. QA/phát hành ở đầu session-handoff; đặc tả đầu class-management.md.
 
 QA mới full200/200backend,6/6E2E desktop/mobile, build/typecheck/format/diff check đạt; log `.local/hunt-window-20261026/`. Kiểm thử độc lập, Railway chỉ đọc lấy mốc78bài/2cấu hình cũ. Chốt Git theo yêu cầu phát hành trước đó; chỉ xác nhận production sau khi đối chiếu deployment và bundle.
+
+Đã phát hành `7cc06e0`: origin/main khớp, Railway `ba6a918b-9a3b-4d89-80b7-54b9f272ad6f` SUCCESS. Xác minh26/10 19:49UTC+7 source4file/bundle/health đúng bản mới,78bài đã nộp và2cấu hình cũ không đổi; không tự mở đợt cũ, giáo viên mở lại một lần để áp dụng. Báo cáo `.local/hunt-window-20261026/release-verification.json`. Ghi chú sau phát hành lưu local, không deploy thêm chỉ cho ghi chú.
 
 ## Hiện hành: đáp án mới ngay trên thẻ sổ tay — 26/10/2026
 

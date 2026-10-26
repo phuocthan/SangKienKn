@@ -106,7 +106,7 @@
 }
 .app-shell .student-home .student-welcome-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 100px;
+  grid-template-columns: minmax(0, 1fr) clamp(180px, 24vw, 300px);
   align-items: center;
   min-height: 0;
   padding: 20px;
@@ -115,8 +115,9 @@
 }
 .app-shell .student-home .student-welcome-hero .hero-illustration {
   position: static;
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
   max-width: 100%;
   margin: 0;
   opacity: 1;
@@ -129,6 +130,24 @@
 .app-shell .student-home .student-welcome-hero p {
   margin: 0 0 12px;
   font-size: 14px;
+}
+.student-welcome-hero .student-study-week {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.student-study-week > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.student-study-week strong {
+  color: var(--deep);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.student-study-week small {
+  display: block;
+  margin-top: 4px;
 }
 .student-home .garden-hero-actions {
   gap: 8px;
@@ -362,7 +381,10 @@
     padding: 18px;
   }
   .app-shell .student-home .student-welcome-hero .hero-illustration {
-    display: none;
+    display: block;
+    width: min(100%, 220px);
+    max-height: none;
+    justify-self: center;
   }
   .app-shell .chapter-card .chapter-art {
     height: 84px;

@@ -538,6 +538,17 @@ export function createApp(
         grade: c.grade,
         teacherName: c.teacherName,
         canManageClass: req.user!.role === "teacher",
+        ...(req.user!.role === "student"
+          ? {
+              studyWeek: studentStudyStatistics(
+                db,
+                c.id,
+                req.user!.id,
+                "week",
+                studyDate(now()),
+              ).summaries.week,
+            }
+          : {}),
         levelMinutes: classroomLevelMinutes(db, c.id),
         studentLevel:
           req.user!.role === "student"

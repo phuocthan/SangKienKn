@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Tuần học và hình sách/cây trong vườn cá nhân — 26/10/2026
+
+Khung **Tiếp tục học** ở Khu vườn của tôi giữ tổng tích lũy và thêm **Tuần này** của chính học sinh trong lớp/môn đang chọn. Tuần thứ Hai–Chủ nhật theo giờ Việt Nam; hiển thị giờ/phút và giây lẻ, ghi rõ khi chưa đủ lịch sử hoặc backend chưa có dữ liệu tuần. Số liệu cập nhật cùng polling lớp10giây/focus/online hiện có, không mở quyền xem thống kê học sinh khác.
+
+Hình cây mọc trên sách dùng lại asset hiện tại, tăng từ khung100px lên180–300px ở desktop; mobile hiện hình220px theo khổ thẻ thay vì ẩn. Chỉ đổi CSS của student-welcome-hero, không phóng ảnh đăng nhập/giáo viên hoặc icon cấp độ khác. Nút luyện tập/hành trình, font/màu chung giữ nguyên.
+
 ## Tạo/xóa lớp và chương nhận giờ kiểm tra — 24/10/2026
 
 Tạo lớp thêm bộ chọn nguồn roster, mặc định lớp trống; chọn nguồn thì ẩn khối nhập tay, hiển thị số học sinh/khối kế thừa, chỉ nhập tên lớp và môn mới. Quản lý lớp có nút Xóa lớp mở modal nhập tên để xác nhận, giữ lỗi để thử lại và khóa đóng khi gửi. Tạo/chỉnh bài online thêm select chương nhận giờ, mặc định Không cộng; metadata buổi thi nêu tên chương được chọn. Giữ CSS và hệ thống modal hiện có, nhãn form đầy đủ, focus trap/Escape và thông báo lỗi; không thêm thư viện giao diện.

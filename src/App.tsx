@@ -987,6 +987,25 @@ export default function App() {
                               ? `${duration(totalSeconds)} đã học · ${current.subject}`
                               : "Chọn một chương để bắt đầu."}
                           </p>
+                          <p className="student-study-week">
+                            <Clock3 size={19} aria-hidden="true" />
+                            <span>
+                              Tuần này:{" "}
+                              <strong>
+                                {current.studyWeek
+                                  ? current.studyWeek.seconds === null
+                                    ? "Chưa có lịch sử"
+                                    : `${duration(current.studyWeek.seconds)}${current.studyWeek.seconds % 60 ? ` ${current.studyWeek.seconds % 60} giây` : ""}`
+                                  : "Chưa có dữ liệu tuần"}
+                              </strong>
+                              <small>
+                                Thứ Hai – Chủ nhật · Giờ Việt Nam
+                                {current.studyWeek?.coverage === "partial"
+                                  ? " · Chưa đủ lịch sử cả tuần"
+                                  : ""}
+                              </small>
+                            </span>
+                          </p>
                           <div className="garden-hero-actions">
                             <button
                               className="button primary"

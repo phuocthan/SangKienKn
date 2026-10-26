@@ -61,6 +61,99 @@ async function fixture(
 }
 const path = "/classrooms/class-demo/students/student-demo/study-statistics";
 
+test("student garden week uses only the signed-in student's class and rolls over at Vietnam Monday midnight", async (t) => {
+  const f = await fixture(t, studyDayStart("2026-10-26") - 10000);
+  f.db
+    .prepare("UPDATE study_history_tracking SET started_at=?")
+    .run(studyDayStart("2026-10-01"));
+  const monday = studyDayStart("2026-10-26");
+  creditStudyInterval(
+    f.db,
+    "student-demo",
+    "chapter-1",
+    monday - 60000,
+    monday - 30000,
+    () => {},
+  );
+  const classes = async (cookie = f.student) =>
+    (await f.request("/classrooms", cookie)).data;
+  const current = async () =>
+    (await classes()).find((c: any) => c.id === "class-demo").studyWeek;
+  assert.deepEqual(await current(), {
+    start: "2026-10-19",
+    end: "2026-10-25",
+    seconds: 30,
+    coverage: "full",
+  });
+  f.advance(10000);
+  assert.deepEqual(await current(), {
+    start: "2026-10-26",
+    end: "2026-11-01",
+    seconds: 0,
+    coverage: "full",
+  });
+  f.advance(3 * 60000);
+  creditStudyInterval(
+    f.db,
+    "student-demo",
+    "chapter-1",
+    monday,
+    monday + 60000,
+    () => {},
+  );
+  creditStudyInterval(
+    f.db,
+    "student-demo",
+    "chapter-2",
+    monday + 120000,
+    monday + 180000,
+    () => {},
+  );
+  creditStudyInterval(
+    f.db,
+    "student-2",
+    "chapter-1",
+    monday,
+    monday + 180000,
+    () => {},
+  );
+  f.db
+    .prepare(
+      "INSERT INTO classrooms VALUES('garden-other','Lớp khác','Toán','10','teacher-demo')",
+    )
+    .run();
+  f.db
+    .prepare("INSERT INTO memberships VALUES('garden-other','student-demo')")
+    .run();
+  f.db
+    .prepare(
+      "INSERT INTO chapters VALUES('garden-other-ch','garden-other','Chương khác')",
+    )
+    .run();
+  creditStudyInterval(
+    f.db,
+    "student-demo",
+    "garden-other-ch",
+    monday,
+    monday + 180000,
+    () => {},
+  );
+  assert.equal((await current()).seconds, 120);
+  assert.equal(
+    (await classes()).find((c: any) => c.id === "garden-other").studyWeek
+      .seconds,
+    180,
+  );
+  assert.equal(
+    (await f.request(path + "?period=week", f.teacher)).data.summaries.week
+      .seconds,
+    120,
+  );
+  assert.ok(
+    (await classes(f.teacher)).every((c: any) => c.studyWeek === undefined),
+  );
+});
+
 test("date-range reports include the full Vietnam end day, exact class, saved accuracy, reviewed hunt points and each online score", async (t) => {
   const f = await fixture(t, studyDayStart("2026-10-20"));
   const start = studyDayStart("2026-10-19"),
