@@ -216,7 +216,7 @@ export function Feedback({
                       <h2>{active.title}</h2>
                       <p>{active.studentName}</p>
                     </div>
-                    {teacher && (
+                    {teacher && !user.readOnly && (
                       <button
                         className="button outline small"
                         disabled={busy}
@@ -253,7 +253,7 @@ export function Feedback({
                       Góp ý đã được xử lý. Giáo viên có thể mở lại để tiếp tục
                       trao đổi.
                     </p>
-                  ) : (
+                  ) : user.readOnly ? null : (
                     <MessageComposer
                       key={active.id}
                       label="Nội dung phản hồi"

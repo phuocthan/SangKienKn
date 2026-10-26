@@ -20,9 +20,11 @@ const time = (seconds: number) =>
   `${Math.floor(seconds / 3600)} giờ ${Math.floor((seconds % 3600) / 60)} phút ${seconds % 60} giây`;
 
 export function WeeklyPractice({
+  readOnly = false,
   classroomId,
   active,
 }: {
+  readOnly?: boolean;
   classroomId: string;
   active: boolean;
 }) {
@@ -179,13 +181,17 @@ export function WeeklyPractice({
                   setDraft(e.target.value);
                   setNotice("");
                 }}
-                disabled={!data || busy}
+                disabled={readOnly || !data || busy}
                 aria-describedby="weekly-policy"
               />
               <button
                 className="button primary"
                 disabled={
-                  !data || busy || !valid || value === data.config.minutes
+                  readOnly ||
+                  !data ||
+                  busy ||
+                  !valid ||
+                  value === data.config.minutes
                 }
               >
                 {busy ? "Đang lưu…" : "Lưu thời gian tuần"}

@@ -1,5 +1,15 @@
 # Bàn giao session GreenEdu
 
+## Tài khoản giáo viên chỉ xem — 27/10/2026
+
+Người dùng yêu cầu một tài khoản xem như thanhphuong nhưng không có quyền chỉnh sửa; đã cung cấp login/mật khẩu. **Đã tạo thật `giaovien-nk`**, tên hiển thị Giáo viên NK (chỉ xem), gắn đúng thanhphuong@greenedu.nk. Không ghi thông tin xác thực vào Git/tài liệu. Chỉ tạo user/mapping trong transaction qua Railway SSH; không sửa lớp, membership, câu hỏi, bài làm, điểm hoặc tài khoản thanhphuong. Không login bằng giáo viên thật để test. Đã xóa script/payload riêng có thông tin cấp tài khoản sau khi tạo.
+
+Khởi điểm main60ae16a sạch. Schema thêm teacher_viewers, danh tính và mật khẩu/phiên riêng; GET tài nguyên dùng phạm vi owner qua các kiểm tra sẵn có, auth giữ ID thật. Mọi ghi bị403 trước handler, trừ tự đổi mật khẩu/đăng xuất. UI readOnly=true dùng giao diện giáo viên, banner chỉ xem và khóa/ẩn điều khiển ghi; filter/xem lịch sử/bài nộp/Excel vẫn được. Vai trò nền student không membership cố ý đóng quyền trên backend cũ, chỉ bản hiểu mapping mới mở chế độ giáo viên chỉ xem. Không đổi role schema/users table hoặc nhân bản dữ liệu. Chi tiết và CLI tạo tái sử dụng ở teacher-viewers.md.
+
+QA mới: full207/207backend đạt (21,3giây), build/typecheck đạt;4/4E2E ngưỡng/Word/top10 cũ đạt trong lượt đầu,2/2E2E viewer desktop/mobile cuối đạt (8,3giây). Kiểm tra owner scope, lớp ngoài403, auth ID thật, POST/PUT/PATCH/DELETE bị chặn và snapshot dữ liệu không đổi, tự đổi mật khẩu không đụng owner, bỏ mapping/mất role owner thì mất quyền, migration/reopen giữ dữ liệu. E2E kiểm tra tìm/xem câu hỏi, nút sửa/import/thêm bị khóa, săn thưởng khóa thao tác, online không có tạo mới, API trực tiếp403 và320/390/768/1440px không tràn. Hai lượt E2E đầu lỗi selector rồi kỳ vọng search: từ khóa “số1” còn khớp Bài1 theo tìm kiếm nhiều từ hiện có; sửa fixture dùng “số4”, không đổi runtime search. Không báo các lượt lỗi là đạt. Log/ảnh `.local/teacher-viewer-20261026/`. Dùng skill thiết kế hiện có, chỉ sửa phân quyền và UI liên quan.
+
+Theo yêu cầu đang có: kiểm thử xong commit/push Git, **không chờ hoặc kiểm tra Railway deploy**. Tạo tài khoản đã hoàn tất; chưa khẳng định quyền xem trên production đã hoạt động khi backend chưa được xác minh, không theo dõi deployment.
+
 ## Ngưỡng Săn thưởng, top10 online và tải Word — 26/10/2026
 
 Yêu cầu mới nhất đã chốt: **top10 chỉ ở từng bài kiểm tra online**; Săn thưởng không giới hạn10 bạn, ngưỡng đạt điểm do GV đặt riêng lớp (mặc định8). Giữ điều kiện cấp3/4/5 tương ứng3đề/vé, không còn câu sai trong chương, tỷ lệ đúng từ70%. Online giữ mốc từ8điểm theo yêu cầu ban đầu, chọn tối đa10 theo điểm cao rồi thời gian làm ngắn, chờ GV duyệt +1. Người dùng yêu cầu **xong thì commit/push Git, không quan tâm/chờ/kiểm tra Railway deploy** để tiết kiệm token; quy tắc này thay bước xác minh Railway trong các nhật ký cũ bên dưới. Không tự báo production đã triển khai từ kết quả push.

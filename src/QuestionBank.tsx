@@ -32,6 +32,7 @@ type Dialog =
   | null;
 
 export function QuestionBank({
+  readOnly = false,
   chapterId,
   topicSupported,
   deleteSupported,
@@ -41,6 +42,7 @@ export function QuestionBank({
   revision,
   onChange,
 }: {
+  readOnly?: boolean;
   chapterId: string;
   topicSupported: boolean;
   deleteSupported: boolean;
@@ -199,6 +201,7 @@ export function QuestionBank({
         <div className="import-format-actions">
           <button
             className="button outline small"
+            disabled={readOnly}
             onClick={() => open({ type: "import", format: "word" })}
           >
             <Upload size={16} />
@@ -348,6 +351,7 @@ export function QuestionBank({
               <div className="question-actions">
                 <button
                   className="button outline small"
+                  disabled={readOnly}
                   onClick={() => open({ type: "edit", question: q })}
                 >
                   <Pencil size={15} />
@@ -355,7 +359,7 @@ export function QuestionBank({
                 </button>
                 <button
                   className={`button ${q.active ? "danger" : "outline"} small`}
-                  disabled={busy || (q.active && !deleteSupported)}
+                  disabled={readOnly || busy || (q.active && !deleteSupported)}
                   onClick={() =>
                     open(
                       q.active

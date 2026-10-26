@@ -3,6 +3,7 @@ import type { StudentLevel } from "../shared/student-levels";
 import type { StudyBucket } from "../shared/study-statistics";
 
 export type User = {
+  readOnly?: boolean;
   id: string;
   name: string;
   email: string;

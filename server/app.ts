@@ -122,7 +122,12 @@ export function createApp(
     id: u.id,
     email: u.email,
     name: u.name,
-    role: u.role,
+    role: db.prepare("SELECT 1 FROM teacher_viewers WHERE user_id=?").get(u.id)
+      ? "teacher"
+      : u.role,
+    readOnly: !!db
+      .prepare("SELECT 1 FROM teacher_viewers WHERE user_id=?")
+      .get(u.id),
     mustChange: !!u.must_change,
     uploadedAvatarId:
       db.prepare("SELECT id FROM avatar_uploads WHERE user_id=?").get(u.id)
@@ -296,6 +301,40 @@ export function createApp(
     }
     if (!req.user)
       return next(new ApiError(401, "Vui lòng đăng nhập để tiếp tục."));
+    const viewer = db
+      .prepare("SELECT teacher_id FROM teacher_viewers WHERE user_id=?")
+      .get(req.user.id);
+    if (viewer) {
+      if (
+        !db
+          .prepare("SELECT 1 FROM users WHERE id=? AND role='teacher'")
+          .get(viewer.teacher_id)
+      )
+        return next(
+          new ApiError(
+            403,
+            "Quyền xem của tài khoản chưa có giáo viên phụ trách hợp lệ.",
+          ),
+        );
+      if (
+        !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
+        !["/auth/logout", "/auth/password"].includes(req.path)
+      )
+        return next(
+          new ApiError(
+            403,
+            "Tài khoản này chỉ có quyền xem, không được chỉnh sửa dữ liệu.",
+          ),
+        );
+      // Auth/profile retain the real identity. Resource reads use the owner's
+      // existing scope checks; all resource writes have already been denied.
+      req.user = {
+        ...req.user,
+        role: "teacher",
+        readOnly: true,
+        ...(!req.path.startsWith("/auth/") ? { id: viewer.teacher_id } : {}),
+      };
+    }
     expireStudySessions(db, now());
     sweepWeeklyPractice(db, now());
     if (
@@ -537,7 +576,7 @@ export function createApp(
         subject: c.subject,
         grade: c.grade,
         teacherName: c.teacherName,
-        canManageClass: req.user!.role === "teacher",
+        canManageClass: req.user!.role === "teacher" && !req.user!.readOnly,
         ...(req.user!.role === "student"
           ? {
               studyWeek: studentStudyStatistics(
@@ -579,11 +618,13 @@ export function createApp(
         ).map((ch) => ({
           ...ch,
           lessons: chapterLessons(db, ch.id),
-          canManageLessons: req.user!.role === "teacher",
-          canDeleteChapter: req.user!.role === "teacher",
-          canReorderChapter: req.user!.role === "teacher",
+          canManageLessons: req.user!.role === "teacher" && !req.user!.readOnly,
+          canDeleteChapter: req.user!.role === "teacher" && !req.user!.readOnly,
+          canReorderChapter:
+            req.user!.role === "teacher" && !req.user!.readOnly,
           practiceAllowed: practiceAllowed(db, String(ch.id)),
-          canDeleteQuestions: req.user!.role === "teacher",
+          canDeleteQuestions:
+            req.user!.role === "teacher" && !req.user!.readOnly,
           canTagQuestions: true,
           questionCount: (
             db
@@ -1907,7 +1948,8 @@ export function createApp(
           chapterTitle: q.chapterTitle,
           resolved: !!q.resolved,
           updatedAt: q.updatedAt,
-          canEditSource: !chapterIsArchived(db, String(q.chapter_id)),
+          canEditSource:
+            !req.user!.readOnly && !chapterIsArchived(db, String(q.chapter_id)),
           wrongAnswers: (history.get(String(q.id)) ?? []).sort(
             (a, b) => a.at - b.at,
           ),

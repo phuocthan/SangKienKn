@@ -7,6 +7,15 @@ export class ApiError extends Error {
   }
 }
 export async function api<T>(path: string, body?: unknown): Promise<T> {
+  if (
+    body !== undefined &&
+    document.documentElement.dataset.readOnly === "true" &&
+    !["/auth/logout", "/auth/password", "/auth/login"].includes(path)
+  )
+    throw new ApiError(
+      403,
+      "Tài khoản này chỉ có quyền xem, không được chỉnh sửa dữ liệu.",
+    );
   const multipart = body instanceof FormData;
   const response = await fetch(`/api${path}`, {
     method: body === undefined ? "GET" : "POST",

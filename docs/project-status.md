@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: giáo viên chỉ xem — 27/10/2026
+
+Đã tạo tài khoản `giaovien-nk` xem phạm vi lớp của thanhphuong, có danh tính/phiên riêng, không chỉnh sửa nội dung/điểm hoặc mở/khóa bài. Bảng teacher_viewers bổ sung, server chặn mọi ghi ngoại trừ đổi mật khẩu riêng/đăng xuất; UI teacher+readOnly, khóa/ẩn thao tác ghi, giữ tìm kiếm/xem/xuất báo cáo. Vai trò nền không có quyền giáo viên/membership để đóng quyền trên backend cũ. Không nhân bản lớp hay sửa dữ liệu học tập. [Chi tiết quyền và CLI](teacher-viewers.md).
+
+QA mới207/207backend,2/2E2E viewer desktop/mobile và4/4E2E Word/ngưỡng/top10 trước đó đạt, build/typecheck đạt; test dùng database riêng. Chỉ tạo tài khoản thật theo yêu cầu, không test bằng tài khoản giáo viên thật. Hoàn tất ở commit/push Git; không chờ/xác minh Railway deploy, cần backend bản mới để dùng quyền xem.
+
 ## Hiện hành: ngưỡng Săn thưởng riêng lớp, top10 chỉ online — 26/10/2026
 
 Săn thưởng cho GV đặt ngưỡng0–10 (mặc định8) riêng lớp; lượt mới đạt ngưỡng chờ duyệt +1, không giới hạn10 bạn. Giữ cấp3/4/5→Đề1/2/3, hết lỗi sổ tay trong chương và tỷ lệ đúng≥70%; giờ làm Hunt hợp lệ nay cộng đúng chương và tổng tuần, không lấy giờ chương khác để lên cấp. Sửa lỗi chunk importWord không tải được trong ảnh bằng parser tải cùng workspace; kiểm tra mở Hunt sau tải DOCX.

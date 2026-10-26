@@ -252,6 +252,12 @@ export default function App() {
   const [loadingClasses, setLoadingClasses] = useState(false);
   const current = classes.find((c) => c.id === classId) ?? classes[0];
   const isTeacher = user?.role === "teacher";
+  useEffect(() => {
+    document.documentElement.dataset.readOnly = String(!!user?.readOnly);
+    return () => {
+      delete document.documentElement.dataset.readOnly;
+    };
+  }, [user?.readOnly]);
   const levelUps = useChapterLevelUps(
     user?.role === "student" ? user.id : "",
     classes,
@@ -822,6 +828,12 @@ export default function App() {
           onNavigate={navigate}
           contentKey={isClassManagementPage ? "class-management" : page}
         >
+          {user.readOnly && (
+            <p className="info-panel" role="status">
+              Giáo viên chỉ xem · Bạn có thể xem các lớp được chia sẻ, không thể
+              chỉnh sửa dữ liệu.
+            </p>
+          )}
           {!isTeacher && (
             <ExamNotices
               key={user.id}
@@ -1130,6 +1142,7 @@ export default function App() {
                     action={
                       <button
                         className="button primary"
+                        disabled={user.readOnly}
                         onClick={() => setEditor("class")}
                       >
                         <Plus size={18} />
@@ -1184,7 +1197,7 @@ export default function App() {
                         key={`${current.id}-${classLearning.levelMinutes ?? 60}-${JSON.stringify(classLearning.sessionPolicy)}`}
                         minutes={classLearning.levelMinutes ?? 60}
                         enabled={classLearning.canConfigureLevels === true}
-                        busy={classLearningBusy}
+                        busy={classLearningBusy || !!user.readOnly}
                         policy={classLearning.sessionPolicy}
                         canConfigurePolicy={
                           classLearning.classManagement === true
@@ -1201,6 +1214,7 @@ export default function App() {
                       <div className="loading-panel">Đang tải cài đặt lớp…</div>
                     ) : null}
                     <WeeklyPractice
+                      readOnly={user.readOnly}
                       key={current.id}
                       classroomId={current.id}
                       active={page === "class-general"}
@@ -1238,6 +1252,7 @@ export default function App() {
                           </button>
                           <button
                             className="button outline small"
+                            disabled={user.readOnly}
                             onClick={() => setEditor("chapter")}
                           >
                             <Plus size={16} />
@@ -1327,6 +1342,7 @@ export default function App() {
                                 <button
                                   className={`button ${access?.practiceAllowed ? "danger" : "primary"} small`}
                                   disabled={
+                                    user.readOnly ||
                                     classLearningBusy ||
                                     !classLearning?.classManagement
                                   }
@@ -1385,7 +1401,7 @@ export default function App() {
                     action={
                       <button
                         className="button primary"
-                        disabled={!current.chapters.length}
+                        disabled={user.readOnly || !current.chapters.length}
                         onClick={() => setEditor("question")}
                       >
                         <Plus size={18} />
@@ -1431,6 +1447,7 @@ export default function App() {
                         </label>
                       </div>
                       <QuestionBank
+                        readOnly={user.readOnly}
                         deleteSupported={
                           !!(
                             current.chapters.find(
@@ -2182,7 +2199,11 @@ function TeacherHome({
       </div>
       <SectionTitle title="Chuẩn bị cho buổi học" />
       <div className="quick-actions">
-        <button className="card" onClick={() => onEditor("student")}>
+        <button
+          className="card"
+          disabled={classroom.canManageClass === false}
+          onClick={() => onEditor("student")}
+        >
           <span className="stat-icon green">
             <Users size={22} />
           </span>
@@ -2190,7 +2211,11 @@ function TeacherHome({
 
           <ArrowRight size={18} />
         </button>
-        <button className="card" onClick={() => onEditor("chapter")}>
+        <button
+          className="card"
+          disabled={classroom.canManageClass === false}
+          onClick={() => onEditor("chapter")}
+        >
           <span className="stat-icon blue">
             <BookOpen size={22} />
           </span>
@@ -2492,7 +2517,11 @@ function Roster({
               <TrendingUp size={16} />
               Thống kê
             </button>
-            <button className="button primary small" onClick={onAdd}>
+            <button
+              className="button primary small"
+              disabled={classroom.canManageClass === false}
+              onClick={onAdd}
+            >
               <Plus size={16} />
               Thêm học sinh
             </button>
@@ -2647,6 +2676,7 @@ function Roster({
                     <td>
                       <button
                         className="text-button"
+                        disabled={classroom.canManageClass === false}
                         onClick={() => onReset(s)}
                       >
                         Cấp lại mật khẩu

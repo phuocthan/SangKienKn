@@ -690,7 +690,7 @@ export function registerLearningRoutes(
       classManagement: true,
       sessionPolicy: sessionPolicy(db, String(c.id)),
       levelMinutes: classroomLevelMinutes(db, String(c.id)),
-      canConfigureLevels: req.user!.role === "teacher",
+      canConfigureLevels: req.user!.role === "teacher" && !req.user!.readOnly,
       examCreation: true,
       onlineExams: true,
       reviewPapers: true,

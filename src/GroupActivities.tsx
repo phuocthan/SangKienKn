@@ -283,7 +283,7 @@ export function GroupActivities({
             Danh sách hoạt động
           </button>
         )}
-        {teacher && createButton}
+        {teacher && !user.readOnly && createButton}
       </div>
       {loading && <p role="status">Đang tải hoạt động…</p>}
       {!selected &&
@@ -394,7 +394,7 @@ export function GroupActivities({
                   Nộp bài
                 </button>
               )}
-              {teacher && (
+              {teacher && !user.readOnly && (
                 <button
                   className="button outline small"
                   onClick={() => setExtending(true)}
@@ -595,7 +595,7 @@ export function GroupActivities({
                                   ))}
                                 </ul>
 
-                                {teacher && (
+                                {teacher && !user.readOnly && (
                                   <Representative
                                     key={group.representativeId}
                                     activity={detail}

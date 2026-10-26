@@ -417,7 +417,7 @@ export function Learning({
     >
       <WorkspaceHeading className="learning-heading learning-page-heading">
         <h1>{onlinePage ? "Kiểm tra" : "Săn thưởng"}</h1>
-        {teacher && onlinePage && (
+        {teacher && !user.readOnly && onlinePage && (
           <button
             ref={createExamButtonRef}
             className="button primary"
@@ -580,6 +580,7 @@ export function Learning({
                     <button
                       className="button secondary small"
                       disabled={
+                        user.readOnly ||
                         busy ||
                         !data.classManagement ||
                         !classroom.chapters.some((c) => c.id === ch.id)
@@ -605,7 +606,7 @@ export function Learning({
                     <ChapterSettings
                       key={`${ch.id}-${ch.semester}-${ch.accuracyBasis}`}
                       chapter={ch}
-                      busy={busy}
+                      busy={busy || !!user.readOnly}
                       onSave={(body) =>
                         act(
                           () => api(`/chapters/${ch.id}/learning`, body),
@@ -1041,7 +1042,7 @@ export function Learning({
             <OnlineExamGroups
               data={data}
               teacher={teacher}
-              busy={busy}
+              busy={busy || !!user.readOnly}
               onStart={(ex) =>
                 void act(
                   () => api(`/learning/exams/${ex.id}/open`, {}),
@@ -1123,6 +1124,7 @@ export function Learning({
                             <button
                               className="button primary small"
                               disabled={
+                                user.readOnly ||
                                 busy ||
                                 (ex.delivery === "online"
                                   ? ex.startedAt != null || !data.onlineExams
@@ -1148,6 +1150,7 @@ export function Learning({
                             <button
                               className={`button ${ex.enabled ? "danger" : "primary"} small`}
                               disabled={
+                                user.readOnly ||
                                 busy ||
                                 ex.closesAt <= Date.now() ||
                                 (ex.delivery === "online" && !ex.enabled)
@@ -1271,7 +1274,7 @@ export function Learning({
                 ? "Mỗi bài kiểm tra kết thúc đề xuất tối đa 10 bạn đạt từ 8 điểm, xếp điểm cao trước; bằng điểm ưu tiên thời gian làm bài ngắn hơn. Giáo viên duyệt +1 điểm cho từng bạn."
                 : `Mỗi chương đạt Kết Trái (cấp 5) nhận 1 điểm; mỗi lượt Săn điểm đạt từ ${(data.huntMinimumScore ?? 8).toLocaleString("vi-VN")} được đề xuất +1 điểm. Giáo viên duyệt việc ghi nhận; không giới hạn top 10 ở Săn thưởng.`}
             </p>
-            {!onlinePage && teacher && (
+            {!onlinePage && teacher && !user.readOnly && (
               <HuntRewardSettings
                 key={`${classroom.id}-${data.huntMinimumScore ?? 8}`}
                 minimum={data.huntMinimumScore ?? 8}
@@ -1310,7 +1313,7 @@ export function Learning({
                         </p>
                       )}
                     </div>
-                    {teacher && r.status === "pending" && (
+                    {teacher && !user.readOnly && r.status === "pending" && (
                       <div className="learning-actions">
                         <button
                           className="button primary small"

@@ -4,6 +4,9 @@ if (!process.env.DATABASE_PATH?.startsWith(".local/e2e-"))
   throw new Error("Browser tests require a dedicated e2e database.");
 const db = openDatabase(process.env.DATABASE_PATH);
 seedDemo(db);
+// Isolated read-only teacher fixture, with no student memberships.
+db.prepare("INSERT INTO users VALUES('viewer-e2e','viewer@greenedu.test','Giáo viên chỉ xem kiểm thử',?,'student',0)").run(hashPassword('ViewerTest123!'));
+db.prepare("INSERT INTO teacher_viewers VALUES('viewer-e2e','teacher-demo')").run();
 // Independent classroom for access/policy scenarios; never inserted in live data.
 db.prepare('INSERT INTO users VALUES(?,?,?,?,?,0)').run('management-student','management@greenedu.test','Học sinh chính sách',hashPassword('ManagementTest123!'),'student');
 db.prepare('INSERT INTO classrooms VALUES(?,?,?,?,?)').run('management-class','Lớp quản lý kiểm thử','Vật lý','11','teacher-demo');

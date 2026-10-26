@@ -40,6 +40,11 @@ export function openDatabase(path: string) {
     CREATE TABLE IF NOT EXISTS sessions (
       token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), expires_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS teacher_viewers (
+      user_id TEXT PRIMARY KEY REFERENCES users(id),
+      teacher_id TEXT NOT NULL REFERENCES users(id),
+      CHECK(user_id != teacher_id)
+    );
     CREATE TABLE IF NOT EXISTS classrooms (
       id TEXT PRIMARY KEY, name TEXT NOT NULL, subject TEXT NOT NULL, grade TEXT NOT NULL,
       teacher_id TEXT NOT NULL REFERENCES users(id)

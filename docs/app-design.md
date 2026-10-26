@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Chế độ giáo viên chỉ xem — 27/10/2026
+
+Giữ giao diện giáo viên với banner **Giáo viên chỉ xem**; dữ liệu từ các lớp được chia sẻ. Khóa/ẩn thao tác tạo/sửa/xóa/duyệt/cấp lại mật khẩu/mở-khóa bài; giữ chọn lớp, tìm kiếm, xem lịch sử/sổ tay/bài nộp và tải báo cáo. API/auth trả ID và hồ sơ người xem riêng, không đổi tên hiển thị thành chủ dữ liệu. Server kiểm tra quyền ghi độc lập với UI. Thiết kế theo hai skill hiện có, không đổi CSS/asset/layout chung.
+
 ## Duyệt điểm cộng Săn thưởng và online — 26/10/2026
 
 Giữ bố cục/style hiện có. Săn thưởng thêm form **Điểm tối thiểu để xét điểm cộng** riêng lớp (mặc định8), ghi rõ chỉ áp dụng lượt nộp mới; học sinh đọc ngưỡng, chủ lớp mới được sửa. Kiểm tra online có vùng **Top 10 xét điểm cộng online**, hiện hạng/điểm/thời gian và nút Duyệt/Từ chối từng bạn đạt từ8điểm sau khi kết thúc. Hai trang lọc đúng loại đề xuất; Săn thưởng không giới hạn top10. Dùng redesign-existing-projects và rà web-design-guidelines, nhãn input, khóa khi gửi, trạng thái lỗi/thành công dùng luồng act hiện có.

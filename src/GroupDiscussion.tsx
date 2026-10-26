@@ -176,7 +176,7 @@ function DiscussionDialog({
                     .filter((reply) => reply.parentId === post.id)
                     .map(message)}
                 </div>
-                {(own || teacher) && (
+                {!user.readOnly && (own || teacher) && (
                   <MessageComposer
                     label={`Phản biện ý kiến của ${post.authorName}`}
                     submitLabel="Gửi phản biện"
@@ -185,7 +185,7 @@ function DiscussionDialog({
                 )}
               </section>
             ))}
-          {(!own && activity.myGroupId) || teacher ? (
+          {!user.readOnly && ((!own && activity.myGroupId) || teacher) ? (
             <div className="discussion-new">
               <h3>Gửi trao đổi cho nhóm</h3>
               <label>
