@@ -584,6 +584,153 @@ test("hunt upload/reuse/delete retains private snapshots and history; teacher cl
   assert.deepEqual(f.db.prepare("PRAGMA foreign_key_check").all(), []);
 });
 
+test("hunt stays open until teacher closure and each late student gets a full independent duration", async (t) => {
+  const f = await fixture(t);
+  await f.post(
+    "/classrooms/class-demo/general-settings",
+    {
+      minutes: 60,
+      policy: { ...f.rules, warningIdleSeconds: 3500, closeIdleSeconds: 3600 },
+    },
+    f.teacher,
+  );
+  f.eligible();
+  f.db
+    .prepare("INSERT INTO progress VALUES('student-2','chapter-1',7200)")
+    .run();
+  f.db
+    .prepare(
+      "INSERT INTO attempts VALUES(?,'student-2','question-1',0,1,'practice',?)",
+    )
+    .run(randomUUID(), f.now());
+  const url = "/chapters/chapter-1/hunt-access";
+  await f.post(
+    url,
+    {
+      enabled: true,
+      questions: paper,
+      preparationMinutes: 1,
+      durationMinutes: 20,
+    },
+    f.teacher,
+  );
+  const overview = await f.read("/classrooms/class-demo/learning");
+  assert.equal(overview.huntTeacherControlled, true);
+  assert.equal(overview.chapters[0].hunt.closesAt, null);
+  assert.equal(
+    (
+      await f.request(
+        "/classrooms/class-demo/exam-runs",
+        { chapterId: "chapter-1", requestId: randomUUID() },
+        f.student,
+      )
+    ).status,
+    403,
+  );
+  f.advance(25 * 60000);
+  let state = (await f.read("/classrooms/class-demo/learning")).chapters[0];
+  assert.equal(state.hunt.open, true);
+  assert.equal(state.eligible, true);
+  const start = () => ({ chapterId: "chapter-1", requestId: randomUUID() });
+  const first = await f.post("/classrooms/class-demo/exam-runs", start());
+  const firstPath = `/learning/exam-runs/${first.id}`;
+  const firstView = await f.read(firstPath);
+  assert.equal(firstView.deadlineAt, f.now() + 20 * 60000);
+  await f.post(firstPath + "/answers", {
+    revision: 0,
+    answers: { [firstView.questions[0].id]: 0 },
+  });
+  f.advance(30000);
+  const second = await f.post(
+    "/classrooms/class-demo/exam-runs",
+    start(),
+    f.peer,
+  );
+  const secondPath = `/learning/exam-runs/${second.id}`;
+  const secondView = await f.read(secondPath, f.peer);
+  assert.equal(secondView.deadlineAt, firstView.deadlineAt + 30000);
+  f.advance(firstView.deadlineAt - f.now() - 1);
+  sweepLearningExams(f.db, f.now());
+  assert.equal((await f.read(firstPath)).status, "active");
+  f.advance(1);
+  sweepLearningExams(f.db, f.now());
+  const submitted = await f.read(firstPath);
+  assert.equal(submitted.reason, "deadline");
+  assert.equal(submitted.answers[firstView.questions[0].id], 0);
+  assert.equal((await f.read(secondPath, f.peer)).status, "active");
+  state = (await f.read("/classrooms/class-demo/learning")).chapters[0];
+  assert.equal(state.hunt.open, true);
+  await f.post(url, { enabled: false }, f.teacher);
+  assert.equal((await f.read(secondPath, f.peer)).reason, "teacher");
+  assert.equal(
+    (await f.read("/classrooms/class-demo/learning")).chapters[0].hunt.open,
+    false,
+  );
+  assert.equal(
+    (await f.request("/classrooms/class-demo/exam-runs", start(), f.peer))
+      .status,
+    403,
+  );
+});
+
+test("legacy hunt windows retain their deadlines and stay closed until the teacher reopens them", async (t) => {
+  const f = await fixture(t);
+  f.eligible();
+  const url = "/chapters/chapter-1/hunt-access";
+  await f.post(
+    url,
+    { enabled: true, questions: paper, durationMinutes: 20 },
+    f.teacher,
+  );
+  const legacyDeadline = f.now() + 60000;
+  f.db
+    .prepare(
+      "UPDATE chapter_hunt_settings SET closes_at=? WHERE chapter_id='chapter-1'",
+    )
+    .run(legacyDeadline);
+  ensureClassManagementSchema(f.db);
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT closes_at FROM chapter_hunt_settings WHERE chapter_id='chapter-1'",
+      )
+      .get()!.closes_at,
+    legacyDeadline,
+  );
+  const run = await f.post("/classrooms/class-demo/exam-runs", {
+    chapterId: "chapter-1",
+    requestId: randomUUID(),
+  });
+  assert.equal(
+    (await f.read(`/learning/exam-runs/${run.id}`)).deadlineAt,
+    legacyDeadline,
+  );
+  f.advance(60000);
+  sweepLearningExams(f.db, f.now());
+  const frozen = f.db.prepare("SELECT * FROM exam_runs WHERE id=?").get(run.id);
+  const legacy = (await f.read("/classrooms/class-demo/learning")).chapters[0];
+  assert.equal(legacy.hunt.open, false);
+  assert.equal(legacy.hunt.closesAt, legacyDeadline);
+  await f.post(
+    url,
+    { enabled: true, reuse: true, preparationMinutes: 0 },
+    f.teacher,
+  );
+  const reopened = (await f.read("/classrooms/class-demo/learning"))
+    .chapters[0];
+  assert.equal(reopened.hunt.open, true);
+  assert.equal(reopened.hunt.closesAt, null);
+  f.advance(86400000);
+  assert.equal(
+    (await f.read("/classrooms/class-demo/learning")).chapters[0].hunt.open,
+    true,
+  );
+  assert.deepEqual(
+    f.db.prepare("SELECT * FROM exam_runs WHERE id=?").get(run.id),
+    frozen,
+  );
+});
+
 test("official exam has its own opening; global tab cap and server idle submit saved answers without counting polling as activity", async (t) => {
   const f = await fixture(t);
   await f.configure();

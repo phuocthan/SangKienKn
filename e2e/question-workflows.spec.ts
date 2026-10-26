@@ -128,7 +128,7 @@ test("bank searches without accents and edits the shared source directly from a 
     .getByRole("combobox", { name: "Đáp án đúng", exact: true })
     .selectOption("2");
   await edit
-    .getByLabel("Lời giải", { exact: true })
+    .getByRole("textbox", { name: "Lời giải", exact: true })
     .fill("Lời giải mới chọn C.");
   await edit
     .getByRole("button", { name: "Lưu câu nguồn", exact: true })
@@ -222,6 +222,7 @@ test("teacher uploads three different hunt papers, duplicate content is rejected
     name: "Mở săn thưởng",
     exact: true,
   });
+  await expect(dialog).toContainText("giữ mở đến khi giáo viên khóa");
   const upload = async (slot: number, text: string) =>
     dialog
       .getByRole("group", {
@@ -270,6 +271,9 @@ test("teacher uploads three different hunt papers, duplicate content is rejected
   const overview = await (
     await page.request.get(`/api/classrooms/${f.classroom.id}/learning`)
   ).json();
+  expect(overview.huntTeacherControlled).toBe(true);
+  expect(overview.chapters[0].hunt.closesAt).toBeNull();
+  expect(overview.chapters[0].hunt.open).toBe(true);
   expect(overview.chapters[0].hunt.papers.map((p: any) => p.slot)).toEqual([
     1, 2, 3,
   ]);

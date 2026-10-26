@@ -1,8 +1,14 @@
 # Quản lý lớp: quyền học tập và quy tắc phiên
 
+## Săn thưởng mở đến khi giáo viên khóa — 26/10/2026
+
+Người dùng đã chốt: **Mở đến khi giáo viên khóa; thời gian làm bài tính riêng cho từng lượt của học sinh**. Thời gian chuẩn bị X vẫn quyết định giờ bắt đầu được vào; Y phút tính từ lúc học sinh bắt đầu lượt, không dùng làm hạn mở chung. Hết Y chỉ thu bài của lượt đó; chương vẫn mở cho học sinh khác. Giáo viên khóa sẽ chặn lượt mới và thu các lượt đang làm; tab/idle, vé, điều kiện và ba đề khác nhau giữ nguyên. Kiểm tra online không đổi.
+
+Lần mở mới lưu closes_at=0 trong bảng hiện có; API trả hunt.closesAt=null và capability huntTeacherControlled=true. Không migration/chuyển tự động đợt cũ sang mở vô hạn: mốc closes_at dương và deadline_at của lượt cũ vẫn được tôn trọng, bài/điểm đã nộp giữ nguyên. Đợt cũ hết hạn cần giáo viên mở lại một lần; bộ đề đã lưu dùng lại được. Retry không đặt lại giờ bắt đầu hoặc gia hạn một lượt đang làm, không cho đổi đề/cấu hình trong lúc chương còn mở. Nội dung này thay quy tắc hạn đóng chung trong lịch sử.
+
 ## Ba đề săn thưởng cho ba vé — 26/10/2026
 
-Mỗi chương có tối đa **Đề 1 / Đề 2 / Đề 3**, gắn lần lượt vé cấp3/4/5. Hộp Mở săn thưởng có ba vùng Word/CSV riêng, dùng lại từng đề và báo số đề đã tải/3. Cho mở khi mới có Đề1; nếu thiếu đề của vé tiếp theo, server chặn vào và không tiêu vé. Giữ điều kiện cấp/tỉ lệ đúng/sổ tay, hạn mở chung, chính sách phiên và ngưỡng đạt thưởng hiện có. Không tự trao thêm vé hoặc thu hồi điểm cũ.
+Mỗi chương có tối đa **Đề 1 / Đề 2 / Đề 3**, gắn lần lượt vé cấp3/4/5. Hộp Mở săn thưởng có ba vùng Word/CSV riêng, dùng lại từng đề và báo số đề đã tải/3. Cho mở khi mới có Đề1; nếu thiếu đề của vé tiếp theo, server chặn vào và không tiêu vé. Giữ điều kiện cấp/tỉ lệ đúng/sổ tay, chính sách phiên và ngưỡng đạt thưởng hiện có; thời gian mở theo quyết định ở đầu tài liệu. Không tự trao thêm vé hoặc thu hồi điểm cũ.
 
 Server chọn đề theo vé chưa dùng thấp nhất, không theo số lần reload hoặc số lần bấm. Bộ đề trùng nội dung bị từ chối dù đổi ID/tên/thứ tự câu/phương án/lời giải; trước bắt đầu còn so với toàn bộ các đề mà học sinh đã làm trong chương, kể cả lịch sử trước migration. Vì vậy khóa/mở lại/tải lại cùng đề không giúp dùng vé khác để nhận thêm điểm. Nguồn ngân hàng cũ vẫn giữ lối vào tương thích nhưng cũng chặn lặp nguyên đề.
 
@@ -59,7 +65,7 @@ Quyền kiểm tra chương cũ còn giữ qua `/exam-access` để tương thí
 
 Mở săn thưởng hiện hộp: tên đề, upload, thời gian chuẩn bị X phút (0–60), làm bài Y phút (1–180), giới hạn rời tab (1–20). Có đề đã lưu thì mặc định **Sử dụng bộ đề đã tải trước đó**, kèm thời điểm tải; bỏ chọn để tải đề mới. Mẫu/preview/kiểm tra lỗi Word và CSV dùng chung với tạo kiểm tra online; chỉ một chương trong hộp này.
 
-Bấm mở chốt snapshot và đặt giờ mở T+X, hạn chung T+X+Y. Mỗi lượt đảo thứ tự câu và lưu thứ tự; vào muộn không được gia hạn. Không được thay bộ đề hoặc kéo dài cửa sổ đang mở; khóa trước khi mở đợt mới. Request ID chống retry tạo thêm đề hoặc đổi giờ. Học sinh thấy tên đề/thời lượng/giờ mở–đóng trên thẻ săn thưởng; poll hiện có cập nhật quyền, server quyết định quyền vào thật.
+Bấm mở chốt nguồn đề và đặt giờ mở T+X, giữ mở đến khi giáo viên khóa. Mỗi lượt đảo thứ tự câu và lưu thứ tự, có hạn riêng lúc bắt đầu+Y; học sinh vào sau vẫn được đủ Y phút. Không được thay bộ đề/cấu hình đang mở; khóa trước khi mở đợt mới. Request ID chống retry tạo thêm đề hoặc đổi giờ. Thẻ học sinh hiển thị thời lượng mỗi lượt và mở đến khi giáo viên khóa; poll cập nhật quyền, server quyết định quyền vào thật. Đợt cũ có hạn dương vẫn hiển thị giờ mở–đóng cũ tới khi giáo viên mở lại.
 
 Bấm khóa luôn có xác nhận: học sinh không vào mới; lượt đang làm thu bài với đáp án đã lưu. Checkbox **Xóa bộ đề đã tải lên** mặc định bỏ chọn. Không xóa thì mở lại dùng đề/thời điểm tải cũ, đặt cửa sổ mới; chọn xóa thì không thể dùng lại đề cấu hình đó, phải tải mới. Giữ snapshot/câu và kết quả của các lượt đã làm để lịch sử và sổ tay không mất dữ liệu. Không xóa lịch sử để xóa đề đang cấu hình.
 

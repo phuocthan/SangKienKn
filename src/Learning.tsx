@@ -619,6 +619,7 @@ export function Learning({
             classroom.chapters.some((c) => c.id === huntChapter) && (
               <HuntAccess
                 multiplePapers={!!data.huntPaperSlots}
+                teacherControlled={!!data.huntTeacherControlled}
                 key={huntChapter}
                 chapter={classroom.chapters.find((c) => c.id === huntChapter)!}
                 state={data.chapters.find((c) => c.id === huntChapter)!}
@@ -972,10 +973,11 @@ export function Learning({
                             dateStyle: "short",
                             timeStyle: "short",
                           }).format(ch.hunt.startsAt)}{" "}
-                          –{" "}
-                          {new Intl.DateTimeFormat("vi-VN", {
-                            timeStyle: "short",
-                          }).format(ch.hunt.closesAt)}
+                          {ch.hunt.closesAt == null
+                            ? "· Mở đến khi giáo viên khóa; thời gian tính riêng mỗi lượt."
+                            : `– ${new Intl.DateTimeFormat("vi-VN", {
+                                timeStyle: "short",
+                              }).format(ch.hunt.closesAt)}`}
                         </p>
                       )}
                       {ch.eligible && ch.examAllowed ? (

@@ -57,6 +57,10 @@ type Snapshot = {
   explanation: string;
 };
 const json = <T>(v: unknown): T => JSON.parse(String(v));
+// Zero means teacher-controlled opening. Positive deadlines belong to older
+// hunt windows and retain their original closing time until explicitly reopened.
+const huntWindowEnded = (hunt: Row, timestamp: number) =>
+  Number(hunt.closes_at) > 0 && Number(hunt.closes_at) <= timestamp;
 const shuffle = <T>(values: T[]) => {
   const result = [...values];
   for (let i = result.length - 1; i > 0; i--) {
@@ -217,7 +221,7 @@ export function sweepLearningExams(db: DatabaseSync, timestamp = Date.now()) {
         : undefined;
     if (
       hunt &&
-      (Number(hunt.closes_at) <= timestamp ||
+      (huntWindowEnded(hunt, timestamp) ||
         db
           .prepare("SELECT enabled FROM chapter_exam_access WHERE chapter_id=?")
           .get(run.chapter_id)?.enabled === 0)
@@ -467,7 +471,7 @@ export function registerLearningRoutes(
       examAllowed(String(ch.id)) &&
       (!hunt ||
         (json<Snapshot[]>(hunt.questions).length > 0 &&
-          Number(hunt.closes_at) > now()));
+          !huntWindowEnded(hunt, now())));
     if (!allowed) missing.push("Giáo viên chưa mở săn thưởng chương này");
     if (hunt && Number(hunt.starts_at) > now())
       missing.push("Săn thưởng chưa đến giờ bắt đầu");
@@ -514,11 +518,11 @@ export function registerLearningRoutes(
               uploadedAt: h.uploaded_at,
               title: h.title,
               startsAt: h.starts_at,
-              closesAt: h.closes_at,
+              closesAt: Number(h.closes_at) || null,
               durationMinutes: h.duration_minutes,
               preparationMinutes: h.preparation_minutes,
               tabLimit: h.tab_limit,
-              open: allowed && Number(h.closes_at) > now(),
+              open: allowed,
               nextSlot: nextPaper.slot,
               papers: huntPapers(db, String(ch.id)).map((p) => ({
                 slot: Number(p.slot),
@@ -673,6 +677,7 @@ export function registerLearningRoutes(
       examScheduling: true,
       examEditing: true,
       huntPaperSlots: true,
+      huntTeacherControlled: true,
       examProgressCredit: true,
       classManagement: true,
       sessionPolicy: sessionPolicy(db, String(c.id)),
@@ -1050,7 +1055,7 @@ export function registerLearningRoutes(
         finalize(db, run, "teacher", now());
       return res.json({ ok: true });
     }
-    if (old && examAllowed(String(ch.id)) && Number(old.closes_at) > now())
+    if (old && examAllowed(String(ch.id)) && !huntWindowEnded(old, now()))
       fail(
         409,
         "Săn thưởng đang mở. Hãy khóa trước khi thay bộ đề hoặc giờ mở.",
@@ -1196,7 +1201,7 @@ export function registerLearningRoutes(
         preparation,
         tabs,
         now() + preparation * 60000,
-        now() + (preparation + duration) * 60000,
+        0,
       );
       db.prepare(
         "INSERT INTO chapter_exam_access VALUES(?,?,?,?) ON CONFLICT(chapter_id) DO UPDATE SET enabled=excluded.enabled,updated_by=excluded.updated_by,updated_at=excluded.updated_at",
@@ -2190,12 +2195,9 @@ export function registerLearningRoutes(
             Math.min(20, bank([String(ch.id)]).length),
             {},
           );
-      deadline = hunt
-        ? Math.min(
-            now() + Number(hunt.duration_minutes) * 60000,
-            Number(hunt.closes_at),
-          )
-        : now() + 1200000;
+      deadline = now() + (hunt ? Number(hunt.duration_minutes) : 20) * 60000;
+      if (hunt && Number(hunt.closes_at) > 0)
+        deadline = Math.min(deadline, Number(hunt.closes_at));
       tabLimit = hunt
         ? Number(hunt.tab_limit)
         : sessionPolicy(db, String(c.id)).closeTabs;

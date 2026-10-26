@@ -1,5 +1,17 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: mở săn thưởng đến khi giáo viên khóa — 26/10/2026
+
+Người dùng chốt bỏ hạn đóng chung T+X+Y: X vẫn là thời gian chuẩn bị, Y tính riêng từ lúc mỗi học sinh bắt đầu lượt. Lần mở mới closes_at=0/API null, chỉ khóa chương khi giáo viên khóa; mỗi lượt vẫn tự nộp khi hết thời gian hoặc vi phạm tab/idle. Giữ ba đề/vé/điều kiện/điểm, không sửa kiểm tra online. Đợt/lượt cũ có hạn dương giữ nguyên, không tự mở lại dữ liệu thật; đợt đã hết hạn cần mở lại một lần, dùng lại đề đã lưu. QA/phát hành ở đầu session-handoff; đặc tả đầu class-management.md.
+
+QA mới full200/200backend,6/6E2E desktop/mobile, build/typecheck/format/diff check đạt; log `.local/hunt-window-20261026/`. Kiểm thử độc lập, Railway chỉ đọc lấy mốc78bài/2cấu hình cũ. Chốt Git theo yêu cầu phát hành trước đó; chỉ xác nhận production sau khi đối chiếu deployment và bundle.
+
+## Hiện hành: đáp án mới ngay trên thẻ sổ tay — 26/10/2026
+
+Theo lỗi người dùng báo, thẻ sổ tay giáo viên lấy nguồn mới nhất cùng family để hiển thị câu/đáp án/lời giải, thay việc chỉ thấy bản mới khi mở sửa. API thêm sourceQuestion riêng, các trường lịch sử và trạng thái sửa sai vẫn giữ nguyên; mục mở **Câu và đáp án lúc làm bài** cho phép đối chiếu bản cũ. Áp dụng cả câu đã sửa trước đây, câu riêng và câu ngân hàng; không migration/chấm lại/đổi bài hoặc điểm cũ, không đổi luồng học sinh. QA/phát hành của đợt sửa này ở đầu [session-handoff.md](session-handoff.md).
+
+QA mới build/typecheck,33/33backend,2/2E2E desktop/mobile đạt; log `.local/notebook-answer-20261026/`. Runtime đã được commit/push từ bên ngoài trong lúc kiểm tra: `06dd445`; Railway `89abf736-8806-485d-a68b-4e95f6ff87f9` SUCCESS, nguồn2file/bundle/health khớp. Xác minh26/10 19:36UTC+7,78bài đã nộp không đổi nội dung/câu trả lời/điểm. Ghi chú kết quả và selector test cuối còn local, không phát hành thêm chỉ để lưu ghi chú; không ghi dữ liệu thử production.
+
 ## Phát hành Git — 26/10/2026
 
 Theo yêu cầu deploy Git, chốt bản tìm kiếm/3đề săn thưởng/sửa câu nguồn từ sổ tay lên main. Fetch không có thay đổi remote ngoài2d78856; QA197backend/12E2E là kết quả của lượt phát triển đã đối chiếu, không chạy lại để báo thành lượt mới. Chỉ gồm source/test/tài liệu liên quan, không .local/database/secrets/dữ liệu học sinh. Cần xác minh Railway đúng SHA và tài nguyên production trước khi kết luận đã triển khai; ghi chú chưa push/deploy bên dưới thuộc trước yêu cầu này.

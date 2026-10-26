@@ -30,7 +30,7 @@ export type LearningChapter = {
     uploadedAt: number;
     title: string;
     startsAt: number;
-    closesAt: number;
+    closesAt: number | null;
     durationMinutes: number;
     preparationMinutes: number;
     tabLimit: number;
@@ -105,6 +105,7 @@ export type LearningReward = {
   createdAt: number;
 };
 export type LearningOverview = {
+  huntTeacherControlled?: boolean;
   huntPaperSlots?: boolean;
   examDeletion?: boolean;
   examScheduling?: boolean;

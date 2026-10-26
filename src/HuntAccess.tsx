@@ -12,6 +12,7 @@ export function HuntAccess({
   state,
   policy,
   multiplePapers = false,
+  teacherControlled = false,
   onClose,
   onSaved,
 }: {
@@ -19,6 +20,7 @@ export function HuntAccess({
   state: LearningChapter;
   policy: SessionPolicy;
   multiplePapers?: boolean;
+  teacherControlled?: boolean;
   onClose: () => void;
   onSaved: () => Promise<void>;
 }) {
@@ -252,7 +254,9 @@ export function HuntAccess({
               </label>
             </div>
             <small>
-              Mở sau {wait} phút, làm trong {minutes} phút với hạn đóng chung.
+              {teacherControlled
+                ? `Mở sau ${wait} phút và giữ mở đến khi giáo viên khóa. Mỗi lượt có ${minutes} phút tính từ lúc học sinh bắt đầu.`
+                : `Mở sau ${wait} phút, làm trong ${minutes} phút với hạn đóng chung.`}{" "}
               Quy tắc của Quản lý chung vẫn áp dụng nếu chặt hơn. Học sinh vẫn
               cần đủ điều kiện và vé.
             </small>

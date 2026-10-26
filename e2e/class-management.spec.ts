@@ -223,6 +223,8 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
       .locator(".hunt-chapter")
       .filter({ hasText: "Chương chính sách" });
     await expect(card).toContainText("Đề thưởng kiểm thử");
+    await expect(card).toContainText("Mở đến khi giáo viên khóa");
+    await expect(card).not.toContainText("1970");
     await card.getByRole("button", { name: "Săn thưởng", exact: true }).click();
     await expect(student.locator(".exam-room")).toBeVisible();
     await expect(student.locator(".exam-room")).toContainText(
