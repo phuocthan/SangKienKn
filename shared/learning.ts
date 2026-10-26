@@ -19,6 +19,13 @@ export type MatrixRow = {
 export type LearningChapter = {
   practiceAllowed?: boolean;
   hunt?: {
+    papers?: {
+      slot: number;
+      title: string;
+      uploadedAt: number;
+      questionCount: number;
+    }[];
+    nextSlot?: number;
     hasQuestions: boolean;
     uploadedAt: number;
     title: string;
@@ -98,6 +105,7 @@ export type LearningReward = {
   createdAt: number;
 };
 export type LearningOverview = {
+  huntPaperSlots?: boolean;
   examDeletion?: boolean;
   examScheduling?: boolean;
   examEditing?: boolean;

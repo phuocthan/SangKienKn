@@ -1456,6 +1456,13 @@ test("hunt consumes one ticket atomically despite concurrent/retried starts, gra
     1,
   );
   for (let i = 0; i < 2; i++) {
+    if (i === 0) await f.post("/chapters/chapter-1/hunt-access", {
+      enabled: true, preparationMinutes: 0,
+      papers: [1,2,3].map(slot => ({ slot, questions: [{ chapterId: "chapter-1", question: {
+        text: `Đề riêng cho vé ${slot}`, choices: ["A","B","C","D"], correctIndex: 0,
+        lesson: "Bài luyện tập chung", explanation: "Đáp án A",
+      } }] })),
+    }, f.teacher);
     const r = await f.start({ chapterId: "chapter-1" });
     await f.post(`/learning/exam-runs/${r.id}/submit`, {});
     f.db.prepare("UPDATE corrections SET resolved=1").run();

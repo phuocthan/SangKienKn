@@ -1,5 +1,5 @@
 import { answerLabel, questionKind } from "../shared/question-types";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { QuestionText } from "./QuestionText";
 import {
   CheckCircle2,
@@ -60,7 +60,36 @@ export function QuestionBank({
     [mutationError, setMutationError] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [notice, setNotice] = useState("");
-  const selectable = rows.filter((q) => q.active && q.isCurrent !== false);
+  const [search, setSearch] = useState("");
+  const normalizeSearch = (value: string) =>
+    value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[đĐ]/g, "d")
+      .toLowerCase();
+  const indexed = useMemo(
+    () =>
+      rows.map((question) => ({
+        question,
+        text: normalizeSearch(
+          [
+            question.text,
+            ...question.choices,
+            question.lesson,
+            question.topic,
+            question.explanation,
+          ].join(" "),
+        ),
+      })),
+    [rows],
+  );
+  const terms = normalizeSearch(search).trim().split(/\s+/).filter(Boolean);
+  const visibleRows = indexed
+    .filter((row) => terms.every((term) => row.text.includes(term)))
+    .map((row) => row.question);
+  const selectable = visibleRows.filter(
+    (q) => q.active && q.isCurrent !== false,
+  );
   const selectedQuestions = selectable.filter((q) => selected.has(q.id));
   const allSelected =
     selectable.length > 0 &&
@@ -146,6 +175,19 @@ export function QuestionBank({
   return (
     <>
       <div className="question-toolbar">
+        <label className="bank-search">
+          Tìm câu hỏi
+          <input
+            type="search"
+            name="question-search"
+            value={search}
+            placeholder="Nhập nội dung, phương án, bài hoặc chủ đề…"
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setSelected(new Set());
+            }}
+          />
+        </label>
         <label>
           <input
             type="checkbox"
@@ -198,7 +240,9 @@ export function QuestionBank({
                 ? "Chưa tải được câu hỏi"
                 : selectedQuestions.length
                   ? `Đã chọn ${selectedQuestions.length} câu`
-                  : `${selectable.length} câu đang dùng`}
+                  : search.trim()
+                    ? `${visibleRows.length}/${rows.length} câu khớp tìm kiếm`
+                    : `${selectable.length} câu đang dùng`}
           </span>
           {selectedQuestions.length > 0 && (
             <button
@@ -263,14 +307,22 @@ export function QuestionBank({
         </div>
       ) : loading ? (
         <div className="loading-panel">Đang tải câu hỏi…</div>
-      ) : !rows.length ? (
+      ) : !visibleRows.length ? (
         <Empty
-          title="Chưa có câu hỏi trong bộ lọc này"
-          text="Thêm câu hỏi hoặc nhập file Word/CSV theo mẫu. Bật Hiện cả câu đã ẩn để xem các câu đã ngừng dùng."
+          title={
+            search.trim()
+              ? "Không tìm thấy câu hỏi phù hợp"
+              : "Chưa có câu hỏi trong bộ lọc này"
+          }
+          text={
+            search.trim()
+              ? "Thử từ khóa khác hoặc đổi bộ lọc bài/chương."
+              : "Thêm câu hỏi hoặc nhập file Word/CSV theo mẫu. Bật Hiện cả câu đã ẩn để xem các câu đã ngừng dùng."
+          }
         />
       ) : (
         <div className="bank-list">
-          {rows.map((q) => (
+          {visibleRows.map((q) => (
             <QuestionCard
               key={q.id}
               question={q}

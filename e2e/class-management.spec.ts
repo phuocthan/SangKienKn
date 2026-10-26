@@ -182,13 +182,20 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
   await dialog.getByLabel("Tên bộ đề").fill("Đề thưởng kiểm thử");
   await dialog.getByLabel("Thời gian chuẩn bị (phút)").fill("0");
   await dialog.getByLabel("Thời gian làm bài (phút)").fill("25");
-  await dialog.getByLabel("File đề (.docx hoặc .csv)").setInputFiles({
-    name: "san-thuong.csv",
-    mimeType: "text/csv",
-    buffer: Buffer.from(
-      "Bài học,Câu hỏi,A,B,C,D,Đáp án,Lời giải\nBài 1,Câu thưởng riêng,A,B,C,D,A,Lời giải riêng\n",
-    ),
-  });
+  for (const slot of [1, 2, 3])
+    await dialog
+      .getByRole("group", {
+        name: `Đề ${slot} · Vé cấp ${slot + 2}`,
+        exact: true,
+      })
+      .getByLabel("File đề (.docx hoặc .csv)")
+      .setInputFiles({
+        name: "san-thuong.csv",
+        mimeType: "text/csv",
+        buffer: Buffer.from(
+          `Bài học,Câu hỏi,A,B,C,D,Đáp án,Lời giải\nBài 1,Câu thưởng riêng ${info.project.name} ${slot},A,B,C,D,A,Lời giải riêng\n`,
+        ),
+      });
   await expect(
     dialog.getByRole("button", { name: "Mở săn thưởng", exact: true }),
   ).toBeEnabled();
@@ -208,6 +215,7 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
   const ctx = await browser.newContext({ ...info.project.use });
   const student = await ctx.newPage();
   let runId = "";
+  let runText = "";
   try {
     await login(student);
     await navigateTo(student, { name: "Săn thưởng", exact: true });
@@ -223,6 +231,11 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
     runId = new URLSearchParams(new URL(student.url()).hash.slice(1)).get(
       "exam",
     )!;
+    runText = (
+      await (
+        await student.request.get(`/api/learning/exam-runs/${runId}`)
+      ).json()
+    ).questions[0].text;
     await page.bringToFront();
     await page
       .getByRole("button", {
@@ -261,9 +274,13 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
       exact: true,
     })
     .click();
-  await expect(
-    dialog.getByLabel(/Sử dụng bộ đề đã tải trước đó/),
-  ).toBeChecked();
+  await expect(dialog.getByLabel(/Sử dụng bộ đề đã tải trước đó/)).toHaveCount(
+    3,
+  );
+  for (const checkbox of await dialog
+    .getByLabel(/Sử dụng bộ đề đã tải trước đó/)
+    .all())
+    await expect(checkbox).toBeChecked();
   await expect(dialog).toContainText(/\d{1,2}\/\d{1,2}\/\d{2,4}/);
   await dialog
     .getByRole("button", { name: "Mở săn thưởng", exact: true })
@@ -295,7 +312,7 @@ test("teacher uploads a reward paper, student participates, then close/reuse/del
   expect(
     (await (await page.request.get(`/api/learning/exam-runs/${runId}`)).json())
       .questions[0].text,
-  ).toBe("Câu thưởng riêng");
+  ).toBe(runText);
 });
 
 test("practice warns at the second away event and closes at the third without adding time", async ({

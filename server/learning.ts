@@ -1,5 +1,11 @@
 import { creditExamTime } from "./exam-study-credit.js";
 import {
+  huntPapers,
+  nextHuntPaper,
+  hasUsedHuntPaper,
+  huntPaperFingerprint,
+} from "./hunt-papers.js";
+import {
   answerCorrect,
   statementCorrectness,
   storedAnswer,
@@ -452,6 +458,7 @@ export function registerLearningRoutes(
       )
       .get(userId, ch.id)!;
     const remaining = Number(tickets.granted) - Number(tickets.used ?? 0);
+    const nextPaper = nextHuntPaper(db, String(ch.id), userId);
     const missing: string[] = [];
     const hunt = db
       .prepare("SELECT * FROM chapter_hunt_settings WHERE chapter_id=?")
@@ -472,6 +479,24 @@ export function registerLearningRoutes(
     if (openCorrections)
       missing.push(`Còn ${openCorrections} câu cần sửa trong chương`);
     if (!remaining) missing.push("Chưa có vé còn lại");
+    if (hunt && remaining && !nextPaper.paper)
+      missing.push(
+        `Giáo viên chưa tải đề ${nextPaper.slot} cho vé săn thưởng tiếp theo`,
+      );
+    if (
+      hunt &&
+      nextPaper.paper &&
+      remaining &&
+      hasUsedHuntPaper(
+        db,
+        String(ch.id),
+        userId,
+        json<Snapshot[]>(nextPaper.paper.questions),
+      )
+    )
+      missing.push(
+        "Bạn đã làm bộ đề này. Giáo viên cần tải đề khác cho lượt tiếp theo",
+      );
     return {
       id: ch.id,
       title: ch.title,
@@ -494,6 +519,13 @@ export function registerLearningRoutes(
               preparationMinutes: h.preparation_minutes,
               tabLimit: h.tab_limit,
               open: allowed && Number(h.closes_at) > now(),
+              nextSlot: nextPaper.slot,
+              papers: huntPapers(db, String(ch.id)).map((p) => ({
+                slot: Number(p.slot),
+                title: String(p.title),
+                uploadedAt: Number(p.uploaded_at),
+                questionCount: json<Snapshot[]>(p.questions).length,
+              })),
             }
           : null;
       })(),
@@ -640,6 +672,7 @@ export function registerLearningRoutes(
       examDeletion: true,
       examScheduling: true,
       examEditing: true,
+      huntPaperSlots: true,
       examProgressCredit: true,
       classManagement: true,
       sessionPolicy: sessionPolicy(db, String(c.id)),
@@ -1001,16 +1034,20 @@ export function registerLearningRoutes(
       db.prepare(
         "INSERT INTO chapter_exam_access VALUES(?,?,?,?) ON CONFLICT(chapter_id) DO UPDATE SET enabled=excluded.enabled,updated_by=excluded.updated_by,updated_at=excluded.updated_at",
       ).run(ch.id, 0, req.user!.id, now());
-      if (req.body.deleteQuestions)
+      if (req.body.deleteQuestions) {
         db.prepare(
           "UPDATE chapter_hunt_settings SET questions='[]',uploaded_at=0,title='' WHERE chapter_id=?",
         ).run(ch.id);
-      for (const r of db
+        db.prepare("DELETE FROM chapter_hunt_papers WHERE chapter_id=?").run(
+          ch.id,
+        );
+      }
+      for (const run of db
         .prepare(
           "SELECT * FROM exam_runs WHERE chapter_id=? AND kind='hunt' AND status='active'",
         )
         .all(ch.id))
-        finalize(db, r, "teacher", now());
+        finalize(db, run, "teacher", now());
       return res.json({ ok: true });
     }
     if (old && examAllowed(String(ch.id)) && Number(old.closes_at) > now())
@@ -1042,72 +1079,118 @@ export function registerLearningRoutes(
       "Tên bộ đề",
       120,
     );
-    let questions: Snapshot[] = [];
-    let uploadTime = now();
-    const incoming = req.body.questions;
-    if (req.body.reuse === true) {
-      if (!old || !json<Snapshot[]>(old.questions).length)
-        fail(409, "Chưa có bộ đề để sử dụng lại. Hãy tải đề lên.");
-      questions = json<Snapshot[]>(old.questions);
-      uploadTime = Number(old.uploaded_at);
-    } else {
-      if (!Array.isArray(incoming) || !incoming.length || incoming.length > 100)
-        fail(400, "Tải lên đề có 1–100 câu hỏi hợp lệ.");
-      questions = incoming.map((row: any) => {
-        if (row?.chapterId !== ch.id)
-          fail(403, "Đề săn thưởng chỉ thuộc chương đang mở.");
-        let content: ReturnType<typeof questionInput>;
-        try {
-          content = questionInput(row.question);
-        } catch (e) {
-          fail(400, (e as Error).message);
-        }
-        if (lessonIsArchived(db, String(ch.id), content.lesson))
-          fail(409, "Bài trong đề đã bị xóa.");
-        return {
-          ...content,
-          id: randomUUID(),
-          chapterId: String(ch.id),
-          chapterTitle: String(ch.title),
-        };
-      });
+    // Legacy clients configure slot 1. New clients submit up to three papers.
+    const incoming = req.body.papers ?? [
+      { slot: 1, reuse: req.body.reuse, questions: req.body.questions, title },
+    ];
+    if (!Array.isArray(incoming) || !incoming.length || incoming.length > 3)
+      fail(400, "Mỗi chương có tối đa 3 đề săn thưởng.");
+    const slots = new Set<number>();
+    const papers = incoming.map((paper: any) => {
+      const slot = number(paper?.slot, "Số đề", 1, 3);
+      if (slots.has(slot)) fail(400, "Số đề bị trùng.");
+      slots.add(slot);
+      const previous = db
+        .prepare(
+          "SELECT * FROM chapter_hunt_papers WHERE chapter_id=? AND slot=?",
+        )
+        .get(ch.id, slot);
+      const paperTitle = text(
+        paper.title ?? title + " · Đề " + slot,
+        "Tên đề",
+        120,
+      );
+      let questions: Snapshot[],
+        uploadedAt = now();
+      if (paper.reuse === true) {
+        if (!previous)
+          fail(409, "Chưa có đề " + slot + " để sử dụng lại. Hãy tải đề lên.");
+        questions = json<Snapshot[]>(previous!.questions);
+        uploadedAt = Number(previous!.uploaded_at);
+      } else {
+        if (
+          !Array.isArray(paper.questions) ||
+          !paper.questions.length ||
+          paper.questions.length > 100
+        )
+          fail(400, "Đề " + slot + " cần 1–100 câu hỏi hợp lệ.");
+        questions = paper.questions.map((row: any) => {
+          if (row?.chapterId !== ch.id)
+            fail(403, "Đề săn thưởng chỉ thuộc chương đang mở.");
+          let content: ReturnType<typeof questionInput>;
+          try {
+            content = questionInput(row.question);
+          } catch (e) {
+            fail(400, (e as Error).message);
+          }
+          if (lessonIsArchived(db, String(ch.id), content!.lesson))
+            fail(409, "Bài trong đề đã bị xóa.");
+          return {
+            ...content!,
+            id: randomUUID(),
+            chapterId: String(ch.id),
+            chapterTitle: String(ch.title),
+          };
+        });
+      }
       if (
-        new Set(
-          questions.map((q) =>
-            JSON.stringify([
-              q.text,
-              q.choices,
-              q.correctIndex,
-              q.correctAnswer,
-            ]),
-          ),
-        ).size !== questions.length
+        new Set(questions.map((q) => huntPaperFingerprint([q]))).size !==
+        questions.length
       )
         fail(400, "Bộ đề có câu hỏi trùng nhau.");
-    }
+      return {
+        slot,
+        title: paperTitle,
+        questions,
+        uploadedAt,
+        insert: paper.reuse !== true,
+      };
+    });
+    if (!slots.has(1)) fail(400, "Cần có đề 1 cho lượt săn thưởng đầu tiên.");
+    if (
+      new Set(papers.map((p) => huntPaperFingerprint(p.questions))).size !==
+      papers.length
+    )
+      fail(
+        400,
+        "Các đề săn thưởng phải khác nội dung; đổi tên hoặc thứ tự không tạo thành đề mới.",
+      );
     db.exec("BEGIN IMMEDIATE");
     try {
-      if (req.body.reuse !== true)
-        for (const q of questions)
-          db.prepare(
-            `INSERT INTO questions(id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,kind,correct_answer) VALUES(?,?,?,?,?,?,?,0,0,1,?,?)`,
-          ).run(
-            q.id,
-            q.chapterId,
-            q.text,
-            JSON.stringify(q.choices),
-            q.correctIndex,
-            q.explanation,
-            q.lesson,
-            q.kind ?? "multiple-choice",
-            q.correctAnswer ?? null,
-          );
+      for (const paper of papers)
+        if (paper.insert)
+          for (const q of paper.questions)
+            db.prepare(
+              "INSERT INTO questions(id,chapter_id,text,choices,correct_index,explanation,lesson,active,is_current,version,kind,correct_answer) VALUES(?,?,?,?,?,?,?,0,0,1,?,?)",
+            ).run(
+              q.id,
+              q.chapterId,
+              q.text,
+              JSON.stringify(q.choices),
+              q.correctIndex,
+              q.explanation,
+              q.lesson,
+              q.kind ?? "multiple-choice",
+              q.correctAnswer ?? null,
+            );
+      db.prepare("DELETE FROM chapter_hunt_papers WHERE chapter_id=?").run(
+        ch.id,
+      );
+      for (const paper of papers)
+        db.prepare("INSERT INTO chapter_hunt_papers VALUES(?,?,?,?,?)").run(
+          ch.id,
+          paper.slot,
+          JSON.stringify(paper.questions),
+          paper.title,
+          paper.uploadedAt,
+        );
+      const first = papers.find((p) => p.slot === 1)!;
       db.prepare(
         "INSERT INTO chapter_hunt_settings VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(chapter_id) DO UPDATE SET questions=excluded.questions,uploaded_at=excluded.uploaded_at,title=excluded.title,duration_minutes=excluded.duration_minutes,preparation_minutes=excluded.preparation_minutes,tab_limit=excluded.tab_limit,starts_at=excluded.starts_at,closes_at=excluded.closes_at",
       ).run(
         ch.id,
-        JSON.stringify(questions),
-        uploadTime,
+        JSON.stringify(first.questions),
+        first.uploadedAt,
         title,
         duration,
         preparation,
@@ -2094,8 +2177,14 @@ export function registerLearningRoutes(
       const hunt = db
         .prepare("SELECT * FROM chapter_hunt_settings WHERE chapter_id=?")
         .get(ch.id);
+      const selectedPaper = nextHuntPaper(db, String(ch.id), req.user!.id);
+      if (hunt && !selectedPaper.paper)
+        fail(
+          409,
+          `Giáo viên chưa tải đề ${selectedPaper.slot} cho vé săn thưởng tiếp theo.`,
+        );
       questions = hunt
-        ? shuffle(json<Snapshot[]>(hunt.questions))
+        ? shuffle(json<Snapshot[]>(selectedPaper.paper!.questions))
         : sample(
             [String(ch.id)],
             Math.min(20, bank([String(ch.id)]).length),
@@ -2110,7 +2199,14 @@ export function registerLearningRoutes(
       tabLimit = hunt
         ? Number(hunt.tab_limit)
         : sessionPolicy(db, String(c.id)).closeTabs;
-      title = `Săn điểm · ${ch.title}`;
+      if (hasUsedHuntPaper(db, String(ch.id), req.user!.id, questions))
+        fail(
+          409,
+          "Bạn đã làm bộ đề này. Không thể dùng vé khác để nhận thưởng từ cùng một đề.",
+        );
+      title = hunt
+        ? String(selectedPaper.paper!.title)
+        : `Săn điểm · ${ch.title}`;
       chapterId = String(ch.id);
     }
     const id = randomUUID();

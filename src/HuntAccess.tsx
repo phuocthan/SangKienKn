@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Modal } from "./components";
 import { api, errorMessage } from "./api";
 import { ExamUpload, type UploadedExamQuestion } from "./ExamUpload";
@@ -11,17 +11,32 @@ export function HuntAccess({
   chapter,
   state,
   policy,
+  multiplePapers = false,
   onClose,
   onSaved,
 }: {
   chapter: Chapter;
   state: LearningChapter;
   policy: SessionPolicy;
+  multiplePapers?: boolean;
   onClose: () => void;
   onSaved: () => Promise<void>;
 }) {
   const closing = state.hunt?.open ?? state.examAllowed;
-  const [reuse, setReuse] = useState(!!state.hunt?.hasQuestions);
+  const [papers, setPapers] = useState(() =>
+    [1, 2, 3].map((slot) => {
+      const saved = state.hunt?.papers?.find((p) => p.slot === slot);
+      return {
+        slot,
+        reuse: !!saved || (slot === 1 && !!state.hunt?.hasQuestions),
+        questions: [] as UploadedExamQuestion[],
+        reading: false,
+        uploadedAt:
+          saved?.uploadedAt ??
+          (slot === 1 ? state.hunt?.uploadedAt : undefined),
+      };
+    }),
+  );
   const [remove, setRemove] = useState(false);
   const [title, setTitle] = useState(
     state.hunt?.title || `Săn thưởng · ${chapter.title}`,
@@ -29,8 +44,24 @@ export function HuntAccess({
   const [wait, setWait] = useState(state.hunt?.preparationMinutes ?? 0);
   const [minutes, setMinutes] = useState(state.hunt?.durationMinutes ?? 20);
   const [tabs, setTabs] = useState(state.hunt?.tabLimit ?? policy.closeTabs);
-  const [questions, setQuestions] = useState<UploadedExamQuestion[]>([]);
-  const [reading, setReading] = useState(false);
+  const reading = papers.some((p) => p.reading);
+  const paperCallbacks = useMemo(
+    () =>
+      [1, 2, 3].map((slot) => ({
+        onChange: (questions: UploadedExamQuestion[]) =>
+          setPapers((old) =>
+            old.map((p) => (p.slot === slot ? { ...p, questions } : p)),
+          ),
+        onReadingChange: (reading: boolean) =>
+          setPapers((old) =>
+            old.find((p) => p.slot === slot)?.reading === reading
+              ? old
+              : old.map((p) => (p.slot === slot ? { ...p, reading } : p)),
+          ),
+      })),
+    [],
+  );
+  const first = papers[0];
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const requests = useRef(new Map<string, string>());
@@ -44,12 +75,25 @@ export function HuntAccess({
         ? { enabled: false, deleteQuestions: remove }
         : {
             enabled: true,
-            reuse,
+            reuse: first.reuse,
             title,
             preparationMinutes: wait,
             durationMinutes: minutes,
             tabLimit: tabs,
-            ...(!reuse ? { questions } : {}),
+            ...(multiplePapers
+              ? {
+                  papers: papers
+                    .filter((p) => p.reuse || p.questions.length)
+                    .map((p) => ({
+                      slot: p.slot,
+                      reuse: p.reuse,
+                      title: `${title.slice(0, 110)} · Đề ${p.slot}`,
+                      ...(!p.reuse ? { questions: p.questions } : {}),
+                    })),
+                }
+              : !first.reuse
+                ? { questions: first.questions }
+                : {}),
           };
       const fingerprint = JSON.stringify(body);
       if (!requests.current.has(fingerprint))
@@ -113,33 +157,59 @@ export function HuntAccess({
                 onChange={(e) => setTitle(e.target.value)}
               />
             </label>
-            {state.hunt?.hasQuestions && (
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={reuse}
-                  disabled={busy || reading}
-                  onChange={(e) => setReuse(e.target.checked)}
-                />
-                Sử dụng bộ đề đã tải trước đó ·{" "}
-                {new Intl.DateTimeFormat("vi-VN", {
-                  dateStyle: "short",
-                  timeStyle: "short",
-                }).format(state.hunt.uploadedAt)}
-              </label>
+            {multiplePapers && (
+              <p>
+                Mỗi vé dùng một đề: cấp 3 → Đề 1, cấp 4 → Đề 2, cấp 5 → Đề 3.
+                Các đề phải khác nội dung. Đề chưa tải lên sẽ khóa lượt tương
+                ứng.
+              </p>
             )}
-            {!reuse && (
-              <fieldset disabled={busy}>
-                <legend>Tải đề Word hoặc CSV</legend>
-                <ExamUpload
-                  singleChapter
-                  chapters={[chapter]}
-                  questions={questions}
-                  onChange={setQuestions}
-                  onReadingChange={setReading}
-                />
+            {(multiplePapers ? papers : papers.slice(0, 1)).map((paper) => (
+              <fieldset key={paper.slot} disabled={busy}>
+                <legend>
+                  {multiplePapers
+                    ? `Đề ${paper.slot} · Vé cấp ${paper.slot + 2}`
+                    : "Đề săn thưởng"}
+                </legend>
+                {paper.uploadedAt && (
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={paper.reuse}
+                      disabled={busy || reading}
+                      onChange={(e) =>
+                        setPapers((old) =>
+                          old.map((p) =>
+                            p.slot === paper.slot
+                              ? { ...p, reuse: e.target.checked }
+                              : p,
+                          ),
+                        )
+                      }
+                    />
+                    Sử dụng bộ đề đã tải trước đó ·{" "}
+                    {new Intl.DateTimeFormat("vi-VN", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    }).format(paper.uploadedAt)}
+                  </label>
+                )}
+                {!paper.reuse && (
+                  <fieldset disabled={busy}>
+                    <legend>Tải đề Word hoặc CSV</legend>
+                    <ExamUpload
+                      singleChapter
+                      chapters={[chapter]}
+                      questions={paper.questions}
+                      onChange={paperCallbacks[paper.slot - 1].onChange}
+                      onReadingChange={
+                        paperCallbacks[paper.slot - 1].onReadingChange
+                      }
+                    />
+                  </fieldset>
+                )}
               </fieldset>
-            )}
+            ))}
             <div className="session-policy-fields">
               <label>
                 Thời gian chuẩn bị (phút)
@@ -205,7 +275,9 @@ export function HuntAccess({
           <button
             className={`button ${closing ? "danger" : "primary"}`}
             disabled={
-              busy || reading || (!closing && !reuse && !questions.length)
+              busy ||
+              reading ||
+              (!closing && !first.reuse && !first.questions.length)
             }
           >
             {busy ? "Đang lưu…" : closing ? "Xác nhận khóa" : "Mở săn thưởng"}

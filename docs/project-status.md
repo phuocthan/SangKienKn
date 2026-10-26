@@ -1,5 +1,17 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Phát hành Git — 26/10/2026
+
+Theo yêu cầu deploy Git, chốt bản tìm kiếm/3đề săn thưởng/sửa câu nguồn từ sổ tay lên main. Fetch không có thay đổi remote ngoài2d78856; QA197backend/12E2E là kết quả của lượt phát triển đã đối chiếu, không chạy lại để báo thành lượt mới. Chỉ gồm source/test/tài liệu liên quan, không .local/database/secrets/dữ liệu học sinh. Cần xác minh Railway đúng SHA và tài nguyên production trước khi kết luận đã triển khai; ghi chú chưa push/deploy bên dưới thuộc trước yêu cầu này.
+
+## Hiện hành: tìm câu, ba đề săn thưởng, sửa từ sổ tay — 26/10/2026
+
+Mã local có ô tìm kiếm ngân hàng theo bộ lọc chương/bài, không phân biệt dấu/hoa-thường; chọn hàng loạt theo kết quả tìm. Mỗi chương lưu3đề săn thưởng riêng cho vé cấp3/4/5, chặn cùng nội dung dù đổi tên/thứ tự và không tiêu vé khi thiếu đề; đề cũ migrate vào1, giữ điểm/vé/lượt cũ. Giáo viên có Sửa câu hỏi ngay trong sổ tay, luôn mở nguồn mới nhất, cập nhật nguồn tái sử dụng cho mọi học sinh dùng chung câu, giữ câu tải riêng ở trạng thái riêng.
+
+Người dùng đã chốt **chỉ áp dụng bản sửa cho lượt mới, giữ bài và điểm cũ**. Không tự chấm lại25câu/7em từ audit trước; không sửa snapshot bài đang làm/đã nộp hoặc gộp các bản nhập độc lập. Đặc tả/API/quyền và migration ở đầu [question-bank.md](question-bank.md), [class-management.md](class-management.md).
+
+QA mới full197/197backend đạt, build/typecheck đạt; E2E12/12 desktop/mobile đạt (1,1phút), đã xem ảnh và kiểm tra320–1440px. Log cuối `.local/hunt-20261026/`; các lượt lỗi trước và cách khắc phục ở session-handoff. Khởi điểm main2d78856 clean, không pull/push/deploy, không ghi Railway. Ba đề và nút sửa cần backend Railway mới; không coi local HMR/test là đã phát hành.
+
 ## Hiện hành: mũ trên/dưới, báo cáo khoảng ngày và rà điểm — 25/10/2026
 
 Đã sửa mã local trong đúng ba phạm vi người dùng yêu cầu: giữ/hiển thị chỉ số trên/dưới từ Word (cả Equation script đơn giản), xuất CSV Từ ngày–Đến ngày có thời gian học/tỉ lệ đúng/điểm săn điểm đã duyệt–chờ duyệt/từng điểm online, và nhận đáp án số kèm đúng đơn vị của đề. Không tự đoán định dạng đã mất trong câu cũ hoặc chuyển đổi đơn vị. Lượt thi mới có marker gradingVersion2 trong snapshot; kết quả lượt cũ giữ cách chấm cũ tới khi giáo viên duyệt điều chỉnh, không migration.

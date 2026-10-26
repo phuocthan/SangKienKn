@@ -560,6 +560,9 @@ export function Learning({
                       <strong>{ch.title}</strong>
                       <p>
                         {ch.hunt?.title || "Chưa có đề tải lên"}
+                        {data.huntPaperSlots
+                          ? ` · ${ch.hunt?.papers?.length ?? 0}/3 đề`
+                          : ""}
                         {ch.hunt?.uploadedAt
                           ? ` · ${date(ch.hunt.uploadedAt)}`
                           : ""}
@@ -615,6 +618,7 @@ export function Learning({
             data.chapters.some((c) => c.id === huntChapter) &&
             classroom.chapters.some((c) => c.id === huntChapter) && (
               <HuntAccess
+                multiplePapers={!!data.huntPaperSlots}
                 key={huntChapter}
                 chapter={classroom.chapters.find((c) => c.id === huntChapter)!}
                 state={data.chapters.find((c) => c.id === huntChapter)!}
@@ -961,6 +965,9 @@ export function Learning({
                       {ch.hunt && (
                         <p className="muted">
                           {ch.hunt.title} · {ch.hunt.durationMinutes} phút ·{" "}
+                          {data.huntPaperSlots
+                            ? `Đề ${ch.hunt.nextSlot ?? 1} cho vé tiếp theo · `
+                            : ""}
                           {new Intl.DateTimeFormat("vi-VN", {
                             dateStyle: "short",
                             timeStyle: "short",

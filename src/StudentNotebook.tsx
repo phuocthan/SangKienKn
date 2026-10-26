@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import { api, errorMessage } from "./api";
+import { api, ensureQuestionTypes, errorMessage } from "./api";
 import { Empty, Modal } from "./components";
 import { AnswerFields } from "./AnswerFields";
+import { QuestionFields, readQuestionForm } from "./QuestionFields";
+import { QuestionText } from "./QuestionText";
+import { Pencil } from "./icons";
 import {
   questionKind,
   type AnswerQuestion,
@@ -10,6 +13,7 @@ import {
 import "./answer-fields.css";
 import type { Classroom, Question, Student } from "./types";
 type Item = Question & {
+  canEditSource?: boolean;
   chapterTitle: string;
   resolved: boolean;
   updatedAt: number;
@@ -48,8 +52,13 @@ export function StudentNotebook({
     [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("open"),
     [chapter, setChapter] = useState("");
+  const [editing, setEditing] = useState<Item | null>(null);
+  const [revision, setRevision] = useState(0);
+  const [notice, setNotice] = useState("");
   useEffect(() => {
     let alive = true;
+    setLoading(true);
+    setError("");
     api<Item[]>(`/classrooms/${classroom.id}/students/${student.id}/notebook`)
       .then((rows) => {
         if (alive) setItems(rows);
@@ -63,14 +72,29 @@ export function StudentNotebook({
     return () => {
       alive = false;
     };
-  }, [classroom.id, student.id]);
+  }, [classroom.id, student.id, revision]);
   const visible = items.filter(
     (q) =>
       (!chapter || q.chapterId === chapter) &&
       (filter === "all" || q.resolved === (filter === "resolved")),
   );
+  if (editing)
+    return (
+      <NotebookQuestionEdit
+        id={editing.id}
+        onClose={() => setEditing(null)}
+        onSaved={(version) => {
+          setEditing(null);
+          setRevision((n) => n + 1);
+          setNotice(
+            `Đã lưu phiên bản nguồn ${version} cho mọi học sinh dùng chung câu này. Nội dung và điểm các lượt cũ vẫn được giữ.`,
+          );
+        }}
+      />
+    );
   return (
     <Modal title={`Sổ tay · ${student.name}`} onClose={onClose}>
+      {notice && <p role="status">{notice}</p>}
       <div className="workspace-filters">
         <select
           aria-label="Trạng thái sửa sai"
@@ -106,7 +130,18 @@ export function StudentNotebook({
             <span className="eyebrow">
               {q.chapterTitle} · {q.resolved ? "Đã khắc phục" : "Cần sửa"}
             </span>
-            <h3>{q.text}</h3>
+            <h3>
+              <QuestionText>{q.text}</QuestionText>
+            </h3>
+            {q.canEditSource && (
+              <button
+                type="button"
+                className="button outline small"
+                onClick={() => setEditing(q)}
+              >
+                <Pencil size={16} /> Sửa câu hỏi
+              </button>
+            )}
             {!!q.wrongAnswers?.length && (
               <div className="notebook-wrong-history">
                 <strong>Câu trả lời sai trước đó</strong>
@@ -140,9 +175,119 @@ export function StudentNotebook({
               disabled
               onChange={() => {}}
             />
-            <p>{q.explanation}</p>
+            <p>
+              <QuestionText>{q.explanation}</QuestionText>
+            </p>
           </article>
         ))
+      )}
+    </Modal>
+  );
+}
+
+function NotebookQuestionEdit({
+  id,
+  onClose,
+  onSaved,
+}: {
+  id: string;
+  onClose: () => void;
+  onSaved: (version: number) => void;
+}) {
+  const [source, setSource] = useState<{
+    question: Question;
+    privateQuestion: boolean;
+    lessons: string[];
+  }>();
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    setError("");
+    setSource(undefined);
+    api<{ question: Question; privateQuestion: boolean; lessons: string[] }>(
+      `/questions/${id}/edit-source`,
+    )
+      .then((result) => {
+        if (alive) setSource(result);
+      })
+      .catch((e) => {
+        if (alive) setError(errorMessage(e));
+      });
+    return () => {
+      alive = false;
+    };
+  }, [id, retry]);
+  async function save(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!source || busy) return;
+    const form = event.currentTarget;
+    setBusy(true);
+    setError("");
+    try {
+      const content = readQuestionForm(form);
+      await ensureQuestionTypes([content]);
+      const result = await api<{ version: number }>(
+        `/questions/${id}/notebook-edit`,
+        { ...content, expectedId: source.question.id },
+      );
+      onSaved(result.version);
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Modal title="Sửa câu hỏi từ sổ tay" onClose={onClose} dismissible={!busy}>
+      <p>
+        Bản sửa áp dụng cho mọi học sinh dùng chung câu nguồn và các đề chưa bắt
+        đầu. Bài đang làm, bài đã nộp và điểm cũ được giữ nguyên.
+      </p>
+      {source ? (
+        <form onSubmit={save}>
+          <p>
+            Đang sửa phiên bản nguồn mới nhất: {source.question.version}.{" "}
+            {source.privateQuestion
+              ? "Câu riêng của đề vẫn không được phát hành vào ngân hàng luyện tập."
+              : "Câu được cập nhật trong ngân hàng câu hỏi."}
+          </p>
+          <fieldset disabled={busy}>
+            <legend className="sr-only">Nội dung câu hỏi</legend>
+            <QuestionFields
+              question={source.question}
+              lessons={source.lessons}
+            />
+          </fieldset>
+          {error && (
+            <p className="error-banner" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="button-group">
+            <button
+              type="button"
+              className="button outline"
+              disabled={busy}
+              onClick={onClose}
+            >
+              Hủy
+            </button>
+            <button className="button primary" disabled={busy}>
+              {busy ? "Đang lưu…" : "Lưu câu nguồn"}
+            </button>
+          </div>
+        </form>
+      ) : error ? (
+        <div role="alert" className="error-banner">
+          {error}
+          <button type="button" onClick={() => setRetry((n) => n + 1)}>
+            Thử lại
+          </button>
+        </div>
+      ) : (
+        <p role="status">Đang tải câu nguồn…</p>
       )}
     </Modal>
   );

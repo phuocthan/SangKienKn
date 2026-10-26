@@ -2,6 +2,16 @@
   padding: 18px 22px;
   margin-bottom: 20px;
 }
+.bank-search {
+  display: grid;
+  gap: 6px;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.bank-search input {
+  width: 100%;
+  min-height: 44px;
+}
 .bank-selection-tools,
 .bank-management-actions {
   display: flex;

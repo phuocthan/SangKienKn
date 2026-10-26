@@ -1,3 +1,4 @@
+import { updateQuestionSources } from "./question-updates.js";
 import {
   answerComplete,
   answerCorrect,
@@ -145,7 +146,7 @@ export function createApp(
   });
   app.use("/api/chapters/:id/questions/import", express.json({ limit: "1mb" }));
   app.use("/api/chapters/:id/questions/delete", express.json({ limit: "1mb" }));
-  app.use("/api/chapters/:id/hunt-access", express.json({ limit: "1mb" }));
+  app.use("/api/chapters/:id/hunt-access", express.json({ limit: "12mb" }));
   app.use("/api/classrooms/:id/exams", express.json({ limit: "4mb" }));
   app.use("/api/classrooms/:id/review-papers", express.json({ limit: "4mb" }));
   app.use(express.json({ limit: "100kb" }));
@@ -213,6 +214,7 @@ export function createApp(
       studyIdleSeconds: 120,
       studyExitMode: "home",
       notebookWrongHistory: true,
+      notebookQuestionEditing: true,
     });
   });
 
@@ -1463,10 +1465,30 @@ export function createApp(
       throw error;
     }
   });
-  app.post("/api/questions/:id/edit", (req: AppRequest, res) => {
-    const q = ownedQuestion(req);
-    if (!q.is_current)
-      fail(409, "Câu hỏi đã có phiên bản mới. Hãy tải lại ngân hàng câu hỏi.");
+  function latestQuestion(q: Row) {
+    return db
+      .prepare(
+        "SELECT * FROM questions WHERE COALESCE(family_id,id)=? ORDER BY version DESC LIMIT 1",
+      )
+      .get(q.family_id ?? q.id) as Row;
+  }
+  app.get("/api/questions/:id/edit-source", (req: AppRequest, res) => {
+    const original = ownedQuestion(req);
+    const current = latestQuestion(original);
+    res.json({
+      question: questionView(current, req),
+      privateQuestion: !current.is_current,
+      lessons: chapterLessons(db, current.chapter_id).map(
+        (lesson) => lesson.title,
+      ),
+    });
+  });
+  function saveQuestionVersion(
+    req: AppRequest,
+    res: Response,
+    q: Row,
+    privateQuestion = false,
+  ) {
     const input = questionPayload({
       ...req.body,
       ...(req.body?.topic === undefined && q.topic ? { topic: q.topic } : {}),
@@ -1488,12 +1510,38 @@ export function createApp(
       db.prepare(
         "UPDATE questions SET active = 0, is_current = 0 WHERE id = ?",
       ).run(q.id);
+      if (privateQuestion)
+        db.prepare("UPDATE questions SET is_current=0 WHERE id=?").run(id);
+      updateQuestionSources(
+        db,
+        String(q.chapter_id),
+        String(q.family_id ?? q.id),
+        id,
+        content,
+        now(),
+      );
       db.exec("COMMIT");
     } catch (e) {
       db.exec("ROLLBACK");
       throw e;
     }
     res.json({ id, version: q.version + 1 });
+  }
+  app.post("/api/questions/:id/edit", (req: AppRequest, res) => {
+    const q = ownedQuestion(req);
+    if (!q.is_current)
+      fail(409, "Câu hỏi đã có phiên bản mới. Hãy tải lại ngân hàng câu hỏi.");
+    saveQuestionVersion(req, res, q);
+  });
+  app.post("/api/questions/:id/notebook-edit", (req: AppRequest, res) => {
+    const original = ownedQuestion(req);
+    const current = latestQuestion(original);
+    if (req.body?.expectedId !== current.id)
+      fail(
+        409,
+        "Câu hỏi vừa được sửa ở nơi khác. Đóng hộp và mở lại để xem bản mới nhất.",
+      );
+    saveQuestionVersion(req, res, current, !current.is_current);
   });
   app.post("/api/questions/:id/visibility", (req: AppRequest, res) => {
     const q = ownedQuestion(req);
@@ -1803,6 +1851,7 @@ export function createApp(
           chapterTitle: q.chapterTitle,
           resolved: !!q.resolved,
           updatedAt: q.updatedAt,
+          canEditSource: !chapterIsArchived(db, String(q.chapter_id)),
           wrongAnswers: (history.get(String(q.id)) ?? []).sort(
             (a, b) => a.at - b.at,
           ),

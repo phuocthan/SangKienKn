@@ -21,6 +21,13 @@ export function ensureClassManagementSchema(db: DatabaseSync) {
     uploaded_at INTEGER NOT NULL, title TEXT NOT NULL, duration_minutes INTEGER NOT NULL,
     preparation_minutes INTEGER NOT NULL, tab_limit INTEGER NOT NULL, starts_at INTEGER NOT NULL, closes_at INTEGER NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS chapter_hunt_papers (
+    chapter_id TEXT NOT NULL REFERENCES chapters(id), slot INTEGER NOT NULL CHECK(slot BETWEEN 1 AND 3),
+    questions TEXT NOT NULL, title TEXT NOT NULL, uploaded_at INTEGER NOT NULL,
+    PRIMARY KEY(chapter_id,slot)
+  );
+  INSERT OR IGNORE INTO chapter_hunt_papers(chapter_id,slot,questions,title,uploaded_at)
+    SELECT chapter_id,1,questions,title,uploaded_at FROM chapter_hunt_settings WHERE json_array_length(questions)>0;
   CREATE TABLE IF NOT EXISTS study_session_controls (
     session_id TEXT PRIMARY KEY, student_id TEXT NOT NULL REFERENCES users(id), chapter_id TEXT NOT NULL REFERENCES chapters(id),
     created_at INTEGER NOT NULL, tabs INTEGER NOT NULL DEFAULT 0,
@@ -106,7 +113,9 @@ export function terminateStudy(db: DatabaseSync, id: string, reason: string) {
   db.exec("BEGIN IMMEDIATE");
   try {
     if (reason === "tabs" || reason === "idle") {
-      db.prepare("DELETE FROM weekly_practice_credit WHERE session_id=?").run(id);
+      db.prepare("DELETE FROM weekly_practice_credit WHERE session_id=?").run(
+        id,
+      );
       db.prepare(
         "UPDATE progress SET seconds=MAX(0,seconds-?) WHERE student_id=? AND chapter_id=?",
       ).run(Number(c.credited_ms) / 1000, c.student_id, c.chapter_id);

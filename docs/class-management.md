@@ -1,5 +1,15 @@
 # Quản lý lớp: quyền học tập và quy tắc phiên
 
+## Ba đề săn thưởng cho ba vé — 26/10/2026
+
+Mỗi chương có tối đa **Đề 1 / Đề 2 / Đề 3**, gắn lần lượt vé cấp3/4/5. Hộp Mở săn thưởng có ba vùng Word/CSV riêng, dùng lại từng đề và báo số đề đã tải/3. Cho mở khi mới có Đề1; nếu thiếu đề của vé tiếp theo, server chặn vào và không tiêu vé. Giữ điều kiện cấp/tỉ lệ đúng/sổ tay, hạn mở chung, chính sách phiên và ngưỡng đạt thưởng hiện có. Không tự trao thêm vé hoặc thu hồi điểm cũ.
+
+Server chọn đề theo vé chưa dùng thấp nhất, không theo số lần reload hoặc số lần bấm. Bộ đề trùng nội dung bị từ chối dù đổi ID/tên/thứ tự câu/phương án/lời giải; trước bắt đầu còn so với toàn bộ các đề mà học sinh đã làm trong chương, kể cả lịch sử trước migration. Vì vậy khóa/mở lại/tải lại cùng đề không giúp dùng vé khác để nhận thêm điểm. Nguồn ngân hàng cũ vẫn giữ lối vào tương thích nhưng cũng chặn lặp nguyên đề.
+
+Migration thêm `chapter_hunt_papers(chapter_id,slot,questions,title,uploaded_at)`; bộ cũ được giữ ở Đề1 bằng INSERT OR IGNORE. Chạy lại không ghi đè các đề đã lưu, không reset giờ/vé/điểm/bài làm. Xóa bộ đề khi khóa xóa cả ba cấu hình đề, giữ câu riêng và snapshot lịch sử. Endpoint hunt-access nhận papers tối đa3phần tử (mỗi đề1–100câu), vẫn nhận payload cũ cho Đề1; overview có capability huntPaperSlots và metadata từng đề không kèm đáp án. Payload tối đa12MB cho ba đề, validation từng câu vẫn giữ giới hạn cũ.
+
+Quy tắc này thay mô tả chỉ một bộ đề dùng lại cho các vé trong các mục lịch sử bên dưới. Tính năng cần backend Railway mới; không suy deploy từ code/test.
+
 ## Sao chép danh sách học sinh và xóa lớp — 24/10/2026
 
 Trong **Lớp học của tôi → Tạo lớp mới**, giáo viên chọn lớp nguồn thuộc quyền mình, nhập tên lớp và môn mới. Chỉ sao chép các liên kết học sinh đang thuộc lớp; giữ tài khoản/mật khẩu/avatar, kế thừa khối lớp. Lớp mới không có chương, câu hỏi, tiến độ, kết quả hay hoạt động nhóm. Bỏ chọn nguồn để tạo lớp trống theo cách cũ. Tạo lớp và sao chép roster trong một transaction; kiểm tra trùng tên/môn/khối chỉ tính lớp chưa xóa.

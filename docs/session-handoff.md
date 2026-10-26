@@ -1,5 +1,27 @@
 # Bàn giao session GreenEdu
 
+## Phát hành Git theo yêu cầu — 26/10/2026
+
+Người dùng yêu cầu “sau khi xong deploy git”. Fetch xác nhận main/origin main cùng2d78856, không có cập nhật remote cần ghép. Chốt đúng bản tìm kiếm ngân hàng/3đề săn thưởng/sửa câu nguồn từ sổ tay cùng test và tài liệu liên quan. Đã đối chiếu log197/197backend và12/12E2E của lượt phát triển, không báo các kết quả này là chạy mới khi phát hành. Không đưa .local/database/dữ liệu học sinh/secrets vào Git. Trước push Railway đang SUCCESS ở2d78856/deployment2eb81a97-0fd5-4b6c-93b8-64122b07f948.
+
+Lượt này cho phép commit/push và xác minh Railway autobuild, không cho phép thay điểm/bài cũ hoặc chạy dữ liệu thử trên production. Chỉ xác nhận đã triển khai sau khi kiểm tra đúng SHA deployment, health/capability, nguồn chạy và bundle production. Các dòng chưa push/deploy ở mục phát triển bên dưới là trạng thái trước yêu cầu phát hành này.
+
+## Tìm câu, ba đề săn thưởng và sửa nguồn từ sổ tay — 26/10/2026
+
+Yêu cầu mới có đúng ba phạm vi: tìm kiếm ngân hàng; thêm Đề2/3 cho mỗi chương để không dùng một đề lấy3điểm; sửa câu ngay từ sổ tay giáo viên. Người dùng đã chốt qua câu hỏi: **Dùng bản sửa cho lượt mới; giữ bài và điểm cũ**. Không liên quan/chưa cho phép xử lý lại7bài trong audit25/10.
+
+Git lúc bắt đầu clean ở main2d78856, đã chứa merge/bản sửa25/10 và tính năng remote24/10. Đã kiểm tra mã thực tế, không pull/push/commit/deploy hoặc ghi dữ liệu Railway. Thay đổi giới hạn ở QuestionBank/CSS, HuntAccess/Learning/types, StudentNotebook, endpoint question/hunt/migration/helper và test/tài liệu liên quan. Dùng redesign-existing-projects + web-design-guidelines, giữ giao diện chung và thư viện hiện có.
+
+Tìm kiếm lọc câu đã tải theo chương/bài/ẩn, không phân biệt dấu/hoa-thường, nhiều từ khóa AND trên nội dung/phương án/bài/chủ đề/lời giải. Chọn tất cả chỉ phạm vi khớp, đổi từ khóa bỏ lựa chọn. Không gọi tìm toàn hệ thống nếu đang ở bộ lọc chương cụ thể.
+
+Săn thưởng thêm bảng chapter_hunt_papers/3slot; migrate đề cũ vào1, không reset vé/điểm. Chọn Đề1/2/3 theo vé cấp3/4/5 thấp nhất chưa dùng; thiếu đề giữ vé và chặn lượt. Hash đề bỏ ID/tên/lời giải/thứ tự câu/phương án; chặn cấu hình trùng và chặn học sinh dùng lại nội dung từng làm, kể cả legacy. Mở lại cùng đề không xóa dấu đã dùng. Metadata không lộ key; closing/delete/reuse giữ snapshot và toàn bộ lịch sử. API cũ cấu hình Đề1, frontend dùng capability huntPaperSlots cho3vùng; mỗi đề1–100câu, body12MB cho3đề. Callback đọc file được giữ ổn định bằng useMemo để các vùng upload không hủy lần đọc lẫn nhau.
+
+Sổ tay có Sửa câu hỏi, tải latest source trong cùng family (kể cả nguồn riêng của đề), expectedId chống sửa đè. Save tạo phiên bản và cập nhật nguồn chung trong bank/hunt/review_papers/đề chưa bắt đầu, trong một transaction. Không sửa attempts/corrections/review_sessions/exam_runs hoặc tự regrade. Sổ tay vẫn là nội dung lịch sử; nút sửa mở bản mới nhất. Không publish câu riêng hoặc dò theo chữ để cập nhật các bản nhập độc lập/lớp khác. Hai endpoint mới edit-source/notebook-edit đều kiểm tra quyền chủ lớp, item canEditSource tương thích backend cũ. Đặc tả hiện hành ở đầu question-bank.md/class-management.md.
+
+QA mới: TypeScript/Vite build đạt tại `.local/hunt-20261026/build-final`; full backend **197/197 đạt** (21,1giây), bổ sung chạy lại5/5workflow sau nâng body limit, gồm quyền/stale request/snapshot cũ/nguồn tái sử dụng/rollback/migrationkhôngreset/ba vé-ba đề/không tiêu vé khi thiếu-trùng. E2E cuối **12/12 desktop/mobile đạt** (1,1phút), 320/390/768/1440px; đã xem ảnh popup sửa/ba đề và kết quả tìm kiếm. Lượt đầu phát hiện callback upload không ổn định (đã sửa runtime) và getByLabel trùng legend (đổi selector textbox); sau đó ca mobile dùng chung vé đã tiêu từ desktop nên bổ sung3đề riêng, giữ so sánh snapshot theo nội dung nhận ban đầu. Không ghi các lượt lỗi là đã đạt. Log cuối `.local/hunt-20261026/e2e-complete.log`, ảnh `.local/hunt-20261026/e2e-complete/`, backend-final.log và workflows-final.log cùng thư mục. Format/diff check đạt; giữ nguyên format không liên quan của learning.test.ts.
+
+**Chưa push/deploy.** Cần triển khai backend Railway để dùng3đề và sửa nguồn từ sổ tay trong chế độ local5173→Railway. Không reset database local hoặc production, không tạo tiến độ/điểm giả ngoài DB kiểm thử riêng.
+
 ## Định dạng câu, thống kê khoảng ngày và rà điểm — 25/10/2026
 
 Yêu cầu mới chỉ trong ba phạm vi: mũ trên/dưới của bài tập/đề kiểm tra; xuất thống kê Từ ngày–Đến ngày gồm thời gian, tỉ lệ đúng, điểm cộng săn điểm và điểm từng bài online; rà báo cáo làm đúng bị chấm sai. Không sửa giao diện chung hoặc dữ liệu thật. Người dùng chọn **chỉ lập danh sách để duyệt trước**, chưa cho chấm lại.

@@ -1,5 +1,15 @@
 # Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
+## Tìm kiếm và sửa từ sổ tay — 26/10/2026
+
+Ngân hàng có ô **Tìm câu hỏi**, lọc trong chương/bài và trạng thái ẩn đang chọn. Tìm không phân biệt hoa/thường hoặc dấu tiếng Việt, kết hợp nhiều từ khóa trên nội dung/phương án/bài/chủ đề/lời giải. Số kết quả và chọn tất cả chỉ tính các câu khớp; đổi từ khóa xóa lựa chọn cũ để tránh xóa nhầm câu không còn hiển thị.
+
+Trong **Quản lý lớp → Học sinh → Xem sổ tay**, giáo viên có **Sửa câu hỏi** ngay trên thẻ. Hộp luôn tải phiên bản nguồn mới nhất, dùng đủ ba dạng câu và chỉ lưu khi xác thực thành công. Retry lỗi giữ nháp; Hủy không ghi; expectedId chặn ghi đè bản vừa được người khác sửa. Chỉ giáo viên sở hữu lớp được đọc/sửa nguồn.
+
+Theo quyết định người dùng26/10: **bản sửa dùng cho lượt mới; giữ bài và điểm cũ**. Lưu tạo phiên bản trong cùng family, cập nhật nguồn tái sử dụng cùng mã/family trong ngân hàng, đề săn thưởng, bộ ôn và đề chưa bắt đầu/chưa có lượt làm. Không sửa attempts, corrections, review_sessions hoặc exam_runs đã có. Sổ tay hiển thị nội dung lịch sử; mở Sửa câu hỏi sẽ thấy nguồn mới nhất. Câu riêng tải lên vẫn không công bố vào ngân hàng luyện tập. Không dò văn bản để tự gộp các bản nhập độc lập ở lớp khác. Tất cả thay đổi nguồn nằm trong cùng transaction; lỗi một nơi rollback cả phiên bản và các nguồn.
+
+API GET `/api/questions/:id/edit-source` trả nguồn hiện hành/loại riêng/danh sách bài cho chủ lớp; POST `/api/questions/:id/notebook-edit` nhận nội dung và expectedId. Notebook item có canEditSource; client với backend cũ không hiện nút chưa hỗ trợ. Chi tiết QA/phát hành ở đầu bàn giao.
+
 ## Nút Xóa câu hỏi thay Ẩn câu hỏi — 19/10/2026
 
 Theo ảnh người dùng, nút ở mỗi câu đang sử dụng đổi thành **Xóa câu hỏi**, icon thùng rác/màu danger, mở cùng popup và endpoint xóa nhiều câu với danh sách một ID. Popup một câu có tiêu đề Xóa câu hỏi, Hủy/Xác nhận xóa 1 câu và lời giải thích giữ lịch sử; đang xử lý chặn đóng modal/gửi lặp. Không chỉ đổi chữ trên luồng visibility: thao tác đi qua quyền/capability canDeleteQuestions và API `/chapters/:id/questions/delete` có sẵn. Câu ngừng dùng cho lượt học mới, vẫn giữ lượt làm/sổ tay/đề đã lưu; Hiện cả câu đã ẩn và Hiện lại giữ như luồng xóa nhiều câu trước. Không xóa vật lý dữ liệu lịch sử hoặc đổi backend.
