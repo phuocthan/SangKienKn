@@ -69,6 +69,10 @@ export function openDatabase(path: string) {
       resolved INTEGER NOT NULL DEFAULT 0, updated_at INTEGER NOT NULL,
       PRIMARY KEY(student_id, question_id)
     );
+    CREATE TABLE IF NOT EXISTS attempt_question_versions (
+      attempt_id TEXT PRIMARY KEY REFERENCES attempts(id) ON DELETE CASCADE,
+      source_question_id TEXT NOT NULL REFERENCES questions(id)
+    );
     CREATE TABLE IF NOT EXISTS progress (
       student_id TEXT NOT NULL REFERENCES users(id), chapter_id TEXT NOT NULL REFERENCES chapters(id),
       seconds REAL NOT NULL DEFAULT 0, PRIMARY KEY(student_id, chapter_id)

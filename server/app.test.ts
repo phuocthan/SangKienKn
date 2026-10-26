@@ -947,7 +947,7 @@ test("repair ranking updates after repair and retry, and removes a question when
   );
 });
 
-test("question edits keep original answers and notebook; old retry works but new practice uses the new revision", async (t) => {
+test("question edits preserve history while new corrections and practice use the new revision", async (t) => {
   const f = await fixture(t),
     teacher = await f.login("teacher"),
     student = await f.login("student");
@@ -1014,7 +1014,8 @@ test("question edits keep original answers and notebook; old retry works but new
     )
   ).data;
   assert.equal(old.length, 1);
-  assert.equal(old[0].text, before.text);
+  assert.equal(old[0].text, update.text);
+  assert.equal(old[0].sourceQuestionId, edit.data.id);
   assert.equal(old[0].correctIndex, undefined);
   assert.equal(
     (
@@ -1022,7 +1023,8 @@ test("question edits keep original answers and notebook; old retry works but new
         "/attempts",
         {
           questionId: before.id,
-          selected: 0,
+          sourceQuestionId: edit.data.id,
+          selected: 1,
           mode: "correction",
           requestId: randomUUID(),
         },

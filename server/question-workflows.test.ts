@@ -487,6 +487,138 @@ test("notebook shows the latest answer for all question kinds without rewriting 
   }
 });
 
+test("a new correction accepts -346 against the revised key and preserves the old -200 attempt, retries and scores", async (t) => {
+  const f = await fixture(t);
+  const content = {
+    ...question(1),
+    kind: "short-answer",
+    choices: [],
+    correctAnswer: "-200",
+    text: "v = 20π cos(2πt - π/3). Tính gia tốc tại t = 0,5 s, lấy π² = 10.",
+  };
+  const original = await f.post("/chapters/chapter-1/questions", content);
+  const first = {
+    questionId: original.id,
+    selected: "-346",
+    mode: "practice",
+    requestId: randomUUID(),
+  };
+  assert.equal((await f.post("/attempts", first, f.student)).correct, false);
+  const oldAttempt = f.db
+    .prepare("SELECT * FROM attempts WHERE id=?")
+    .get(first.requestId);
+  const revised = await f.post(`/questions/${original.id}/notebook-edit`, {
+    ...content,
+    text: content.text + " Làm tròn đến hàng đơn vị.",
+    correctAnswer: "-346",
+    expectedId: original.id,
+  });
+  const load = async () =>
+    (
+      await f.request(
+        "/chapters/chapter-1/questions?mode=correction",
+        undefined,
+        f.student,
+      )
+    ).data.find((q: any) => q.id === original.id);
+  const current = await load();
+  assert.equal(current.sourceQuestionId, revised.id);
+  assert.equal(current.text.includes("hàng đơn vị"), true);
+  assert.equal(current.correctAnswer, undefined);
+  const list = (await f.request("/corrections", undefined, f.student)).data;
+  assert.equal(
+    list.find((q: any) => q.id === original.id).sourceQuestionId,
+    revised.id,
+  );
+  assert.equal(
+    list.find((q: any) => q.id === original.id).correctAnswer,
+    undefined,
+  );
+  assert.equal((await f.post("/attempts", first, f.student)).correct, false);
+  const body = {
+    questionId: original.id,
+    mode: "correction",
+    selected: "-346",
+    requestId: randomUUID(),
+  };
+  for (const source of [undefined, original.id, "question-2"]) {
+    assert.equal(
+      (
+        await f.request(
+          "/attempts",
+          { ...body, sourceQuestionId: source },
+          f.student,
+        )
+      ).status,
+      409,
+    );
+  }
+  const wrong = {
+    ...body,
+    requestId: randomUUID(),
+    sourceQuestionId: revised.id,
+    selected: "-345",
+  };
+  assert.equal((await f.post("/attempts", wrong, f.student)).correct, false);
+  const notebook = (
+    await f.request(
+      "/classrooms/class-demo/students/student-demo/notebook",
+      undefined,
+      f.teacher,
+    )
+  ).data.find((q: any) => q.id === original.id);
+  const newWrong = notebook.wrongAnswers.find(
+    (entry: any) => entry.selected === "-345",
+  );
+  assert.equal(newWrong.question.correctAnswer, "-346");
+  assert.equal(newWrong.source, "Sửa sai · Phiên bản 2");
+  const answer = { ...body, sourceQuestionId: revised.id };
+  const count = f.db.prepare("SELECT COUNT(*) n FROM attempts").get()!.n;
+  f.db.exec(
+    "CREATE TRIGGER reject_attempt_version BEFORE INSERT ON attempt_question_versions BEGIN SELECT RAISE(ABORT,'expected rollback'); END",
+  );
+  assert.equal((await f.request("/attempts", answer, f.student)).status, 500);
+  assert.equal(f.db.prepare("SELECT COUNT(*) n FROM attempts").get()!.n, count);
+  f.db.exec("DROP TRIGGER reject_attempt_version");
+  const result = await f.post("/attempts", answer, f.student);
+  assert.equal(result.correct, true);
+  assert.equal(result.resolved, true);
+  assert.equal(result.correctAnswer, "-346");
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT source_question_id FROM attempt_question_versions WHERE attempt_id=?",
+      )
+      .get(answer.requestId)!.source_question_id,
+    revised.id,
+  );
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT resolved FROM corrections WHERE student_id='student-demo' AND question_id=?",
+      )
+      .get(original.id)!.resolved,
+    1,
+  );
+  await f.post(`/questions/${original.id}/notebook-edit`, {
+    ...content,
+    correctAnswer: "-347",
+    expectedId: revised.id,
+  });
+  assert.deepEqual(await f.post("/attempts", answer, f.student), result);
+  assert.deepEqual(
+    f.db.prepare("SELECT * FROM attempts WHERE id=?").get(first.requestId),
+    oldAttempt,
+  );
+  assert.equal(
+    f.db
+      .prepare("SELECT correct_answer FROM questions WHERE id=?")
+      .get(original.id)!.correct_answer,
+    "-200",
+  );
+  assert.deepEqual(f.db.prepare("PRAGMA foreign_key_check").all(), []);
+});
+
 test("editing a bank source from notebook updates the current bank version", async (t) => {
   const f = await fixture(t);
   f.db

@@ -339,7 +339,8 @@ test("API imports topics atomically, preserves retry/history/correction, and bal
     await request(`/chapters/${chapter}/questions?mode=correction`, student)
   ).data;
   assert.equal(correction[0].id, qid);
-  assert.equal(correction[0].topic, questions[0].topic);
+  assert.equal(correction[0].topic, "Chủ đề đã chỉnh");
+  assert.equal(correction[0].sourceQuestionId, revised.data.id);
   const history = (
     await request(`/questions/${revised.data.id}/history`, teacher)
   ).data;

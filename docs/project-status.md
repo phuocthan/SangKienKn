@@ -1,10 +1,18 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: lượt sửa sai mới theo đáp án đã sửa — 26/10/2026
+
+Sửa lỗi luồng Làm lại dùng khóa cũ dù nguồn đã cập nhật (ca -346 bị so với -200). Nội dung học sinh thấy và bản chấm đồng nhất qua sourceQuestionId; stale trả409, không ghi sai. Bảng cộng thêm attempt_question_versions lưu phiên bản chấm cho lượt sửa sai mới, giữ retry/lịch sử cũ; chỉ đánh dấu khắc phục khi học sinh nộp đúng, không tự chấm lại/đổi điểm hoặc snapshot đã có. Chi tiết đầu question-bank.md/session-handoff. Rà dữ liệu thật chỉ đọc, bằng chứng riêng giữ.local; không public dữ liệu cá nhân.
+
+QA mới202/202backend,6/6E2E desktop/mobile, build/typecheck/format/diff check đạt. Ảnh ca -346 được ghi đúng và log `.local/answer-hieu-20261026/`. Chốt Git sau fetch6c0b533; trước phát hành lấy hash78bài/30347attempts chỉ đọc, không chấm lại hoặc sửa sổ tay thật. Kết quả deploy ghi sau xác minh.
+
 ## Hiện hành: giờ học tuần này trên vườn cá nhân — 26/10/2026
 
 Khu vườn của tôi thêm giờ học **Tuần này** cạnh tổng tích lũy, đúng học sinh/lớp/môn; thứ Hai–Chủ nhật UTC+7, cùng nguồn daily ledger với thống kê giáo viên. GET /classrooms chỉ bổ sung studyWeek cho học sinh; không mở quyền thống kê bạn khác, không thay cách cộng giờ. Hình cây trên sách trong Tiếp tục học tăng180–300px desktop và hiện220px mobile, không đổi ảnh/icon nơi khác. QA/phát hành đầu session-handoff, thiết kế đầu app-design.md. Người dùng đã yêu cầu deploy Git sau khi hoàn thành.
 
 QA mới full201/201backend,4/4E2E desktop/mobile, build/typecheck/format/diff check đạt. Đã xem ảnh và kiểm tra320–1920px; log `.local/garden-week-20261026/`. Không migration/dữ liệu thử trên production; chốt phát hành sau fetch xác nhận7cc06e0, chỉ xác nhận Railway khi kiểm tra đúng source/bundle/health.
+
+Đã phát hành `6c0b533`, origin/main khớp; Railway `3ec72db7-4971-48a1-8c39-94db5c607dca` SUCCESS. Xác minh26/10 20:10UTC+7: source4file/JS/CSS/health đúng bản mới,78bài cũ không đổi. Báo cáo `.local/garden-week-20261026/release-verification.json`; ghi chú sau phát hành còn local, không deploy thêm chỉ cho ghi chú.
 
 ## Hiện hành: mở săn thưởng đến khi giáo viên khóa — 26/10/2026
 

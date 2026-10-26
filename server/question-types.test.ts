@@ -146,6 +146,7 @@ test("typed questions preserve versions, hide keys until correct and expose note
   f.advance(1000);
   const stillWrong = await f.post("/attempts", {
     questionId: a.id,
+    sourceQuestionId: edited.id,
     selected: "00",
     mode: "correction",
     requestId: randomUUID(),
@@ -153,12 +154,13 @@ test("typed questions preserve versions, hide keys until correct and expose note
   assert.equal(stillWrong.correct, false);
   const right = await f.post("/attempts", {
     questionId: a.id,
-    selected: "10",
+    sourceQuestionId: edited.id,
+    selected: "11",
     mode: "correction",
     requestId: randomUUID(),
   });
   assert.equal(right.correct, true);
-  assert.equal(right.correctAnswer, "10");
+  assert.equal(right.correctAnswer, "11");
   assert.equal(right.explanation, truth.explanation);
   const shortWrong = await f.post("/attempts", {
     questionId: b.id,

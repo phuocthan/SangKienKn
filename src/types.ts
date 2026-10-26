@@ -43,6 +43,7 @@ export type Classroom = {
   chapters: Chapter[];
 };
 export type Question = {
+  sourceQuestionId?: string;
   kind?: QuestionKind;
   correctAnswer?: string;
   topic?: string;

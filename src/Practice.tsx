@@ -433,6 +433,9 @@ export function Practice({
         reviewId ? `/learning/reviews/${reviewId}/answer` : "/attempts",
         {
           questionId: questions[index].id,
+          ...(mode === "correction" && !reviewId
+            ? { sourceQuestionId: questions[index].sourceQuestionId }
+            : {}),
           selected,
           mode,
           requestId: requestId.current,

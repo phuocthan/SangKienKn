@@ -1,5 +1,17 @@
 # Bàn giao session GreenEdu
 
+## Chấm lượt sửa sai theo đáp án đã cập nhật — 26/10/2026
+
+Người dùng đưa ca nhập -346 đúng với nguồn đã sửa nhưng vẫn ghi sai. Rà Railway bằng SQLite readOnly: lượt correction mới nhất vẫn tham chiếu bản1/khóa -200, trong khi source cùng family bản2 đã là -346 và thêm yêu cầu làm tròn. Đây là lỗi luồng sửa sai khóa cứng bản cũ, không phải dấu trừ/ký tự hoặc tính toán. Kết quả vật lý -200√3≈-346,410, làm tròn -346. Bằng chứng có dữ liệu cá nhân ở `.local/answer-hieu-20261026/audit.json`, không đưa vào Git. Chưa sửa kết quả/sổ tay/điểm thật hoặc chấm lại.
+
+Sửa đúng luồng Làm lại: GET/corrections và chapters/questions?mode=correction trả nguồn mới nhất, giữ id mục cũ và sourceQuestionId để POST /attempts xác thực stale nguồn. Client cũ/marker cũ gặp409 yêu cầu mở lại, không bị ghi sai. Attempts vẫn liên kết mục sửa sai gốc; bảng bổ sung attempt_question_versions giữ source cụ thể dùng chấm trong cùng transaction, dùng lại khi replay để không đổi kết quả cũ sau các lần sửa tiếp. Sổ tay giáo viên đọc lịch sử đúng nguồn của mỗi lượt. Không thay bộ chấm số, không sửa snapshot ôn/thi, không gộp bản nhập độc lập khác lớp.
+
+QA mới build/typecheck/format/diff check đạt; full **202/202 backend đạt (49,2giây)**, **6/6 E2E desktop/mobile đạt (1,5phút)**. Ca -346 tái hiện khóa cũ -200 và bản mới -346; xác nhận marker stale/nguồn khác bị409, không lộ đáp án, rollback nếu lưu metadata lỗi, lịch sử đúng phiên bản và retry không đổi sau bản3, giữ lượt gốc. E2E gồm ca gia tốc, sửa từ sổ tay giáo viên và nhập/sửa/ẩn/hiện rồi học sinh làm lại theo bản mới. Đã xem ảnh nhập -346 được báo khắc phục. Log `.local/answer-hieu-20261026/`.
+
+Các kiểm thử cũ buộc sửa sai theo bản cũ đã cập nhật đúng quy tắc mới, giữ assertion lịch sử/điểm bất biến. Lượt full đầu201/202 còn assertion chủ đề correction cũ, đã sửa rồi chạy full lại; focused34/34 đạt trước lượt full. Lượt test mới đầu chọn phần tử cuối khi fixture cùng timestamp đã đổi tìm đúng selected -345, không sửa runtime vì lỗi đó. Không báo các lượt lỗi là QA đạt. Không reset database, không chạy ca thử trên Railway.
+
+Fetch xác nhận main/origin main cùng6c0b533. Chốt phát hành bản sửa trong phạm vi source/schema bổ sung/test/tài liệu liên quan theo yêu cầu deploy Git còn hiệu lực. Mốc readOnly trước phát hành:78bài đã nộp và30347attempts; không tự đổi điểm, trạng thái correction hoặc trả lời thay học sinh. Chỉ xác nhận production sau khi đối chiếu deployment/source/bundle/schema và hash toàn bộ bản ghi cũ.
+
 ## Giờ học trong tuần và hình sách/cây ở vườn cá nhân — 26/10/2026
 
 Yêu cầu đúng hai phần trong **Khu vườn của tôi** học sinh: show thời gian đã học trong tuần, tăng hình sách/cây đang quá nhỏ; người dùng yêu cầu deploy Git khi xong. Khởi điểm main7cc06e0, hai ghi chú sau phát hành còn local được giữ. Dùng redesign-existing-projects/web-design-guidelines; giữ UI hiện có và asset knowledge-garden-v1.webp.
@@ -9,6 +21,8 @@ API GET /classrooms thêm studyWeek chỉ cho học sinh, dùng studentStudyStat
 QA mới build/typecheck/format/diff check đạt; full **201/201 backend đạt (19giây)**, trong đó ca tuần UTC+7 cắt đúng thứ Hai00:00, cộng nhiều chương đúng lớp, tách lớp/môn và học sinh khác, khớp thống kê giáo viên, không trả tuần học sinh cho teacher. **4/4 E2E desktop/mobile đạt (10,2giây)**: phân biệt tuần/tổng tích lũy, không dữ liệu/0/partial, refresh focus, hình hiện180–300px desktop/220px mobile,320/390/768/1440/1920px không tràn và nút luyện tập vẫn hoạt động. Đã xem ảnh hero hai kích thước; log/ảnh `.local/garden-week-20261026/`. Lượt đầu test mới truyền nhầm chữ ký creditStudyInterval, đã sửa fixture rồi chạy lại; không báo lượt lỗi thành đạt. Không sửa runtime sau build. Dữ liệu kiểm thử dùng database riêng.
 
 Fetch xác nhận main/origin main cùng7cc06e0. Người dùng yêu cầu deploy Git, chốt9file code/test/tài liệu liên quan, giữ ghi chú phát hành săn thưởng có sẵn; không đưa .local/database/secrets/dữ liệu học sinh vào Git. Production chỉ đọc lấy mốc78bài đã nộp trước triển khai, không đăng nhập/ghi dữ liệu thử. Kết quả phát hành ghi tiếp sau khi đối chiếu đúng commit/source/bundle/health và hash bài cũ.
+
+Đã push `6c0b533042ac87a214ee511137b15da1232cc59f`, origin/main khớp. Railway deployment `3ec72db7-4971-48a1-8c39-94db5c607dca` **SUCCESS**; xác minh26/10 20:10UTC+7: source4file khớp commit, health200/ok=true/demo=false/quickLogin=false; entry `/assets/index-DtZDis0r.js` có studyWeek, CSS `/assets/index-pozyiIIT.css` có hình desktop lớn/mobile hiện. Hash78bài đã nộp trước phát hành giữ nguyên. Báo cáo `.local/garden-week-20261026/release-verification.json`; không đăng nhập/ghi dữ liệu thử production. Ghi chú kết quả lưu local, không tạo thêm deploy chỉ để lưu ghi chú.
 
 ## Săn thưởng không tự đóng theo thời gian làm bài — 26/10/2026
 

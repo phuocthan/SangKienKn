@@ -140,8 +140,7 @@ export function StudentNotebook({
               {updated && (
                 <p>
                   Câu và đáp án hiện tại · Phiên bản {source.version}. Lịch sử
-                  trả lời bên dưới thuộc phiên bản {q.version}; điểm cũ giữ
-                  nguyên.
+                  trả lời và điểm cũ được giữ nguyên.
                 </p>
               )}
               {q.canEditSource && (

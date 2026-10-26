@@ -157,7 +157,7 @@ async function demoLogin(page: Page, role: "Học sinh" | "Giáo viên") {
   ).toBeVisible();
 }
 
-test("teacher imports with preview and network retry, edits/hides/restores; student repairs the original revision", async ({
+test("teacher imports with preview and network retry, edits/hides/restores; student repairs using the latest revision", async ({
   page,
 }, info) => {
   const stamp = `${info.project.name}-${Date.now()}`;
@@ -335,10 +335,10 @@ test("teacher imports with preview and network retry, edits/hides/restores; stud
   await navigateTo(page, { name: /Sổ tay sửa sai/ });
   const old = page
     .locator(".correction-card")
-    .filter({ hasText: "Câu nhập thứ nhất?" });
+    .filter({ hasText: "Câu đã sửa sang phiên bản mới?" });
   await expect(old).toBeVisible();
   await old.getByRole("button", { name: "Làm lại" }).click();
-  await page.getByRole("button", { name: "A 1", exact: true }).click();
+  await page.getByRole("button", { name: "C 3", exact: true }).click();
   await page.getByRole("button", { name: "Kiểm tra đáp án" }).click();
   await expect(page.getByText("Bạn đã khắc phục lỗi sai này!")).toBeVisible();
   await page.getByRole("button", { name: "Xem kết quả" }).click();

@@ -1,12 +1,18 @@
 # Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
+## Lượt sửa sai mới dùng bản đã sửa — 26/10/2026
+
+Giữ bài và điểm cũ không có nghĩa chấm một lượt sửa sai mới bằng đáp án cũ. Sổ tay học sinh và màn Làm lại đọc nội dung/phương án mới nhất cùng family; giữ ID mục sửa sai gốc và thêm sourceQuestionId. Khi gửi, server kiểm tra marker còn là nguồn mới nhất; nếu giáo viên vừa sửa, trả409 yêu cầu quay lại sổ tay/mở lại, không ghi một lượt sai do bản đã cũ. Không gửi khóa đáp án/lời giải trước khi trả lời đúng.
+
+Lượt mới giữ liên kết mục sửa sai gốc trong attempts và lưu nguồn thực sự dùng chấm vào bảng bổ sung attempt_question_versions(attempt_id,source_question_id) cùng transaction. Nhờ vậy retry vẫn trả kết quả của đúng phiên bản đã nộp, kể cả giáo viên sửa thêm lần nữa; lịch sử sai dùng phương án/đáp án đúng phiên bản của từng lượt. Trả lời đúng chỉ đánh dấu khắc phục mục đang sửa; không tự sửa điểm/đáp án/lượt cũ, không tự chấm lại hoặc hoàn tất sổ tay học sinh. Nguồn riêng của đề cũng áp dụng; snapshot ôn/thi đang làm/đã nộp vẫn giữ nguyên.
+
 ## Tìm kiếm và sửa từ sổ tay — 26/10/2026
 
 Ngân hàng có ô **Tìm câu hỏi**, lọc trong chương/bài và trạng thái ẩn đang chọn. Tìm không phân biệt hoa/thường hoặc dấu tiếng Việt, kết hợp nhiều từ khóa trên nội dung/phương án/bài/chủ đề/lời giải. Số kết quả và chọn tất cả chỉ tính các câu khớp; đổi từ khóa xóa lựa chọn cũ để tránh xóa nhầm câu không còn hiển thị.
 
 Trong **Quản lý lớp → Học sinh → Xem sổ tay**, giáo viên có **Sửa câu hỏi** ngay trên thẻ. Hộp luôn tải phiên bản nguồn mới nhất, dùng đủ ba dạng câu và chỉ lưu khi xác thực thành công. Retry lỗi giữ nháp; Hủy không ghi; expectedId chặn ghi đè bản vừa được người khác sửa. Chỉ giáo viên sở hữu lớp được đọc/sửa nguồn.
 
-Theo quyết định người dùng26/10: **bản sửa dùng cho lượt mới; giữ bài và điểm cũ**. Lưu tạo phiên bản trong cùng family, cập nhật nguồn tái sử dụng cùng mã/family trong ngân hàng, đề săn thưởng, bộ ôn và đề chưa bắt đầu/chưa có lượt làm. Không sửa attempts, corrections, review_sessions hoặc exam_runs đã có. Thẻ sổ tay giáo viên hiển thị câu, đáp án và lời giải nguồn mới nhất ngay sau lưu và khi mở lại. Nếu khác bản lúc làm bài, thẻ ghi rõ phiên bản; mục **Câu và đáp án lúc làm bài** mở xem bản cũ, lịch sử trả lời vẫn theo bản cũ. Không thay đổi luồng sửa sai của học sinh hoặc chấm lại điểm. Câu riêng tải lên vẫn không công bố vào ngân hàng luyện tập. Không dò văn bản để tự gộp các bản nhập độc lập ở lớp khác. Tất cả thay đổi nguồn nằm trong cùng transaction; lỗi một nơi rollback cả phiên bản và các nguồn.
+Theo quyết định người dùng26/10: **bản sửa dùng cho lượt mới; giữ bài và điểm cũ**. Lưu tạo phiên bản trong cùng family, cập nhật nguồn tái sử dụng cùng mã/family trong ngân hàng, đề săn thưởng, bộ ôn và đề chưa bắt đầu/chưa có lượt làm. Không sửa attempts, corrections, review_sessions hoặc exam_runs đã có. Thẻ sổ tay giáo viên hiển thị câu, đáp án và lời giải nguồn mới nhất ngay sau lưu và khi mở lại. Nếu khác bản lúc làm bài, thẻ ghi rõ phiên bản; mục **Câu và đáp án lúc làm bài** mở xem bản cũ, lịch sử trả lời vẫn theo bản cũ. Lượt sửa sai mới dùng nguồn mới nhất theo quy tắc ở đầu tài liệu; không chấm lại điểm cũ. Câu riêng tải lên vẫn không công bố vào ngân hàng luyện tập. Không dò văn bản để tự gộp các bản nhập độc lập ở lớp khác. Tất cả thay đổi nguồn nằm trong cùng transaction; lỗi một nơi rollback cả phiên bản và các nguồn.
 
 API GET `/api/questions/:id/edit-source` trả nguồn hiện hành/loại riêng/danh sách bài cho chủ lớp; POST `/api/questions/:id/notebook-edit` nhận nội dung và expectedId. Notebook item có canEditSource và sourceQuestion (nguồn mới nhất), các trường gốc giữ lịch sử; client với backend cũ không hiện nút chưa hỗ trợ. Chi tiết QA/phát hành ở đầu bàn giao.
 
@@ -70,7 +76,7 @@ API cũng ghép tên tương đương khi thêm/sửa/nhập câu; kiểm tra tr
 
 - Câu hỏi đã xuất bản là một phiên bản có mã riêng. Khi thay đổi nội dung, bài học, lựa chọn, đáp án hoặc lời giải, app tạo mã mới và tăng số phiên bản. Không sửa câu hỏi tại chỗ.
 - Phiên bản mới ở cùng chương; không chuyển câu đã làm sang chương khác. Câu cũ ngừng dùng trong luyện tập mới, nhưng lượt làm và sổ tay vẫn tham chiếu câu cũ.
-- Học sinh sửa sai với nội dung, phương án và đáp án của phiên bản đã làm sai, kể cả khi giáo viên đã ẩn hoặc sửa câu đó.
+- Học sinh bắt đầu lượt sửa sai mới với nguồn mới nhất cùng family, kể cả khi câu đã ẩn; retry một lượt đã lưu vẫn theo đúng phiên bản đã chấm. Lịch sử các lượt cũ không đổi.
 - Ẩn/xóa câu chỉ ngừng dùng cho lượt luyện tập mới; hiện lại chỉ áp dụng phiên bản hiện tại. Chỉnh sửa câu đang ẩn không tự công bố nó. Không xóa vật lý câu hoặc lượt làm.
 - Nếu giáo viên cập nhật/ẩn câu khi học sinh chưa gửi đáp án, lượt luyện tập mới bị từ chối và yêu cầu mở lại bài. Gửi lại mã của lượt đã lưu vẫn trả kết quả cũ và không ghi thêm lượt.
 - Không đổi nội dung thì không tăng phiên bản. Sửa từ một phiên bản đã cũ bị từ chối; giáo viên tải lại trước khi sửa.

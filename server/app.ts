@@ -1418,7 +1418,13 @@ export function createApp(
             randomInt,
           )
         : rows;
-    res.json(ordered.map((q) => questionView(q, req)));
+    res.json(
+      ordered.map((q) =>
+        req.query.mode === "correction"
+          ? correctionQuestionView(q, req)
+          : questionView(q, req),
+      ),
+    );
   });
   app.post("/api/chapters/:id/questions", (req: AppRequest, res) => {
     teacher(req);
@@ -1482,6 +1488,15 @@ export function createApp(
         "SELECT * FROM questions WHERE COALESCE(family_id,id)=? ORDER BY version DESC LIMIT 1",
       )
       .get(q.family_id ?? q.id) as Row;
+  }
+  function correctionQuestionView(original: Row, req: AppRequest) {
+    const current = latestQuestion(original);
+    return {
+      ...questionView(current, req),
+      id: original.id,
+      sourceQuestionId: current.id,
+      correction: true,
+    };
   }
   app.get("/api/questions/:id/edit-source", (req: AppRequest, res) => {
     const original = ownedQuestion(req);
@@ -1681,20 +1696,41 @@ export function createApp(
       now(),
       req.body?.studySessionId,
     );
-    const content = questionContent(q);
+    const mode = req.body?.mode;
+    if (!["practice", "correction"].includes(mode))
+      fail(400, "Câu trả lời không hợp lệ.");
+    const existing = db
+      .prepare("SELECT * FROM attempts WHERE id = ?")
+      .get(id) as Row | undefined;
+    let gradingQuestion = q;
+    if (mode === "correction") {
+      const sourceId = req.body?.sourceQuestionId ?? questionId;
+      const source = existing
+        ? (db
+            .prepare(
+              "SELECT * FROM questions WHERE id=COALESCE((SELECT source_question_id FROM attempt_question_versions WHERE attempt_id=?),?)",
+            )
+            .get(existing.id, existing.question_id) as Row | undefined)
+        : latestQuestion(q);
+      if (
+        !source ||
+        sourceId !== source.id ||
+        (source.family_id ?? source.id) !== (q.family_id ?? q.id)
+      )
+        fail(
+          409,
+          "Giáo viên đã cập nhật câu hỏi. Quay lại sổ tay và mở lại để làm bản mới nhất.",
+        );
+      gradingQuestion = source;
+    }
+    const content = questionContent(gradingQuestion);
     let selected;
     try {
       selected = validateQuestionAnswer(content, req.body?.selected);
     } catch (e) {
       fail(400, (e as Error).message);
     }
-    const selectedStored = storedAnswer(selected!),
-      mode = req.body?.mode;
-    if (!["practice", "correction"].includes(mode))
-      fail(400, "Câu trả lời không hợp lệ.");
-    const existing = db
-      .prepare("SELECT * FROM attempts WHERE id = ?")
-      .get(id) as Row | undefined;
+    const selectedStored = storedAnswer(selected!);
     if (
       existing &&
       (existing.student_id !== req.user!.id ||
@@ -1730,6 +1766,11 @@ export function createApp(
           mode,
           now(),
         );
+        if (gradingQuestion.id !== questionId)
+          db.prepare("INSERT INTO attempt_question_versions VALUES(?,?)").run(
+            id,
+            gradingQuestion.id,
+          );
         if (!correct)
           db.prepare(
             "INSERT INTO corrections VALUES (?,?,0,?) ON CONFLICT(student_id,question_id) DO UPDATE SET resolved = 0, updated_at = excluded.updated_at",
@@ -1750,9 +1791,9 @@ export function createApp(
       ...(!answerCorrect(content, selected)
         ? { explanation: "Hãy xem lại kiến thức và tự làm lại câu này." }
         : {
-            correctIndex: q.correct_index,
-            correctAnswer: q.correct_answer ?? undefined,
-            explanation: q.explanation,
+            correctIndex: gradingQuestion.correct_index,
+            correctAnswer: gradingQuestion.correct_answer ?? undefined,
+            explanation: gradingQuestion.explanation,
           }),
       resolved: mode === "correction" && answerCorrect(content, selected),
     });
@@ -1799,8 +1840,9 @@ export function createApp(
       };
       const attempts = db
         .prepare(
-          `SELECT a.question_id,a.selected,a.created_at,a.mode,q.kind,q.choices,q.correct_index,q.correct_answer
-       FROM attempts a JOIN questions q ON q.id=a.question_id JOIN chapters ch ON ch.id=q.chapter_id
+          `SELECT a.question_id,a.selected,a.created_at,a.mode,q.version,q.kind,q.choices,q.correct_index,q.correct_answer
+       FROM attempts a LEFT JOIN attempt_question_versions av ON av.attempt_id=a.id
+       JOIN questions q ON q.id=COALESCE(av.source_question_id,a.question_id) JOIN chapters ch ON ch.id=q.chapter_id
        WHERE a.student_id=? AND ch.classroom_id=? AND a.correct=0 ORDER BY a.created_at,a.id`,
         )
         .all(studentId, classId) as Row[];
@@ -1818,7 +1860,9 @@ export function createApp(
           String(attempt.question_id),
           selected,
           Number(attempt.created_at),
-          attempt.mode === "correction" ? "Sửa sai" : "Luyện tập",
+          attempt.mode === "correction"
+            ? `Sửa sai · Phiên bản ${attempt.version}`
+            : "Luyện tập",
           {
             kind: attempt.kind,
             choices: JSON.parse(attempt.choices),
@@ -1883,7 +1927,7 @@ export function createApp(
     res.json(
       db
         .prepare(
-          `SELECT q.id,q.kind,q.chapter_id AS chapterId,q.text,q.choices,ch.title AS chapterTitle,c.name AS className,cr.updated_at AS updatedAt
+          `SELECT q.*,q.chapter_id AS chapterId,ch.title AS chapterTitle,c.name AS className,cr.updated_at AS updatedAt
       FROM corrections cr JOIN questions q ON q.id = cr.question_id JOIN chapters ch ON ch.id = q.chapter_id
       JOIN classrooms c ON c.id = ch.classroom_id JOIN memberships m ON m.classroom_id = c.id AND m.student_id = cr.student_id
       WHERE cr.student_id = ? AND cr.resolved = 0 ORDER BY cr.updated_at DESC`,
@@ -1891,7 +1935,12 @@ export function createApp(
         .all(req.user!.id)
         .map((raw) => {
           const r = raw as Row;
-          return { ...r, choices: JSON.parse(r.choices), correction: true };
+          return {
+            ...correctionQuestionView(r, req),
+            chapterTitle: r.chapterTitle,
+            className: r.className,
+            updatedAt: r.updatedAt,
+          };
         }),
     );
   });
