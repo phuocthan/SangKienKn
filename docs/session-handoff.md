@@ -12,6 +12,8 @@ Các kiểm thử cũ buộc sửa sai theo bản cũ đã cập nhật đúng q
 
 Fetch xác nhận main/origin main cùng6c0b533. Chốt phát hành bản sửa trong phạm vi source/schema bổ sung/test/tài liệu liên quan theo yêu cầu deploy Git còn hiệu lực. Mốc readOnly trước phát hành:78bài đã nộp và30347attempts; không tự đổi điểm, trạng thái correction hoặc trả lời thay học sinh. Chỉ xác nhận production sau khi đối chiếu deployment/source/bundle/schema và hash toàn bộ bản ghi cũ.
 
+Đã push `360aedc167691f1a947a76d8411863e7858141c9`, origin/main khớp; Railway deployment `87bc8291-571b-46e0-89a8-c368680d7572` **SUCCESS**, xác minh26/10 20:42UTC+7. Source5file khớp commit, bundle `/assets/index-Cus_Qeju.js` có sourceQuestionId; metadata table có và foreign_key_check không lỗi. Health200/ok=true/demo=false/quickLogin=false. Hash78bài đã nộp và30347attempts trước rollout không đổi. Báo cáo `.local/answer-hieu-20261026/release-verification.json`; không đăng nhập/thử trả lời bằng tài khoản thật hoặc chấm lại dữ liệu. Học sinh cần tải lại trang và mở lại câu từ sổ tay để bắt đầu lượt theo nguồn mới. Ghi chú xác minh lưu local, không tạo thêm deploy chỉ cho ghi chú.
+
 ## Giờ học trong tuần và hình sách/cây ở vườn cá nhân — 26/10/2026
 
 Yêu cầu đúng hai phần trong **Khu vườn của tôi** học sinh: show thời gian đã học trong tuần, tăng hình sách/cây đang quá nhỏ; người dùng yêu cầu deploy Git khi xong. Khởi điểm main7cc06e0, hai ghi chú sau phát hành còn local được giữ. Dùng redesign-existing-projects/web-design-guidelines; giữ UI hiện có và asset knowledge-garden-v1.webp.

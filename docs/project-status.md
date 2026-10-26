@@ -6,6 +6,8 @@ Sửa lỗi luồng Làm lại dùng khóa cũ dù nguồn đã cập nhật (ca
 
 QA mới202/202backend,6/6E2E desktop/mobile, build/typecheck/format/diff check đạt. Ảnh ca -346 được ghi đúng và log `.local/answer-hieu-20261026/`. Chốt Git sau fetch6c0b533; trước phát hành lấy hash78bài/30347attempts chỉ đọc, không chấm lại hoặc sửa sổ tay thật. Kết quả deploy ghi sau xác minh.
 
+Đã phát hành `360aedc`: origin/main khớp, Railway `87bc8291-571b-46e0-89a8-c368680d7572` SUCCESS. Xác minh26/10 20:42UTC+7 source5file/bundle/health đúng bản mới, bảng metadata có/không lỗi khóa ngoại,78bài và30347attempts cũ không đổi. Học sinh tải lại/mở lại sổ tay để dùng đáp án mới, không tự chấm lại lượt cũ. Báo cáo `.local/answer-hieu-20261026/release-verification.json`; ghi chú kết quả còn local, không deploy thêm chỉ cho ghi chú.
+
 ## Hiện hành: giờ học tuần này trên vườn cá nhân — 26/10/2026
 
 Khu vườn của tôi thêm giờ học **Tuần này** cạnh tổng tích lũy, đúng học sinh/lớp/môn; thứ Hai–Chủ nhật UTC+7, cùng nguồn daily ledger với thống kê giáo viên. GET /classrooms chỉ bổ sung studyWeek cho học sinh; không mở quyền thống kê bạn khác, không thay cách cộng giờ. Hình cây trên sách trong Tiếp tục học tăng180–300px desktop và hiện220px mobile, không đổi ảnh/icon nơi khác. QA/phát hành đầu session-handoff, thiết kế đầu app-design.md. Người dùng đã yêu cầu deploy Git sau khi hoàn thành.
