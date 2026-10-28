@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: xuất câu hỏi thường làm sai theo chương — 28/10/2026
+
+Ngân hàng câu hỏi xuất Word/Excel cho chương đang chọn; tính lượt trả lời trong luyện tập, sửa sai, ôn tập và các bài kiểm tra đã nộp, loại câu bỏ trống; sắp theo lượt sai và tách theo phiên bản câu. File có câu hỏi/phương án/đáp án, lượt sai/lượt trả lời/số HS sai/tỷ lệ sai và hiển thị mũ/chỉ số; GV lớp hoặc GV chỉ xem được truy cập. Không chấm lại hoặc đổi dữ liệu học tập. Chi tiết tính và QA trong session-handoff/question-bank.md.
+
+QA mới:210/210 backend,2/2 E2E desktop/mobile, build/typecheck và kiểm tra mở Word/Excel đạt; log `.local/mistake-report-20261028/`. Push Git khi xong, không chờ/kiểm tra Railway theo yêu cầu.
+
 ## Hiện hành: giáo viên chỉ xem — 27/10/2026
 
 Đã tạo tài khoản `giaovien-nk` xem phạm vi lớp của thanhphuong, có danh tính/phiên riêng, không chỉnh sửa nội dung/điểm hoặc mở/khóa bài. Bảng teacher_viewers bổ sung, server chặn mọi ghi ngoại trừ đổi mật khẩu riêng/đăng xuất; UI teacher+readOnly, khóa/ẩn thao tác ghi, giữ tìm kiếm/xem/xuất báo cáo. Vai trò nền không có quyền giáo viên/membership để đóng quyền trên backend cũ. Không nhân bản lớp hay sửa dữ liệu học tập. [Chi tiết quyền và CLI](teacher-viewers.md).

@@ -1,5 +1,10 @@
 import { updateQuestionSources } from "./question-updates.js";
 import {
+  questionMistakes,
+  mistakeWorkbook,
+  mistakeDocument,
+} from "./question-mistakes.js";
+import {
   answerComplete,
   answerCorrect,
   statementCorrectness,
@@ -625,6 +630,7 @@ export function createApp(
           practiceAllowed: practiceAllowed(db, String(ch.id)),
           canDeleteQuestions:
             req.user!.role === "teacher" && !req.user!.readOnly,
+          canExportMistakeReport: req.user!.role === "teacher",
           canTagQuestions: true,
           questionCount: (
             db
@@ -1409,6 +1415,30 @@ export function createApp(
         : {}),
     };
   }
+  app.get("/api/chapters/:id/mistakes.:format", (req: AppRequest, res) => {
+    teacher(req);
+    const ch = chapter(req, String(req.params.id), true);
+    const format = String(req.params.format);
+    if (format !== "xlsx" && format !== "docx")
+      fail(400, "Chọn định dạng Word hoặc Excel.");
+    const c = classroom(req, String(ch.classroom_id));
+    const rows = questionMistakes(db, String(ch.id), String(c.id));
+    const filename = `${c.name} - ${ch.title} - cau-hoi-thuong-sai.${format}`;
+    res.set(
+      "Content-Disposition",
+      `attachment; filename="greenedu-cau-hoi-thuong-sai.${format}"; filename*=UTF-8''${encodeURIComponent(filename).replace(/[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)}`,
+    );
+    res.type(
+      format === "xlsx"
+        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    res.send(
+      format === "xlsx"
+        ? mistakeWorkbook(String(c.name), String(ch.title), rows)
+        : mistakeDocument(String(c.name), String(ch.title), rows),
+    );
+  });
   app.get("/api/chapters/:id/questions", (req: AppRequest, res) => {
     if (req.user!.role === "student")
       requirePractice(db, String(req.params.id));

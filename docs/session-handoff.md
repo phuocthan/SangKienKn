@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Xuất câu hỏi thường làm sai theo chương — 28/10/2026
+
+Người dùng chốt tính **cả luyện tập, sửa sai và bài kiểm tra**. Trong Ngân hàng câu hỏi, chọn lớp/chương rồi dùng **Xuất Word** hoặc **Xuất Excel** ở thẻ Thống kê câu hỏi thường sai; xuất toàn chương đang chọn, không phụ thuộc bộ lọc bài hoặc tìm kiếm. Quyền thuộc GV lớp và GV chỉ xem được chia sẻ; học sinh/GV lớp khác không truy cập. Capability canExportMistakeReport tránh hiển thị link hỏng với backend cũ.
+
+GET /api/chapters/:id/mistakes.:format đọc attempts (bao gồm ôn tập đã ghi vào attempts), cộng câu đã trả lời trong exam_runs đã nộp cho đúng lớp/chương, không cộng hai lần ôn tập. Bỏ câu không trả lời, Đ/S có trả lời dở vẫn là sai theo bộ chấm; dùng gradingVersion và snapshot/key của từng bài, không chấm lại/ghi dữ liệu. Tách từng ID/phiên bản câu; lượt sửa sai dùng attempt_question_versions. Câu ≥1 lượt sai được xếp theo lượt sai, số HS sai, tỷ lệ; tỷ lệ = lượt sai / lượt đã trả lời, HS sai là số học sinh khác nhau từng phiên bản. Bản Word/Excel gồm nội dung, phương án, đáp án, phiên bản và các số liệu; tên file có lớp/chương, bảng rỗng có lời giải thích. Ký hiệu mũ/chỉ số được chuyển thành định dạng Word/Excel thực, không in nguyên marker ^/_; lưu lịch sử và dữ liệu thật như cũ.
+
+QA: full210/210 backend đạt, focused3/3 sau sửa metadata/filename đạt; E2E2/2 desktop/mobile đạt, thử xuất file Word/Excel thực trên database riêng và kiểm tra320/390/768/1440px không tràn. Build/typecheck đạt, dùng openpyxl/python-docx từ runtime mở file mẫu, xác minh nội dung, số liệu, freeze/filter và chỉ số trên/dưới. Đã xem ảnh desktop/mobile. Không chạy ca thử/ghi dữ liệu production; log và mẫu giả trong `.local/mistake-report-20261028/`. Dùng redesign-existing-projects/web-design-guidelines, giữ style app; không đổi chức năng hay dữ liệu ngoài phạm vi. Theo yêu cầu còn hiệu lực, hoàn thành thì commit/push Git, không chờ/kiểm tra Railway deploy.
+
 ## Tài khoản giáo viên chỉ xem — 27/10/2026
 
 Người dùng yêu cầu một tài khoản xem như thanhphuong nhưng không có quyền chỉnh sửa; đã cung cấp login/mật khẩu. **Đã tạo thật `giaovien-nk`**, tên hiển thị Giáo viên NK (chỉ xem), gắn đúng thanhphuong@greenedu.nk. Không ghi thông tin xác thực vào Git/tài liệu. Chỉ tạo user/mapping trong transaction qua Railway SSH; không sửa lớp, membership, câu hỏi, bài làm, điểm hoặc tài khoản thanhphuong. Không login bằng giáo viên thật để test. Đã xóa script/payload riêng có thông tin cấp tài khoản sau khi tạo.

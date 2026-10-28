@@ -2,6 +2,25 @@
   padding: 18px 22px;
   margin-bottom: 20px;
 }
+.mistake-report {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+.mistake-report p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.mistake-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 .bank-search {
   display: grid;
   gap: 6px;

@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Xuất câu hỏi thường sai — 28/10/2026
+
+Ngân hàng câu hỏi thêm thẻ **Thống kê câu hỏi thường sai · Chương đang chọn**, giải thích nguồn lượt trả lời và hai liên kết **Xuất Word / Xuất Excel**. Thẻ xếp linh hoạt desktop/mobile, giữ font/màu/nút hiện có; GV chỉ xem vẫn xuất được. Backend cũ hiện lời nhắc thay vì link lỗi. Thiết kế và rà theo hai skill trong AGENTS.
+
 ## Chế độ giáo viên chỉ xem — 27/10/2026
 
 Giữ giao diện giáo viên với banner **Giáo viên chỉ xem**; dữ liệu từ các lớp được chia sẻ. Khóa/ẩn thao tác tạo/sửa/xóa/duyệt/cấp lại mật khẩu/mở-khóa bài; giữ chọn lớp, tìm kiếm, xem lịch sử/sổ tay/bài nộp và tải báo cáo. API/auth trả ID và hồ sơ người xem riêng, không đổi tên hiển thị thành chủ dữ liệu. Server kiểm tra quyền ghi độc lập với UI. Thiết kế theo hai skill hiện có, không đổi CSS/asset/layout chung.

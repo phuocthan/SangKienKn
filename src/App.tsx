@@ -1448,6 +1448,13 @@ export default function App() {
                       </div>
                       <QuestionBank
                         readOnly={user.readOnly}
+                        reportSupported={
+                          !!(
+                            current.chapters.find(
+                              (ch) => ch.id === questionChapter,
+                            ) ?? current.chapters[0]
+                          ).canExportMistakeReport
+                        }
                         deleteSupported={
                           !!(
                             current.chapters.find(

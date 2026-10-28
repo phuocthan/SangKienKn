@@ -13,6 +13,7 @@ export type User = {
   uploadedAvatarId?: string | null;
 };
 export type Chapter = {
+  canExportMistakeReport?: boolean;
   practiceAllowed?: boolean;
   levelMinutes?: number;
   id: string;

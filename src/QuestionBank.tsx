@@ -33,6 +33,7 @@ type Dialog =
 
 export function QuestionBank({
   readOnly = false,
+  reportSupported = false,
   chapterId,
   topicSupported,
   deleteSupported,
@@ -43,6 +44,7 @@ export function QuestionBank({
   onChange,
 }: {
   readOnly?: boolean;
+  reportSupported?: boolean;
   chapterId: string;
   topicSupported: boolean;
   deleteSupported: boolean;
@@ -176,6 +178,40 @@ export function QuestionBank({
   }
   return (
     <>
+      <section
+        className="card mistake-report"
+        aria-label="Xuất thống kê câu hỏi thường sai"
+      >
+        <div>
+          <strong>Thống kê câu hỏi thường sai · Chương đang chọn</strong>
+          <p>
+            Gồm luyện tập, sửa sai, ôn tập và bài kiểm tra đã nộp; không tính
+            câu bỏ trống. Xếp theo số lượt sai, tách từng phiên bản câu hỏi.
+          </p>
+        </div>
+        <div className="mistake-report-actions">
+          {reportSupported ? (
+            <>
+              <a
+                className="button secondary small"
+                href={`/api/chapters/${chapterId}/mistakes.docx`}
+              >
+                <Download size={16} /> Xuất Word
+              </a>
+              <a
+                className="button secondary small"
+                href={`/api/chapters/${chapterId}/mistakes.xlsx`}
+              >
+                <Download size={16} /> Xuất Excel
+              </a>
+            </>
+          ) : (
+            <span className="subtle-note">
+              Thống kê cần máy chủ phiên bản mới.
+            </span>
+          )}
+        </div>
+      </section>
       <div className="question-toolbar">
         <label className="bank-search">
           Tìm câu hỏi

@@ -1,5 +1,11 @@
 # Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
+## Xuất câu hỏi thường làm sai — 28/10/2026
+
+Trong Ngân hàng câu hỏi, GV chọn lớp/chương và tải Word hoặc Excel tại thẻ thống kê. Đề thống kê gồm lượt luyện tập, sửa sai, ôn tập (đã có attempts) và bài kiểm tra đã nộp; bỏ câu không trả lời, tính Đ/S trả lời một phần là sai. Mỗi phiên bản nguồn là một dòng/câu riêng: correction lấy nguồn ở attempt_question_versions, bài thi dùng snapshot/key và quy tắc chấm lúc nộp. Không gộp bản sửa làm thay đổi nội dung hoặc đáp án lịch sử, không gộp câu cùng văn bản nhưng khác ID. Xếp giảm theo lượt sai, sau đó số HS sai và tỷ lệ sai; mẫu số là các lượt đã trả lời, HS sai không trùng theo từng phiên bản. Không giới hạn top, chỉ đưa câu có ít nhất một lượt sai.
+
+File ghi lớp/chương, câu hỏi/phương án/đáp án, phiên bản, lượt sai, lượt trả lời, số học sinh khác nhau và tỷ lệ %. Mũ/chỉ số được xuất thành rich text đúng định dạng trong cả hai file. Có thông báo khi chưa có câu sai; GV chỉ xem được xuất, học sinh và GV ngoài lớp bị chặn. API chỉ đọc, không sửa điểm/attempts/snapshot. Chọn chương độc lập với bộ lọc bài/tìm kiếm. Backend mới cung cấp capability canExportMistakeReport; chưa phát hành thì client chỉ thông báo cần bản mới. QA/Git xem đầu session-handoff.
+
 ## Lượt sửa sai mới dùng bản đã sửa — 26/10/2026
 
 Giữ bài và điểm cũ không có nghĩa chấm một lượt sửa sai mới bằng đáp án cũ. Sổ tay học sinh và màn Làm lại đọc nội dung/phương án mới nhất cùng family; giữ ID mục sửa sai gốc và thêm sourceQuestionId. Khi gửi, server kiểm tra marker còn là nguồn mới nhất; nếu giáo viên vừa sửa, trả409 yêu cầu quay lại sổ tay/mở lại, không ghi một lượt sai do bản đã cũ. Không gửi khóa đáp án/lời giải trước khi trả lời đúng.
