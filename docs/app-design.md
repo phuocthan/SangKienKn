@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Quyền riêng tư tỷ lệ đúng trong Vinh danh — 31/10/2026
+
+Học sinh chỉ thấy tỷ lệ đúng của chính mình trong Top10; ẩn cả con số, icon và thanh tỷ lệ của bạn khác ở bục và danh sách, kể cả nhãn đọc màn hình. Hai số liệu còn lại căn đều trong thẻ. Giáo viên vẫn thấy cả ba chỉ số. Giữ khung, màu, bậc và thứ tự; backend mới xếp hạng trước khi bỏ dữ liệu tỷ lệ của bạn khác. Client gặp backend cũ vẫn ẩn trên giao diện, cần backend mới để không trả số liệu qua API.
+
 ## Xuất câu hỏi thường sai — 28/10/2026
 
 Ngân hàng câu hỏi thêm thẻ **Thống kê câu hỏi thường sai · Chương đang chọn**, giải thích nguồn lượt trả lời và hai liên kết **Xuất Word / Xuất Excel**. Thẻ xếp linh hoạt desktop/mobile, giữ font/màu/nút hiện có; GV chỉ xem vẫn xuất được. Backend cũ hiện lời nhắc thay vì link lỗi. Thiết kế và rà theo hai skill trong AGENTS.

@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: ẩn tỷ lệ đúng của bạn khác — 31/10/2026
+
+Học sinh trong Vinh danh Top10 chỉ thấy tỷ lệ trả lời đúng của chính mình; phần trăm và thanh tỷ lệ của bạn khác được ẩn. API honors của học sinh xếp hạng ở server bằng quy tắc cũ, chỉ trả correct/total/accuracy của người gọi; GV vẫn nhận đầy đủ. Không đổi dữ liệu hoặc thứ tự xếp hạng, client với backend cũ vẫn ẩn UI nhưng backend cũ chưa bảo vệ dữ liệu API. Chi tiết và QA ở đầu session-handoff.
+
+Đã pull `--ff-only` (main5f52a3d đã mới nhất). QA mới211/211backend,12/12 E2E liên quan và4/4 E2E riêng desktop/mobile, build/typecheck đạt; log `.local/honors-privacy-20261031/`. Push Git khi hoàn tất, không chờ/kiểm tra Railway deploy.
+
 ## Hiện hành: xuất câu hỏi thường làm sai theo chương — 28/10/2026
 
 Ngân hàng câu hỏi xuất Word/Excel cho chương đang chọn; tính lượt trả lời trong luyện tập, sửa sai, ôn tập và các bài kiểm tra đã nộp, loại câu bỏ trống; sắp theo lượt sai và tách theo phiên bản câu. File có câu hỏi/phương án/đáp án, lượt sai/lượt trả lời/số HS sai/tỷ lệ sai và hiển thị mũ/chỉ số; GV lớp hoặc GV chỉ xem được truy cập. Không chấm lại hoặc đổi dữ liệu học tập. Chi tiết tính và QA trong session-handoff/question-bank.md.

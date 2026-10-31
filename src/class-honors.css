@@ -143,6 +143,10 @@
   margin: 0;
   min-width: 0;
 }
+.honors-stats.honors-stats-private,
+.honors-winner .honors-stats.honors-stats-private {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .honors-stats div {
   min-width: 0;
 }

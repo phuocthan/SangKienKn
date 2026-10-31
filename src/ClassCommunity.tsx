@@ -5,7 +5,10 @@ import { api, duration, errorMessage } from "./api";
 import { BloomingTreeIcon } from "./StudentLevel";
 import { ClassHonors } from "./ClassHonors";
 import { Motto } from "./components";
-import type { HonorsStudent } from "../shared/class-honors";
+import type {
+  HonorsStudent,
+  VisibleClassHonoree,
+} from "../shared/class-honors";
 import { StudentGarden } from "./StudentGarden";
 import type {
   ClassLeaderboard,
@@ -22,12 +25,14 @@ export function ClassCommunity({
   revision,
   userId,
   teacherAvatarId,
+  isTeacher = false,
   embedded = false,
 }: {
   classroom: Classroom;
   revision: number;
   userId: string;
   teacherAvatarId?: string | null;
+  isTeacher?: boolean;
   embedded?: boolean;
 }) {
   const [data, setData] = useState<{
@@ -35,7 +40,7 @@ export function ClassCommunity({
     members?: ClassGardenMember[];
     teacher?: { name: string; avatarId: string | null };
     board: ClassLeaderboard;
-    honorStudents: HonorsStudent[];
+    honorStudents: (HonorsStudent | VisibleClassHonoree)[];
     honorsError: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,7 +61,9 @@ export function ClassCommunity({
           teacher?: { name: string; avatarId: string | null };
         }>(`/classrooms/${classroom.id}/garden`),
         api<ClassLeaderboard>(`/classrooms/${classroom.id}/leaderboard`),
-        api<HonorsStudent[]>(`/classrooms/${classroom.id}/honors`),
+        api<(HonorsStudent | VisibleClassHonoree)[]>(
+          `/classrooms/${classroom.id}/honors`,
+        ),
       ])
         .then(([gardenResult, boardResult, honorsResult]) => {
           if (gardenResult.status === "rejected") throw gardenResult.reason;
@@ -165,6 +172,8 @@ export function ClassCommunity({
             loading={false}
             error={data.honorsError}
             onRetry={() => setRetry((n) => n + 1)}
+            viewerId={userId}
+            isTeacher={isTeacher}
           />
           <StudentGarden
             members={data.members}

@@ -1156,6 +1156,7 @@ export default function App() {
                       classroom={current}
                       revision={revision}
                       userId={user.id}
+                      isTeacher={isTeacher}
                       teacherAvatarId={user.avatarId}
                       embedded
                     />

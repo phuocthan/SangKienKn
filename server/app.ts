@@ -1,4 +1,5 @@
 import { updateQuestionSources } from "./question-updates.js";
+import { rankClassHonors } from "../shared/class-honors.js";
 import {
   questionMistakes,
   mistakeWorkbook,
@@ -1032,9 +1033,49 @@ export function createApp(
     });
   }
   app.get("/api/classrooms/:id/honors", (req: AppRequest, res) => {
-    classroom(req, String(req.params.id));
+    const classId = String(req.params.id);
+    classroom(req, classId);
+    const members = roster(classId);
+    if (req.user!.role === "student") {
+      const repairs = db
+        .prepare(
+          `SELECT cr.student_id AS id,COUNT(*) AS n FROM corrections cr
+        JOIN questions q ON q.id=cr.question_id JOIN chapters ch ON ch.id=q.chapter_id
+        WHERE ch.classroom_id=? AND cr.resolved=1 GROUP BY cr.student_id`,
+        )
+        .all(classId);
+      const ranked = rankClassHonors(
+        members,
+        new Map(repairs.map((row) => [String(row.id), Number(row.n)])),
+      );
+      return res.json(
+        ranked.map(
+          ({
+            id,
+            name,
+            avatarId,
+            position,
+            treeLevel,
+            answeredCount,
+            resolvedCount,
+            correct,
+            total,
+            accuracy,
+          }) => ({
+            id,
+            name,
+            avatarId,
+            position,
+            treeLevel,
+            answeredCount,
+            resolvedCount,
+            ...(id === req.user!.id ? { correct, total, accuracy } : {}),
+          }),
+        ),
+      );
+    }
     res.json(
-      roster(String(req.params.id)).map((member) => ({
+      members.map((member) => ({
         id: member.id,
         name: member.name,
         avatarId: member.avatarId,

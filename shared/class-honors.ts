@@ -16,6 +16,16 @@ export type ClassHonoree = HonorsStudent & {
   resolvedCount: number;
 };
 
+// The server ranks the full roster, then omits other students' accuracy data.
+export type VisibleClassHonoree = Omit<
+  ClassHonoree,
+  "correct" | "total" | "accuracy"
+> & {
+  correct?: number;
+  total?: number;
+  accuracy?: number;
+};
+
 export function hasHonorsMetrics(students: readonly HonorsStudent[]) {
   return students.every(
     (student) =>

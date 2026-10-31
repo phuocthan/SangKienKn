@@ -5,7 +5,7 @@ import { StudentLevelIcon } from "./StudentLevel";
 import {
   hasHonorsMetrics,
   rankClassHonors,
-  type ClassHonoree,
+  type VisibleClassHonoree,
   type HonorsStudent,
 } from "../shared/class-honors";
 import type { ClassLeaderboard } from "./types";
@@ -76,12 +76,16 @@ function HonorsMedal({ position }: { position: number }) {
 function HonorStats({
   student,
   compact = false,
+  showAccuracy = false,
 }: {
-  student: ClassHonoree;
+  student: VisibleClassHonoree;
   compact?: boolean;
+  showAccuracy?: boolean;
 }) {
   return (
-    <dl className={`honors-stats${compact ? " honors-stats-compact" : ""}`}>
+    <dl
+      className={`honors-stats${compact ? " honors-stats-compact" : ""}${!showAccuracy ? " honors-stats-private" : ""}`}
+    >
       <div>
         <dt title="Câu đã làm">
           <BookOpen size={15} />
@@ -89,30 +93,32 @@ function HonorStats({
         </dt>
         <dd>{student.answeredCount}</dd>
       </div>
-      <div>
-        <dt title="Tỷ lệ đúng">
-          <CheckCircle2 size={15} />
-          <span className={compact ? "sr-only" : undefined}>Tỷ lệ đúng</span>
-        </dt>
-        <dd>
-          {student.total
-            ? `${(student.accuracy * 100).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}%`
-            : "—"}
-          {!compact && student.total > 0 && (
-            <span
-              className="honors-accuracy-bar"
-              role="progressbar"
-              aria-label={`Tỷ lệ đúng · ${student.name}`}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={student.accuracy * 100}
-              aria-valuetext={`${student.correct}/${student.total} lượt đúng`}
-            >
-              <span style={{ width: `${student.accuracy * 100}%` }} />
-            </span>
-          )}
-        </dd>
-      </div>
+      {showAccuracy && (
+        <div>
+          <dt title="Tỷ lệ đúng">
+            <CheckCircle2 size={15} />
+            <span className={compact ? "sr-only" : undefined}>Tỷ lệ đúng</span>
+          </dt>
+          <dd>
+            {student.total
+              ? `${((student.accuracy ?? 0) * 100).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}%`
+              : "—"}
+            {!compact && (student.total ?? 0) > 0 && (
+              <span
+                className="honors-accuracy-bar"
+                role="progressbar"
+                aria-label={`Tỷ lệ đúng · ${student.name}`}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={(student.accuracy ?? 0) * 100}
+                aria-valuetext={`${student.correct}/${student.total} lượt đúng`}
+              >
+                <span style={{ width: `${(student.accuracy ?? 0) * 100}%` }} />
+              </span>
+            )}
+          </dd>
+        </div>
+      )}
       <div>
         <dt title="Đã khắc phục">
           <Notebook size={15} />
@@ -130,25 +136,36 @@ export function ClassHonors({
   loading,
   error,
   onRetry,
+  viewerId,
+  isTeacher = false,
 }: {
-  students: HonorsStudent[];
+  students: (HonorsStudent | VisibleClassHonoree)[];
   leaderboard?: ClassLeaderboard;
   loading: boolean;
   error: string;
   onRetry?: () => void;
+  viewerId: string;
+  isTeacher?: boolean;
 }) {
-  const complete = hasHonorsMetrics(students);
+  const preRanked =
+    students.length > 0 &&
+    students.every(
+      (student) => "position" in student && Number.isInteger(student.position),
+    );
+  const complete = preRanked || hasHonorsMetrics(students as HonorsStudent[]);
   const ranked =
     leaderboard && complete
-      ? rankClassHonors(
-          students,
-          new Map(
-            leaderboard.repairs.map((member) => [
-              member.id,
-              member.resolvedCorrections,
-            ]),
-          ),
-        )
+      ? preRanked
+        ? (students as VisibleClassHonoree[])
+        : rankClassHonors(
+            students as HonorsStudent[],
+            new Map(
+              leaderboard.repairs.map((member) => [
+                member.id,
+                member.resolvedCorrections,
+              ]),
+            ),
+          )
       : [];
   return (
     <section className="class-honors card" aria-labelledby="class-honors-title">
@@ -230,7 +247,11 @@ export function ClassHonors({
                       <div className="honors-tree">
                         <StudentLevelIcon level={student.treeLevel} />
                       </div>
-                      <HonorStats student={student} compact />
+                      <HonorStats
+                        student={student}
+                        compact
+                        showAccuracy={isTeacher || student.id === viewerId}
+                      />
                     </div>
                   </div>
                 </article>
@@ -254,7 +275,10 @@ export function ClassHonors({
                   <div className="honors-tree">
                     <StudentLevelIcon level={student.treeLevel} />
                   </div>
-                  <HonorStats student={student} />
+                  <HonorStats
+                    student={student}
+                    showAccuracy={isTeacher || student.id === viewerId}
+                  />
                 </li>
               ))}
             </ol>

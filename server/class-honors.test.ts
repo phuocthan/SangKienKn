@@ -52,7 +52,7 @@ async function fixture(t: TestContext) {
   };
 }
 
-test("class members see the same accurate honors metrics without private roster fields", async (t) => {
+test("class members see their own honors accuracy without private peer metrics", async (t) => {
   const f = await fixture(t);
   f.db
     .prepare("INSERT INTO progress VALUES('student-demo','chapter-1',14400)")
@@ -69,31 +69,26 @@ test("class members see the same accurate honors metrics without private roster 
   const teacher = await f.request("/classrooms/class-demo/honors", f.teacher);
   const student = await f.request("/classrooms/class-demo/honors", f.student);
   assert.equal(student.status, 200);
-  assert.deepEqual(student.data, teacher.data);
+  assert.equal(teacher.status, 200);
+  const teacherMember = teacher.data.find(
+    (row: { id: string }) => row.id === "student-demo",
+  );
+  assert.equal(teacherMember.answeredQuestions, 1);
+  assert.equal(teacherMember.correct, 1);
+  assert.equal(teacherMember.total, 1);
   const member = student.data.find(
     (row: { id: string }) => row.id === "student-demo",
   );
-  assert.equal(member.answeredQuestions, 1);
+  assert.equal(member.answeredCount, 1);
   assert.equal(member.correct, 1);
   assert.equal(member.total, 1);
-  assert.equal(
-    Math.max(
-      ...member.chapterLevels.map((row: { level: number }) => row.level),
-    ),
-    5,
-  );
+  assert.equal(member.treeLevel, 5);
+  assert.equal(member.position, 1);
   for (const row of student.data) {
-    assert.deepEqual(Object.keys(row).sort(), [
-      "answeredQuestions",
-      "avatarId",
-      "chapterLevels",
-      "correct",
-      "id",
-      "name",
-      "total",
-    ]);
-    for (const chapter of row.chapterLevels)
-      assert.deepEqual(Object.keys(chapter), ["level"]);
+    assert.equal(Object.hasOwn(row, "email"), false);
+    if (row.id !== "student-demo")
+      for (const key of ["correct", "total", "accuracy"])
+        assert.equal(Object.hasOwn(row, key), false);
   }
   assert.ok(!JSON.stringify(student.data).includes("@"));
   assert.equal(

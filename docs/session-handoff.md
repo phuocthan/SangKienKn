@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Ẩn tỷ lệ đúng của học sinh khác — 31/10/2026
+
+Người dùng yêu cầu pull dự án và trang học sinh không cho thấy tỷ lệ % của bạn khác. `git pull --ff-only` báo đã cập nhật, khởi điểm main/origin main5f52a3d sạch. Trong Vinh danh Top10, học sinh chỉ xem tỷ lệ đúng của mình; các thẻ bạn khác không có số %, biểu tượng hoặc thanh/nhãn trợ năng chứa tỷ lệ. Giáo viên, kể cả giáo viên chỉ xem, vẫn xem đủ. Vườn chung, số câu đã làm/khắc phục và tiêu chí xếp hạng giữ nguyên.
+
+GET /api/classrooms/:id/honors khi học sinh gọi: server xếp Top10 bằng đúng comparator shared/class-honors hiện có và số sửa sai đã khắc phục, rồi trả thứ hạng, tên/avatar/cấp/số câu đã làm/số khắc phục; chỉ mục của chính người gọi có correct/total/accuracy. Không trả hai số để suy ra tỷ lệ bạn khác. Endpoint giáo viên trả dữ liệu cũ đầy đủ. Client hiểu kết quả server đã xếp; với backend cũ client vẫn xếp dữ liệu cũ nhưng ẩn số % của bạn khác trên màn hình. API backend cũ vẫn trả dữ liệu thô cho tới khi backend mới được triển khai; không thể coi lớp UI mới là bảo vệ API cũ. Không migration hoặc sửa dữ liệu học sinh.
+
+QA mới: build/typecheck đạt; full211/211 backend, 12/12 E2E cộng đồng/vinh danh/quyền riêng tư desktop/mobile và 4/4 E2E riêng cuối đạt. Kiểm tra học sinh khác nhau chỉ thấy dữ liệu % của mình, thứ tự bằng thứ tự GV ngay cả khi tỷ lệ dùng để phân hạng, GV vẫn đủ số liệu, API không lộ correct/total/accuracy của bạn khác, cấm ngoài lớp, chế độ backend cũ ẩn trên UI, thứ hạng 1–3 và 4–10/kể cả nhãn progressbar, kiểm tra320/390/768/1440px. Lượt full đầu210/211 do test cũ bắt học sinh/GV nhận cùng dữ liệu; đã cập nhật theo quyết định mới rồi chạy full lại. Đã xem ảnh desktop/mobile; log `.local/honors-privacy-20261031/`. Không test/ghi dữ liệu thật Railway. Commit/push Git khi hoàn tất; không chờ/kiểm tra Railway deploy theo yêu cầu.
+
 ## Xuất câu hỏi thường làm sai theo chương — 28/10/2026
 
 Người dùng chốt tính **cả luyện tập, sửa sai và bài kiểm tra**. Trong Ngân hàng câu hỏi, chọn lớp/chương rồi dùng **Xuất Word** hoặc **Xuất Excel** ở thẻ Thống kê câu hỏi thường sai; xuất toàn chương đang chọn, không phụ thuộc bộ lọc bài hoặc tìm kiếm. Quyền thuộc GV lớp và GV chỉ xem được chia sẻ; học sinh/GV lớp khác không truy cập. Capability canExportMistakeReport tránh hiển thị link hỏng với backend cũ.
