@@ -1,5 +1,9 @@
 # Bàn giao session GreenEdu
 
+## Thứ tự danh sách quản lý học sinh — 06/11/2026
+
+Bảng Quản lý lớp → Học sinh sắp xếp tên bằng so sánh tiếng Việt có xử lý số, để 1, 2, 3 đứng trước 10, 12; bộ tìm kiếm giữ thứ tự này. Thay đổi chỉ ở bảng frontend, không sửa tài khoản hoặc dữ liệu học tập. Build/typecheck đạt; Playwright dùng API fixture trên database riêng đạt 2/2 desktop và mobile, bao gồm tìm kiếm. Đẩy Git theo yêu cầu dự án, không xác minh Railway deploy.
+
 ## Ẩn tỷ lệ đúng của học sinh khác — 31/10/2026
 
 Người dùng yêu cầu pull dự án và trang học sinh không cho thấy tỷ lệ % của bạn khác. `git pull --ff-only` báo đã cập nhật, khởi điểm main/origin main5f52a3d sạch. Trong Vinh danh Top10, học sinh chỉ xem tỷ lệ đúng của mình; các thẻ bạn khác không có số %, biểu tượng hoặc thanh/nhãn trợ năng chứa tỷ lệ. Giáo viên, kể cả giáo viên chỉ xem, vẫn xem đủ. Vườn chung, số câu đã làm/khắc phục và tiêu chí xếp hạng giữ nguyên.

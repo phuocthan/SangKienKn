@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: thứ tự quản lý học sinh — 06/11/2026
+
+Bảng Quản lý lớp → Học sinh sắp xếp tên theo tiếng Việt với số tự nhiên (1, 2, 3, 10), kể cả khi tìm kiếm. Build/typecheck đạt; kiểm thử Playwright desktop/mobile 2/2 đạt với dữ liệu riêng. Chỉ thay frontend; push Git không đồng nghĩa Railway đã triển khai.
+
 ## Hiện hành: ẩn tỷ lệ đúng của bạn khác — 31/10/2026
 
 Học sinh trong Vinh danh Top10 chỉ thấy tỷ lệ trả lời đúng của chính mình; phần trăm và thanh tỷ lệ của bạn khác được ẩn. API honors của học sinh xếp hạng ở server bằng quy tắc cũ, chỉ trả correct/total/accuracy của người gọi; GV vẫn nhận đầy đủ. Không đổi dữ liệu hoặc thứ tự xếp hạng, client với backend cũ vẫn ẩn UI nhưng backend cũ chưa bảo vệ dữ liệu API. Chi tiết và QA ở đầu session-handoff.

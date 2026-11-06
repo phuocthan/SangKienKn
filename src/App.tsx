@@ -2497,9 +2497,9 @@ function Roster({
       member.resolvedCorrections,
     ]),
   );
-  const filtered = rows.filter((s) =>
-    searchText(`${s.name} ${s.email}`).includes(query),
-  );
+  const filtered = rows
+    .filter((s) => searchText(`${s.name} ${s.email}`).includes(query))
+    .sort((a, b) => a.name.localeCompare(b.name, "vi", { numeric: true }));
   return (
     <>
       <SectionTitle
