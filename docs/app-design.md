@@ -1,5 +1,11 @@
 # Thiết kế giao diện GreenEdu
 
+## Bộ soạn công thức trong nhập đề — 09/11/2026
+
+Giữ phong cách xanh/kem/font hiện có, dùng redesign-existing-projects và rà web-design-guidelines. Các ô nội dung/phương án/lời giải có nút **Công thức** với nhãn trợ năng riêng, xem trước khi có công thức và panel soạn ngay trong form để tránh popup lồng nhau. Panel tải MathLive khi mở, có mẫu/ký hiệu chạm44px, ô trực quan, xem trước, mã LaTeX và Chèn/Sao chép/Đóng; trả focus về ô nguồn. Clipboard lỗi có hướng dẫn chọn mã để copy. Lỗi tải bộ soạn được chặn tại panel, giữ bản nháp form.
+
+Hộp nhập file có công cụ soạn/copy riêng; tải đề có Thêm câu trực tiếp/Sửa câu/Lưu câu vào đề/Hủy. Khóa gửi đề và thay nguồn khi câu đang sửa, không tự lưu vào server. Công thức hiển thị cùng renderer ở các trang dùng QuestionText; công thức dài cuộn ngang trong chính vùng công thức, không đẩy tràn trang. Xem chi tiết định dạng và giới hạn nhập Word tại question-bank.md.
+
 ## Giải thích điều kiện Top 10 online — 09/11/2026
 
 Mô tả ngay tại **Top 10 xét điểm cộng online** ghi rõ lượt tự nộp do rời tab vẫn được xét; lượt không tương tác vẫn bị loại. Giữ mốc8điểm, tối đa10 mỗi bài đã kết thúc, điểm cao trước và chỉ so thời gian khi bằng điểm; GV duyệt +1 từng bạn. Chỉ chỉnh nội dung đoạn văn, dùng redesign-existing-projects và rà web-design-guidelines; không đổi bố cục/CSS/asset hoặc cách chấm điểm.

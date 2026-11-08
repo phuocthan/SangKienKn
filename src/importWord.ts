@@ -2,6 +2,8 @@ import {
   parseQuestionWordText,
   readWordDocument,
 } from "../shared/word-questions";
+import { complexWordMath, wordMathLatex } from "./word-math";
+import { wrapFormula } from "../shared/formula-text";
 
 const wordNamespace =
   "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
@@ -24,7 +26,7 @@ export function parseWordFile(data: Uint8Array) {
     )
   )
     throw new Error(
-      "File có hình ảnh, công thức hoặc nội dung nhúng. Mẫu nhập hiện hỗ trợ văn bản; hãy chuyển nội dung cần dùng thành chữ trước khi nhập.",
+      "File có hình ảnh hoặc đối tượng nhúng chưa đọc được (ví dụ MathType dạng ảnh/OLE). Hãy chuyển sang Equation của Word hoặc dùng bộ soạn công thức rồi dán mã vào đề.",
     );
   if (
     ["ins", "del", "moveFrom", "moveTo"].some(
@@ -41,6 +43,8 @@ export function parseWordFile(data: Uint8Array) {
         .map((child) => text(child as Element))
         .join("");
     if (node.namespaceURI === mathNamespace) {
+      if (node.localName === "oMath" && complexWordMath(node))
+        return wrapFormula(wordMathLatex(node));
       if (node.localName === "t") return node.textContent ?? "";
       if (["sSup", "sSub", "sSubSup"].includes(node.localName)) {
         const part = (name: string) => {
@@ -88,11 +92,20 @@ export function parseWordFile(data: Uint8Array) {
           "vertAlign",
         )[0];
         const kind = align?.getAttributeNS(wordNamespace, "val");
+        const position = node.getElementsByTagNameNS(
+          wordNamespace,
+          "position",
+        )[0];
+        const offset = Number(
+          position?.getAttributeNS(wordNamespace, "val") ?? 0,
+        );
         return kind === "superscript"
           ? `^{${value}}`
-          : kind === "subscript"
+          : kind === "subscript" || (!kind && offset < 0)
             ? `_{${value}}`
-            : value;
+            : !kind && offset > 0
+              ? `^{${value}}`
+              : value;
       }
     }
     return children();

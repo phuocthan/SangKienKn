@@ -1,5 +1,15 @@
 # Ngân hàng câu hỏi: phiên bản, ẩn và nhập Word/CSV
 
+## Soạn, dán và nhập công thức — 09/11/2026
+
+Nội dung câu hỏi, phương án/khẳng định và lời giải có nút **Công thức**, xem trước định dạng ngay bên dưới. Bộ soạn trực quan MathLive có mẫu chỉ số dưới/trên, phân số, căn, vectơ, tổng, tích phân và ký hiệu toán/vật lý. Mẫu **Wđ** tạo `W_{\text{đ}}=\frac{1}{2}mv^{2}` với chữ đ làm chỉ số dưới. Đặt con trỏ trong công thức hoặc bôi đen rồi mở bộ soạn để chỉnh; **Chèn công thức** thay đúng vùng được chọn. Mã LaTeX có ô nhập riêng để dán/sửa, có thông báo khi mã không hợp lệ.
+
+**Sao chép công thức** ghi văn bản LaTeX có dấu bao `\(...\)` và HTML MathML khi trình duyệt cho phép; có thể dán lại vào các ô nội dung hoặc ô mã để sửa. **Sao chép MathML** dành cho ứng dụng ngoài hỗ trợ MathML. Dán HTML có sub/sup từ Word giữ chỉ số tiếng Việt (`W_{đ}`), không nhúng HTML/chạy script vào nội dung. Clipboard phụ thuộc quyền trình duyệt; khi bị chặn có thể chọn ô mã rồi Ctrl+C. Word/MathType dạng ảnh/OLE không có cấu trúc công thức để đọc nên vẫn được báo rõ; không hứa chuyển mọi đối tượng nhúng thành công thức.
+
+Word Equation (OMML) đọc thêm phân số, căn, dấu ngoặc, hàm, vectơ/dấu mũ, tổng/tích phân, giới hạn và ma trận; giữ kiểu chỉ số cũ, cả chữ hạ/nâng bằng `w:position`. Công thức mới được lưu trong văn bản có dấu bao LaTeX, hiển thị bằng KaTeX ở ngân hàng/xem trước/ôn/thi/sổ tay. Đề CSV cũng nhận cùng dạng. Không tự đoán chuỗi `Wđ` cũ thành chỉ số: nội dung đã mất định dạng cần sửa hoặc nhập lại từ nguồn đúng.
+
+Hộp nhập ngân hàng và tải đề có **Soạn và sao chép công thức**. Ở tải đề ôn/thi/Săn thưởng, có thể **Thêm câu trực tiếp** hoặc **Sửa câu** vừa tải, dùng chung bộ nhập trước khi lưu đề. Các chỉnh sửa này chỉ là bản nháp; không chạm snapshot/lượt làm cũ. Đáp án ngắn vẫn được chấm theo số/văn bản hiện có, không thêm bộ giải hoặc so khớp đại số. Không migration/chấm lại/sửa dữ liệu đã lưu. QA và phát hành ở đầu session-handoff.
+
 ## Xuất câu hỏi thường làm sai — 28/10/2026
 
 Trong Ngân hàng câu hỏi, GV chọn lớp/chương và tải Word hoặc Excel tại thẻ thống kê. Đề thống kê gồm lượt luyện tập, sửa sai, ôn tập (đã có attempts) và bài kiểm tra đã nộp; bỏ câu không trả lời, tính Đ/S trả lời một phần là sai. Mỗi phiên bản nguồn là một dòng/câu riêng: correction lấy nguồn ở attempt_question_versions, bài thi dùng snapshot/key và quy tắc chấm lúc nộp. Không gộp bản sửa làm thay đổi nội dung hoặc đáp án lịch sử, không gộp câu cùng văn bản nhưng khác ID. Xếp giảm theo lượt sai, sau đó số HS sai và tỷ lệ sai; mẫu số là các lượt đã trả lời, HS sai không trùng theo từng phiên bản. Không giới hạn top, chỉ đưa câu có ít nhất một lượt sai.

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { QuestionText } from "./QuestionText";
+import { FormulaWorkbench } from "./FormulaField";
+import { QuestionFields, readQuestionForm } from "./QuestionFields";
+import { answerLabel } from "../shared/question-types";
 import { parseWordFile } from "./importWord";
 import {
   csvTemplate,
@@ -32,6 +35,9 @@ export function ExamUpload({
   const [errors, setErrors] = useState<string[]>([]);
   const [reading, setReading] = useState(false);
   const [success, setSuccess] = useState("");
+  const [editing, setEditing] = useState<number | null>(null);
+  const [editError, setEditError] = useState("");
+  const editor = useRef<HTMLFieldSetElement>(null);
   const generation = useRef(0);
   const target = chapters.some((ch) => ch.id === chapterId)
     ? chapterId
@@ -117,6 +123,45 @@ export function ExamUpload({
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
+  function edit(index: number | null) {
+    setEditing(index);
+    setEditError("");
+    onReadingChange(index !== null);
+  }
+  function saveQuestion() {
+    if (!editor.current || editing === null) return;
+    const invalid = Array.from(
+      editor.current.querySelectorAll<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >("input,textarea,select"),
+    ).find((el) => !el.checkValidity());
+    if (invalid) {
+      invalid.reportValidity();
+      return;
+    }
+    try {
+      const question = readQuestionForm(editor.current);
+      const chapterId = editing >= 0 ? questions[editing].chapterId : target;
+      if (
+        questions.some(
+          (row, i) =>
+            i !== editing &&
+            row.chapterId === chapterId &&
+            questionContentKey(row.question) === questionContentKey(question),
+        )
+      )
+        throw new Error("Câu này trùng với câu đã có trong đề.");
+      const row = { chapterId, question };
+      onChange(
+        editing < 0
+          ? [...questions, row]
+          : questions.map((old, i) => (i === editing ? row : old)),
+      );
+      edit(null);
+    } catch (problem) {
+      setEditError(errorMessage(problem));
+    }
+  }
   return (
     <fieldset className="exam-upload">
       <legend>Tải đề của giáo viên</legend>
@@ -144,12 +189,23 @@ export function ExamUpload({
           Mẫu CSV
         </button>
       </div>
+      <FormulaWorkbench />
+      <button
+        type="button"
+        className="button secondary small"
+        disabled={
+          reading || editing !== null || !target || questions.length >= 100
+        }
+        onClick={() => edit(-1)}
+      >
+        Thêm câu trực tiếp
+      </button>
       <label>
         Chương cho file tải lên
         <select
           value={target}
           onChange={(e) => setChapterId(e.target.value)}
-          disabled={reading || !chapters.length}
+          disabled={reading || editing !== null || !chapters.length}
         >
           {!chapters.length && <option value="">Chọn chương ở trên</option>}
           {chapters.map((ch) => (
@@ -164,7 +220,7 @@ export function ExamUpload({
         <input
           type="file"
           accept=".docx,.csv"
-          disabled={reading || !target}
+          disabled={reading || editing !== null || !target}
           onChange={(e) => {
             const file = e.target.files?.[0];
             e.target.value = "";
@@ -184,6 +240,37 @@ export function ExamUpload({
         </div>
       )}
       <p>{questions.length} câu đã chọn / tối đa 100</p>
+      {editing !== null && (
+        <fieldset
+          ref={editor}
+          className="uploaded-question-editor"
+          key={editing}
+        >
+          <legend>
+            {editing < 0 ? "Thêm câu trực tiếp" : `Sửa câu ${editing + 1}`}
+          </legend>
+          <QuestionFields
+            question={editing >= 0 ? questions[editing].question : undefined}
+          />
+          {editError && <p role="alert">{editError}</p>}
+          <div className="learning-actions">
+            <button
+              type="button"
+              className="button primary small"
+              onClick={saveQuestion}
+            >
+              Lưu câu vào đề
+            </button>
+            <button
+              type="button"
+              className="button secondary small"
+              onClick={() => edit(null)}
+            >
+              Hủy sửa câu
+            </button>
+          </div>
+        </fieldset>
+      )}
       {!!questions.length && (
         <details>
           <summary>Xem và bỏ câu khỏi đề</summary>
@@ -199,19 +286,30 @@ export function ExamUpload({
                   · {row.question.lesson || "Chưa gắn bài"}
                 </p>
                 <small>
-                  Đáp án: {row.question.choices[row.question.correctIndex]}
+                  Đáp án:{" "}
+                  <QuestionText>{answerLabel(row.question)}</QuestionText>
                 </small>
               </div>
-              <button
-                type="button"
-                className="button danger-outline small"
-                disabled={reading}
-                onClick={() =>
-                  onChange(questions.filter((_, i) => i !== index))
-                }
-              >
-                Bỏ câu {index + 1}
-              </button>
+              <div className="learning-actions">
+                <button
+                  type="button"
+                  className="button secondary small"
+                  disabled={reading || editing !== null}
+                  onClick={() => edit(index)}
+                >
+                  Sửa câu {index + 1}
+                </button>
+                <button
+                  type="button"
+                  className="button danger-outline small"
+                  disabled={reading || editing !== null}
+                  onClick={() =>
+                    onChange(questions.filter((_, i) => i !== index))
+                  }
+                >
+                  Bỏ câu {index + 1}
+                </button>
+              </div>
             </div>
           ))}
         </details>

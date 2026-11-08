@@ -13,6 +13,7 @@ import {
 import { api, ensureQuestionTypes, errorMessage } from "./api";
 import { Empty, Modal } from "./components";
 import { QuestionFields, readQuestionForm } from "./QuestionFields";
+import { FormulaWorkbench } from "./FormulaField";
 import {
   csvTemplate,
   parseQuestionCsv,
@@ -848,6 +849,7 @@ function ImportForm({
   }
   return (
     <div className="question-import">
+      <FormulaWorkbench />
       <details className="workspace-help">
         <summary>Hướng dẫn nhập câu hỏi</summary>
         <p>

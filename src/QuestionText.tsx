@@ -1,24 +1,39 @@
 import type { ReactNode } from "react";
+import { formulaSegments } from "../shared/formula-text";
+import { renderFormula } from "./formula-render";
 
-// Render only the two supported script markers; all other content remains
-// escaped React text, including anything that looks like HTML.
+// Only KaTeX's bounded, untrusted renderer produces markup. Ordinary question
+// text (including pasted HTML-looking strings) always stays escaped React text.
 export function QuestionText({ children }: { children?: string }) {
-  const source = children ?? "";
-  const parts: ReactNode[] = [];
-  const pattern = /([_^])(?:\{([^{}\n]+)\}|([+-]?\d+))/g;
-  let cursor = 0;
-  for (const match of source.matchAll(pattern)) {
-    parts.push(source.slice(cursor, match.index));
-    const value = match[2] ?? match[3];
-    parts.push(
-      match[1] === "^" ? (
-        <sup key={match.index}>{value}</sup>
-      ) : (
-        <sub key={match.index}>{value}</sub>
-      ),
+  const parts: ReactNode[] = formulaSegments(children ?? "").map((part) => {
+    if (part.kind === "text") return part.value;
+    if (part.kind === "sub")
+      return (
+        <sub key={part.start}>
+          <QuestionText>{part.value}</QuestionText>
+        </sub>
+      );
+    if (part.kind === "sup")
+      return (
+        <sup key={part.start}>
+          <QuestionText>{part.value}</QuestionText>
+        </sup>
+      );
+    const result = renderFormula(part.value, part.display);
+    return result.error ? (
+      <span
+        key={part.start}
+        className="formula-invalid"
+        title={result.error}
+      >{`\\(${part.value}\\)`}</span>
+    ) : (
+      <span
+        key={part.start}
+        className={`question-formula${part.display ? " formula-display" : ""}`}
+        translate="no"
+        dangerouslySetInnerHTML={{ __html: result.html }}
+      />
     );
-    cursor = match.index + match[0].length;
-  }
-  parts.push(source.slice(cursor));
+  });
   return <>{parts}</>;
 }

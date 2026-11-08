@@ -1,9 +1,20 @@
 import { useState } from "react";
-import type { Question } from "./types";
-import { questionInput } from "../shared/questions";
+import { questionInput, type QuestionInput } from "../shared/questions";
 import { questionKind, type QuestionKind } from "../shared/question-types";
-export function readQuestionForm(form: HTMLFormElement) {
-  const fields = Object.fromEntries(new FormData(form));
+import { FormulaField } from "./FormulaField";
+export function readQuestionForm(form: HTMLFormElement | HTMLFieldSetElement) {
+  const fields =
+    form instanceof HTMLFormElement
+      ? Object.fromEntries(new FormData(form))
+      : Object.fromEntries(
+          Array.from(
+            form.querySelectorAll<
+              HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+            >("input[name],textarea[name],select[name]"),
+          )
+            .filter((el) => !el.disabled)
+            .map((el) => [el.name, el.value]),
+        );
   const kind = fields.kind ?? "multiple-choice";
   if (
     kind === "true-false" &&
@@ -37,7 +48,7 @@ export function QuestionFields({
   lessons = [],
   topicSupported = true,
 }: {
-  question?: Question;
+  question?: Partial<QuestionInput>;
   lessons?: string[];
   topicSupported?: boolean;
 }) {
@@ -80,31 +91,25 @@ export function QuestionFields({
           defaultValue={question?.topic ?? ""}
         />
       </label>
-      <label>
-        Nội dung câu hỏi
-        <textarea
-          name="text"
-          required
-          maxLength={3000}
-          rows={3}
-          defaultValue={question?.text}
-        />
-      </label>
+      <FormulaField
+        label="Nội dung câu hỏi"
+        name="text"
+        required
+        maxLength={3000}
+        rows={3}
+        defaultValue={question?.text}
+      />
       {kind !== "short-answer" && (
         <div className="form-grid">
           {["a", "b", "c", "d"].map((letter, index) => (
             <div key={`${kind}-${letter}`}>
-              <label>
-                {kind === "true-false" ? "Khẳng định" : "Phương án"}{" "}
-                {letter.toUpperCase()}
-                {kind === "true-false" && index > 1 ? " (không bắt buộc)" : ""}
-                <input
-                  name={letter}
-                  required={kind === "multiple-choice" || index < 2}
-                  maxLength={1000}
-                  defaultValue={question?.choices[index]}
-                />
-              </label>
+              <FormulaField
+                label={`${kind === "true-false" ? "Khẳng định" : "Phương án"} ${letter.toUpperCase()}${kind === "true-false" && index > 1 ? " (không bắt buộc)" : ""}`}
+                name={letter}
+                required={kind === "multiple-choice" || index < 2}
+                maxLength={1000}
+                defaultValue={question?.choices?.[index]}
+              />
               {kind === "true-false" && (
                 <label>
                   Đáp án ý {letter.toUpperCase()}
@@ -149,16 +154,14 @@ export function QuestionFields({
           </label>
         )
       )}
-      <label>
-        Lời giải
-        <textarea
-          name="explanation"
-          required
-          maxLength={3000}
-          rows={3}
-          defaultValue={question?.explanation}
-        />
-      </label>
+      <FormulaField
+        label="Lời giải"
+        name="explanation"
+        required
+        maxLength={3000}
+        rows={3}
+        defaultValue={question?.explanation}
+      />
     </>
   );
 }

@@ -1,5 +1,11 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: bộ soạn và định dạng công thức — 09/11/2026
+
+Form tạo/sửa câu hỏi, phương án/khẳng định và lời giải có bộ soạn MathLive với mẫu/ký hiệu, xem trước, chèn lại đúng vùng, copy/paste LaTeX/MathML và giữ sub/sup khi dán từ Word. Nhập Equation thêm phân số/căn/vectơ/tổng/giới hạn/ma trận; hiển thị KaTeX ở các trang dùng QuestionText, giữ marker cũ. Tải đề có thêm/sửa câu trực tiếp trước lưu. Không đoán/sửa chuỗi Wđ cũ, không chấm lại hoặc đổi đáp án/điểm/snapshot. MathType dạng ảnh/OLE vẫn báo không đọc được. Chi tiết cách dùng/giới hạn ở question-bank.md và đầu session-handoff.
+
+QA mới build/typecheck,218/218backend,10/10E2E liên quan và4/4lượt xác nhận cuối desktop/mobile đạt; tổng12ca khác nhau,320–1440px không tràn. Thử trên database riêng, không ghi production; hoàn tất ở commit/push Git, không chờ/xác minh Railway deploy.
+
 ## Hiện hành: đề xuất điểm cây theo cấp 5 — 09/11/2026
 
 Đề xuất chăm cây theo cấp 5 đang hiển thị của từng chương, kể cả phiên học đang mở; áp dụng mọi học sinh và dữ liệu cũ chưa có đề xuất. GV duyệt/từ chối mới ghi quyết định, giữ quyết định cũ và chống trùng; vé săn thưởng vẫn đợi thời gian đã chốt. Chi tiết và giới hạn tại đầu session-handoff. Build/typecheck và 218/218 backend đạt; backend Railway cần được triển khai để áp dụng.
