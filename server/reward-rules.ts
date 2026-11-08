@@ -27,7 +27,7 @@ export function onlineRewardCandidates(
     FROM exam_runs r JOIN exam_definitions e ON e.id=r.exam_id
     JOIN online_exam_sessions o ON o.exam_id=e.id JOIN users u ON u.id=r.student_id
     WHERE r.classroom_id=? AND r.status='submitted' AND o.started_at IS NOT NULL
-      AND (e.enabled=0 OR e.closes_at<=?) AND r.reason IN ('student','teacher','deadline')
+      AND (e.enabled=0 OR e.closes_at<=?) AND r.reason IN ('student','teacher','deadline','tabs')
       AND r.score>=8`,
     )
     .all(classroomId, timestamp);

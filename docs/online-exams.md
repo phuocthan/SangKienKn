@@ -1,8 +1,8 @@
 # Kiểm tra online do giáo viên bắt đầu
 
-## Top 10 chờ giáo viên duyệt điểm cộng — 26/10/2026
+## Top 10 chờ giáo viên duyệt điểm cộng — cập nhật 09/11/2026
 
-Người dùng xác nhận **top10 chỉ ở kiểm tra online**, tính riêng từng bài kiểm tra. Sau khi buổi kết thúc/giáo viên đóng, đề xuất tối đa10 học sinh đạt từ8điểm: điểm cao trước, bằng điểm ưu tiên thời gian làm ngắn hơn; tiếp tục bằng nhau dùng thời điểm nộp/ID để kết quả ổn định. Loại lượt thu do vi phạm tab/idle. Giáo viên duyệt hoặc từ chối từng đề xuất, duyệt nhận +1; không tự cộng. Online giữ mốc8điểm; ngưỡng Săn thưởng riêng lớp không thay mốc này.
+Người dùng xác nhận **top10 chỉ ở kiểm tra online**, tính riêng từng bài kiểm tra. Sau khi buổi kết thúc/giáo viên đóng, đề xuất tối đa10 học sinh đạt từ8điểm: điểm cao trước, bằng điểm ưu tiên thời gian làm ngắn hơn; tiếp tục bằng nhau dùng thời điểm nộp/ID để kết quả ổn định. **Từ 09/11/2026, lượt tự nộp do rời tab (`reason=tabs`) vẫn được xét Top10** theo yêu cầu mới; thay điều kiện loại lượt rời tab trước đây. Lượt tự nộp do không tương tác (`idle`) vẫn không được xét. Không đổi công thức chấm điểm hoặc cách tính thời gian, không thay ngưỡng/cơ chế tự nộp hay cách cộng giờ học. Giáo viên duyệt hoặc từ chối từng đề xuất, duyệt nhận +1; không tự cộng. Online giữ mốc8điểm; ngưỡng Săn thưởng riêng lớp không thay mốc này.
 
 Trang Kiểm tra có danh sách riêng, hiện tên, bài, hạng, điểm và thời gian. Server xếp toàn bộ buổi trước khi lọc học sinh; học sinh chỉ thấy đề xuất của mình. Đề xuất tính chỉ đọc, kể cả bài cũ đã kết thúc; không ghi điểm/đổi bài khi mở danh sách. POST /learning/rewards/online:{runId}/review kiểm tra chủ lớp, buổi đã kết thúc và top10 rồi lưu quyết định duy nhất vào learning_rewards. Retry không cộng lặp, từ chối/duyệt rồi không tự đổi trạng thái. Kết quả/điểm bài cũ giữ nguyên; xem nguồn đã xóa vẫn giữ quyết định đã lưu.
 

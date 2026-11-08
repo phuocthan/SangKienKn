@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: Top 10 online bao gồm lượt rời tab — 09/11/2026
+
+Theo yêu cầu mới, lượt online tự nộp do rời tab vẫn được xét Top10; thay điều kiện loại `tabs` ngày26/10. Giữ cách chấm điểm, mốc8điểm, tối đa10 mỗi bài kết thúc, ưu tiên điểm rồi thời gian; `idle` vẫn loại, GV duyệt+1, không tự sửa điểm hoặc quyết định đã lưu. Mã xét đề xuất dùng chung cho danh sách và kiểm tra quyền duyệt; mô tả UI đã nói rõ. QA mới build/typecheck,212/212backend và2/2E2E desktop/mobile đạt; chi tiết đầu session-handoff. Rà dữ liệu thật chỉ đọc, test dùng database riêng. Hoàn tất ở commit/push Git, không chờ/kiểm tra Railway deploy; backend cần bản mới để có hiệu lực.
+
 ## Hiện hành: thứ tự quản lý học sinh — 06/11/2026
 
 Bảng Quản lý lớp → Học sinh sắp xếp tên theo tiếng Việt với số tự nhiên (1, 2, 3, 10), kể cả khi tìm kiếm. Build/typecheck đạt; kiểm thử Playwright desktop/mobile 2/2 đạt với dữ liệu riêng. Chỉ thay frontend; push Git không đồng nghĩa Railway đã triển khai.

@@ -71,14 +71,14 @@ test("online proposals rank each ended paper before student filtering, require t
   }
   const candidates = onlineRewardCandidates(f.db, "class-demo", f.now());
   assert.equal(candidates.length, 20);
-  assert.deepEqual(candidates.filter(r => r.examId === "rank-a").map(r => r.id), [1, 0, 11, 10, 9, 8, 7, 6, 5, 4].map(i => `online:rank-a-${i}`));
+  assert.deepEqual(candidates.filter(r => r.examId === "rank-a").map(r => r.id), [12, 1, 0, 11, 10, 9, 8, 7, 6, 5].map(i => `online:rank-a-${i}`));
   assert.equal(learningRewards(f.db, "class-demo", f.now(), "student-demo").filter(r => r.sourceType === "online").length, 2);
-  assert.equal(learningRewards(f.db, "class-demo", f.now(), "student-demo")[0].rank, 2);
+  assert.equal(learningRewards(f.db, "class-demo", f.now(), "student-demo")[0].rank, 3);
   assert.equal(f.db.prepare("SELECT COUNT(*) n FROM learning_rewards").get()!.n, 0);
   const review = "/learning/rewards/online:rank-a-0/review";
   for (const cookie of [f.student, f.other])
     assert.equal((await f.request(review, { status: "approved" }, cookie)).status, 403);
-  for (const id of ["rank-a-2", "rank-a-12", "rank-active-0", "rank-low-0"])
+  for (const id of ["rank-a-2", "rank-a-4", "rank-active-0", "rank-low-0"])
     assert.equal((await f.request(`/learning/rewards/online:${id}/review`, { status: "approved" }, f.teacher)).status, 409);
   await f.post(review, { status: "approved" }, f.teacher);
   await f.post(review, { status: "approved" }, f.teacher);
@@ -93,6 +93,98 @@ test("online proposals rank each ended paper before student filtering, require t
   assert.equal(shown.find(r => r.id === "online:rank-a-0")!.status, "approved");
   assert.equal(shown.find(r => r.id === "online:rank-b-0")!.status, "rejected");
   assert.equal(f.db.prepare("SELECT score FROM exam_runs WHERE id='rank-a-0'").get()!.score, 10);
+});
+
+test("online top ten includes tab closures, keeps perfect scores ahead of faster 9.5 scores and still excludes idle closures", async (t) => {
+  const f = await fixture(t);
+  f.db
+    .prepare(
+      "INSERT INTO exam_definitions VALUES('top-ten-audit','class-demo','Bài kiểm thử','[]',1000,?,4,1,1000)",
+    )
+    .run(f.now() - 1);
+  f.db
+    .prepare(
+      "INSERT INTO online_exam_sessions(exam_id,duration_minutes,question_count,started_at) VALUES('top-ten-audit',30,20,1000)",
+    )
+    .run();
+  const add = (id: string, score: number, reason: string, elapsed: number) => {
+    f.db
+      .prepare("INSERT INTO users VALUES(?,?,?,?,?,0)")
+      .run(id, `${id}@test.local`, id, "unused", "student");
+    f.db.prepare("INSERT INTO memberships VALUES('class-demo',?)").run(id);
+    f.db
+      .prepare(
+        `INSERT INTO exam_runs(id,student_id,classroom_id,exam_id,kind,title,questions,answers,started_at,deadline_at,tab_limit,status,reason,score,submitted_at,request_id)
+      VALUES(?,?,'class-demo','top-ten-audit','official','Bài kiểm thử','[]','{}',1000,1801000,4,'submitted',?,?,?,?)`,
+      )
+      .run(id, id, reason, score, 1000 + elapsed, id);
+  };
+  for (let i = 0; i < 13; i++)
+    add(`perfect-${i}`, 10, i < 7 ? "student" : "tabs", (i + 1) * 60000);
+  add("idle-perfect", 10, "idle", 10000);
+  // All three 9.5 scores are faster than every eligible perfect score.
+  for (let i = 0; i < 3; i++) add(`next-${i}`, 9.5, "student", (3 - i) * 10000);
+  add("below-top-ten", 8, "student", 5000);
+  const before = f.db
+    .prepare(
+      "SELECT id,status,score,reason,submitted_at FROM exam_runs ORDER BY id",
+    )
+    .all();
+  const candidates = onlineRewardCandidates(f.db, "class-demo", f.now());
+  assert.deepEqual(
+    candidates.map((r) => r.id),
+    [...Array.from({ length: 10 }, (_, i) => `online:perfect-${i}`)],
+  );
+  assert.deepEqual(
+    candidates.map((r) => r.rank),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  );
+  assert.deepEqual(
+    f.db
+      .prepare(
+        "SELECT id,status,score,reason,submitted_at FROM exam_runs ORDER BY id",
+      )
+      .all(),
+    before,
+  );
+  assert.equal(
+    f.db.prepare("SELECT COUNT(*) n FROM learning_rewards").get()!.n,
+    0,
+  );
+  for (const id of ["perfect-10", "idle-perfect", "below-top-ten", "next-0"])
+    assert.equal(
+      (
+        await f.request(
+          `/learning/rewards/online:${id}/review`,
+          { status: "approved" },
+          f.teacher,
+        )
+      ).status,
+      409,
+    );
+  assert.equal(
+    f.db.prepare("SELECT COUNT(*) n FROM learning_rewards").get()!.n,
+    0,
+  );
+  const review = "/learning/rewards/online:perfect-7/review";
+  await f.post(review, { status: "approved" }, f.teacher);
+  await f.post(review, { status: "approved" }, f.teacher);
+  assert.equal(
+    f.db
+      .prepare(
+        "SELECT SUM(points) n FROM learning_rewards WHERE status='approved'",
+      )
+      .get()!.n,
+    1,
+  );
+  assert.deepEqual(
+    f.db
+      .prepare(
+        "SELECT id,status,score,reason,submitted_at FROM exam_runs ORDER BY id",
+      )
+      .all(),
+    before,
+  );
 });
 
 test("class clone copies only existing student memberships and deletion preserves accounts and source data", async (t) => {

@@ -1271,7 +1271,7 @@ export function Learning({
             </h2>
             <p>
               {onlinePage
-                ? "Mỗi bài kiểm tra kết thúc đề xuất tối đa 10 bạn đạt từ 8 điểm, xếp điểm cao trước; bằng điểm ưu tiên thời gian làm bài ngắn hơn. Giáo viên duyệt +1 điểm cho từng bạn."
+                ? "Mỗi bài kiểm tra đã kết thúc xét tối đa 10 bạn đạt từ 8 điểm, kể cả lượt tự nộp do rời tab. Xếp điểm cao trước; chỉ khi bằng điểm mới ưu tiên thời gian làm bài ngắn hơn. Lượt tự nộp do không tương tác không được xét. Giáo viên duyệt +1 điểm cho từng bạn."
                 : `Mỗi chương đạt Kết Trái (cấp 5) nhận 1 điểm; mỗi lượt Săn điểm đạt từ ${(data.huntMinimumScore ?? 8).toLocaleString("vi-VN")} được đề xuất +1 điểm. Giáo viên duyệt việc ghi nhận; không giới hạn top 10 ở Săn thưởng.`}
             </p>
             {!onlinePage && teacher && !user.readOnly && (

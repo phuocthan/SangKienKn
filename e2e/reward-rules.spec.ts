@@ -151,6 +151,7 @@ test("online has its own ranked approval list and never shows hunt proposals", a
   const rewards = page.getByRole("region", {
     name: "Điểm cộng kiểm tra online",
   });
+  await expect(rewards.getByText(/kể cả lượt tự nộp do rời tab/)).toBeVisible();
   await expect(rewards.getByText(/Hạng 1 · 9.5\/10/)).toBeVisible();
   await expect(
     rewards.getByText("Săn điểm đạt từ 8", { exact: false }),

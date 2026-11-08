@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Top 10 online vẫn xét lượt rời tab — 09/11/2026
+
+Người dùng báo nhiều bạn10điểm không có tên trong khi9,5điểm có, sau đó chốt **giữ công thức tính và vẫn cho lượt rời tab vào Top10**. Rà mã và dữ liệu Railway chỉ đọc xác định điều kiện cũ `reason IN ('student','teacher','deadline')` loại lượt `tabs` trước khi xếp hạng, không phải comparator ưu tiên thời gian hơn điểm. Bằng chứng riêng ở `.local/online-top10-audit-20261109/`, không đưa dữ liệu bài làm vào Git.
+
+`server/reward-rules.ts` bổ sung `tabs` vào nguồn xét đề xuất, áp dụng khi đọc cả bài đã kết thúc trước đây; `idle` vẫn loại. Giữ mốc8, tối đa10/bài, điểm giảm dần rồi thời gian tăng dần và mốc nộp/ID ổn định. Không chấm lại, không sửa điểm/đáp án/lý do nộp/thời gian hoặc quyết định thưởng đã lưu; không đổi tự nộp/chống tab, cộng giờ học hoặc Săn thưởng. GET không ghi điểm, GV duyệt mới nhận+1. UI nói rõ điều kiện hiện hành; dùng hai skill thiết kế theo AGENTS.
+
+Khởi điểm main/origin main23baf78, giữ file PDF ngoài phạm vi chưa theo dõi. QA mới: build/typecheck đạt; focused2/2, full212/212backend (38,1giây), E2E2/2 desktop/mobile (24,9giây) đạt. Ca mới mô phỏng13bạn10điểm có lượt `tabs` và các lượt9,5nhanh hơn: chọn10điểm trước, đủ tối đa10; vẫn loại `idle`, cấm duyệt ngoài Top10, duyệt lượt `tabs` retry không cộng lặp, điểm/lý do/nộp không đổi và GET không ghi thưởng. Đã xem ảnh mô tả desktop/mobile, không tràn. Bằng chứng riêng và ảnh ở `.local/online-top10-audit-20261109/`. Kiểm thử dùng database riêng, không thử ghi production. Hoàn tất theo quy tắc commit/push Git, không chờ/kiểm tra Railway deploy; backend cần bản mới để điều kiện có hiệu lực.
+
 ## Thứ tự danh sách quản lý học sinh — 06/11/2026
 
 Bảng Quản lý lớp → Học sinh sắp xếp tên bằng so sánh tiếng Việt có xử lý số, để 1, 2, 3 đứng trước 10, 12; bộ tìm kiếm giữ thứ tự này. Thay đổi chỉ ở bảng frontend, không sửa tài khoản hoặc dữ liệu học tập. Build/typecheck đạt; Playwright dùng API fixture trên database riêng đạt 2/2 desktop và mobile, bao gồm tìm kiếm. Đẩy Git theo yêu cầu dự án, không xác minh Railway deploy.

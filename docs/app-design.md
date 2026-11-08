@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Giải thích điều kiện Top 10 online — 09/11/2026
+
+Mô tả ngay tại **Top 10 xét điểm cộng online** ghi rõ lượt tự nộp do rời tab vẫn được xét; lượt không tương tác vẫn bị loại. Giữ mốc8điểm, tối đa10 mỗi bài đã kết thúc, điểm cao trước và chỉ so thời gian khi bằng điểm; GV duyệt +1 từng bạn. Chỉ chỉnh nội dung đoạn văn, dùng redesign-existing-projects và rà web-design-guidelines; không đổi bố cục/CSS/asset hoặc cách chấm điểm.
+
 ## Quyền riêng tư tỷ lệ đúng trong Vinh danh — 31/10/2026
 
 Học sinh chỉ thấy tỷ lệ đúng của chính mình trong Top10; ẩn cả con số, icon và thanh tỷ lệ của bạn khác ở bục và danh sách, kể cả nhãn đọc màn hình. Hai số liệu còn lại căn đều trong thẻ. Giáo viên vẫn thấy cả ba chỉ số. Giữ khung, màu, bậc và thứ tự; backend mới xếp hạng trước khi bỏ dữ liệu tỷ lệ của bạn khác. Client gặp backend cũ vẫn ẩn trên giao diện, cần backend mới để không trả số liệu qua API.
