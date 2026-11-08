@@ -2,6 +2,7 @@ import { creditExamTime } from "./exam-study-credit.js";
 import {
   huntMinimumScore,
   onlineRewardCandidates,
+  treeRewardCandidates,
   learningRewards,
 } from "./reward-rules.js";
 import {
@@ -114,6 +115,7 @@ export function grantLearningMilestones(
     )
     .all(studentId);
   for (const row of rows) {
+    const displayedSeconds = Number(row.seconds);
     const provisional =
       Number(
         db
@@ -130,7 +132,7 @@ export function grantLearningMilestones(
         db.prepare(
           "INSERT OR IGNORE INTO learning_tickets(student_id,chapter_id,level,granted_at) VALUES(?,?,?,?)",
         ).run(studentId, row.chapter_id, level, now);
-    if (Number(row.seconds) >= 4 * step)
+    if (studentLevel(displayedSeconds, minutes).level === 5)
       db.prepare(
         "INSERT OR IGNORE INTO learning_rewards(id,student_id,classroom_id,chapter_id,source,label,points,created_at) VALUES(?,?,?,?,?,?,1,?)",
       ).run(
@@ -2372,6 +2374,51 @@ export function registerLearningRoutes(
     const status = req.body?.status;
     if (!["approved", "rejected"].includes(status))
       fail(400, "Chọn duyệt hoặc từ chối.");
+    if (!r && String(req.params.id).startsWith("tree:")) {
+      const source = String(req.params.id);
+      const parts = source.split(":");
+      if (parts.length !== 3) fail(404, "Không tìm thấy điểm thưởng.");
+      const chapter = db
+        .prepare("SELECT classroom_id FROM chapters WHERE id=?")
+        .get(parts[2]);
+      if (!chapter) fail(404, "Không tìm thấy chương.");
+      const classroomId = String(chapter.classroom_id);
+      classroom(req, classroomId);
+      const existing = db
+        .prepare("SELECT * FROM learning_rewards WHERE source=?")
+        .get(source);
+      if (existing) {
+        if (existing.status !== "pending" && existing.status !== status)
+          fail(409, "Điểm thưởng đã được xử lý.");
+        db.prepare(
+          "UPDATE learning_rewards SET status=?,reviewed_by=?,reviewed_at=? WHERE id=? AND status='pending'",
+        ).run(status, req.user!.id, now(), existing.id);
+        return res.json({ ok: true });
+      }
+      const candidate = treeRewardCandidates(
+        db,
+        classroomId,
+        now(),
+        parts[1],
+      ).find((row) => row.id === source);
+      if (!candidate) fail(409, "Học sinh chưa đạt cấp 5 của chương.");
+      db.prepare(
+        `INSERT INTO learning_rewards(id,student_id,classroom_id,chapter_id,source,label,points,created_at,status,reviewed_by,reviewed_at)
+         VALUES(?,?,?,?,?,?,1,?,?,?,?)`,
+      ).run(
+        source,
+        candidate.studentId,
+        classroomId,
+        candidate.chapterId,
+        source,
+        candidate.label,
+        now(),
+        status,
+        req.user!.id,
+        now(),
+      );
+      return res.json({ ok: true });
+    }
     if (!r && String(req.params.id).startsWith("online:")) {
       const run = db
         .prepare("SELECT classroom_id FROM exam_runs WHERE id=?")

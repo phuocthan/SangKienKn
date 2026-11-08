@@ -1,5 +1,11 @@
 # Bàn giao session GreenEdu
 
+## Đề xuất điểm cây theo cấp hiển thị — 09/11/2026
+
+Người dùng yêu cầu áp dụng cho mọi học sinh: khi chương hiện cấp 5 thì có đề xuất điểm chăm cây, kể cả phần giờ từ phiên đang mở. Vé Săn thưởng vẫn dựa trên thời gian đã chốt. GET danh sách đề xuất suy ra các mốc chưa có bản ghi cho tất cả học sinh đủ điều kiện, kể cả dữ liệu cũ, không ghi database; khi GV duyệt/từ chối mới ghi quyết định, có kiểm tra quyền và chống trùng nguồn. Heartbeat/learning của học sinh cũng tạo bản ghi cây khi đạt cấp 5; bản ghi đã tạo và các quyết định đã duyệt giữ nguyên nếu cấp sau đó thay đổi. Không thay progress hoặc tự duyệt điểm.
+
+Đối chiếu Railway chỉ đọc lúc thực hiện: 11 Hoàng tại chương I Vật lý 11/2 có cấp 5 và chưa có điểm cây; các học sinh khác đủ cấp tại thời điểm kiểm tra đã có bản ghi. Dữ liệu có thể thay đổi; không chỉnh trực tiếp production. Kiểm thử mới build/typecheck đạt và 218/218 backend đạt trên database riêng. Giữ toàn bộ sửa đổi trình soạn công thức và PDF có sẵn ngoài phạm vi. Push Git không xác nhận Railway đã triển khai.
+
 ## Top 10 online vẫn xét lượt rời tab — 09/11/2026
 
 Người dùng báo nhiều bạn10điểm không có tên trong khi9,5điểm có, sau đó chốt **giữ công thức tính và vẫn cho lượt rời tab vào Top10**. Rà mã và dữ liệu Railway chỉ đọc xác định điều kiện cũ `reason IN ('student','teacher','deadline')` loại lượt `tabs` trước khi xếp hạng, không phải comparator ưu tiên thời gian hơn điểm. Bằng chứng riêng ở `.local/online-top10-audit-20261109/`, không đưa dữ liệu bài làm vào Git.

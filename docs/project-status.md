@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: đề xuất điểm cây theo cấp 5 — 09/11/2026
+
+Đề xuất chăm cây theo cấp 5 đang hiển thị của từng chương, kể cả phiên học đang mở; áp dụng mọi học sinh và dữ liệu cũ chưa có đề xuất. GV duyệt/từ chối mới ghi quyết định, giữ quyết định cũ và chống trùng; vé săn thưởng vẫn đợi thời gian đã chốt. Chi tiết và giới hạn tại đầu session-handoff. Build/typecheck và 218/218 backend đạt; backend Railway cần được triển khai để áp dụng.
+
 ## Hiện hành: Top 10 online bao gồm lượt rời tab — 09/11/2026
 
 Theo yêu cầu mới, lượt online tự nộp do rời tab vẫn được xét Top10; thay điều kiện loại `tabs` ngày26/10. Giữ cách chấm điểm, mốc8điểm, tối đa10 mỗi bài kết thúc, ưu tiên điểm rồi thời gian; `idle` vẫn loại, GV duyệt+1, không tự sửa điểm hoặc quyết định đã lưu. Mã xét đề xuất dùng chung cho danh sách và kiểm tra quyền duyệt; mô tả UI đã nói rõ. QA mới build/typecheck,212/212backend và2/2E2E desktop/mobile đạt; chi tiết đầu session-handoff. Rà dữ liệu thật chỉ đọc, test dùng database riêng. Hoàn tất ở commit/push Git, không chờ/kiểm tra Railway deploy; backend cần bản mới để có hiệu lực.

@@ -94,7 +94,7 @@ Blur/hidden cùng một lần rời chỉ tính một sự kiện; trở lại r
 
 ## Khi bị đóng phiên
 
-- **Luyện tập/ôn/sửa sai:** về trang chính, popup lý do, giữ đăng nhập và đáp án/sổ tay. Loại **toàn bộ thời gian của đúng phiên vi phạm**, giữ giờ từ các phiên trước, chương và học sinh khác. Ledger phiên lưu tổng mili-giây và phần theo ngày để hoàn tác progress và thống kê ngày cùng transaction, kể cả qua nửa đêm. Retry không trừ hai lần. Giờ phiên đang mở là tạm tính; không dùng phần này để cấp vé/điểm mốc cho tới khi phiên kết thúc hợp lệ.
+- **Luyện tập/ôn/sửa sai:** về trang chính, popup lý do, giữ đăng nhập và đáp án/sổ tay. Loại **toàn bộ thời gian của đúng phiên vi phạm**, giữ giờ từ các phiên trước, chương và học sinh khác. Ledger phiên lưu tổng mili-giây và phần theo ngày để hoàn tác progress và thống kê ngày cùng transaction, kể cả qua nửa đêm. Retry không trừ hai lần. Giờ phiên đang mở không dùng để cấp vé; đề xuất điểm cây theo cấp 5 đang hiển thị, kể cả thời gian phiên đang mở.
 - **Phòng thi/săn thưởng:** khóa trả lời, tự nộp với đáp án server đã lưu; không cộng giờ ôn cho thời gian thi. Server dùng last_activity và số sự kiện đã nhận; GET/poll không gia hạn idle. Gửi đáp án sau khi đóng không thay kết quả. Hàng đợi xử lý vi phạm tab trước đáp án chưa gửi để không đưa đáp án mới vào bài sau khi đã đạt ngưỡng.
 - **Mất mạng/ngủ máy:** client dừng thao tác/đếm bù khi không đủ bằng chứng; closure luyện tập được lưu chờ và gửi lại lúc online. Worker server đóng các phiên đã hết ngưỡng ngay cả khi không còn trình duyệt. Không khẳng định có thể phát hiện một sự kiện trình duyệt không gửi được; backend không thể chứng thực `isTrusted` của client. Không có trừ điểm kỷ luật/khóa tài khoản hoặc thêm gia sư AI.
 

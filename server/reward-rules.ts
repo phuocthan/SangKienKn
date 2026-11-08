@@ -1,5 +1,7 @@
 import type { DatabaseSync } from "node:sqlite";
 import type { LearningReward } from "../shared/learning.js";
+import { classroomLevelMinutes } from "./level-settings.js";
+import { studentLevel } from "../shared/student-levels.js";
 
 export function huntMinimumScore(db: DatabaseSync, classroomId: string) {
   return Number(
@@ -9,6 +11,42 @@ export function huntMinimumScore(db: DatabaseSync, classroomId: string) {
       )
       .get(classroomId)?.hunt_minimum_score ?? 8,
   );
+}
+
+export function treeRewardCandidates(
+  db: DatabaseSync,
+  classroomId: string,
+  timestamp: number,
+  studentId?: string,
+): (LearningReward & {
+  studentId: string;
+  classroomId: string;
+  chapterId: string;
+})[] {
+  const minutes = classroomLevelMinutes(db, classroomId);
+  return db
+    .prepare(
+      `SELECT p.student_id,p.chapter_id,p.seconds,u.name FROM progress p
+       JOIN chapters c ON c.id=p.chapter_id
+       JOIN memberships m ON m.classroom_id=c.classroom_id AND m.student_id=p.student_id
+       JOIN users u ON u.id=p.student_id AND u.role='student'
+       WHERE c.classroom_id=? AND (? IS NULL OR p.student_id=?)`,
+    )
+    .all(classroomId, studentId ?? null, studentId ?? null)
+    .filter((row) => studentLevel(Number(row.seconds), minutes).level === 5)
+    .map((row) => ({
+      id: `tree:${row.student_id}:${row.chapter_id}`,
+      studentId: String(row.student_id),
+      classroomId,
+      chapterId: String(row.chapter_id),
+      studentName: String(row.name),
+      label:
+        minutes === 60 ? "Chăm cây đủ 4 giờ" : "Chăm cây đạt Kết Trái · Cấp 5",
+      points: 1,
+      status: "pending" as const,
+      createdAt: timestamp,
+      sourceType: "tree" as const,
+    }));
 }
 
 // Read-only proposals. No points are recorded until the owning teacher reviews
@@ -56,7 +94,10 @@ export function learningRewards(
   timestamp: number,
   studentId?: string,
 ): LearningReward[] {
-  const candidates = onlineRewardCandidates(db, classroomId, timestamp);
+  const candidates = [
+    ...onlineRewardCandidates(db, classroomId, timestamp),
+    ...treeRewardCandidates(db, classroomId, timestamp, studentId),
+  ];
   const saved = db
     .prepare(
       `SELECT r.*,u.name studentName FROM learning_rewards r JOIN users u ON u.id=r.student_id

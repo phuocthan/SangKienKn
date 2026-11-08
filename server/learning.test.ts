@@ -1457,6 +1457,26 @@ test("scheduled exams keep their own schedule and resume rules independently of 
   );
 });
 
+test("tree proposals include every student at displayed level five, even during an open session", async (t) => {
+  const f = await fixture(t);
+  f.db.prepare("INSERT INTO users VALUES('other-student','other-student@test.local','Bạn khác','unused','student',0)").run();
+  f.db.prepare("INSERT INTO memberships VALUES('class-demo','other-student')").run();
+  f.db.prepare("INSERT INTO progress VALUES('student-demo','chapter-1',14400),('other-student','chapter-1',14400)").run();
+  f.db.prepare("INSERT INTO study_sessions VALUES('open-study','student-demo','chapter-1',?,?,1)").run(f.now(), f.now());
+  f.db.prepare("INSERT INTO study_session_controls(session_id,student_id,chapter_id,created_at,credited_ms) VALUES('open-study','student-demo','chapter-1',?,8000000)").run(f.now());
+  const source = "tree:student-demo:chapter-1";
+  const rewards = (await f.read("/classrooms/class-demo/learning", f.teacher)).rewards;
+  assert.equal(rewards.filter((r: any) => r.sourceType === "tree").length, 2);
+  assert.equal(rewards.find((r: any) => r.id === source)?.status, "pending");
+  assert.equal(f.db.prepare("SELECT COUNT(*) n FROM learning_rewards").get()!.n, 0);
+  assert.equal((await f.request(`/learning/rewards/${source}/review`, { status: "approved" }, f.other)).status, 403);
+  await f.post(`/learning/rewards/${source}/review`, { status: "approved" }, f.teacher);
+  await f.post(`/learning/rewards/${source}/review`, { status: "approved" }, f.teacher);
+  grantLearningMilestones(f.db, "student-demo", f.now());
+  assert.equal(f.db.prepare("SELECT COUNT(*) n FROM learning_rewards WHERE source=?").get(source)!.n, 1);
+  assert.equal(f.db.prepare("SELECT COUNT(*) n FROM learning_tickets WHERE student_id='student-demo'").get()!.n, 0);
+});
+
 test("milestones are exact, grant three tickets and one tree reward once; eligibility counts all repairs and chapter notebook", async (t) => {
   const f = await fixture(t);
   f.db
