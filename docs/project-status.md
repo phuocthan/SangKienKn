@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: đã duyệt định dạng công thức cũ — 10/11/2026
+
+Đã áp dụng toàn bộ 1.062 đề xuất cho 496 câu trên Railway sau sao lưu SQLite và chạy thử trên bản sao. Mỗi câu có phiên bản mới; bản cũ và lịch sử/điểm được giữ, nguồn tái sử dụng cập nhật theo luồng phiên bản. Xác minh sau lưu: 496 câu và 1.062 trường khớp, không bỏ qua; quick_check/foreign_key_check đạt. Backup và manifest nằm trên volume Railway; chi tiết và cách hoàn nguyên an toàn ở đầu session-handoff. Không đưa dữ liệu thật lên Git.
+
 ## Hiện hành: bộ soạn và định dạng công thức — 09/11/2026
 
 Form tạo/sửa câu hỏi, phương án/khẳng định và lời giải có bộ soạn MathLive với mẫu/ký hiệu, xem trước, chèn lại đúng vùng, copy/paste LaTeX/MathML và giữ sub/sup khi dán từ Word. Nhập Equation thêm phân số/căn/vectơ/tổng/giới hạn/ma trận; hiển thị KaTeX ở các trang dùng QuestionText, giữ marker cũ. Tải đề có thêm/sửa câu trực tiếp trước lưu. Không đoán/sửa chuỗi Wđ cũ, không chấm lại hoặc đổi đáp án/điểm/snapshot. MathType dạng ảnh/OLE vẫn báo không đọc được. Chi tiết cách dùng/giới hạn ở question-bank.md và đầu session-handoff.

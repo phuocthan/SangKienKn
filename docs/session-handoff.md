@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Phê duyệt định dạng công thức cũ — 10/11/2026
+
+Người dùng duyệt toàn bộ danh sách đã gửi (file Excel không có quyết định riêng) và yêu cầu sao lưu để có thể hoàn nguyên. Trước khi thay đổi, dùng SQLite backup tạo `/data/backups/pre-formula-review-20261110-1794320761568.sqlite` trên volume Railway, xác nhận quick_check; giữ manifest `/data/backups/formula-review-20261110-manifest.json` gồm ánh xạ ID cũ/mới. Hai file này chứa dữ liệu thật, không đưa vào Git. Báo cáo và script kiểm tra ở `.local/formula-*-20261110*`, cũng không đưa Git.
+
+Đọc đúng 1.062 đề xuất trong Excel, đối chiếu nội dung từng trường và phiên bản. Chạy thử transaction trên bản sao backup: 496 câu / 1.062 trường khớp, không có câu bị bỏ qua; hash attempts, corrections, exam_runs, review_sessions và progress không thay đổi, foreign_key_check đạt. Sau đó áp dụng một transaction trên dữ liệu thật: tạo phiên bản mới theo family cho 496 câu, giữ nguyên bản cũ, đáp án, điểm và snapshot; cập nhật nguồn tái sử dụng theo `updateQuestionSources` hiện có. Không chấm lại hoặc tạo tiến độ. Đối chiếu sau commit bằng kết nối chỉ đọc: đủ 496 bản mới, 1.062 trường đúng đề xuất, 0 bỏ qua, bản cũ giữ nội dung/đáp án, cả database và backup qua quick_check và foreign_key_check.
+
+Nếu cần hoàn nguyên, dùng manifest đối chiếu từng câu và tạo phiên bản mới từ nội dung cũ; không phục hồi đè toàn bộ database vì sẽ xóa thay đổi phát sinh sau backup. Cần xác nhận phạm vi hoàn nguyên với người dùng và kiểm tra phiên bản hiện hành trước khi ghi. Backup là ảnh chụp trên cùng volume, không coi là bản sao ngoài hệ thống. Theo quy tắc dự án, push Git cho ghi chú, không chờ/kiểm tra Railway deploy.
+
 ## Nhập và soạn công thức toán/vật lý — 09/11/2026
 
 Người dùng đưa ảnh Wđ bị nằm cùng dòng và yêu cầu rà nhập công thức, thêm bộ soạn kiểu MathType, hỗ trợ ký hiệu và copy/paste ngược lại. Không có file Word nguồn của ảnh để xác định chính xác định dạng đã mất ở khâu nào; không tự đổi Wđ cũ thành chỉ số. Mã cũ chỉ hiển thị marker mũ/chỉ số và đọc một số Equation đơn giản, còn từ chối phân số/căn/cấu trúc phức tạp.
