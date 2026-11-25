@@ -2593,29 +2593,34 @@ function Roster({
           <div className="loading-panel">Đang tải tiến độ…</div>
         ) : rows.length ? (
           <div className="table-scroll">
-            <table aria-label="Danh sách học sinh">
-              <thead>
-                <tr>
-                  <th>Học sinh</th>
+            <table
+              className="student-roster"
+              role="table"
+              aria-label="Danh sách học sinh"
+            >
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th role="columnheader">Học sinh</th>
                   <th
                     className="roster-time-heading"
                     scope="col"
+                    role="columnheader"
                     aria-label="Thời gian học"
                     title="Thời gian học"
                   >
                     <Clock3 size={20} />
                   </th>
-                  <th>Số câu đã làm</th>
-                  <th>Tỷ lệ đúng</th>
-                  <th>Câu cần sửa</th>
-                  <th>Câu đã khắc phục</th>
-                  <th>Tài khoản</th>
+                  <th role="columnheader">Số câu đã làm</th>
+                  <th role="columnheader">Tỷ lệ đúng</th>
+                  <th role="columnheader">Câu cần sửa</th>
+                  <th role="columnheader">Câu đã khắc phục</th>
+                  <th role="columnheader">Tài khoản</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody role="rowgroup">
                 {filtered.map((s) => (
-                  <tr key={s.id}>
-                    <td>
+                  <tr role="row" key={s.id}>
+                    <td role="cell" className="roster-student-cell">
                       <div className="student-cell">
                         <Avatar name={s.name} avatarId={s.avatarId} />
                         <div>
@@ -2627,6 +2632,8 @@ function Roster({
                     </td>
                     <td
                       className="roster-time-cell"
+                      role="cell"
+                      data-label="Thời gian học"
                       data-recorded-seconds={recordedSeconds(s)}
                     >
                       {duration(recordedSeconds(s))}
@@ -2650,13 +2657,19 @@ function Roster({
                         </span>
                       )}
                     </td>
-                    <td>{s.answeredQuestions ?? s.total}</td>
-                    <td>
+                    <td role="cell" data-label="Số câu đã làm">
+                      {s.answeredQuestions ?? s.total}
+                    </td>
+                    <td role="cell" data-label="Tỷ lệ đúng">
                       {s.total
                         ? `${Math.round((s.correct / s.total) * 100)}%`
                         : "—"}
                     </td>
-                    <td>
+                    <td
+                      role="cell"
+                      className="roster-corrections-cell"
+                      data-label="Câu cần sửa"
+                    >
                       <span
                         className={`pill ${s.openCorrections ? "amber" : ""}`}
                       >
@@ -2669,7 +2682,11 @@ function Roster({
                         Xem sổ tay
                       </button>
                     </td>
-                    <td className="roster-resolved-cell">
+                    <td
+                      className="roster-resolved-cell"
+                      role="cell"
+                      data-label="Câu đã khắc phục"
+                    >
                       <span
                         className="pill roster-resolved-count"
                         title={
@@ -2681,7 +2698,7 @@ function Roster({
                         {leaderboard ? (resolvedCounts.get(s.id) ?? 0) : "—"}
                       </span>
                     </td>
-                    <td>
+                    <td role="cell" className="roster-account-cell">
                       <button
                         className="text-button"
                         disabled={classroom.canManageClass === false}

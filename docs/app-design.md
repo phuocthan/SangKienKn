@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Danh sách học sinh trên điện thoại — 25/11/2026
+
+Ở khổ ≤600px, bảng Quản lý học sinh thành danh sách thẻ hai cột trong khung hiện có: dòng đầu là học sinh, tiếp theo từng số liệu có nhãn nhỏ phía trên, nút chữ tối thiểu 44px căn phải. Không còn cuộn ngang. Từ 601px giữ bảng. Quyết định này thay mô tả “bảng cuộn trong khung” cho riêng danh sách học sinh trên điện thoại.
+
 ## Nền dịu, header gọn và phạm vi xếp hạng — 25/11/2026
 
 `refresh.css` (nạp sau cùng) là lớp hiện hành cho: nền ảnh trường phủ kem 90–97% và mờ 6px, chỉ còn là chất liệu; header desktop một hàng căn giữa, lớp và tài khoản dạng viên bo tròn, avatar 44px, tên 15px/600 một dòng có ellipsis; portrait tên 16px một dòng. Thay quyết định avatar 60px/tên lớn 1,5× trước đây. Thẻ số liệu (.stat-card) dùng một nền #fffefa, viền #dfe6d2, số tabular; màu nhấn chỉ ở icon, thay bốn nền màu xen kẽ. Thẻ **Phạm vi xếp hạng** đặt ngay trên Vinh danh Top 10: nhãn + mô tả bên trái, select bên phải (mobile xếp dọc, select tối thiểu 44px); dòng phạm vi hiện dưới tiêu đề Top 10. Kích thước bục vinh danh giữ nguyên.

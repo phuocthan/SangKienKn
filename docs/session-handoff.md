@@ -1,5 +1,11 @@
 # Bàn giao session GreenEdu
 
+## Bảng học sinh dạng thẻ trên mobile — 25/11/2026
+
+Tiếp nối đợt chỉnh trang cùng ngày, người dùng chọn làm bảng học sinh mobile. Quản lý lớp → Học sinh ở khổ ≤600px hiển thị mỗi học sinh một thẻ thay bảng cuộn ngang: tên/email/cấp chương, Thời gian học kèm kính lúp thống kê, Số câu đã làm và Tỷ lệ đúng cạnh nhau, Câu cần sửa kèm Xem sổ tay, Câu đã khắc phục và Cấp lại mật khẩu. Nhãn cột lấy từ `data-label` trên ô; tiêu đề bảng ẩn trực quan nhưng còn cho trình đọc màn hình. Bảng có lớp `student-roster` và role ARIA tường minh (table/rowgroup/row/columnheader/cell) để giữ ngữ nghĩa khi đổi display. Desktop/tablet giữ bảng cũ; không đổi dữ liệu, API, thứ tự hay hành vi nút. CSS nằm cuối `src/refresh.css`.
+
+QA mới: build/typecheck đạt; E2E class-roster, roster-order, study-statistics, class-management, teacher-viewer, ranking-chapter 28/28 desktop/mobile đạt (1,6 phút); đã xem ảnh 390px, không tràn ngang. Không chạy lại backend vì không sửa server. Database kiểm thử riêng. Commit/push Git, không chờ/kiểm tra Railway. Còn lại từ đợt trước: tab phụ mobile màu đất nung khác desktop; thẻ chương chưa học màu xám; hai spec login-layout/workspace-density lỗi có sẵn.
+
 ## Chỉnh trang giao diện và xếp hạng theo chương — 25/11/2026
 
 Người dùng chưa vừa lòng giao diện desktop/mobile, yêu cầu tái cấu trúc hợp lý hơn, tự sửa điều thấy tốt hơn, và cho bảng xếp hạng chọn chương. Không có danh sách lỗi cụ thể; đã chụp toàn bộ trang chính ở 1440px/390px trên server riêng để tự chẩn đoán. Dùng redesign-existing-projects, rà theo web-design-guidelines.
