@@ -1086,6 +1086,88 @@ export function createApp(
       })),
     );
   });
+  // Chapter-scoped Top 10: same comparator as class honors, metrics limited to one chapter.
+  app.get("/api/classrooms/:id/chapter-honors", (req: AppRequest, res) => {
+    const classId = String(req.params.id);
+    classroom(req, classId);
+    const chapters = (
+      db
+        .prepare(
+          "SELECT ch.id,ch.title FROM chapters ch JOIN chapter_display_order o ON o.chapter_id=ch.id WHERE ch.classroom_id=? AND ch.id NOT IN (SELECT chapter_id FROM archived_chapters) ORDER BY o.position,ch.rowid",
+        )
+        .all(classId) as Row[]
+    ).map((ch) => ({ id: String(ch.id), title: String(ch.title) }));
+    const chapterId =
+      typeof req.query.chapter === "string" ? req.query.chapter : "";
+    if (!chapterId)
+      return res.json({ chapters, chapterId: null, honorees: [] });
+    if (!chapters.some((ch) => ch.id === chapterId))
+      fail(404, "Không tìm thấy chương trong lớp này.");
+    const students = (
+      db
+        .prepare(
+          "SELECT u.id,u.name,a.avatar_id AS avatarId FROM users u JOIN memberships m ON m.student_id=u.id LEFT JOIN user_avatars a ON a.user_id=u.id WHERE m.classroom_id=? ORDER BY u.name",
+        )
+        .all(classId) as Row[]
+    ).map((u) => {
+      const s = summary(chapterId, String(u.id));
+      return {
+        id: String(u.id),
+        name: String(u.name),
+        avatarId: (u.avatarId as string | null) ?? null,
+        chapterLevels: [{ level: s.level }],
+        answeredQuestions: Number(
+          db
+            .prepare(
+              "SELECT COUNT(DISTINCT a.question_id) AS n FROM attempts a JOIN questions q ON q.id=a.question_id WHERE a.student_id=? AND q.chapter_id=? AND a.mode='practice'",
+            )
+            .get(u.id, chapterId)!.n,
+        ),
+        correct: s.correct,
+        total: s.total,
+      };
+    });
+    const repairs = db
+      .prepare(
+        `SELECT cr.student_id AS id,COUNT(*) AS n FROM corrections cr
+        JOIN questions q ON q.id=cr.question_id
+        WHERE q.chapter_id=? AND cr.resolved=1 GROUP BY cr.student_id`,
+      )
+      .all(chapterId);
+    const isStudent = req.user!.role === "student";
+    res.json({
+      chapters,
+      chapterId,
+      honorees: rankClassHonors(
+        students,
+        new Map(repairs.map((row) => [String(row.id), Number(row.n)])),
+      ).map(
+        ({
+          id,
+          name,
+          avatarId,
+          position,
+          treeLevel,
+          answeredCount,
+          resolvedCount,
+          correct,
+          total,
+          accuracy,
+        }) => ({
+          id,
+          name,
+          avatarId,
+          position,
+          treeLevel,
+          answeredCount,
+          resolvedCount,
+          ...(!isStudent || id === req.user!.id
+            ? { correct, total, accuracy }
+            : {}),
+        }),
+      ),
+    });
+  });
   app.get("/api/classrooms/:id/students", (req: AppRequest, res) => {
     teacher(req);
     classroom(req, String(req.params.id));

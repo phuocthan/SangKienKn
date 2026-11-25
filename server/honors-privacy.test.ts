@@ -88,6 +88,44 @@ test("student honors omit peers' accuracy and answer counts while preserving tea
       assert.equal(Object.hasOwn(row, "email"), false);
     }
   }
+  // Chapter rankings: same comparator, metrics limited to the chosen chapter.
+  async function chapterHonors(cookie: string, chapter = "") {
+    const r = await fetch(
+      `${base}/classrooms/class-demo/chapter-honors${chapter ? `?chapter=${chapter}` : ""}`,
+      { headers: { cookie } },
+    );
+    return { status: r.status, data: await r.json() };
+  }
+  assert.equal((await chapterHonors("")).status, 401);
+  assert.equal((await chapterHonors(other)).status, 403);
+  assert.equal((await chapterHonors(teacher, "missing")).status, 404);
+  const list = (await chapterHonors(student)).data;
+  assert.deepEqual(
+    list.chapters.map((c: { id: string }) => c.id),
+    ["chapter-1", "chapter-2", "chapter-3"],
+  );
+  assert.deepEqual(list.honorees, []);
+  db.prepare(
+    "INSERT INTO progress VALUES('student-2','chapter-2',14400)",
+  ).run();
+  const first = (await chapterHonors(teacher, "chapter-1")).data;
+  assert.deepEqual(
+    first.honorees.map((r: { id: string }) => r.id),
+    ["student-3", "student-demo", "student-2"],
+  );
+  assert.equal(first.honorees[0].total, 2);
+  const second = (await chapterHonors(teacher, "chapter-2")).data;
+  assert.equal(second.honorees[0].id, "student-2");
+  assert.equal(second.honorees[0].treeLevel, 5);
+  assert.equal(second.honorees[0].answeredCount, 0);
+  assert.equal(second.honorees[1].treeLevel, 1);
+  const own = (await chapterHonors(student, "chapter-1")).data.honorees;
+  assert.deepEqual(
+    own.map((r: { id: string }) => r.id),
+    first.honorees.map((r: { id: string }) => r.id),
+  );
+  for (const row of own)
+    assert.equal(Object.hasOwn(row, "accuracy"), row.id === "student-demo");
   assert.equal(
     (
       await fetch(`${base}/classrooms/class-demo/students`, {

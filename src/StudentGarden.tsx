@@ -14,6 +14,7 @@ const byLevel = (a: ClassGardenMember, b: ClassGardenMember) =>
   a.studentId.localeCompare(b.studentId);
 
 export function StudentGarden({
+  chapter,
   members,
   trees,
   userId,
@@ -22,6 +23,8 @@ export function StudentGarden({
   teacherName,
   teacherAvatarId,
 }: {
+  /** Limits the level-5 honors to one chapter; the shared garden stays class-wide. */
+  chapter?: { id: string; title: string };
   members?: ClassGardenMember[];
   trees: ClassTree[];
   userId: string;
@@ -34,21 +37,40 @@ export function StudentGarden({
   const students = [...(members ?? [])].sort(byLevel);
   // Older APIs prove only level-5 achievement. Don't infer roster or levels from
   // aggregate time; one honoree per student even if several chapters earned trees.
-  const celebrated = members
-    ? students.filter((student) => student.level === 5)
-    : [
-        ...new Map(
-          trees.map((tree) => [
-            tree.studentId,
-            {
-              studentId: tree.studentId,
-              studentName: tree.studentName,
-              level: 5,
-              avatarId: null,
-            },
-          ]),
-        ).values(),
-      ].sort(byLevel);
+  const chapterWinners = chapter
+    ? new Set(
+        trees
+          .filter((tree) => tree.chapterId === chapter.id)
+          .map((tree) => tree.studentId),
+      )
+    : null;
+  const celebrated = chapterWinners
+    ? members
+      ? students.filter((student) => chapterWinners.has(student.studentId))
+      : trees
+          .filter((tree) => tree.chapterId === chapter!.id)
+          .map((tree) => ({
+            studentId: tree.studentId,
+            studentName: tree.studentName,
+            level: 5,
+            avatarId: null,
+          }))
+          .sort(byLevel)
+    : members
+      ? students.filter((student) => student.level === 5)
+      : [
+          ...new Map(
+            trees.map((tree) => [
+              tree.studentId,
+              {
+                studentId: tree.studentId,
+                studentName: tree.studentName,
+                level: 5,
+                avatarId: null,
+              },
+            ]),
+          ).values(),
+        ].sort(byLevel);
   return (
     <>
       <section
@@ -63,7 +85,9 @@ export function StudentGarden({
             <span className="eyebrow">NHỮNG CÂY ĐÃ KẾT TRÁI</span>
             <h2 id="garden-honors-title">Vinh danh Kết Trái · Cấp 5</h2>
             <p>
-              Ghi nhận những bạn đã đạt cấp cao nhất trong một chương của lớp.
+              {chapter
+                ? `Những bạn đã đạt cấp cao nhất ở ${chapter.title}.`
+                : "Ghi nhận những bạn đã đạt cấp cao nhất trong một chương của lớp."}
             </p>
           </div>
           <span className="garden-honors-count">{celebrated.length} bạn</span>
@@ -95,7 +119,9 @@ export function StudentGarden({
           </div>
         ) : (
           <p className="garden-honors-empty">
-            Chưa có bạn đạt cấp 5. Cùng chăm vườn để cây kết trái nhé!
+            {chapter
+              ? "Chưa có bạn đạt cấp 5 ở chương này."
+              : "Chưa có bạn đạt cấp 5. Cùng chăm vườn để cây kết trái nhé!"}
           </p>
         )}
       </section>

@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Nền dịu, header gọn và phạm vi xếp hạng — 25/11/2026
+
+`refresh.css` (nạp sau cùng) là lớp hiện hành cho: nền ảnh trường phủ kem 90–97% và mờ 6px, chỉ còn là chất liệu; header desktop một hàng căn giữa, lớp và tài khoản dạng viên bo tròn, avatar 44px, tên 15px/600 một dòng có ellipsis; portrait tên 16px một dòng. Thay quyết định avatar 60px/tên lớn 1,5× trước đây. Thẻ số liệu (.stat-card) dùng một nền #fffefa, viền #dfe6d2, số tabular; màu nhấn chỉ ở icon, thay bốn nền màu xen kẽ. Thẻ **Phạm vi xếp hạng** đặt ngay trên Vinh danh Top 10: nhãn + mô tả bên trái, select bên phải (mobile xếp dọc, select tối thiểu 44px); dòng phạm vi hiện dưới tiêu đề Top 10. Kích thước bục vinh danh giữ nguyên.
+
 ## Bộ soạn công thức trong nhập đề — 09/11/2026
 
 Giữ phong cách xanh/kem/font hiện có, dùng redesign-existing-projects và rà web-design-guidelines. Các ô nội dung/phương án/lời giải có nút **Công thức** với nhãn trợ năng riêng, xem trước khi có công thức và panel soạn ngay trong form để tránh popup lồng nhau. Panel tải MathLive khi mở, có mẫu/ký hiệu chạm44px, ô trực quan, xem trước, mã LaTeX và Chèn/Sao chép/Đóng; trả focus về ô nguồn. Clipboard lỗi có hướng dẫn chọn mã để copy. Lỗi tải bộ soạn được chặn tại panel, giữ bản nháp form.

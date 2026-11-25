@@ -138,7 +138,10 @@ export function ClassHonors({
   onRetry,
   viewerId,
   isTeacher = false,
+  scopeLabel,
 }: {
+  /** Chapter title when the ranking is limited to one chapter. */
+  scopeLabel?: string;
   students: (HonorsStudent | VisibleClassHonoree)[];
   leaderboard?: ClassLeaderboard;
   loading: boolean;
@@ -178,6 +181,9 @@ export function ClassHonors({
             <Motto>CÙNG NHAU VƯƠN LÊN</Motto>
           </span>
           <h2 id="class-honors-title">Vinh danh Top 10</h2>
+          <p className="honors-scope">
+            {scopeLabel ?? "Cả lớp · tất cả chương"}
+          </p>
         </div>
       </header>
       <ol className="sr-only" aria-label="Thứ tự ưu tiên xếp hạng">
@@ -284,7 +290,9 @@ export function ClassHonors({
             </ol>
           )}
           <p className="honors-tie-note">
-            Cấp cây cao nhất. Bằng bốn tiêu chí: xếp theo tên.
+            {scopeLabel
+              ? "Xếp theo cấp cây, câu đã làm, tỷ lệ đúng và câu khắc phục của riêng chương này."
+              : "Cấp cây cao nhất. Bằng bốn tiêu chí: xếp theo tên."}
           </p>
         </>
       )}

@@ -17,6 +17,12 @@ import type {
   ClassGardenMember,
 } from "./types";
 
+type ChapterHonors = {
+  chapters: { id: string; title: string }[];
+  chapterId: string | null;
+  honorees: VisibleClassHonoree[];
+};
+
 const studyTime = (seconds: number) =>
   seconds < 60 ? `${seconds} giây` : duration(seconds);
 
@@ -46,6 +52,60 @@ export function ClassCommunity({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  // Chapter filter for the rankings; "" keeps the whole-class view.
+  const [chapters, setChapters] = useState<{ id: string; title: string }[]>([]);
+  const [chapterId, setChapterId] = useState("");
+  const [chapterHonors, setChapterHonors] = useState<{
+    chapterId: string;
+    honorees: VisibleClassHonoree[];
+  } | null>(null);
+  const [chapterError, setChapterError] = useState("");
+  useEffect(() => {
+    let alive = true;
+    api<ChapterHonors>(`/classrooms/${classroom.id}/chapter-honors`)
+      .then((result) => {
+        // Older backends have no chapter rankings: keep the class view only.
+        if (alive && Array.isArray(result?.chapters))
+          setChapters(result.chapters);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [classroom.id, revision]);
+  useEffect(() => {
+    if (!chapterId) return;
+    let alive = true;
+    setChapterError("");
+    const load = () =>
+      api<ChapterHonors>(
+        `/classrooms/${classroom.id}/chapter-honors?chapter=${encodeURIComponent(chapterId)}`,
+      )
+        .then((result) => {
+          if (!alive) return;
+          if (!Array.isArray(result?.honorees))
+            throw new Error("Chưa tải được xếp hạng theo chương.");
+          setChapterError("");
+          setChapterHonors({ chapterId, honorees: result.honorees });
+        })
+        .catch((e) => {
+          if (alive) setChapterError(errorMessage(e));
+        });
+    void load();
+    const update = () => {
+      if (document.visibilityState === "visible" && navigator.onLine)
+        void load();
+    };
+    const timer = window.setInterval(update, 30000);
+    window.addEventListener("focus", update);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", update);
+    };
+  }, [classroom.id, chapterId, revision, retry]);
+  const chapter = chapters.find((item) => item.id === chapterId);
+  const chapterReady = chapterHonors?.chapterId === chapterId;
   useEffect(() => {
     let alive = true;
     let inFlight = false;
@@ -166,16 +226,42 @@ export function ClassCommunity({
               <small>Thời gian học có hoạt động được ghi nhận</small>
             </div>
           </div>
+          {chapters.length > 0 && (
+            <div className="ranking-scope card">
+              <label htmlFor="ranking-scope-select">
+                <strong>Phạm vi xếp hạng</strong>
+                <small>
+                  Áp dụng cho Vinh danh Top 10 và Vinh danh Kết Trái.
+                </small>
+              </label>
+              <select
+                id="ranking-scope-select"
+                value={chapter ? chapterId : ""}
+                onChange={(e) => setChapterId(e.target.value)}
+              >
+                <option value="">Cả lớp · tất cả chương</option>
+                {chapters.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <ClassHonors
-            students={data.honorStudents}
+            students={
+              chapter ? (chapterHonors?.honorees ?? []) : data.honorStudents
+            }
             leaderboard={data.board}
-            loading={false}
-            error={data.honorsError}
+            loading={!!chapter && !chapterReady && !chapterError}
+            error={chapter ? chapterError : data.honorsError}
             onRetry={() => setRetry((n) => n + 1)}
             viewerId={userId}
             isTeacher={isTeacher}
+            scopeLabel={chapter?.title}
           />
           <StudentGarden
+            chapter={chapter}
             members={data.members}
             trees={data.trees}
             userId={userId}
