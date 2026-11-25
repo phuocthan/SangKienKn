@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: khu vườn chung và điểm cộng theo chương — 25/11/2026
+
+Bộ chọn chương ở Khu vườn của lớp áp dụng cả cho Khu vườn chung (cấp cây theo chương). Danh sách Điểm thưởng/Điểm cộng (Săn thưởng, Top 10 online) lọc được theo chương nhờ `chapterIds` do server trả. Chi tiết ở đầu `docs/session-handoff.md`. Có mã/test không xác nhận Railway đã phát hành.
+
 ## Hiện hành: chỉnh trang giao diện, xếp hạng theo chương — 25/11/2026
 
 Khu vườn của lớp có **Phạm vi xếp hạng**: chọn cả lớp hoặc từng chương cho Vinh danh Top 10 và Vinh danh Kết Trái; endpoint mới chapter-honors chỉ đọc, giữ quyền riêng tư tỷ lệ đúng. Lớp `refresh.css` làm dịu nền ảnh, gọn header (chip tài khoản), thống nhất thẻ số liệu trên desktop/mobile. Build, 218/218 backend và E2E liên quan đạt (chi tiết, lỗi có sẵn và phần chưa làm ở đầu session-handoff). Cần backend Railway bản mới để có bộ chọn chương; push không xác nhận deploy.

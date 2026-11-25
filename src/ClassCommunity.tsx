@@ -106,6 +106,11 @@ export function ClassCommunity({
   }, [classroom.id, chapterId, revision, retry]);
   const chapter = chapters.find((item) => item.id === chapterId);
   const chapterReady = chapterHonors?.chapterId === chapterId;
+  // In a chapter view each garden tree shows that chapter's level, not the best one.
+  const chapterLevels =
+    chapter && chapterReady
+      ? new Map(chapterHonors!.honorees.map((row) => [row.id, row.treeLevel]))
+      : null;
   useEffect(() => {
     let alive = true;
     let inFlight = false;
@@ -231,7 +236,8 @@ export function ClassCommunity({
               <label htmlFor="ranking-scope-select">
                 <strong>Phạm vi xếp hạng</strong>
                 <small>
-                  Áp dụng cho Vinh danh Top 10 và Vinh danh Kết Trái.
+                  Áp dụng cho Vinh danh Top 10, Vinh danh Kết Trái và Khu vườn
+                  chung.
                 </small>
               </label>
               <select
@@ -262,7 +268,14 @@ export function ClassCommunity({
           />
           <StudentGarden
             chapter={chapter}
-            members={data.members}
+            members={
+              chapterLevels && data.members
+                ? data.members.map((member) => ({
+                    ...member,
+                    level: chapterLevels.get(member.studentId) ?? 1,
+                  }))
+                : data.members
+            }
             trees={data.trees}
             userId={userId}
             subject={classroom.subject}

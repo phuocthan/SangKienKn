@@ -23,7 +23,7 @@ export function StudentGarden({
   teacherName,
   teacherAvatarId,
 }: {
-  /** Limits the level-5 honors to one chapter; the shared garden stays class-wide. */
+  /** Scopes the level-5 honors and the garden to one chapter; members then carry that chapter's level. */
   chapter?: { id: string; title: string };
   members?: ClassGardenMember[];
   trees: ClassTree[];
@@ -134,6 +134,11 @@ export function StudentGarden({
             <span className="eyebrow" id="student-garden-title">
               <Sprout size={15} /> KHU VƯỜN CHUNG
             </span>
+            <p className="honors-scope">
+              {chapter
+                ? `Cấp cây của ${chapter.title}`
+                : "Cấp cây cao nhất của mỗi bạn · tất cả chương"}
+            </p>
           </div>
           <button
             className="button outline small"

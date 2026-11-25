@@ -33,6 +33,11 @@ test("rankings can be limited to one chapter and return to the whole class", asy
   await expect(
     page.getByText("Chưa có bạn đạt cấp 5 ở chương này."),
   ).toBeVisible();
+  const garden = page.locator(".student-garden");
+  await expect(garden.locator(".honors-scope")).toHaveText(
+    "Cấp cây của Chương 2 · Động học",
+  );
+  await expect(garden.locator(".garden-student").first()).toBeVisible();
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(

@@ -102,6 +102,8 @@ export type LearningReward = {
   rank?: number;
   score?: number;
   elapsedMs?: number;
+  /** Chapters this reward belongs to; absent on older servers. */
+  chapterIds?: string[];
   id: string;
   studentName: string;
   label: string;

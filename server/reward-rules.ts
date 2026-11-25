@@ -39,6 +39,7 @@ export function treeRewardCandidates(
       studentId: String(row.student_id),
       classroomId,
       chapterId: String(row.chapter_id),
+      chapterIds: [String(row.chapter_id)],
       studentName: String(row.name),
       label:
         minutes === 60 ? "Chăm cây đủ 4 giờ" : "Chăm cây đạt Kết Trái · Cấp 5",
@@ -51,11 +52,45 @@ export function treeRewardCandidates(
 
 // Read-only proposals. No points are recorded until the owning teacher reviews
 // a candidate; a finished exam's full ranking is calculated before student filtering.
+// Chapters an exam covers, read from its question snapshot (cached per call).
+function examChapters(
+  db: DatabaseSync,
+  cache: Map<string, string[]>,
+  examId: string,
+) {
+  let ids = cache.get(examId);
+  if (!ids) {
+    ids = [];
+    try {
+      const questions: unknown = JSON.parse(
+        String(
+          db
+            .prepare("SELECT questions FROM exam_definitions WHERE id=?")
+            .get(examId)?.questions ?? "[]",
+        ),
+      );
+      if (Array.isArray(questions))
+        ids = [
+          ...new Set(
+            questions
+              .map((q) => (q as { chapterId?: unknown })?.chapterId)
+              .filter((id): id is string => typeof id === "string"),
+          ),
+        ];
+    } catch {
+      ids = [];
+    }
+    cache.set(examId, ids);
+  }
+  return ids;
+}
+
 export function onlineRewardCandidates(
   db: DatabaseSync,
   classroomId: string,
   timestamp: number,
 ): (LearningReward & { studentId: string; classroomId: string })[] {
+  const cache = new Map<string, string[]>();
   const ranked = db
     .prepare(
       `SELECT r.id,r.student_id,r.exam_id,r.score,r.submitted_at,u.name studentName,e.title examTitle,
@@ -82,6 +117,7 @@ export function onlineRewardCandidates(
       createdAt: Number(r.submitted_at),
       sourceType: "online",
       examId: String(r.exam_id),
+      chapterIds: examChapters(db, cache, String(r.exam_id)),
       rank: Number(r.rank),
       score: Number(r.score),
       elapsedMs: Number(r.elapsedMs),
@@ -109,8 +145,16 @@ export function learningRewards(
       .filter((r) => !studentId || r.studentId === studentId)
       .map((r) => [r.id, r]),
   );
+  const cache = new Map<string, string[]>();
   const result: LearningReward[] = saved.map((r) => {
     const candidate = proposed.get(String(r.source));
+    const source = String(r.source);
+    const examId =
+      r.chapter_id == null && /^(online|exam):/.test(source)
+        ? db
+            .prepare("SELECT exam_id FROM exam_runs WHERE id=?")
+            .get(source.slice(source.indexOf(":") + 1))?.exam_id
+        : null;
     proposed.delete(String(r.source));
     return {
       ...candidate,
@@ -120,6 +164,12 @@ export function learningRewards(
       points: Number(r.points),
       status: r.status as LearningReward["status"],
       createdAt: Number(r.created_at),
+      chapterIds:
+        r.chapter_id != null
+          ? [String(r.chapter_id)]
+          : examId
+            ? examChapters(db, cache, String(examId))
+            : (candidate?.chapterIds ?? []),
       sourceType: String(r.source).startsWith("online:")
         ? "online"
         : String(r.source).startsWith("exam:")

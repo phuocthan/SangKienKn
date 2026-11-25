@@ -202,6 +202,7 @@ export function Learning({
   const [uploaded, setUploaded] = useState<UploadedExamQuestion[]>([]);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [huntChapter, setHuntChapter] = useState<string | null>(null);
+  const [rewardChapter, setRewardChapter] = useState("");
   const selectedChapters =
     examSource === "upload"
       ? [...new Set(uploaded.map((row) => row.chapterId))]
@@ -224,10 +225,20 @@ export function Learning({
         ? run.kind === "official" && run.delivery !== "online"
         : run.kind === "hunt",
     ) ?? [];
-  const rewards =
+  const pageRewards =
     data?.rewards.filter((r) =>
       onlinePage ? r.sourceType === "online" : r.sourceType !== "online",
     ) ?? [];
+  // Chapter filter needs the server to say which chapters a reward belongs to.
+  const rewardChapters = pageRewards.some((r) => Array.isArray(r.chapterIds))
+    ? (data?.chapters ?? [])
+    : [];
+  const activeRewardChapter = rewardChapters.some((c) => c.id === rewardChapter)
+    ? rewardChapter
+    : "";
+  const rewards = activeRewardChapter
+    ? pageRewards.filter((r) => r.chapterIds?.includes(activeRewardChapter))
+    : pageRewards;
   const startKeys = useRef(new Map<string, string>());
   const refreshSequence = useRef(0);
   const requestKey = (intent: string) => {
@@ -1290,8 +1301,30 @@ export function Learning({
                 }
               />
             )}
+            {rewardChapters.length > 0 && (
+              <div className="reward-scope">
+                <label htmlFor="reward-scope-select">Chương</label>
+                <select
+                  id="reward-scope-select"
+                  value={activeRewardChapter}
+                  onChange={(e) => setRewardChapter(e.target.value)}
+                >
+                  <option value="">Tất cả chương</option>
+                  {rewardChapters.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.title}
+                    </option>
+                  ))}
+                </select>
+                <small aria-live="polite">{rewards.length} mục</small>
+              </div>
+            )}
             {!rewards.length ? (
-              <p className="muted">Chưa có điểm thưởng.</p>
+              <p className="muted">
+                {activeRewardChapter
+                  ? "Chưa có điểm thưởng ở chương này."
+                  : "Chưa có điểm thưởng."}
+              </p>
             ) : (
               <div className="learning-list">
                 {rewards.map((r) => (

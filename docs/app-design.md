@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Phạm vi chương cho Khu vườn chung và Điểm cộng — 25/11/2026
+
+Một bộ chọn "Phạm vi xếp hạng" điều khiển Top 10, Kết Trái và Khu vườn chung; mỗi khối ghi rõ phạm vi đang xem bằng dòng `.honors-scope`. Danh sách điểm thưởng có ô chọn "Chương" riêng (`.reward-scope`, cao 44px, kèm số mục) đặt ngay trên danh sách; trạng thái rỗng nói rõ "ở chương này".
+
 ## Danh sách học sinh trên điện thoại — 25/11/2026
 
 Ở khổ ≤600px, bảng Quản lý học sinh thành danh sách thẻ hai cột trong khung hiện có: dòng đầu là học sinh, tiếp theo từng số liệu có nhãn nhỏ phía trên, nút chữ tối thiểu 44px căn phải. Không còn cuộn ngang. Từ 601px giữ bảng. Quyết định này thay mô tả “bảng cuộn trong khung” cho riêng danh sách học sinh trên điện thoại.

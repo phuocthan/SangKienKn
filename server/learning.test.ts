@@ -1468,6 +1468,7 @@ test("tree proposals include every student at displayed level five, even during 
   const rewards = (await f.read("/classrooms/class-demo/learning", f.teacher)).rewards;
   assert.equal(rewards.filter((r: any) => r.sourceType === "tree").length, 2);
   assert.equal(rewards.find((r: any) => r.id === source)?.status, "pending");
+  assert.deepEqual(rewards.find((r: any) => r.id === source)?.chapterIds, ["chapter-1"]);
   assert.equal(f.db.prepare("SELECT COUNT(*) n FROM learning_rewards").get()!.n, 0);
   assert.equal((await f.request(`/learning/rewards/${source}/review`, { status: "approved" }, f.other)).status, 403);
   await f.post(`/learning/rewards/${source}/review`, { status: "approved" }, f.teacher);

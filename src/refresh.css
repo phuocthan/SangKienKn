@@ -147,6 +147,45 @@
   }
 }
 
+/* Bonus points: chapter filter above the list. */
+.reward-scope {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 12px 0;
+}
+.reward-scope label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #24452f;
+}
+.reward-scope select {
+  flex: 0 1 320px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 36px 8px 14px;
+  border: 1px solid #c3d3b0;
+  border-radius: 12px;
+  background-color: #fbfcf6;
+  color: #203f2c;
+  font: inherit;
+  text-overflow: ellipsis;
+}
+.reward-scope select:focus-visible {
+  outline: 3px solid #5f8a4d66;
+  outline-offset: 2px;
+}
+.reward-scope small {
+  font-size: 13px;
+  color: #5f7359;
+}
+@media (max-width: 600px) {
+  .reward-scope select {
+    flex: 1 1 100%;
+  }
+}
+
 /* Short desktop windows: the version label yields to navigation instead of being clipped. */
 @media (min-width: 1101px) and (max-height: 920px) {
   .sidebar .sidebar-version {

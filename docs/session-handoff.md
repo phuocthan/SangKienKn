@@ -1,5 +1,13 @@
 # Bàn giao session GreenEdu
 
+## Khu vườn chung và Điểm cộng theo chương — 25/11/2026
+
+Yêu cầu: khu vườn của lớp và mục điểm cộng cũng phải chọn được chương.
+
+- Khu vườn chung dùng chung bộ chọn "Phạm vi xếp hạng": khi chọn chương, mỗi cây hiện cấp của riêng chương đó (lấy `treeLevel` từ `/chapter-honors`, không thêm API); "Cả lớp" vẫn là cấp cao nhất. Dòng phụ dưới tiêu đề nêu rõ phạm vi.
+- Điểm cộng/Điểm thưởng (Săn thưởng và Top 10 online trong `src/Learning.tsx`): server (`server/reward-rules.ts`) trả thêm `chapterIds` cho từng điểm thưởng — cây/săn điểm theo `chapter_id`, online theo các chương trong đề. Giao diện có ô chọn "Chương" phía trên danh sách; server cũ không có `chapterIds` thì ô chọn ẩn. Không đổi dữ liệu, không migration.
+- Đã chạy trong đợt này: build, backend 218/218, E2E `ranking-chapter`, `student-garden`, `reward-rules`, `class-honors` 16/16 (desktop + mobile, server/DB kiểm thử riêng). Chưa kiểm tra Railway; lọc Điểm cộng cần backend Railway chạy bản mới.
+
 ## Bảng học sinh dạng thẻ trên mobile — 25/11/2026
 
 Tiếp nối đợt chỉnh trang cùng ngày, người dùng chọn làm bảng học sinh mobile. Quản lý lớp → Học sinh ở khổ ≤600px hiển thị mỗi học sinh một thẻ thay bảng cuộn ngang: tên/email/cấp chương, Thời gian học kèm kính lúp thống kê, Số câu đã làm và Tỷ lệ đúng cạnh nhau, Câu cần sửa kèm Xem sổ tay, Câu đã khắc phục và Cấp lại mật khẩu. Nhãn cột lấy từ `data-label` trên ô; tiêu đề bảng ẩn trực quan nhưng còn cho trình đọc màn hình. Bảng có lớp `student-roster` và role ARIA tường minh (table/rowgroup/row/columnheader/cell) để giữ ngữ nghĩa khi đổi display. Desktop/tablet giữ bảng cũ; không đổi dữ liệu, API, thứ tự hay hành vi nút. CSS nằm cuối `src/refresh.css`.
