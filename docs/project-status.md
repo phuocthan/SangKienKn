@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: vị trí cấp lại mật khẩu học sinh — 28/11/2026
+
+Trong Quản lý lớp → Học sinh, nút **Cấp lại mật khẩu** nằm dưới thông tin từng học sinh thay vì ở cột cuối dễ bị khuất khi cuộn ngang. Giữ modal và quyền giáo viên; giao diện thẻ mobile vẫn dùng được. Build/typecheck và 8/8 E2E desktop/mobile đạt trên dữ liệu kiểm thử riêng; chi tiết ở đầu session-handoff. Push Git không xác nhận Railway đã triển khai.
+
 ## Hiện hành: khu vườn chung và điểm cộng theo chương — 25/11/2026
 
 Bộ chọn chương ở Khu vườn của lớp áp dụng cả cho Khu vườn chung (cấp cây theo chương). Danh sách Điểm thưởng/Điểm cộng (Săn thưởng, Top 10 online) lọc được theo chương nhờ `chapterIds` do server trả. Chi tiết ở đầu `docs/session-handoff.md`. Có mã/test không xác nhận Railway đã phát hành.

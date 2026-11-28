@@ -1,5 +1,11 @@
 # Bàn giao session GreenEdu
 
+## Nút cấp lại mật khẩu dễ thấy trên desktop — 28/11/2026
+
+Người dùng báo nút **Cấp lại mật khẩu** bị khuất ở một số màn hình desktop. Kiểm tra danh sách Quản lý lớp → Học sinh: nút nằm ở cột cuối của bảng cuộn ngang. Chuyển nút vào một dòng riêng ngay dưới thông tin đúng học sinh, bỏ cột Tài khoản; nút có nền/viền rõ, vùng bấm tối thiểu44px, focus bàn phím và tên trợ năng gắn với học sinh. Bố cục thẻ mobile tiếp tục dùng cùng nút, giữ luồng modal và điều kiện khóa của giáo viên chỉ xem; không đổi API/mật khẩu hoặc dữ liệu thật.
+
+Khởi điểm checkout27ae24c, fetch/pull fast-forward lên f93da17 trước sửa, giữ PDF chưa theo dõi. QA mới: build/typecheck đạt; 8/8 E2E desktop/mobile (41,8 giây) gồm bảng/thống kê, hiển thị nút ngay khi bảng ở mép trái tại320/390/768/1024/1100/1280/1440/1920px, không tràn trang, mở/đóng modal bằng bàn phím và trả focus, khóa với giáo viên chỉ xem. Đã xem ảnh desktop/mobile, test dùng database riêng; log `.local/roster-password-e2e-20261128.log`. Rà theo redesign-existing-projects và web-design-guidelines; không test ghi Railway. Theo quyết định hiện hành, commit/push Git khi xong, không chờ hoặc kiểm tra Railway deploy.
+
 ## Khu vườn chung và Điểm cộng theo chương — 25/11/2026
 
 Yêu cầu: khu vườn của lớp và mục điểm cộng cũng phải chọn được chương.

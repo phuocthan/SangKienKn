@@ -193,6 +193,28 @@
   }
 }
 
+/* Keep account recovery with the student even when the statistics table scrolls. */
+.app-shell .student-roster .roster-reset-password {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 44px;
+  padding: 4px 10px;
+  margin-top: 5px;
+  border: 1px solid #cbd9c3;
+  border-radius: 8px;
+  background: #f2f7ec;
+  text-align: left;
+  white-space: normal;
+}
+.app-shell .student-roster .roster-reset-password:hover:not(:disabled) {
+  background: #e2efdb;
+}
+.app-shell .student-roster .roster-reset-password:focus-visible {
+  outline: 3px solid #3e7654;
+  outline-offset: 2px;
+}
+
 /* Phone roster: one card per student instead of a sideways-scrolling table. */
 @media (max-width: 600px) {
   .app-shell .table-scroll:has(> .student-roster) {
@@ -268,10 +290,6 @@
   }
   .app-shell .student-roster .roster-corrections-cell .text-button {
     margin-left: auto;
-  }
-  .app-shell .student-roster .roster-account-cell {
-    align-items: flex-end;
-    justify-content: flex-end;
   }
   .app-shell .student-roster .text-button {
     min-height: 44px;

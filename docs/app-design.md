@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Nút cấp lại mật khẩu học sinh — 28/11/2026
+
+Quản lý lớp → Học sinh đặt **Cấp lại mật khẩu** dưới tên, email và cấp cây của từng học sinh, có viền/nền nhẹ và vùng bấm tối thiểu44px. Trên desktop nút hiện trong vùng đầu bảng dù các cột thống kê phải cuộn; mobile giữ bố cục thẻ. Tên trợ năng kèm tên học sinh, focus rõ, quyền chỉ xem vẫn khóa nút; giữ popup và chức năng hiện có.
+
 ## Phạm vi chương cho Khu vườn chung và Điểm cộng — 25/11/2026
 
 Một bộ chọn "Phạm vi xếp hạng" điều khiển Top 10, Kết Trái và Khu vườn chung; mỗi khối ghi rõ phạm vi đang xem bằng dòng `.honors-scope`. Danh sách điểm thưởng có ô chọn "Chương" riêng (`.reward-scope`, cao 44px, kèm số mục) đặt ngay trên danh sách; trạng thái rỗng nói rõ "ở chương này".

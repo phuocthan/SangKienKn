@@ -2614,7 +2614,6 @@ function Roster({
                   <th role="columnheader">Tỷ lệ đúng</th>
                   <th role="columnheader">Câu cần sửa</th>
                   <th role="columnheader">Câu đã khắc phục</th>
-                  <th role="columnheader">Tài khoản</th>
                 </tr>
               </thead>
               <tbody role="rowgroup">
@@ -2627,6 +2626,15 @@ function Roster({
                           <strong>{s.name}</strong>
                           <small>{s.email}</small>
                           <ChapterLevelIcons chapters={s.chapterLevels} />
+                          <button
+                            type="button"
+                            className="text-button roster-reset-password"
+                            aria-label={`Cấp lại mật khẩu · ${s.name}`}
+                            disabled={classroom.canManageClass === false}
+                            onClick={() => onReset(s)}
+                          >
+                            Cấp lại mật khẩu
+                          </button>
                         </div>
                       </div>
                     </td>
@@ -2697,15 +2705,6 @@ function Roster({
                       >
                         {leaderboard ? (resolvedCounts.get(s.id) ?? 0) : "—"}
                       </span>
-                    </td>
-                    <td role="cell" className="roster-account-cell">
-                      <button
-                        className="text-button"
-                        disabled={classroom.canManageClass === false}
-                        onClick={() => onReset(s)}
-                      >
-                        Cấp lại mật khẩu
-                      </button>
                     </td>
                   </tr>
                 ))}
