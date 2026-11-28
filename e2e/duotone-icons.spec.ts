@@ -21,18 +21,18 @@ for (const role of ["teacher", "student"] as const) {
     const destinations =
       role === "teacher"
         ? [
-            ["Tổng quan", "SquaresFour"],
-            ["Lớp học của tôi", "ChalkboardTeacher"],
-            ["Ngân hàng câu hỏi", "Books"],
-            ["Ôn tập", "GraduationCap"],
-            ["Quản lý lớp", "GearSix"],
+            ["Tổng quan", "tong-quan"],
+            ["Lớp học của tôi", "lop-cua-toi"],
+            ["Ngân hàng câu hỏi", "ngan-hang-cau-hoi"],
+            ["Ôn tập", "on-tap"],
+            ["Quản lý lớp", "quan-ly-lop"],
           ]
         : [
-            ["Khu vườn của tôi", "Plant"],
-            ["Luyện tập", "BookOpenText"],
-            ["Ôn tập", "GraduationCap"],
-            ["Kiểm tra", "ClipboardText"],
-            ["Lớp học của tôi", "Tree"],
+            ["Khu vườn của tôi", "vuon-cua-toi"],
+            ["Luyện tập", "luyen-tap"],
+            ["Ôn tập", "on-tap"],
+            ["Kiểm tra", "kiem-tra-online"],
+            ["Lớp học của tôi", "vuon-cua-lop"],
           ];
     for (const [label, icon] of destinations) {
       const button = navigation.getByRole("button", {
@@ -105,7 +105,7 @@ for (const role of ["teacher", "student"] as const) {
         page
           .getByRole("tab", { name: "Sổ tay sửa sai", exact: true })
           .locator("svg"),
-      ).toHaveAttribute("data-icon-name", "Notebook");
+      ).toHaveAttribute("data-icon-name", "so-tay-sua-sai");
       await navigateTo(page, { name: "Khu vườn của tôi", exact: true });
     } else {
       await navigateTo(page, { name: "Lớp học của tôi", exact: true });

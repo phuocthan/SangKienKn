@@ -11,17 +11,17 @@ test("rankings can be limited to one chapter and return to the whole class", asy
     .click();
   const honors = page.getByRole("region", { name: "Vinh danh Top 10" });
   await expect(honors.getByText("Cả lớp · tất cả chương")).toBeVisible();
-  const scope = page.locator("#ranking-scope-select");
-  await expect(scope.locator("option")).toHaveText([
-    "Cả lớp · tất cả chương",
-    "Chương 1 · Mở đầu",
-    "Chương 2 · Động học",
-    "Chương 3 · Động lực học",
+  const scope = page.getByRole("radiogroup", { name: "Phạm vi xếp hạng" });
+  await expect(scope.getByRole("radio")).toHaveText([
+    "Cả lớp",
+    "Chương 1",
+    "Chương 2",
+    "Chương 3",
   ]);
   const request = page.waitForResponse((response) =>
     response.url().includes("/chapter-honors?chapter=chapter-2"),
   );
-  await scope.selectOption("chapter-2");
+  await scope.getByRole("radio", { name: "Chương 2" }).click();
   expect((await request).ok()).toBe(true);
   await expect(honors.locator(".honors-scope")).toHaveText(
     "Chương 2 · Động học",
@@ -46,7 +46,7 @@ test("rankings can be limited to one chapter and return to the whole class", asy
       ),
     ).toBeLessThanOrEqual(0);
   }
-  await scope.selectOption("");
+  await scope.getByRole("radio", { name: "Cả lớp" }).click();
   await expect(honors.locator(".honors-scope")).toHaveText(
     "Cả lớp · tất cả chương",
   );

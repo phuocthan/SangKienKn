@@ -1,0 +1,257 @@
+/* 28/11/2026 — "nhiều icon, ít chữ" layer, after artifacts/redesign-20261128/mocks.
+   Loaded last. Cream sidebar and bottom bar, short nav labels, compact stat cards,
+   chapter chips. Long helper text is hidden visually only where an icon + label
+   already carries the meaning. */
+
+/* ---------- Navigation: short visible labels, full name stays in aria-label ---------- */
+.nav-label-short {
+  display: none;
+}
+.sidebar nav .nav-item:has(.nav-label-short) .nav-label-text {
+  display: none;
+}
+.sidebar nav .nav-item .nav-label-short {
+  display: inline;
+}
+
+/* Desktop / landscape: light sidebar like the mock. */
+@media (min-width: 1101px), (min-width: 701px) and (orientation: landscape) {
+  .app-shell .sidebar {
+    background: #fffefa;
+    border: 1px solid #dfe6d2;
+    box-shadow: 0 1px 2px #2847330a;
+    color: #24452f;
+  }
+  .app-shell .sidebar .logo,
+  .app-shell .sidebar .logo * {
+    color: #164b35;
+  }
+  .app-shell .sidebar .workspace-label {
+    color: #5f7359;
+  }
+  .app-shell .sidebar .sidebar-note {
+    display: none;
+  }
+  .app-shell .sidebar .nav-item {
+    min-height: 46px;
+    border-radius: 12px;
+    color: #24452f;
+    background: transparent;
+  }
+  .app-shell .sidebar .nav-item:hover:not(.active) {
+    background: #eef6ef;
+    color: #164b35;
+  }
+  .app-shell .sidebar .nav-item.active {
+    background: #216b4a;
+    color: #fffefa;
+    box-shadow: none;
+  }
+  .app-shell .sidebar .nav-item svg {
+    color: inherit;
+    --gi-fill: #cfe6c4;
+  }
+  .app-shell .sidebar .nav-item.active svg {
+    --gi-fill: #2f8a60;
+  }
+  .app-shell .sidebar .nav-count {
+    background: #fbefbf;
+    color: #76521a;
+  }
+}
+
+/* Portrait: cream bottom bar, icon above a one-line label. */
+@media (max-width: 1100px) and (orientation: portrait) {
+  .app-shell .sidebar {
+    border-top: 1px solid #dfe6d2;
+    border-radius: 0;
+    background: #fffefaf2;
+    box-shadow: 0 -2px 14px #2847331a;
+  }
+  .app-shell .sidebar nav .nav-item {
+    gap: 2px;
+    color: #4d6650;
+    font-size: 12px;
+  }
+  .app-shell .sidebar nav .nav-item svg {
+    width: 26px;
+    height: 26px;
+    color: inherit;
+  }
+  .app-shell .sidebar nav .nav-item.active {
+    border-color: transparent;
+    background: transparent;
+    color: #164b35;
+    box-shadow: none;
+    font-weight: 700;
+  }
+  .app-shell .sidebar nav .nav-item.active svg {
+    padding: 2px 10px;
+    width: 46px;
+    border-radius: 999px;
+    background: #216b4a;
+    color: #fffefa;
+    --gi-fill: #2f8a60;
+  }
+  .app-shell .sidebar nav .nav-item + .nav-item:not(.active)::after,
+  .app-shell .sidebar .nav-item.active::before {
+    display: none;
+  }
+  .app-shell .sidebar nav .nav-label {
+    flex: 0 0 auto;
+    height: auto;
+    white-space: nowrap;
+  }
+}
+
+/* ---------- Stat cards: icon + big number + short label ---------- */
+.app-shell .main-content .stat-card.card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "icon value"
+    "icon label";
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 0;
+  padding: 16px 18px;
+}
+.app-shell .main-content .stat-card .stat-icon {
+  grid-area: icon;
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  border-radius: 14px;
+}
+.app-shell .main-content .stat-card .stat-icon svg {
+  width: 28px;
+  height: 28px;
+}
+.app-shell .main-content .stat-card > strong {
+  grid-area: value;
+  align-self: end;
+  margin: 0;
+  font-size: clamp(24px, 2.4vw, 30px);
+  line-height: 1.1;
+}
+.app-shell .main-content .stat-card .stat-label {
+  grid-area: label;
+  align-self: start;
+  order: 3;
+  margin: 2px 0 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #5f7359;
+}
+.app-shell .main-content .stat-card > small {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .app-shell .main-content .stats-grid:has(> .stat-card) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .app-shell .main-content .stat-card.card {
+    column-gap: 10px;
+    padding: 12px;
+  }
+  .app-shell .main-content .stat-card .stat-icon {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+/* ---------- Ranking scope: chips instead of a described select ---------- */
+.ranking-scope label small {
+  display: none;
+}
+.chapter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: #216b4a;
+}
+.chapter-chip {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid #c3d3b0;
+  border-radius: 999px;
+  background: #fbfcf6;
+  color: #24452f;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chapter-chip:hover {
+  background: #eef6ef;
+}
+.chapter-chip.is-active {
+  border-color: #216b4a;
+  background: #216b4a;
+  color: #fffefa;
+}
+.chapter-chip:focus-visible,
+.chapter-chips select:focus-visible {
+  outline: 3px solid #5f8a4d66;
+  outline-offset: 2px;
+}
+.chapter-chips select {
+  min-height: 44px;
+  min-width: 0;
+  padding: 8px 14px;
+  border: 1px solid #c3d3b0;
+  border-radius: 12px;
+  background: #fbfcf6;
+  font: inherit;
+}
+@media (max-width: 600px) {
+  .chapter-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: -2px;
+    padding: 2px;
+  }
+  .chapter-chips > * {
+    flex: 0 0 auto;
+  }
+}
+
+/* ---------- Sub-tabs: same green/cream as desktop, icon-led ---------- */
+@media (max-width: 1100px) and (orientation: portrait) {
+  .app-shell .workspace-tabs {
+    border-color: #dfe6d2;
+    background: #fffefaf2;
+    box-shadow: 0 4px 14px #2847331a;
+  }
+  .app-shell .workspace-tabs > button {
+    gap: 6px;
+    color: #4d6650;
+  }
+  .app-shell .workspace-tabs > button > svg {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+  }
+  .app-shell .workspace-tabs > button[aria-selected="true"] {
+    border-color: #216b4a;
+    background: #216b4a;
+    color: #fffefa;
+    box-shadow: none;
+    --gi-fill: #2f8a60;
+  }
+  .app-shell .workspace-tabs > button:hover:not([aria-selected="true"]) {
+    background: #eef6ef;
+  }
+  .app-shell .workspace-tabs > button:focus-visible {
+    outline-color: #216b4a;
+  }
+}

@@ -626,21 +626,42 @@ export default function App() {
   const nav: NavigationItem<Page>[] = isTeacher
     ? [
         { id: "home", label: "Tổng quan", icon: LayoutDashboard },
-        { id: "classes", label: "Lớp học của tôi", icon: ClassroomIcon },
-        { id: "questions", label: "Ngân hàng câu hỏi", icon: NganHangCauHoi },
+        {
+          id: "classes",
+          label: "Lớp học của tôi",
+          short: "Lớp học",
+          icon: ClassroomIcon,
+        },
+        {
+          id: "questions",
+          label: "Ngân hàng câu hỏi",
+          short: "Câu hỏi",
+          icon: NganHangCauHoi,
+        },
         { id: "learning", label: "Ôn tập", icon: GraduationCap },
         {
           id: "class-settings",
           label: "Quản lý lớp",
+          short: "Quản lý",
           icon: QuanLyLop,
         },
       ]
     : [
-        { id: "home", label: "Khu vườn của tôi", icon: Sprout },
+        {
+          id: "home",
+          label: "Khu vườn của tôi",
+          short: "Vườn tôi",
+          icon: Sprout,
+        },
         { id: "practice", label: "Luyện tập", icon: BookOpen },
         { id: "learning", label: "Ôn tập", icon: GraduationCap },
         { id: "online-exams", label: "Kiểm tra", icon: KiemTraOnline },
-        { id: "garden", label: "Lớp học của tôi", icon: TreeIcon },
+        {
+          id: "garden",
+          label: "Lớp học của tôi",
+          short: "Vườn lớp",
+          icon: TreeIcon,
+        },
       ];
   const parentPage: Page =
     page === "hunt" || (isTeacher && page === "online-exams")

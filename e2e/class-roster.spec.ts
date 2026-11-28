@@ -93,7 +93,7 @@ test("teacher roster shows unique resolved corrections and a labeled clock; stud
     name: "Thời gian học",
     exact: true,
   });
-  await expect(clock.locator("svg")).toHaveAttribute("data-icon-name", "Clock");
+  await expect(clock.locator("svg")).toHaveAttribute("data-icon-name", "thoi-gian-hoc");
   await expect(clock).toHaveText("");
   await roster.scrollIntoViewIfNeeded();
   await roster.screenshot({

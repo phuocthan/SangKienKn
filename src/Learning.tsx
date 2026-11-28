@@ -1,4 +1,5 @@
 import { DEFAULT_SESSION_POLICY } from "../shared/session-policy";
+import { ChapterChips } from "./ChapterChips";
 import { AnswerFields } from "./AnswerFields";
 import { answerComplete, type QuestionAnswer } from "../shared/question-types";
 import { QuestionText } from "./QuestionText";
@@ -1303,19 +1304,14 @@ export function Learning({
             )}
             {rewardChapters.length > 0 && (
               <div className="reward-scope">
-                <label htmlFor="reward-scope-select">Chương</label>
-                <select
+                <ChapterChips
                   id="reward-scope-select"
+                  label="Lọc điểm thưởng theo chương"
+                  allLabel="Tất cả"
+                  chapters={rewardChapters}
                   value={activeRewardChapter}
-                  onChange={(e) => setRewardChapter(e.target.value)}
-                >
-                  <option value="">Tất cả chương</option>
-                  {rewardChapters.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.title}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setRewardChapter}
+                />
                 <small aria-live="polite">{rewards.length} mục</small>
               </div>
             )}

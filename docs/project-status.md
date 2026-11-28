@@ -1,5 +1,9 @@
 # Tiến độ và lộ trình GreenEdu
 
+## Hiện hành: bố cục ít chữ — 28/11/2026
+
+`src/compact.css` + `ChapterChips`: sidebar/thanh dưới kem, nhãn ngắn, thẻ số liệu gọn, chip chương. Chi tiết đầu `docs/session-handoff.md`.
+
 ## Hiện hành: bộ icon Vườn tri thức — 28/11/2026
 
 84 icon mới thay Phosphor qua alias trong `src/icons.tsx`; mock giao diện ít chữ ở `artifacts/redesign-20261128/mocks/` chưa lắp. Chi tiết đầu `docs/session-handoff.md`.

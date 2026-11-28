@@ -10,6 +10,7 @@ import type {
   VisibleClassHonoree,
 } from "../shared/class-honors";
 import { StudentGarden } from "./StudentGarden";
+import { ChapterChips } from "./ChapterChips";
 import type {
   ClassLeaderboard,
   Classroom,
@@ -233,25 +234,21 @@ export function ClassCommunity({
           </div>
           {chapters.length > 0 && (
             <div className="ranking-scope card">
-              <label htmlFor="ranking-scope-select">
+              <label>
                 <strong>Phạm vi xếp hạng</strong>
                 <small>
                   Áp dụng cho Vinh danh Top 10, Vinh danh Kết Trái và Khu vườn
                   chung.
                 </small>
               </label>
-              <select
+              <ChapterChips
                 id="ranking-scope-select"
+                label="Phạm vi xếp hạng"
+                allLabel="Cả lớp"
+                chapters={chapters}
                 value={chapter ? chapterId : ""}
-                onChange={(e) => setChapterId(e.target.value)}
-              >
-                <option value="">Cả lớp · tất cả chương</option>
-                {chapters.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.title}
-                  </option>
-                ))}
-              </select>
+                onChange={setChapterId}
+              />
             </div>
           )}
           <ClassHonors

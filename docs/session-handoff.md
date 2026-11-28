@@ -1,5 +1,15 @@
 # Bàn giao session GreenEdu
 
+## Bố cục "ít chữ" — 28/11/2026
+
+Theo mock `artifacts/redesign-20261128/mocks/`, lớp `src/compact.css` (nạp cuối):
+- Sidebar desktop nền kem, mục đang chọn nền xanh; ẩn thẻ trích dẫn. Thanh dưới điện thoại nền kem, icon 26px trên nhãn một dòng. Nhãn ngắn qua `short` của `NavigationItem` (Vườn tôi, Vườn lớp, Lớp học, Câu hỏi, Quản lý); tên đầy đủ vẫn là aria-label.
+- Thẻ số liệu: icon + số lớn + nhãn; dòng mô tả `small` chỉ còn cho trình đọc màn hình. Điện thoại 2 cột.
+- Tab con trên điện thoại đổi từ đất nung sang xanh/kem.
+- `src/ChapterChips.tsx`: chọn chương bằng chip (radiogroup) ở Phạm vi xếp hạng và Điểm thưởng; trên 8 chương thì về select.
+- Test: build đạt; E2E liên quan (icon, roster, chương, portrait, điểm cộng, vườn) 26/28, 2 lỗi roster chỉ khi chạy chung DB, chạy riêng đạt. Full run trước đó: `warm-journey`, `chapter-management`, `login-layout`, `workspace-density` lỗi có sẵn (đã chạy lại trên 9d890f6, cũng lỗi).
+- Chưa làm: rút gọn chữ trong nội dung từng trang (thẻ Tiếp tục học, Mục tiêu tiếp theo, mô tả vinh danh), nút "i"/tooltip cho mô tả dài.
+
 ## Bộ icon "Vườn tri thức" — 28/11/2026
 
 Người dùng muốn nhiều icon, ít chữ. Prompt thiết kế: `docs/redesign-brief-20261128.md`; sản phẩm (84 icon SVG, CSS, mock, bảng đối chiếu) do phiên thiết kế riêng làm ở `artifacts/redesign-20261128/`. Người dùng duyệt "lắp đi".

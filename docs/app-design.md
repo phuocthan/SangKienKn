@@ -1,5 +1,9 @@
 # Thiết kế giao diện GreenEdu
 
+## Bố cục ít chữ — 28/11/2026
+
+Sidebar và thanh dưới nền kem `#fffefa`, mục chọn nền `#216b4a` chữ kem; nhãn điều hướng 1–2 từ. Thẻ số liệu: icon 52px (mobile 42px) + số + nhãn, không dòng mô tả. Chọn chương bằng chip tròn 44px, cuộn ngang trên điện thoại. Tab con điện thoại xanh/kem như desktop. Thay quyết định sidebar xanh đậm và tab đất nung trước đây.
+
 ## Bộ icon Vườn tri thức — 28/11/2026
 
 Icon toàn app là bộ "Vườn tri thức" (nét bo tròn, mảng kem-xanh qua `--gi-fill`), thay Phosphor duotone; icon trang trí `aria-hidden`, icon mang nghĩa truyền `label`. Hướng bố cục ít chữ tiếp theo theo `artifacts/redesign-20261128/mocks/`.
