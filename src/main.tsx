@@ -24,6 +24,7 @@ import "./learning-feedback.css";
 import "./workspace-clarity.css";
 import "./motion.css";
 import "./refresh.css";
+import "./greenedu-icons.css";
 import "katex/dist/katex.min.css";
 import "./formula.css";
 import { installMotionInput } from "./motion";

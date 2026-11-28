@@ -42,6 +42,12 @@ import {
   Trophy,
   Users,
   X,
+  HocSinh,
+  KiemTraOnline,
+  NganHangCauHoi,
+  QuanLyLop,
+  SanThuong,
+  VuonCuaLop,
 } from "./icons";
 import {
   api,
@@ -621,19 +627,19 @@ export default function App() {
     ? [
         { id: "home", label: "Tổng quan", icon: LayoutDashboard },
         { id: "classes", label: "Lớp học của tôi", icon: ClassroomIcon },
-        { id: "questions", label: "Ngân hàng câu hỏi", icon: Books },
+        { id: "questions", label: "Ngân hàng câu hỏi", icon: NganHangCauHoi },
         { id: "learning", label: "Ôn tập", icon: GraduationCap },
         {
           id: "class-settings",
           label: "Quản lý lớp",
-          icon: Settings,
+          icon: QuanLyLop,
         },
       ]
     : [
         { id: "home", label: "Khu vườn của tôi", icon: Sprout },
         { id: "practice", label: "Luyện tập", icon: BookOpen },
         { id: "learning", label: "Ôn tập", icon: GraduationCap },
-        { id: "online-exams", label: "Kiểm tra", icon: ClipboardList },
+        { id: "online-exams", label: "Kiểm tra", icon: KiemTraOnline },
         { id: "garden", label: "Lớp học của tôi", icon: TreeIcon },
       ];
   const parentPage: Page =
@@ -663,7 +669,7 @@ export default function App() {
           parent: "class-settings",
           label: "Quản lý lớp",
           items: [
-            { id: "class-settings", label: "Học sinh", icon: Users },
+            { id: "class-settings", label: "Học sinh", icon: HocSinh },
             { id: "class-chapters", label: "Chương học", icon: Books },
             { id: "class-general", label: "Cài đặt chung", icon: Settings },
           ],
@@ -672,7 +678,7 @@ export default function App() {
           parent: "classes",
           label: "Lớp học của tôi",
           items: [
-            { id: "classes", label: "Khu vườn của lớp", icon: ClassroomIcon },
+            { id: "classes", label: "Khu vườn của lớp", icon: VuonCuaLop },
             { id: "groups", label: "Hoạt động nhóm", icon: Users },
           ],
         },
@@ -714,12 +720,12 @@ export default function App() {
               {
                 id: "hunt" as const,
                 label: "Săn thưởng",
-                icon: Trophy,
+                icon: SanThuong,
               },
               {
                 id: "online-exams" as const,
                 label: "Kiểm tra online",
-                icon: ClipboardList,
+                icon: KiemTraOnline,
               },
             ],
           }

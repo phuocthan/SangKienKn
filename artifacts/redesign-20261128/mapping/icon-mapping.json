@@ -1,0 +1,2968 @@
+{
+  "generated": "2026-11-28",
+  "source": "../../src",
+  "icons": [
+    {
+      "id": "tong-quan",
+      "component": "TongQuan",
+      "label": "Tổng quan",
+      "group": "nav",
+      "replaces": [
+        "LayoutDashboard"
+      ],
+      "usages": [
+        "src/App.tsx:622"
+      ]
+    },
+    {
+      "id": "lop-cua-toi",
+      "component": "LopCuaToi",
+      "label": "Lớp học của tôi",
+      "group": "nav",
+      "replaces": [
+        "ClassroomIcon"
+      ],
+      "usages": [
+        "src/App.tsx:623",
+        "src/App.tsx:675",
+        "src/App.tsx:791"
+      ]
+    },
+    {
+      "id": "chuong-hoc",
+      "component": "ChuongHoc",
+      "label": "Chương học",
+      "group": "nav",
+      "replaces": [
+        "Books"
+      ],
+      "usages": [
+        "src/App.tsx:667"
+      ]
+    },
+    {
+      "id": "luyen-tap",
+      "component": "LuyenTap",
+      "label": "Luyện tập",
+      "group": "nav",
+      "replaces": [
+        "BookOpen"
+      ],
+      "usages": [
+        "src/App.tsx:634",
+        "src/App.tsx:685",
+        "src/App.tsx:713",
+        "src/App.tsx:2027",
+        "src/App.tsx:2165",
+        "src/App.tsx:2228",
+        "src/App.tsx:2332",
+        "src/ClassHonors.tsx:91",
+        "src/ExamMetadata.tsx:9",
+        "src/GardenNote.tsx:25",
+        "src/GardenNote.tsx:49",
+        "src/GardenNote.tsx:73",
+        "src/Learning.tsx:661",
+        "src/ReviewLibrary.tsx:288"
+      ]
+    },
+    {
+      "id": "on-tap",
+      "component": "OnTap",
+      "label": "Ôn tập",
+      "group": "nav",
+      "replaces": [
+        "GraduationCap"
+      ],
+      "usages": [
+        "src/App.tsx:625",
+        "src/App.tsx:635"
+      ]
+    },
+    {
+      "id": "kiem-tra",
+      "component": "KiemTra",
+      "label": "Kiểm tra",
+      "group": "nav",
+      "replaces": [
+        "ClipboardList"
+      ],
+      "usages": [
+        "src/HomeTasks.tsx:152"
+      ]
+    },
+    {
+      "id": "kiem-tra-online",
+      "component": "KiemTraOnline",
+      "label": "Kiểm tra online",
+      "group": "nav",
+      "replaces": [
+        "ClipboardList"
+      ],
+      "usages": [
+        "src/App.tsx:636",
+        "src/App.tsx:722"
+      ]
+    },
+    {
+      "id": "san-thuong",
+      "component": "SanThuong",
+      "label": "Săn thưởng",
+      "group": "nav",
+      "replaces": [
+        "Target"
+      ],
+      "usages": []
+    },
+    {
+      "id": "so-tay-sua-sai",
+      "component": "SoTaySuaSai",
+      "label": "Sổ tay sửa sai",
+      "group": "nav",
+      "replaces": [
+        "Notebook"
+      ],
+      "usages": [
+        "src/App.tsx:689",
+        "src/App.tsx:1916",
+        "src/ClassHonors.tsx:124",
+        "src/Learning.tsx:1016"
+      ]
+    },
+    {
+      "id": "vuon-cua-toi",
+      "component": "VuonCuaToi",
+      "label": "Khu vườn của tôi",
+      "group": "nav",
+      "replaces": [
+        "Sprout"
+      ],
+      "usages": [
+        "src/App.tsx:633",
+        "src/App.tsx:923",
+        "src/App.tsx:1532",
+        "src/App.tsx:1816",
+        "src/App.tsx:1843",
+        "src/components.tsx:37",
+        "src/StudentGarden.tsx:135",
+        "src/StudentGarden.tsx:170",
+        "src/StudentGarden.tsx:222"
+      ]
+    },
+    {
+      "id": "vuon-cua-lop",
+      "component": "VuonCuaLop",
+      "label": "Khu vườn của lớp",
+      "group": "nav",
+      "replaces": [
+        "TreeIcon"
+      ],
+      "usages": [
+        "src/App.tsx:637",
+        "src/App.tsx:702"
+      ]
+    },
+    {
+      "id": "hoat-dong-nhom",
+      "component": "HoatDongNhom",
+      "label": "Hoạt động nhóm",
+      "group": "nav",
+      "replaces": [
+        "Users"
+      ],
+      "usages": [
+        "src/App.tsx:1814",
+        "src/App.tsx:1855",
+        "src/GroupActivities.tsx:305",
+        "src/GroupActivities.tsx:321",
+        "src/HomeTasks.tsx:150"
+      ]
+    },
+    {
+      "id": "ngan-hang-cau-hoi",
+      "component": "NganHangCauHoi",
+      "label": "Ngân hàng câu hỏi",
+      "group": "nav",
+      "replaces": [
+        "Books"
+      ],
+      "usages": [
+        "src/App.tsx:624"
+      ]
+    },
+    {
+      "id": "hoc-sinh",
+      "component": "HocSinh",
+      "label": "Học sinh",
+      "group": "nav",
+      "replaces": [
+        "Users",
+        "UserCircle"
+      ],
+      "usages": [
+        "src/Accounts.tsx:95",
+        "src/App.tsx:666",
+        "src/App.tsx:2160",
+        "src/App.tsx:2216"
+      ]
+    },
+    {
+      "id": "quan-ly-lop",
+      "component": "QuanLyLop",
+      "label": "Quản lý lớp",
+      "group": "nav",
+      "replaces": [
+        "Settings"
+      ],
+      "usages": [
+        "src/App.tsx:629"
+      ]
+    },
+    {
+      "id": "cai-dat",
+      "component": "CaiDat",
+      "label": "Cài đặt chung",
+      "group": "nav",
+      "replaces": [
+        "Settings"
+      ],
+      "usages": [
+        "src/App.tsx:668"
+      ]
+    },
+    {
+      "id": "menu-them",
+      "component": "MenuThem",
+      "label": "Thêm",
+      "group": "nav",
+      "replaces": [],
+      "usages": []
+    },
+    {
+      "id": "thoi-gian-hoc",
+      "component": "ThoiGianHoc",
+      "label": "Thời gian học",
+      "group": "metric",
+      "replaces": [
+        "Clock3"
+      ],
+      "usages": [
+        "src/App.tsx:1003",
+        "src/App.tsx:1899",
+        "src/App.tsx:2023",
+        "src/App.tsx:2611",
+        "src/ClassCommunity.tsx:227",
+        "src/ExamMetadata.tsx:23",
+        "src/ExamMetadata.tsx:38",
+        "src/ExamNotices.tsx:137",
+        "src/ExamNotices.tsx:176",
+        "src/GroupActivities.tsx:317",
+        "src/GroupActivities.tsx:382",
+        "src/HomeTasks.tsx:154",
+        "src/Learning.tsx:1085",
+        "src/Learning.tsx:1827",
+        "src/OnlineExamGroups.tsx:50",
+        "src/Practice.tsx:611"
+      ]
+    },
+    {
+      "id": "so-cau-da-lam",
+      "component": "SoCauDaLam",
+      "label": "Số câu đã làm",
+      "group": "metric",
+      "replaces": [
+        "ClipboardList",
+        "Check"
+      ],
+      "usages": []
+    },
+    {
+      "id": "ty-le-dung",
+      "component": "TyLeDung",
+      "label": "Tỷ lệ đúng",
+      "group": "metric",
+      "replaces": [
+        "Target"
+      ],
+      "usages": [
+        "src/App.tsx:1905",
+        "src/App.tsx:2174",
+        "src/ClassHonors.tsx:99",
+        "src/QuestionBank.tsx:613"
+      ]
+    },
+    {
+      "id": "cau-can-sua",
+      "component": "CauCanSua",
+      "label": "Câu cần sửa",
+      "group": "metric",
+      "replaces": [
+        "RotateCcw"
+      ],
+      "usages": []
+    },
+    {
+      "id": "cau-da-khac-phuc",
+      "component": "CauDaKhacPhuc",
+      "label": "Câu đã khắc phục",
+      "group": "metric",
+      "replaces": [
+        "CheckCircle2"
+      ],
+      "usages": []
+    },
+    {
+      "id": "cay-ra-hoa",
+      "component": "CayRaHoa",
+      "label": "Cây đã ra hoa",
+      "group": "metric",
+      "replaces": [
+        "Flower2"
+      ],
+      "usages": [
+        "src/GardenGoal.tsx:87",
+        "src/GardenNote.tsx:67",
+        "src/GardenNote.tsx:103",
+        "src/StudentGarden.tsx:164",
+        "src/StudentGarden.tsx:166",
+        "src/StudentGarden.tsx:169",
+        "src/StudentGarden.tsx:171"
+      ]
+    },
+    {
+      "id": "thanh-vien-hoat-dong",
+      "component": "ThanhVienHoatDong",
+      "label": "Thành viên hoạt động",
+      "group": "metric",
+      "replaces": [
+        "Users"
+      ],
+      "usages": [
+        "src/App.tsx:676",
+        "src/App.tsx:703",
+        "src/ClassCommunity.tsx:217"
+      ]
+    },
+    {
+      "id": "diem-cong",
+      "component": "DiemCong",
+      "label": "Điểm cộng",
+      "group": "metric",
+      "replaces": [
+        "Sparkles"
+      ],
+      "usages": []
+    },
+    {
+      "id": "ve-kiem-tra",
+      "component": "VeKiemTra",
+      "label": "Vé kiểm tra",
+      "group": "metric",
+      "replaces": [
+        "Ticket"
+      ],
+      "usages": [
+        "src/Learning.tsx:925",
+        "src/Learning.tsx:955"
+      ]
+    },
+    {
+      "id": "dang-hoc",
+      "component": "DangHoc",
+      "label": "Đang học",
+      "group": "status",
+      "replaces": [
+        "Play"
+      ],
+      "usages": []
+    },
+    {
+      "id": "tam-dung",
+      "component": "TamDung",
+      "label": "Tạm dừng",
+      "group": "status",
+      "replaces": [
+        "Pause"
+      ],
+      "usages": [
+        "src/GardenNote.tsx:601",
+        "src/Practice.tsx:637",
+        "src/StudentGarden.tsx:149"
+      ]
+    },
+    {
+      "id": "da-nop",
+      "component": "DaNop",
+      "label": "Đã nộp",
+      "group": "status",
+      "replaces": [
+        "Send"
+      ],
+      "usages": []
+    },
+    {
+      "id": "cho-duyet",
+      "component": "ChoDuyet",
+      "label": "Chờ duyệt",
+      "group": "status",
+      "replaces": [
+        "History",
+        "Clock3"
+      ],
+      "usages": [
+        "src/ExamMetadata.tsx:17"
+      ]
+    },
+    {
+      "id": "da-duyet",
+      "component": "DaDuyet",
+      "label": "Đã duyệt",
+      "group": "status",
+      "replaces": [
+        "CheckCircle2"
+      ],
+      "usages": [
+        "src/Accounts.tsx:151",
+        "src/App.tsx:2015",
+        "src/App.tsx:3074",
+        "src/Feedback.tsx:228",
+        "src/GroupActivities.tsx:216",
+        "src/MotionToast.tsx:23",
+        "src/Practice.tsx:699",
+        "src/StudentLevel.tsx:161"
+      ]
+    },
+    {
+      "id": "tu-choi",
+      "component": "TuChoi",
+      "label": "Từ chối",
+      "group": "status",
+      "replaces": [
+        "X"
+      ],
+      "usages": []
+    },
+    {
+      "id": "khoa",
+      "component": "Khoa",
+      "label": "Khóa",
+      "group": "status",
+      "replaces": [
+        "LockKeyhole"
+      ],
+      "usages": [
+        "src/StudentLevel.tsx:173"
+      ]
+    },
+    {
+      "id": "mo",
+      "component": "Mo",
+      "label": "Mở",
+      "group": "status",
+      "replaces": [
+        "LockKeyhole"
+      ],
+      "usages": []
+    },
+    {
+      "id": "canh-bao-roi-tab",
+      "component": "CanhBaoRoiTab",
+      "label": "Cảnh báo rời tab",
+      "group": "status",
+      "replaces": [
+        "EyeOff"
+      ],
+      "usages": []
+    },
+    {
+      "id": "offline",
+      "component": "Offline",
+      "label": "Mất kết nối",
+      "group": "status",
+      "replaces": [],
+      "usages": []
+    },
+    {
+      "id": "bat-dau",
+      "component": "BatDau",
+      "label": "Bắt đầu",
+      "group": "action",
+      "replaces": [
+        "Play"
+      ],
+      "usages": [
+        "src/GardenNote.tsx:599",
+        "src/StudentGarden.tsx:149"
+      ]
+    },
+    {
+      "id": "tiep-tuc",
+      "component": "TiepTuc",
+      "label": "Tiếp tục",
+      "group": "action",
+      "replaces": [
+        "ArrowRight"
+      ],
+      "usages": [
+        "src/App.tsx:1029"
+      ]
+    },
+    {
+      "id": "nop-bai",
+      "component": "NopBai",
+      "label": "Nộp bài",
+      "group": "action",
+      "replaces": [
+        "Send"
+      ],
+      "usages": []
+    },
+    {
+      "id": "xem-bai",
+      "component": "XemBai",
+      "label": "Xem bài",
+      "group": "action",
+      "replaces": [
+        "Eye"
+      ],
+      "usages": [
+        "src/QuestionBank.tsx:408"
+      ]
+    },
+    {
+      "id": "duyet",
+      "component": "Duyet",
+      "label": "Duyệt",
+      "group": "action",
+      "replaces": [
+        "Check"
+      ],
+      "usages": [
+        "src/Avatars.tsx:306",
+        "src/Practice.tsx:746",
+        "src/StudentLevel.tsx:171"
+      ]
+    },
+    {
+      "id": "tu-choi-nut",
+      "component": "TuChoiNut",
+      "label": "Từ chối (nút)",
+      "group": "action",
+      "replaces": [
+        "X"
+      ],
+      "usages": []
+    },
+    {
+      "id": "tai-len-word",
+      "component": "TaiLenWord",
+      "label": "Tải lên Word",
+      "group": "action",
+      "replaces": [
+        "Upload"
+      ],
+      "usages": [
+        "src/QuestionBank.tsx:244"
+      ]
+    },
+    {
+      "id": "xuat-excel",
+      "component": "XuatExcel",
+      "label": "Xuất Excel",
+      "group": "action",
+      "replaces": [
+        "Download"
+      ],
+      "usages": [
+        "src/App.tsx:2514",
+        "src/Learning.tsx:1232",
+        "src/OnlineExamGroups.tsx:236",
+        "src/QuestionBank.tsx:206",
+        "src/StudentStudyStatistics.tsx:359"
+      ]
+    },
+    {
+      "id": "xuat-word",
+      "component": "XuatWord",
+      "label": "Xuất Word",
+      "group": "action",
+      "replaces": [
+        "Download"
+      ],
+      "usages": [
+        "src/QuestionBank.tsx:200",
+        "src/QuestionBank.tsx:909"
+      ]
+    },
+    {
+      "id": "them-moi",
+      "component": "ThemMoi",
+      "label": "Thêm mới",
+      "group": "action",
+      "replaces": [
+        "Plus"
+      ],
+      "usages": [
+        "src/Accounts.tsx:188",
+        "src/App.tsx:963",
+        "src/App.tsx:1148",
+        "src/App.tsx:1259",
+        "src/App.tsx:1408",
+        "src/App.tsx:1504",
+        "src/App.tsx:2533",
+        "src/Feedback.tsx:127",
+        "src/GroupActivities.tsx:182",
+        "src/Learning.tsx:452",
+        "src/Lessons.tsx:63",
+        "src/ReviewLibrary.tsx:223"
+      ]
+    },
+    {
+      "id": "sua",
+      "component": "Sua",
+      "label": "Sửa",
+      "group": "action",
+      "replaces": [
+        "Pencil"
+      ],
+      "usages": [
+        "src/OnlineExamGroups.tsx:211",
+        "src/QuestionBank.tsx:394",
+        "src/StudentNotebook.tsx:152"
+      ]
+    },
+    {
+      "id": "xoa",
+      "component": "Xoa",
+      "label": "Xóa",
+      "group": "action",
+      "replaces": [
+        "Trash2"
+      ],
+      "usages": [
+        "src/ChapterDelete.tsx:50",
+        "src/Lessons.tsx:91",
+        "src/OnlineExamGroups.tsx:249",
+        "src/QuestionBank.tsx:307",
+        "src/QuestionBank.tsx:325",
+        "src/QuestionBank.tsx:408"
+      ]
+    },
+    {
+      "id": "tim",
+      "component": "Tim",
+      "label": "Tìm",
+      "group": "action",
+      "replaces": [
+        "Search"
+      ],
+      "usages": [
+        "src/Accounts.tsx:226",
+        "src/App.tsx:2561",
+        "src/App.tsx:2649",
+        "src/GroupActivities.tsx:252"
+      ]
+    },
+    {
+      "id": "loc-chuong",
+      "component": "LocChuong",
+      "label": "Lọc theo chương",
+      "group": "action",
+      "replaces": [
+        "ChevronDown"
+      ],
+      "usages": []
+    },
+    {
+      "id": "doi-lop",
+      "component": "DoiLop",
+      "label": "Đổi lớp",
+      "group": "action",
+      "replaces": [
+        "ArrowsDownUp"
+      ],
+      "usages": []
+    },
+    {
+      "id": "dang-xuat",
+      "component": "DangXuat",
+      "label": "Đăng xuất",
+      "group": "action",
+      "replaces": [
+        "LogOut"
+      ],
+      "usages": [
+        "src/Accounts.tsx:116",
+        "src/App.tsx:772",
+        "src/PortraitActions.tsx:51"
+      ]
+    },
+    {
+      "id": "dang-nhap",
+      "component": "DangNhap",
+      "label": "Đăng nhập",
+      "group": "action",
+      "replaces": [],
+      "usages": []
+    },
+    {
+      "id": "tai-len",
+      "component": "TaiLen",
+      "label": "Tải lên",
+      "group": "action",
+      "replaces": [
+        "Upload"
+      ],
+      "usages": [
+        "src/Avatars.tsx:211"
+      ]
+    },
+    {
+      "id": "tai-xuong",
+      "component": "TaiXuong",
+      "label": "Tải xuống",
+      "group": "action",
+      "replaces": [
+        "Download"
+      ],
+      "usages": [
+        "src/GroupActivities.tsx:52",
+        "src/QuestionBank.tsx:919"
+      ]
+    },
+    {
+      "id": "gui",
+      "component": "Gui",
+      "label": "Gửi",
+      "group": "action",
+      "replaces": [
+        "Send"
+      ],
+      "usages": [
+        "src/Conversation.tsx:72"
+      ]
+    },
+    {
+      "id": "cup",
+      "component": "Cup",
+      "label": "Cúp",
+      "group": "honor",
+      "replaces": [
+        "Trophy"
+      ],
+      "usages": [
+        "src/App.tsx:717",
+        "src/ClassHonors.tsx:177",
+        "src/Learning.tsx:1044",
+        "src/StudentGarden.tsx:82"
+      ]
+    },
+    {
+      "id": "huy-chuong-1",
+      "component": "HuyChuong1",
+      "label": "Huy chương hạng 1",
+      "group": "honor",
+      "replaces": [
+        "Medal"
+      ],
+      "usages": []
+    },
+    {
+      "id": "huy-chuong-2",
+      "component": "HuyChuong2",
+      "label": "Huy chương hạng 2",
+      "group": "honor",
+      "replaces": [
+        "Medal"
+      ],
+      "usages": []
+    },
+    {
+      "id": "huy-chuong-3",
+      "component": "HuyChuong3",
+      "label": "Huy chương hạng 3",
+      "group": "honor",
+      "replaces": [
+        "Medal"
+      ],
+      "usages": []
+    },
+    {
+      "id": "top-10",
+      "component": "Top10",
+      "label": "Top 10",
+      "group": "honor",
+      "replaces": [
+        "Trophy"
+      ],
+      "usages": []
+    },
+    {
+      "id": "ket-trai",
+      "component": "KetTrai",
+      "label": "Kết Trái",
+      "group": "honor",
+      "replaces": [
+        "TreeIcon"
+      ],
+      "usages": []
+    },
+    {
+      "id": "quay-lai",
+      "component": "QuayLai",
+      "label": "Quay lại",
+      "group": "util",
+      "replaces": [
+        "ArrowLeft"
+      ],
+      "usages": [
+        "src/GroupActivities.tsx:282",
+        "src/Learning.tsx:1737",
+        "src/Learning.tsx:1942",
+        "src/Practice.tsx:525",
+        "src/Practice.tsx:604"
+      ]
+    },
+    {
+      "id": "di-tiep",
+      "component": "DiTiep",
+      "label": "Đi tiếp",
+      "group": "util",
+      "replaces": [
+        "ArrowRight"
+      ],
+      "usages": [
+        "src/App.tsx:1784",
+        "src/App.tsx:1822",
+        "src/App.tsx:2092",
+        "src/App.tsx:2220",
+        "src/App.tsx:2232",
+        "src/App.tsx:2240",
+        "src/App.tsx:2378",
+        "src/components.tsx:361",
+        "src/GardenGoal.tsx:91",
+        "src/HomeTasks.tsx:133",
+        "src/HomeTasks.tsx:160",
+        "src/Practice.tsx:583",
+        "src/Practice.tsx:737"
+      ]
+    },
+    {
+      "id": "mo-rong",
+      "component": "MoRong",
+      "label": "Mở rộng",
+      "group": "util",
+      "replaces": [
+        "ChevronDown"
+      ],
+      "usages": [
+        "src/App.tsx:806"
+      ]
+    },
+    {
+      "id": "dong",
+      "component": "Dong",
+      "label": "Đóng",
+      "group": "util",
+      "replaces": [
+        "X"
+      ],
+      "usages": [
+        "src/App.tsx:1180",
+        "src/App.tsx:1566",
+        "src/App.tsx:1574",
+        "src/App.tsx:1609",
+        "src/App.tsx:2578",
+        "src/components.tsx:302",
+        "src/MotionToast.tsx:32"
+      ]
+    },
+    {
+      "id": "thong-bao",
+      "component": "ThongBao",
+      "label": "Thông báo",
+      "group": "util",
+      "replaces": [
+        "BellRing"
+      ],
+      "usages": [
+        "src/ExamNotices.tsx:122"
+      ]
+    },
+    {
+      "id": "goi-y",
+      "component": "GoiY",
+      "label": "Gợi ý",
+      "group": "util",
+      "replaces": [
+        "Lightbulb"
+      ],
+      "usages": [
+        "src/GardenNote.tsx:31",
+        "src/GardenNote.tsx:79",
+        "src/GardenNote.tsx:97"
+      ]
+    },
+    {
+      "id": "binh-luan",
+      "component": "BinhLuan",
+      "label": "Bình luận",
+      "group": "util",
+      "replaces": [
+        "MessageSquare"
+      ],
+      "usages": [
+        "src/App.tsx:760",
+        "src/Feedback.tsx:274",
+        "src/GroupDiscussion.tsx:30",
+        "src/PortraitActions.tsx:31"
+      ]
+    },
+    {
+      "id": "lam-moi",
+      "component": "LamMoi",
+      "label": "Làm mới",
+      "group": "util",
+      "replaces": [
+        "RefreshCw"
+      ],
+      "usages": [
+        "src/Accounts.tsx:249"
+      ]
+    },
+    {
+      "id": "lam-lai",
+      "component": "LamLai",
+      "label": "Làm lại",
+      "group": "util",
+      "replaces": [
+        "RotateCcw"
+      ],
+      "usages": [
+        "src/Avatars.tsx:343",
+        "src/Feedback.tsx:226",
+        "src/Practice.tsx:578"
+      ]
+    },
+    {
+      "id": "lich-su",
+      "component": "LichSu",
+      "label": "Lịch sử",
+      "group": "util",
+      "replaces": [
+        "History"
+      ],
+      "usages": [
+        "src/QuestionBank.tsx:415"
+      ]
+    },
+    {
+      "id": "xu-huong",
+      "component": "XuHuong",
+      "label": "Hành trình",
+      "group": "util",
+      "replaces": [
+        "TrendingUp"
+      ],
+      "usages": [
+        "src/App.tsx:1046",
+        "src/App.tsx:2236",
+        "src/App.tsx:2525"
+      ]
+    },
+    {
+      "id": "sap-xep",
+      "component": "SapXep",
+      "label": "Sắp xếp",
+      "group": "util",
+      "replaces": [
+        "ArrowsDownUp"
+      ],
+      "usages": [
+        "src/App.tsx:1251"
+      ]
+    },
+    {
+      "id": "tai-lieu",
+      "component": "TaiLieu",
+      "label": "Tài liệu",
+      "group": "util",
+      "replaces": [
+        "FileText"
+      ],
+      "usages": [
+        "src/GroupActivities.tsx:439",
+        "src/GroupActivities.tsx:661"
+      ]
+    },
+    {
+      "id": "tai-khoan",
+      "component": "TaiKhoan",
+      "label": "Tài khoản",
+      "group": "util",
+      "replaces": [
+        "UserCircle"
+      ],
+      "usages": [
+        "src/Accounts.tsx:112",
+        "src/App.tsx:768",
+        "src/PortraitActions.tsx:42"
+      ]
+    },
+    {
+      "id": "an",
+      "component": "An",
+      "label": "Ẩn",
+      "group": "util",
+      "replaces": [
+        "EyeOff"
+      ],
+      "usages": []
+    },
+    {
+      "id": "bao-mat",
+      "component": "BaoMat",
+      "label": "Bảo mật",
+      "group": "util",
+      "replaces": [
+        "ShieldCheck"
+      ],
+      "usages": [
+        "src/Accounts.tsx:103",
+        "src/Accounts.tsx:173",
+        "src/Accounts.tsx:194",
+        "src/App.tsx:932",
+        "src/App.tsx:1793",
+        "src/App.tsx:2825",
+        "src/ExamMetadata.tsx:31"
+      ]
+    },
+    {
+      "id": "lap-lanh",
+      "component": "LapLanh",
+      "label": "Lấp lánh",
+      "group": "util",
+      "replaces": [
+        "Sparkles"
+      ],
+      "usages": [
+        "src/Practice.tsx:553"
+      ]
+    },
+    {
+      "id": "muc-tieu",
+      "component": "MucTieu",
+      "label": "Mục tiêu",
+      "group": "util",
+      "replaces": [
+        "Target"
+      ],
+      "usages": [
+        "src/GardenGoal.tsx:36",
+        "src/GardenGoal.tsx:56"
+      ]
+    },
+    {
+      "id": "la",
+      "component": "La",
+      "label": "Lá",
+      "group": "util",
+      "replaces": [
+        "Leaf"
+      ],
+      "usages": [
+        "src/App.tsx:1735",
+        "src/components.tsx:324",
+        "src/GardenNote.tsx:19",
+        "src/GardenNote.tsx:43",
+        "src/StudentGarden.tsx:165"
+      ]
+    },
+    {
+      "id": "mat-troi",
+      "component": "MatTroi",
+      "label": "Mặt trời",
+      "group": "util",
+      "replaces": [
+        "Sun"
+      ],
+      "usages": [
+        "src/GardenNote.tsx:55",
+        "src/GardenNote.tsx:91"
+      ]
+    },
+    {
+      "id": "chim",
+      "component": "Chim",
+      "label": "Chim",
+      "group": "util",
+      "replaces": [
+        "Bird"
+      ],
+      "usages": [
+        "src/GardenNote.tsx:61",
+        "src/GardenNote.tsx:109"
+      ]
+    },
+    {
+      "id": "kham-pha",
+      "component": "KhamPha",
+      "label": "Khám phá",
+      "group": "util",
+      "replaces": [
+        "Compass"
+      ],
+      "usages": [
+        "src/GardenNote.tsx:37",
+        "src/GardenNote.tsx:85"
+      ]
+    }
+  ],
+  "legacy": [
+    {
+      "old": "ArrowLeft",
+      "phosphor": "ArrowLeft",
+      "defaultNew": "quay-lai",
+      "candidates": [
+        "quay-lai"
+      ],
+      "usages": [
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 282,
+          "text": "<ArrowLeft size={16} />",
+          "suggest": "quay-lai"
+        },
+        {
+          "file": "src/Learning.tsx",
+          "line": 1737,
+          "text": "<ArrowLeft size={16} /> Về danh sách",
+          "suggest": "quay-lai"
+        },
+        {
+          "file": "src/Learning.tsx",
+          "line": 1942,
+          "text": "<ArrowLeft size={17} /> Về danh sách",
+          "suggest": "quay-lai"
+        },
+        {
+          "file": "src/Practice.tsx",
+          "line": 525,
+          "text": "<ArrowLeft size={16} />",
+          "suggest": "quay-lai"
+        },
+        {
+          "file": "src/Practice.tsx",
+          "line": 604,
+          "text": "<ArrowLeft size={16} />",
+          "suggest": "quay-lai"
+        }
+      ]
+    },
+    {
+      "old": "ArrowsDownUp",
+      "phosphor": "ArrowsDownUp",
+      "defaultNew": "sap-xep",
+      "candidates": [
+        "doi-lop",
+        "sap-xep"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 1251,
+          "text": "<ArrowsDownUp size={16} />",
+          "suggest": "sap-xep"
+        }
+      ]
+    },
+    {
+      "old": "ArrowRight",
+      "phosphor": "ArrowRight",
+      "defaultNew": "di-tiep",
+      "candidates": [
+        "tiep-tuc",
+        "di-tiep"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 1029,
+          "text": "<ArrowRight size={18} />",
+          "suggest": "tiep-tuc"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1784,
+          "text": "<ArrowRight size={18} />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1822,
+          "text": "<ArrowRight size={17} />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2092,
+          "text": "<ArrowRight size={17} />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2220,
+          "text": "<ArrowRight size={18} />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2232,
+          "text": "<ArrowRight size={18} />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2240,
+          "text": "<ArrowRight size={18} />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2378,
+          "text": "<ArrowRight size={16} />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/components.tsx",
+          "line": 361,
+          "text": "<ArrowRight size={16} />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/GardenGoal.tsx",
+          "line": 91,
+          "text": "Luyện tập <ArrowRight size={17} aria-hidden=\"true\" />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/HomeTasks.tsx",
+          "line": 133,
+          "text": "{corrections} câu cần sửa <ArrowRight size={16} />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/HomeTasks.tsx",
+          "line": 160,
+          "text": "<ArrowRight size={17} aria-hidden=\"true\" />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/Practice.tsx",
+          "line": 583,
+          "text": "<ArrowRight size={18} />",
+          "suggest": "di-tiep"
+        },
+        {
+          "file": "src/Practice.tsx",
+          "line": 737,
+          "text": "<ArrowRight size={17} />",
+          "suggest": "di-tiep"
+        }
+      ]
+    },
+    {
+      "old": "BellRing",
+      "phosphor": "BellRinging",
+      "defaultNew": "thong-bao",
+      "candidates": [
+        "thong-bao"
+      ],
+      "usages": [
+        {
+          "file": "src/ExamNotices.tsx",
+          "line": 122,
+          "text": "<BellRing size={20} />",
+          "suggest": "thong-bao"
+        }
+      ]
+    },
+    {
+      "old": "Bird",
+      "phosphor": "Bird",
+      "defaultNew": "chim",
+      "candidates": [
+        "chim"
+      ],
+      "usages": [
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 61,
+          "text": "icon: Bird,",
+          "suggest": "chim"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 109,
+          "text": "icon: Bird,",
+          "suggest": "chim"
+        }
+      ]
+    },
+    {
+      "old": "BookOpen",
+      "phosphor": "BookOpenText",
+      "defaultNew": "luyen-tap",
+      "candidates": [
+        "luyen-tap"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 634,
+          "text": "{ id: \"practice\", label: \"Luyện tập\", icon: BookOpen },",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 685,
+          "text": "{ id: \"practice\", label: \"Luyện tập\", icon: BookOpen },",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 713,
+          "text": "{ id: \"learning\" as const, label: \"Ôn tập\", icon: BookOpen },",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2027,
+          "text": "<BookOpen size={14} />",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2165,
+          "text": "icon={<BookOpen size={21} />}",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2228,
+          "text": "<BookOpen size={22} />",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2332,
+          "text": "<BookOpen size={21} />",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/ClassHonors.tsx",
+          "line": 91,
+          "text": "<BookOpen size={15} />",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/ExamMetadata.tsx",
+          "line": 9,
+          "text": "<BookOpen size={18} />",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 25,
+          "text": "icon: BookOpen,",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 49,
+          "text": "icon: BookOpen,",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 73,
+          "text": "icon: BookOpen,",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/Learning.tsx",
+          "line": 661,
+          "text": "<BookOpen size={21} aria-hidden=\"true\" /> Chuẩn bị đề & thời",
+          "suggest": "luyen-tap"
+        },
+        {
+          "file": "src/ReviewLibrary.tsx",
+          "line": 288,
+          "text": "<BookOpen size={21} aria-hidden=\"true\" /> Bài ôn của lớp",
+          "suggest": "luyen-tap"
+        }
+      ]
+    },
+    {
+      "old": "Check",
+      "phosphor": "Check",
+      "defaultNew": "duyet",
+      "candidates": [
+        "so-cau-da-lam",
+        "duyet"
+      ],
+      "usages": [
+        {
+          "file": "src/Avatars.tsx",
+          "line": 306,
+          "text": "<Check className=\"avatar-check\" size={16} />",
+          "suggest": "duyet"
+        },
+        {
+          "file": "src/Practice.tsx",
+          "line": 746,
+          "text": "<Check size={17} />",
+          "suggest": "duyet"
+        },
+        {
+          "file": "src/StudentLevel.tsx",
+          "line": 171,
+          "text": "<Check size={10} />",
+          "suggest": "duyet"
+        }
+      ]
+    },
+    {
+      "old": "CheckCircle2",
+      "phosphor": "CheckCircle",
+      "defaultNew": "da-duyet",
+      "candidates": [
+        "cau-da-khac-phuc",
+        "da-duyet"
+      ],
+      "usages": [
+        {
+          "file": "src/Accounts.tsx",
+          "line": 151,
+          "text": "<CheckCircle2 size={18} />",
+          "suggest": "da-duyet"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1905,
+          "text": "icon={<CheckCircle2 size={21} />}",
+          "suggest": "ty-le-dung"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2015,
+          "text": "<CheckCircle2 size={24} />",
+          "suggest": "da-duyet"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2174,
+          "text": "icon={<CheckCircle2 size={21} />}",
+          "suggest": "ty-le-dung"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 3074,
+          "text": "<CheckCircle2 size={17} />",
+          "suggest": "da-duyet"
+        },
+        {
+          "file": "src/ClassHonors.tsx",
+          "line": 99,
+          "text": "<CheckCircle2 size={15} />",
+          "suggest": "ty-le-dung"
+        },
+        {
+          "file": "src/Feedback.tsx",
+          "line": 228,
+          "text": "<CheckCircle2 size={16} />",
+          "suggest": "da-duyet"
+        },
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 216,
+          "text": "<CheckCircle2 size={18} />",
+          "suggest": "da-duyet"
+        },
+        {
+          "file": "src/MotionToast.tsx",
+          "line": 23,
+          "text": "<CheckCircle2 size={18} aria-hidden=\"true\" />",
+          "suggest": "da-duyet"
+        },
+        {
+          "file": "src/Practice.tsx",
+          "line": 699,
+          "text": "<CheckCircle2 size={19} />",
+          "suggest": "da-duyet"
+        },
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 613,
+          "text": "{index === q.correctIndex && <CheckCircle2 size={16} />}",
+          "suggest": "ty-le-dung"
+        },
+        {
+          "file": "src/StudentLevel.tsx",
+          "line": 161,
+          "text": "<CheckCircle2 size={18} />",
+          "suggest": "da-duyet"
+        }
+      ]
+    },
+    {
+      "old": "ChevronDown",
+      "phosphor": "CaretDown",
+      "defaultNew": "mo-rong",
+      "candidates": [
+        "loc-chuong",
+        "mo-rong"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 806,
+          "text": "<ChevronDown size={13} />",
+          "suggest": "mo-rong"
+        }
+      ]
+    },
+    {
+      "old": "ClipboardList",
+      "phosphor": "ClipboardText",
+      "defaultNew": "kiem-tra",
+      "candidates": [
+        "kiem-tra",
+        "kiem-tra-online",
+        "so-cau-da-lam"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 636,
+          "text": "{ id: \"online-exams\", label: \"Kiểm tra\", icon: ClipboardList },",
+          "suggest": "kiem-tra-online"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 722,
+          "text": "icon: ClipboardList,",
+          "suggest": "kiem-tra-online"
+        },
+        {
+          "file": "src/HomeTasks.tsx",
+          "line": 152,
+          "text": "<ClipboardList size={20} aria-hidden=\"true\" />",
+          "suggest": "kiem-tra"
+        }
+      ]
+    },
+    {
+      "old": "Clock3",
+      "phosphor": "Clock",
+      "defaultNew": "thoi-gian-hoc",
+      "candidates": [
+        "thoi-gian-hoc",
+        "cho-duyet"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 1003,
+          "text": "<Clock3 size={19} aria-hidden=\"true\" />",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1899,
+          "text": "icon={<Clock3 size={21} />}",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2023,
+          "text": "<Clock3 size={14} />",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2611,
+          "text": "<Clock3 size={20} />",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/ClassCommunity.tsx",
+          "line": 227,
+          "text": "<Clock3 size={21} />",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/ExamMetadata.tsx",
+          "line": 17,
+          "text": "<Clock3 size={18} />",
+          "suggest": "cho-duyet"
+        },
+        {
+          "file": "src/ExamMetadata.tsx",
+          "line": 23,
+          "text": "<Clock3 size={18} />",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/ExamMetadata.tsx",
+          "line": 38,
+          "text": "<Clock3 size={18} />",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/ExamNotices.tsx",
+          "line": 137,
+          "text": "<Clock3 size={16} /> {serverTime < pending.startsAt ? \"Bắt đầu sau\" : \"Còn\"}{\" \"}",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/ExamNotices.tsx",
+          "line": 176,
+          "text": "<Clock3 size={15} /> {waiting ? \"Bắt đầu sau\" : \"Còn\"}{\" \"}",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 317,
+          "text": "<Clock3 size={16} />",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 382,
+          "text": "<Clock3 size={17} />",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/HomeTasks.tsx",
+          "line": 154,
+          "text": "<Clock3 size={20} aria-hidden=\"true\" />",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/Learning.tsx",
+          "line": 1085,
+          "text": "<Clock3 size={21} /> Lịch kiểm tra đã lưu",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/Learning.tsx",
+          "line": 1827,
+          "text": "<Clock3 size={17} />",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/OnlineExamGroups.tsx",
+          "line": 50,
+          "text": "<Clock3 size={21} /> Các buổi kiểm tra online",
+          "suggest": "thoi-gian-hoc"
+        },
+        {
+          "file": "src/Practice.tsx",
+          "line": 611,
+          "text": "<Clock3 size={14} />",
+          "suggest": "thoi-gian-hoc"
+        }
+      ]
+    },
+    {
+      "old": "Compass",
+      "phosphor": "Compass",
+      "defaultNew": "kham-pha",
+      "candidates": [
+        "kham-pha"
+      ],
+      "usages": [
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 37,
+          "text": "icon: Compass,",
+          "suggest": "kham-pha"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 85,
+          "text": "icon: Compass,",
+          "suggest": "kham-pha"
+        }
+      ]
+    },
+    {
+      "old": "Download",
+      "phosphor": "DownloadSimple",
+      "defaultNew": "tai-xuong",
+      "candidates": [
+        "xuat-excel",
+        "xuat-word",
+        "tai-xuong"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 2514,
+          "text": "<Download size={16} />",
+          "suggest": "xuat-excel"
+        },
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 52,
+          "text": "<Download size={16} />",
+          "suggest": "tai-xuong"
+        },
+        {
+          "file": "src/Learning.tsx",
+          "line": 1232,
+          "text": "<Download size={16} /> Xuất Excel",
+          "suggest": "xuat-excel"
+        },
+        {
+          "file": "src/OnlineExamGroups.tsx",
+          "line": 236,
+          "text": "<Download size={16} /> Tải kết quả",
+          "suggest": "xuat-excel"
+        },
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 200,
+          "text": "<Download size={16} /> Xuất Word",
+          "suggest": "xuat-word"
+        },
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 206,
+          "text": "<Download size={16} /> Xuất Excel",
+          "suggest": "xuat-excel"
+        },
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 909,
+          "text": "<Download size={16} />",
+          "suggest": "xuat-word"
+        },
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 919,
+          "text": "<Download size={16} />",
+          "suggest": "tai-xuong"
+        },
+        {
+          "file": "src/StudentStudyStatistics.tsx",
+          "line": 359,
+          "text": "<Download size={16} /> Xuất CSV",
+          "suggest": "xuat-excel"
+        }
+      ]
+    },
+    {
+      "old": "Eye",
+      "phosphor": "Eye",
+      "defaultNew": "xem-bai",
+      "candidates": [
+        "xem-bai"
+      ],
+      "usages": [
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 408,
+          "text": "{q.active ? <Trash2 size={15} /> : <Eye size={15} />}",
+          "suggest": "xem-bai"
+        }
+      ]
+    },
+    {
+      "old": "EyeOff",
+      "phosphor": "EyeSlash",
+      "defaultNew": "an",
+      "candidates": [
+        "canh-bao-roi-tab",
+        "an"
+      ],
+      "usages": []
+    },
+    {
+      "old": "FileText",
+      "phosphor": "FileText",
+      "defaultNew": "tai-lieu",
+      "candidates": [
+        "tai-lieu"
+      ],
+      "usages": [
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 439,
+          "text": "<FileText size={20} />",
+          "suggest": "tai-lieu"
+        },
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 661,
+          "text": "<FileText size={22} />",
+          "suggest": "tai-lieu"
+        }
+      ]
+    },
+    {
+      "old": "Flower2",
+      "phosphor": "Flower",
+      "defaultNew": "cay-ra-hoa",
+      "candidates": [
+        "cay-ra-hoa"
+      ],
+      "usages": [
+        {
+          "file": "src/GardenGoal.tsx",
+          "line": 87,
+          "text": "<Flower2 size={17} aria-hidden=\"true\" /> {flowers}/",
+          "suggest": "cay-ra-hoa"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 67,
+          "text": "icon: Flower2,",
+          "suggest": "cay-ra-hoa"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 103,
+          "text": "icon: Flower2,",
+          "suggest": "cay-ra-hoa"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 164,
+          "text": "<Flower2 />",
+          "suggest": "cay-ra-hoa"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 166,
+          "text": "<Flower2 />",
+          "suggest": "cay-ra-hoa"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 169,
+          "text": "<Flower2 />",
+          "suggest": "cay-ra-hoa"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 171,
+          "text": "<Flower2 />",
+          "suggest": "cay-ra-hoa"
+        }
+      ]
+    },
+    {
+      "old": "History",
+      "phosphor": "ClockCounterClockwise",
+      "defaultNew": "lich-su",
+      "candidates": [
+        "cho-duyet",
+        "lich-su"
+      ],
+      "usages": [
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 415,
+          "text": "<History size={15} />",
+          "suggest": "lich-su"
+        }
+      ]
+    },
+    {
+      "old": "LayoutDashboard",
+      "phosphor": "SquaresFour",
+      "defaultNew": "tong-quan",
+      "candidates": [
+        "tong-quan"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 622,
+          "text": "{ id: \"home\", label: \"Tổng quan\", icon: LayoutDashboard },",
+          "suggest": "tong-quan"
+        }
+      ]
+    },
+    {
+      "old": "Leaf",
+      "phosphor": "Leaf",
+      "defaultNew": "la",
+      "candidates": [
+        "la"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 1735,
+          "text": "<Leaf size={17} />",
+          "suggest": "la"
+        },
+        {
+          "file": "src/components.tsx",
+          "line": 324,
+          "text": "<Leaf size={27} aria-hidden=\"true\" />",
+          "suggest": "la"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 19,
+          "text": "icon: Leaf,",
+          "suggest": "la"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 43,
+          "text": "icon: Leaf,",
+          "suggest": "la"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 165,
+          "text": "<Leaf />",
+          "suggest": "la"
+        }
+      ]
+    },
+    {
+      "old": "Lightbulb",
+      "phosphor": "Lightbulb",
+      "defaultNew": "goi-y",
+      "candidates": [
+        "goi-y"
+      ],
+      "usages": [
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 31,
+          "text": "icon: Lightbulb,",
+          "suggest": "goi-y"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 79,
+          "text": "icon: Lightbulb,",
+          "suggest": "goi-y"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 97,
+          "text": "icon: Lightbulb,",
+          "suggest": "goi-y"
+        }
+      ]
+    },
+    {
+      "old": "LockKeyhole",
+      "phosphor": "LockKey",
+      "defaultNew": "khoa",
+      "candidates": [
+        "khoa",
+        "mo"
+      ],
+      "usages": [
+        {
+          "file": "src/StudentLevel.tsx",
+          "line": 173,
+          "text": "<LockKeyhole size={10} />",
+          "suggest": "khoa"
+        }
+      ]
+    },
+    {
+      "old": "LogOut",
+      "phosphor": "SignOut",
+      "defaultNew": "dang-xuat",
+      "candidates": [
+        "dang-xuat"
+      ],
+      "usages": [
+        {
+          "file": "src/Accounts.tsx",
+          "line": 116,
+          "text": "<LogOut size={19} />",
+          "suggest": "dang-xuat"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 772,
+          "text": "<LogOut size={19} />",
+          "suggest": "dang-xuat"
+        },
+        {
+          "file": "src/PortraitActions.tsx",
+          "line": 51,
+          "text": "<LogOut size={20} aria-hidden=\"true\" />",
+          "suggest": "dang-xuat"
+        }
+      ]
+    },
+    {
+      "old": "MessageSquare",
+      "phosphor": "ChatCircleText",
+      "defaultNew": "binh-luan",
+      "candidates": [
+        "binh-luan"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 760,
+          "text": "<MessageSquare size={19} />",
+          "suggest": "binh-luan"
+        },
+        {
+          "file": "src/Feedback.tsx",
+          "line": 274,
+          "text": "<MessageSquare size={32} />",
+          "suggest": "binh-luan"
+        },
+        {
+          "file": "src/GroupDiscussion.tsx",
+          "line": 30,
+          "text": "<MessageSquare size={16} />",
+          "suggest": "binh-luan"
+        },
+        {
+          "file": "src/PortraitActions.tsx",
+          "line": 31,
+          "text": "<MessageSquare size={20} aria-hidden=\"true\" />",
+          "suggest": "binh-luan"
+        }
+      ]
+    },
+    {
+      "old": "Pause",
+      "phosphor": "Pause",
+      "defaultNew": "tam-dung",
+      "candidates": [
+        "tam-dung"
+      ],
+      "usages": [
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 601,
+          "text": "<Pause size={13} aria-hidden=\"true\" />",
+          "suggest": "tam-dung"
+        },
+        {
+          "file": "src/Practice.tsx",
+          "line": 637,
+          "text": "<Pause size={20} />",
+          "suggest": "tam-dung"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 149,
+          "text": "{animated ? <Pause size={15} /> : <Play size={15} />}",
+          "suggest": "tam-dung"
+        }
+      ]
+    },
+    {
+      "old": "Pencil",
+      "phosphor": "PencilSimple",
+      "defaultNew": "sua",
+      "candidates": [
+        "sua"
+      ],
+      "usages": [
+        {
+          "file": "src/OnlineExamGroups.tsx",
+          "line": 211,
+          "text": "<Pencil size={16} /> Chỉnh sửa thông tin",
+          "suggest": "sua"
+        },
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 394,
+          "text": "<Pencil size={15} />",
+          "suggest": "sua"
+        },
+        {
+          "file": "src/StudentNotebook.tsx",
+          "line": 152,
+          "text": "<Pencil size={16} /> Sửa câu hỏi",
+          "suggest": "sua"
+        }
+      ]
+    },
+    {
+      "old": "Play",
+      "phosphor": "Play",
+      "defaultNew": "bat-dau",
+      "candidates": [
+        "dang-hoc",
+        "bat-dau"
+      ],
+      "usages": [
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 599,
+          "text": "<Play size={13} aria-hidden=\"true\" />",
+          "suggest": "bat-dau"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 149,
+          "text": "{animated ? <Pause size={15} /> : <Play size={15} />}",
+          "suggest": "bat-dau"
+        }
+      ]
+    },
+    {
+      "old": "Plus",
+      "phosphor": "Plus",
+      "defaultNew": "them-moi",
+      "candidates": [
+        "them-moi"
+      ],
+      "usages": [
+        {
+          "file": "src/Accounts.tsx",
+          "line": 188,
+          "text": "<Plus size={17} />",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 963,
+          "text": "<Plus size={17} />",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1148,
+          "text": "<Plus size={18} />",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1259,
+          "text": "<Plus size={16} />",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1408,
+          "text": "<Plus size={18} />",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1504,
+          "text": "<Plus size={16} />",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2533,
+          "text": "<Plus size={16} />",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/Feedback.tsx",
+          "line": 127,
+          "text": "<Plus size={16} />",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 182,
+          "text": "<Plus size={16} />",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/Learning.tsx",
+          "line": 452,
+          "text": "<Plus size={19} /> Tạo bài kiểm tra",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/Lessons.tsx",
+          "line": 63,
+          "text": "<Plus size={15} /> Thêm bài",
+          "suggest": "them-moi"
+        },
+        {
+          "file": "src/ReviewLibrary.tsx",
+          "line": 223,
+          "text": "<Plus size={19} aria-hidden=\"true\" /> Tạo bài ôn",
+          "suggest": "them-moi"
+        }
+      ]
+    },
+    {
+      "old": "RefreshCw",
+      "phosphor": "ArrowsClockwise",
+      "defaultNew": "lam-moi",
+      "candidates": [
+        "lam-moi"
+      ],
+      "usages": [
+        {
+          "file": "src/Accounts.tsx",
+          "line": 249,
+          "text": "<RefreshCw size={16} />",
+          "suggest": "lam-moi"
+        }
+      ]
+    },
+    {
+      "old": "RotateCcw",
+      "phosphor": "ArrowCounterClockwise",
+      "defaultNew": "lam-lai",
+      "candidates": [
+        "cau-can-sua",
+        "lam-lai"
+      ],
+      "usages": [
+        {
+          "file": "src/Avatars.tsx",
+          "line": 343,
+          "text": "<RotateCcw size={16} />",
+          "suggest": "lam-lai"
+        },
+        {
+          "file": "src/Feedback.tsx",
+          "line": 226,
+          "text": "<RotateCcw size={16} />",
+          "suggest": "lam-lai"
+        },
+        {
+          "file": "src/Practice.tsx",
+          "line": 578,
+          "text": "Làm lại bài <RotateCcw size={17} />",
+          "suggest": "lam-lai"
+        }
+      ]
+    },
+    {
+      "old": "Search",
+      "phosphor": "MagnifyingGlass",
+      "defaultNew": "tim",
+      "candidates": [
+        "tim"
+      ],
+      "usages": [
+        {
+          "file": "src/Accounts.tsx",
+          "line": 226,
+          "text": "<Search size={18} />",
+          "suggest": "tim"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2561,
+          "text": "<Search size={18} aria-hidden=\"true\" />",
+          "suggest": "tim"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2649,
+          "text": "<Search size={18} />",
+          "suggest": "tim"
+        },
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 252,
+          "text": "<Search size={18} />",
+          "suggest": "tim"
+        }
+      ]
+    },
+    {
+      "old": "Medal",
+      "phosphor": "Medal",
+      "defaultNew": "huy-chuong-1",
+      "candidates": [
+        "huy-chuong-1",
+        "huy-chuong-2",
+        "huy-chuong-3"
+      ],
+      "usages": []
+    },
+    {
+      "old": "Send",
+      "phosphor": "PaperPlaneTilt",
+      "defaultNew": "gui",
+      "candidates": [
+        "da-nop",
+        "nop-bai",
+        "gui"
+      ],
+      "usages": [
+        {
+          "file": "src/Conversation.tsx",
+          "line": 72,
+          "text": "<Send size={16} />",
+          "suggest": "gui"
+        }
+      ]
+    },
+    {
+      "old": "Settings",
+      "phosphor": "GearSix",
+      "defaultNew": "cai-dat",
+      "candidates": [
+        "quan-ly-lop",
+        "cai-dat"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 629,
+          "text": "icon: Settings,",
+          "suggest": "quan-ly-lop"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 668,
+          "text": "{ id: \"class-general\", label: \"Cài đặt chung\", icon: Settings },",
+          "suggest": "cai-dat"
+        }
+      ]
+    },
+    {
+      "old": "ShieldCheck",
+      "phosphor": "ShieldCheck",
+      "defaultNew": "bao-mat",
+      "candidates": [
+        "bao-mat"
+      ],
+      "usages": [
+        {
+          "file": "src/Accounts.tsx",
+          "line": 103,
+          "text": "<ShieldCheck size={24} />",
+          "suggest": "bao-mat"
+        },
+        {
+          "file": "src/Accounts.tsx",
+          "line": 173,
+          "text": "<ShieldCheck size={18} />",
+          "suggest": "bao-mat"
+        },
+        {
+          "file": "src/Accounts.tsx",
+          "line": 194,
+          "text": "<ShieldCheck size={26} />",
+          "suggest": "bao-mat"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 932,
+          "text": "<ShieldCheck size={18} />",
+          "suggest": "bao-mat"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1793,
+          "text": "<ShieldCheck size={16} />",
+          "suggest": "bao-mat"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2825,
+          "text": "<ShieldCheck size={17} />",
+          "suggest": "bao-mat"
+        },
+        {
+          "file": "src/ExamMetadata.tsx",
+          "line": 31,
+          "text": "<ShieldCheck size={18} />",
+          "suggest": "bao-mat"
+        }
+      ]
+    },
+    {
+      "old": "Sparkles",
+      "phosphor": "Sparkle",
+      "defaultNew": "lap-lanh",
+      "candidates": [
+        "diem-cong",
+        "lap-lanh"
+      ],
+      "usages": [
+        {
+          "file": "src/Practice.tsx",
+          "line": 553,
+          "text": "<Sparkles size={36} />",
+          "suggest": "lap-lanh"
+        }
+      ]
+    },
+    {
+      "old": "Sprout",
+      "phosphor": "Plant",
+      "defaultNew": "vuon-cua-toi",
+      "candidates": [
+        "vuon-cua-toi"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 633,
+          "text": "{ id: \"home\", label: \"Khu vườn của tôi\", icon: Sprout },",
+          "suggest": "vuon-cua-toi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 923,
+          "text": "<Sprout size={18} />",
+          "suggest": "vuon-cua-toi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1532,
+          "text": "<Sprout size={15} />",
+          "suggest": "vuon-cua-toi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1816,
+          "text": "<Sprout size={21} />",
+          "suggest": "vuon-cua-toi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1843,
+          "text": "<Sprout size={16} />",
+          "suggest": "vuon-cua-toi"
+        },
+        {
+          "file": "src/components.tsx",
+          "line": 37,
+          "text": "<Sprout size={27} />",
+          "suggest": "vuon-cua-toi"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 135,
+          "text": "<Sprout size={15} /> KHU VƯỜN CHUNG",
+          "suggest": "vuon-cua-toi"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 170,
+          "text": "<Sprout />",
+          "suggest": "vuon-cua-toi"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 222,
+          "text": "<Sprout size={38} />",
+          "suggest": "vuon-cua-toi"
+        }
+      ]
+    },
+    {
+      "old": "Sun",
+      "phosphor": "Sun",
+      "defaultNew": "mat-troi",
+      "candidates": [
+        "mat-troi"
+      ],
+      "usages": [
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 55,
+          "text": "icon: Sun,",
+          "suggest": "mat-troi"
+        },
+        {
+          "file": "src/GardenNote.tsx",
+          "line": 91,
+          "text": "icon: Sun,",
+          "suggest": "mat-troi"
+        }
+      ]
+    },
+    {
+      "old": "Target",
+      "phosphor": "Target",
+      "defaultNew": "muc-tieu",
+      "candidates": [
+        "san-thuong",
+        "ty-le-dung",
+        "muc-tieu"
+      ],
+      "usages": [
+        {
+          "file": "src/GardenGoal.tsx",
+          "line": 36,
+          "text": "<Target size={24} aria-hidden=\"true\" />",
+          "suggest": "muc-tieu"
+        },
+        {
+          "file": "src/GardenGoal.tsx",
+          "line": 56,
+          "text": "<Target size={24} aria-hidden=\"true\" />",
+          "suggest": "muc-tieu"
+        }
+      ]
+    },
+    {
+      "old": "Ticket",
+      "phosphor": "Ticket",
+      "defaultNew": "ve-kiem-tra",
+      "candidates": [
+        "ve-kiem-tra"
+      ],
+      "usages": [
+        {
+          "file": "src/Learning.tsx",
+          "line": 925,
+          "text": "<Ticket size={21} className=\"reward-ticket-icon\" /> Cấp độ & vé",
+          "suggest": "ve-kiem-tra"
+        },
+        {
+          "file": "src/Learning.tsx",
+          "line": 955,
+          "text": "<Ticket size={20} className=\"reward-ticket-icon\" />",
+          "suggest": "ve-kiem-tra"
+        }
+      ]
+    },
+    {
+      "old": "Trash2",
+      "phosphor": "Trash",
+      "defaultNew": "xoa",
+      "candidates": [
+        "xoa"
+      ],
+      "usages": [
+        {
+          "file": "src/ChapterDelete.tsx",
+          "line": 50,
+          "text": "<Trash2 size={16} />",
+          "suggest": "xoa"
+        },
+        {
+          "file": "src/Lessons.tsx",
+          "line": 91,
+          "text": "<Trash2 size={16} />",
+          "suggest": "xoa"
+        },
+        {
+          "file": "src/OnlineExamGroups.tsx",
+          "line": 249,
+          "text": "<Trash2 size={16} /> Xóa bài kiểm tra",
+          "suggest": "xoa"
+        },
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 307,
+          "text": "<Trash2 size={16} /> Xóa các câu đã chọn",
+          "suggest": "xoa"
+        },
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 325,
+          "text": "<Trash2 size={16} /> Xóa cả bài",
+          "suggest": "xoa"
+        },
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 408,
+          "text": "{q.active ? <Trash2 size={15} /> : <Eye size={15} />}",
+          "suggest": "xoa"
+        }
+      ]
+    },
+    {
+      "old": "TrendingUp",
+      "phosphor": "ChartLineUp",
+      "defaultNew": "xu-huong",
+      "candidates": [
+        "xu-huong"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 1046,
+          "text": "<TrendingUp size={17} /> Xem hành trình",
+          "suggest": "xu-huong"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2236,
+          "text": "<TrendingUp size={22} />",
+          "suggest": "xu-huong"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2525,
+          "text": "<TrendingUp size={16} />",
+          "suggest": "xu-huong"
+        }
+      ]
+    },
+    {
+      "old": "Trophy",
+      "phosphor": "Trophy",
+      "defaultNew": "cup",
+      "candidates": [
+        "cup",
+        "top-10"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 717,
+          "text": "icon: Trophy,",
+          "suggest": "cup"
+        },
+        {
+          "file": "src/ClassHonors.tsx",
+          "line": 177,
+          "text": "<Trophy size={27} />",
+          "suggest": "cup"
+        },
+        {
+          "file": "src/Learning.tsx",
+          "line": 1044,
+          "text": "<Trophy size={17} /> Săn thưởng",
+          "suggest": "cup"
+        },
+        {
+          "file": "src/StudentGarden.tsx",
+          "line": 82,
+          "text": "<Trophy size={25} />",
+          "suggest": "cup"
+        }
+      ]
+    },
+    {
+      "old": "Upload",
+      "phosphor": "UploadSimple",
+      "defaultNew": "tai-len",
+      "candidates": [
+        "tai-len-word",
+        "tai-len"
+      ],
+      "usages": [
+        {
+          "file": "src/Avatars.tsx",
+          "line": 211,
+          "text": "<Upload size={16} />",
+          "suggest": "tai-len"
+        },
+        {
+          "file": "src/QuestionBank.tsx",
+          "line": 244,
+          "text": "<Upload size={16} />",
+          "suggest": "tai-len-word"
+        }
+      ]
+    },
+    {
+      "old": "Users",
+      "phosphor": "UsersThree",
+      "defaultNew": "hoat-dong-nhom",
+      "candidates": [
+        "hoat-dong-nhom",
+        "hoc-sinh",
+        "thanh-vien-hoat-dong"
+      ],
+      "usages": [
+        {
+          "file": "src/Accounts.tsx",
+          "line": 95,
+          "text": "<Users size={20} />",
+          "suggest": "hoc-sinh"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 666,
+          "text": "{ id: \"class-settings\", label: \"Học sinh\", icon: Users },",
+          "suggest": "hoc-sinh"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 676,
+          "text": "{ id: \"groups\", label: \"Hoạt động nhóm\", icon: Users },",
+          "suggest": "thanh-vien-hoat-dong"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 703,
+          "text": "{ id: \"groups\", label: \"Hoạt động nhóm\", icon: Users },",
+          "suggest": "thanh-vien-hoat-dong"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1814,
+          "text": "<Users size={21} />",
+          "suggest": "hoat-dong-nhom"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1855,
+          "text": "<Users size={16} />",
+          "suggest": "hoat-dong-nhom"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2160,
+          "text": "icon={<Users size={21} />}",
+          "suggest": "hoc-sinh"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2216,
+          "text": "<Users size={22} />",
+          "suggest": "hoc-sinh"
+        },
+        {
+          "file": "src/ClassCommunity.tsx",
+          "line": 217,
+          "text": "<Users size={21} />",
+          "suggest": "thanh-vien-hoat-dong"
+        },
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 305,
+          "text": "<Users size={22} />",
+          "suggest": "hoat-dong-nhom"
+        },
+        {
+          "file": "src/GroupActivities.tsx",
+          "line": 321,
+          "text": "<Users size={16} />",
+          "suggest": "hoat-dong-nhom"
+        },
+        {
+          "file": "src/HomeTasks.tsx",
+          "line": 150,
+          "text": "<Users size={20} aria-hidden=\"true\" />",
+          "suggest": "hoat-dong-nhom"
+        }
+      ]
+    },
+    {
+      "old": "X",
+      "phosphor": "X",
+      "defaultNew": "dong",
+      "candidates": [
+        "tu-choi",
+        "tu-choi-nut",
+        "dong"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 1180,
+          "text": "Xóa lớp",
+          "suggest": "dong"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1566,
+          "text": "title=\"Xóa lớp học\"",
+          "suggest": "dong"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1574,
+          "text": "Xóa “{deletingClass.name} · {deletingClass.subject}” khỏi danh",
+          "suggest": "dong"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1609,
+          "text": "{deleteClassBusy ? \"Đang xóa…\" : \"Xóa lớp\"}",
+          "suggest": "dong"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 2578,
+          "text": "Xóa tìm kiếm",
+          "suggest": "dong"
+        },
+        {
+          "file": "src/components.tsx",
+          "line": 302,
+          "text": "<X size={20} aria-hidden=\"true\" />",
+          "suggest": "dong"
+        },
+        {
+          "file": "src/MotionToast.tsx",
+          "line": 32,
+          "text": "<X size={16} aria-hidden=\"true\" />",
+          "suggest": "dong"
+        }
+      ]
+    },
+    {
+      "old": "ClassroomIcon",
+      "phosphor": "ChalkboardTeacher",
+      "defaultNew": "lop-cua-toi",
+      "candidates": [
+        "lop-cua-toi"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 623,
+          "text": "{ id: \"classes\", label: \"Lớp học của tôi\", icon: ClassroomIcon },",
+          "suggest": "lop-cua-toi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 675,
+          "text": "{ id: \"classes\", label: \"Khu vườn của lớp\", icon: ClassroomIcon },",
+          "suggest": "lop-cua-toi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 791,
+          "text": "<ClassroomIcon size={16} />",
+          "suggest": "lop-cua-toi"
+        }
+      ]
+    },
+    {
+      "old": "Books",
+      "phosphor": "Books",
+      "defaultNew": "chuong-hoc",
+      "candidates": [
+        "chuong-hoc",
+        "ngan-hang-cau-hoi"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 624,
+          "text": "{ id: \"questions\", label: \"Ngân hàng câu hỏi\", icon: Books },",
+          "suggest": "ngan-hang-cau-hoi"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 667,
+          "text": "{ id: \"class-chapters\", label: \"Chương học\", icon: Books },",
+          "suggest": "chuong-hoc"
+        }
+      ]
+    },
+    {
+      "old": "GraduationCap",
+      "phosphor": "GraduationCap",
+      "defaultNew": "on-tap",
+      "candidates": [
+        "on-tap"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 625,
+          "text": "{ id: \"learning\", label: \"Ôn tập\", icon: GraduationCap },",
+          "suggest": "on-tap"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 635,
+          "text": "{ id: \"learning\", label: \"Ôn tập\", icon: GraduationCap },",
+          "suggest": "on-tap"
+        }
+      ]
+    },
+    {
+      "old": "Notebook",
+      "phosphor": "Notebook",
+      "defaultNew": "so-tay-sua-sai",
+      "candidates": [
+        "so-tay-sua-sai"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 689,
+          "text": "icon: Notebook,",
+          "suggest": "so-tay-sua-sai"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 1916,
+          "text": "icon={<Notebook size={21} />}",
+          "suggest": "so-tay-sua-sai"
+        },
+        {
+          "file": "src/ClassHonors.tsx",
+          "line": 124,
+          "text": "<Notebook size={15} />",
+          "suggest": "so-tay-sua-sai"
+        },
+        {
+          "file": "src/Learning.tsx",
+          "line": 1016,
+          "text": "<Notebook size={16} /> Mở sổ tay",
+          "suggest": "so-tay-sua-sai"
+        }
+      ]
+    },
+    {
+      "old": "UserCircle",
+      "phosphor": "UserCircle",
+      "defaultNew": "tai-khoan",
+      "candidates": [
+        "hoc-sinh",
+        "tai-khoan"
+      ],
+      "usages": [
+        {
+          "file": "src/Accounts.tsx",
+          "line": 112,
+          "text": "<UserCircle size={19} />",
+          "suggest": "tai-khoan"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 768,
+          "text": "<UserCircle size={19} />",
+          "suggest": "tai-khoan"
+        },
+        {
+          "file": "src/PortraitActions.tsx",
+          "line": 42,
+          "text": "<UserCircle size={20} aria-hidden=\"true\" />",
+          "suggest": "tai-khoan"
+        }
+      ]
+    },
+    {
+      "old": "TreeIcon",
+      "phosphor": "Tree",
+      "defaultNew": "vuon-cua-lop",
+      "candidates": [
+        "vuon-cua-lop",
+        "ket-trai"
+      ],
+      "usages": [
+        {
+          "file": "src/App.tsx",
+          "line": 637,
+          "text": "{ id: \"garden\", label: \"Lớp học của tôi\", icon: TreeIcon },",
+          "suggest": "vuon-cua-lop"
+        },
+        {
+          "file": "src/App.tsx",
+          "line": 702,
+          "text": "{ id: \"garden\", label: \"Khu vườn của lớp\", icon: TreeIcon },",
+          "suggest": "vuon-cua-lop"
+        }
+      ]
+    }
+  ]
+}

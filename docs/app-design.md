@@ -1,8 +1,14 @@
 # Thiết kế giao diện GreenEdu
 
+<<<<<<< HEAD
 ## Nút cấp lại mật khẩu học sinh — 28/11/2026
 
 Quản lý lớp → Học sinh đặt **Cấp lại mật khẩu** dưới tên, email và cấp cây của từng học sinh, có viền/nền nhẹ và vùng bấm tối thiểu44px. Trên desktop nút hiện trong vùng đầu bảng dù các cột thống kê phải cuộn; mobile giữ bố cục thẻ. Tên trợ năng kèm tên học sinh, focus rõ, quyền chỉ xem vẫn khóa nút; giữ popup và chức năng hiện có.
+=======
+## Bộ icon Vườn tri thức — 28/11/2026
+
+Icon toàn app là bộ "Vườn tri thức" (nét bo tròn, mảng kem-xanh qua `--gi-fill`), thay Phosphor duotone; icon trang trí `aria-hidden`, icon mang nghĩa truyền `label`. Hướng bố cục ít chữ tiếp theo theo `artifacts/redesign-20261128/mocks/`.
+>>>>>>> 31eaba0 (Replace Phosphor icons with the Vuon tri thuc icon set)
 
 ## Phạm vi chương cho Khu vườn chung và Điểm cộng — 25/11/2026
 
