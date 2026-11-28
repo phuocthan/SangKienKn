@@ -1,19 +1,17 @@
 # Bàn giao session GreenEdu
 
-<<<<<<< HEAD
-## Nút cấp lại mật khẩu dễ thấy trên desktop — 28/11/2026
-
-Người dùng báo nút **Cấp lại mật khẩu** bị khuất ở một số màn hình desktop. Kiểm tra danh sách Quản lý lớp → Học sinh: nút nằm ở cột cuối của bảng cuộn ngang. Chuyển nút vào một dòng riêng ngay dưới thông tin đúng học sinh, bỏ cột Tài khoản; nút có nền/viền rõ, vùng bấm tối thiểu44px, focus bàn phím và tên trợ năng gắn với học sinh. Bố cục thẻ mobile tiếp tục dùng cùng nút, giữ luồng modal và điều kiện khóa của giáo viên chỉ xem; không đổi API/mật khẩu hoặc dữ liệu thật.
-
-Khởi điểm checkout27ae24c, fetch/pull fast-forward lên f93da17 trước sửa, giữ PDF chưa theo dõi. QA mới: build/typecheck đạt; 8/8 E2E desktop/mobile (41,8 giây) gồm bảng/thống kê, hiển thị nút ngay khi bảng ở mép trái tại320/390/768/1024/1100/1280/1440/1920px, không tràn trang, mở/đóng modal bằng bàn phím và trả focus, khóa với giáo viên chỉ xem. Đã xem ảnh desktop/mobile, test dùng database riêng; log `.local/roster-password-e2e-20261128.log`. Rà theo redesign-existing-projects và web-design-guidelines; không test ghi Railway. Theo quyết định hiện hành, commit/push Git khi xong, không chờ hoặc kiểm tra Railway deploy.
-=======
 ## Bộ icon "Vườn tri thức" — 28/11/2026
 
 Người dùng muốn nhiều icon, ít chữ. Prompt thiết kế: `docs/redesign-brief-20261128.md`; sản phẩm (84 icon SVG, CSS, mock, bảng đối chiếu) do phiên thiết kế riêng làm ở `artifacts/redesign-20261128/`. Người dùng duyệt "lắp đi".
 
 - Đã lắp: `src/green-icons.tsx` (chép từ `react/GreenIcons.tsx`), `src/greenedu-icons.css` nạp sau `refresh.css`. `src/icons.tsx` chỉ còn alias tên cũ → icon mới theo cột "mặc định" của `mapping/icon-mapping.md`, nên mọi import cũ vẫn chạy. Điều hướng dùng icon riêng: Ngân hàng câu hỏi, Học sinh, Quản lý lớp, Khu vườn của lớp, Săn thưởng, Kiểm tra/Kiểm tra online.
 - Chưa làm: bố cục "ít chữ" theo mock (thanh dưới mobile, chip chương, thẻ số liệu gọn); chọn icon theo ngữ cảnh cho các tên nhiều nghĩa (Users, Clock3, CheckCircle2, Download, X…); bỏ gói `@phosphor-icons/react`.
->>>>>>> 31eaba0 (Replace Phosphor icons with the Vuon tri thuc icon set)
+
+## Nút cấp lại mật khẩu dễ thấy trên desktop — 28/11/2026
+
+Người dùng báo nút **Cấp lại mật khẩu** bị khuất ở một số màn hình desktop. Kiểm tra danh sách Quản lý lớp → Học sinh: nút nằm ở cột cuối của bảng cuộn ngang. Chuyển nút vào một dòng riêng ngay dưới thông tin đúng học sinh, bỏ cột Tài khoản; nút có nền/viền rõ, vùng bấm tối thiểu44px, focus bàn phím và tên trợ năng gắn với học sinh. Bố cục thẻ mobile tiếp tục dùng cùng nút, giữ luồng modal và điều kiện khóa của giáo viên chỉ xem; không đổi API/mật khẩu hoặc dữ liệu thật.
+
+Khởi điểm checkout27ae24c, fetch/pull fast-forward lên f93da17 trước sửa, giữ PDF chưa theo dõi. QA mới: build/typecheck đạt; 8/8 E2E desktop/mobile (41,8 giây) gồm bảng/thống kê, hiển thị nút ngay khi bảng ở mép trái tại320/390/768/1024/1100/1280/1440/1920px, không tràn trang, mở/đóng modal bằng bàn phím và trả focus, khóa với giáo viên chỉ xem. Đã xem ảnh desktop/mobile, test dùng database riêng; log `.local/roster-password-e2e-20261128.log`. Rà theo redesign-existing-projects và web-design-guidelines; không test ghi Railway. Theo quyết định hiện hành, commit/push Git khi xong, không chờ hoặc kiểm tra Railway deploy.
 
 ## Khu vườn chung và Điểm cộng theo chương — 25/11/2026
 

@@ -1,14 +1,12 @@
 # Tiến độ và lộ trình GreenEdu
 
-<<<<<<< HEAD
-## Hiện hành: vị trí cấp lại mật khẩu học sinh — 28/11/2026
-
-Trong Quản lý lớp → Học sinh, nút **Cấp lại mật khẩu** nằm dưới thông tin từng học sinh thay vì ở cột cuối dễ bị khuất khi cuộn ngang. Giữ modal và quyền giáo viên; giao diện thẻ mobile vẫn dùng được. Build/typecheck và 8/8 E2E desktop/mobile đạt trên dữ liệu kiểm thử riêng; chi tiết ở đầu session-handoff. Push Git không xác nhận Railway đã triển khai.
-=======
 ## Hiện hành: bộ icon Vườn tri thức — 28/11/2026
 
 84 icon mới thay Phosphor qua alias trong `src/icons.tsx`; mock giao diện ít chữ ở `artifacts/redesign-20261128/mocks/` chưa lắp. Chi tiết đầu `docs/session-handoff.md`.
->>>>>>> 31eaba0 (Replace Phosphor icons with the Vuon tri thuc icon set)
+
+## Hiện hành: vị trí cấp lại mật khẩu học sinh — 28/11/2026
+
+Trong Quản lý lớp → Học sinh, nút **Cấp lại mật khẩu** nằm dưới thông tin từng học sinh thay vì ở cột cuối dễ bị khuất khi cuộn ngang. Giữ modal và quyền giáo viên; giao diện thẻ mobile vẫn dùng được. Build/typecheck và 8/8 E2E desktop/mobile đạt trên dữ liệu kiểm thử riêng; chi tiết ở đầu session-handoff. Push Git không xác nhận Railway đã triển khai.
 
 ## Hiện hành: khu vườn chung và điểm cộng theo chương — 25/11/2026
 
